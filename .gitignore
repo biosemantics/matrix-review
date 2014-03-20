@@ -9,3 +9,4 @@
 .project
 .settings/*
 bin
+war/WEB-INF/classes
