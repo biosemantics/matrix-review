@@ -1,0 +1,58 @@
+/**
+ * Sencha GXT 3.1.0-beta - Sencha for GWT
+ * Copyright(c) 2007-2014, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+@eval rowExpand com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/row-expand-sprite.gif");
+
+.hasExpander .grid-cell, .hasExpander .grid-cellInner {
+  background: none repeat scroll 0 0 transparent;
+  border-width: 0;
+}
+
+@sprite .grid-rowWrap .cell {
+  vertical-align: top;
+  gwt-image: 'specialColumn';
+  height: auto;
+  width: auto;
+}
+
+@sprite .grid-rowSelected .cell {
+  gwt-image: 'specialColumnSelected';
+  height: auto;
+  width: auto;
+}
+
+.rowExpander {
+  width: 20px;
+  height: 18px;
+  background-position: 4px 2px;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  
+  background-image: rowExpand;
+}
+
+.rowCollapsed .rowExpander {
+  background-position: 4px 2px;
+}
+
+.rowExpanded .rowExpander {
+  background-position: -21px 2px;
+}
+
+.rowCollapsed .grid-rowBodyRow {
+  display: none; 
+}
+
+.rowExpanded .grid-rowBodyRow {
+  display: table-row; 
+}
+
+@if user.agent ie6 {
+  .hasExpander .grid-cellInner {
+    padding: 3px 3px 2px 5px;
+  }
+}
