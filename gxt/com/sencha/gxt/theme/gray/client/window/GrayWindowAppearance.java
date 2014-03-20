@@ -33,7 +33,7 @@ public class GrayWindowAppearance extends FramedPanelBaseAppearance implements W
     @Override
     GrayWindowDivFrameStyle style();
 
-    @Source("com/sencha/gxt/core/public/clear.gif")
+    @Source("com/sencha/gxt/core/publik/clear.gif")
     ImageResource background();
 
     @Override

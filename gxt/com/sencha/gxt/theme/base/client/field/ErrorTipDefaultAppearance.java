@@ -25,7 +25,7 @@ public class ErrorTipDefaultAppearance extends TipDefaultAppearance implements S
 
   public interface ErrorTipFrameResources extends ClientBundle, TipDivFrameResources {
 
-    @Source("com/sencha/gxt/core/public/clear.gif")
+    @Source("com/sencha/gxt/core/publik/clear.gif")
     @ImageOptions(repeatStyle = RepeatStyle.Both)
     ImageResource background();
 

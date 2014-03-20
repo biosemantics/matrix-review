@@ -33,7 +33,7 @@ public class BlueWindowAppearance extends FramedPanelBaseAppearance implements W
     @Override
     BlueWindowDivFrameStyle style();
 
-    @Source("com/sencha/gxt/core/public/clear.gif")
+    @Source("com/sencha/gxt/core/publik/clear.gif")
     ImageResource background();
 
     @Override
