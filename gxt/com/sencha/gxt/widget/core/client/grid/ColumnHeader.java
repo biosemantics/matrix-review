@@ -688,7 +688,7 @@ public class ColumnHeader<M> extends Component {
    */
   private int rightAlignOffset;
 
-  private QuickTip quickTip;
+  protected QuickTip quickTip;
   private boolean enableColumnReorder;
   private final ColumnHeaderAppearance appearance;
   protected ColumnHeaderStyles styles;

@@ -7,12 +7,12 @@
 	<!-- Servlets -->
 	<servlet>
 		<servlet-name>matrix</servlet-name>
-		<servlet-class>my.ex.server.MatrixService</servlet-class>
+		<servlet-class>edu.arizona.biosemantics.matrixreview.server.MatrixService</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
 		<servlet-name>matrix</servlet-name>
-		<url-pattern>/test3/matrix</url-pattern>
+		<url-pattern>/matrix_review/matrix</url-pattern>
 	</servlet-mapping>
 
 	<!-- Default page to serve -->

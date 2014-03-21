@@ -325,7 +325,7 @@ public class GridView<M> {
   protected boolean focusConstrainScheduled = false;
   protected boolean forceFit;
   protected Grid<M> grid;
-  private ColumnHeader<M> header;
+  protected ColumnHeader<M> header;
   protected int headerColumnIndex;
   protected boolean headerDisabled;
   /**

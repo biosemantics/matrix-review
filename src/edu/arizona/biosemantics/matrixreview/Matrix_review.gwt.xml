@@ -18,6 +18,7 @@
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 
   <!-- Other module inherits                                      -->
+  <inherits name='com.sencha.gxt.ui.GXT' />
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='edu.arizona.biosemantics.matrixreview.client.MatrixReview'/>
