@@ -24,11 +24,12 @@ public class AutoScrollSupport {
 
   private boolean autoScroll = true;
   private int scrollDelay = 400;
-  private int scrollRepeatDelay = 300;
+  private int scrollRepeatDelay = 100;
   private Rectangle bottomBounds, topBounds;
-  private int scrollRegionHeight = 25;
+  private int scrollRegionHeight = 50;
   private XElement scrollElement;
   private boolean active;
+  private int scrollZone = 100;
 
   private DelayedTask scrollUpTask = new DelayedTask() {
 
@@ -216,11 +217,11 @@ public class AutoScrollSupport {
     if (!autoScroll) return;
 
     topBounds = scrollElement.getBounds();
-    topBounds.setHeight(20);
+    topBounds.setHeight(scrollZone);
 
     bottomBounds = scrollElement.getBounds();
-    bottomBounds.setY(bottomBounds.getY() + bottomBounds.getHeight() - 20);
-    bottomBounds.setHeight(20);
+    bottomBounds.setY(bottomBounds.getY() + bottomBounds.getHeight() - scrollZone);
+    bottomBounds.setHeight(scrollZone);
 
     preview.add();
   }

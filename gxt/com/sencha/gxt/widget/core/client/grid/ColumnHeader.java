@@ -335,7 +335,7 @@ public class ColumnHeader<M> extends Component {
     private ImageElement img;
     private InlineHTML text;
     private Widget widget;
-    private int row;
+    protected int row;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public Head(ColumnConfig column) {
@@ -691,7 +691,7 @@ public class ColumnHeader<M> extends Component {
   private QuickTip quickTip;
   private boolean enableColumnReorder;
   private final ColumnHeaderAppearance appearance;
-  private ColumnHeaderStyles styles;
+  protected ColumnHeaderStyles styles;
   private TableSectionElement tbody = Document.get().createTBodyElement();
   private int oldWidth;
   private int oldHeight;
