@@ -94,16 +94,20 @@ public class MyGridView<M> extends GridView<M> {
 		moveMenu.add(item);
 
 		int cols = cm.getColumnCount();
+		
+		//col 0 is for the expander, col 1 is taxon name: Do we want them to be rearrangable too? when browsing vertically far maybe?
 		for (int i = 0; i < cols; i++) {
-			final int theI = i;
-			item = new MenuItem(cm.getColumnHeader(i).asString());
-			item.addSelectionHandler(new SelectionHandler<Item>() {
-				@Override
-				public void onSelection(SelectionEvent<Item> event) {
-					cm.moveColumn(colIndex, theI + 1);
-				}
-			});
-			moveMenu.add(item);
+			if(i != colIndex) {
+				final int theI = i;
+				item = new MenuItem(cm.getColumnHeader(i).asString());
+				item.addSelectionHandler(new SelectionHandler<Item>() {
+					@Override
+					public void onSelection(SelectionEvent<Item> event) {
+						cm.moveColumn(colIndex, theI + 1);
+					}
+				});
+				moveMenu.add(item);
+			}
 		}
 
 		return menu;

@@ -5,6 +5,7 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sencha.gxt.widget.core.client.grid.MyGrid;
+import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
@@ -14,9 +15,11 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 public class TaxonCell<C> extends MenuExtendedCell<C> {
 
 	private MyGrid<Taxon> grid;
+	private TaxonMatrixView taxonMatrixView;
 
-	public TaxonCell(MyGrid<Taxon> grid) {
+	public TaxonCell(MyGrid<Taxon> grid, TaxonMatrixView taxonMatrixView) {
 		this.grid = grid;
+		this.taxonMatrixView = taxonMatrixView;
 	}
 
 	@Override
@@ -33,6 +36,19 @@ public class TaxonCell<C> extends MenuExtendedCell<C> {
 	@Override
 	protected Menu createContextMenu(final int colIndex, final int rowIndex) {
 		final Menu menu = new Menu();
+		
+		final CheckMenuItem lockItem = new CheckMenuItem("Lock");
+		lockItem.setChecked(taxonMatrixView.isLocked(colIndex));
+		lockItem.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				boolean newValue = !taxonMatrixView.isLocked(colIndex);
+				lockItem.setChecked(newValue);
+				taxonMatrixView.setLocked(colIndex, newValue);
+			}
+		});
+		menu.add(lockItem);
+		
 		
 		MenuItem item = new MenuItem("Move after");
 		menu.add(item);
@@ -51,19 +67,21 @@ public class TaxonCell<C> extends MenuExtendedCell<C> {
 		
 		int rows = grid.getStore().size();
 		for (int i = 0; i < rows; i++) {
-			final int theI = i;
-			item = new MenuItem(grid.getStore().get(i).getName());
-			item.addSelectionHandler(new SelectionHandler<Item>() {
-				@Override
-				public void onSelection(SelectionEvent<Item> event) {
-					Taxon taxon =  grid.getStore().remove(rowIndex);
-					int finalI = theI;
-					if(rowIndex < theI)
-						finalI--;				
-					grid.getStore().add(finalI + 1, taxon);
-				}
-			});
-			moveMenu.add(item);
+			if(i != rowIndex) {
+				final int theI = i;
+				item = new MenuItem(grid.getStore().get(i).getName());
+				item.addSelectionHandler(new SelectionHandler<Item>() {
+					@Override
+					public void onSelection(SelectionEvent<Item> event) {
+						Taxon taxon =  grid.getStore().remove(rowIndex);
+						int finalI = theI;
+						if(rowIndex < theI)
+							finalI--;				
+						grid.getStore().add(finalI + 1, taxon);
+					}
+				});
+				moveMenu.add(item);
+			}
 		}
 		
 		
