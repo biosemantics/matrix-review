@@ -1181,6 +1181,7 @@ public class ColumnHeader<M> extends Component {
    */
   public void updateTotalWidth(int offset, int width) {
     if (offset != -1) table.getElement().getParentElement().getStyle().setWidth(++offset, Unit.PX);
+    //table.getElement().getParentElement().getParentElement().getStyle().setWidth(width, Unit.PX);
     table.getElement().getStyle().setWidth(width, Unit.PX);
     checkHeaderSizeChange();
   }

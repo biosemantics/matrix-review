@@ -200,8 +200,8 @@ public class TaxonMatrixView implements IsWidget {
 		ColumnConfig columnConfig = createCharacterColumnConfig(character);
 		columns.add(columnConfig);
 		ColumnModel<Taxon> cm = new ColumnModel<Taxon>(columns);
-		this.enableEditing(columnConfig);	
 		this.setControlMode(columnConfig, ControlMode.OFF);
+		this.enableEditing(columnConfig);	
 		grid.reconfigure(grid.getStore(), cm);
 	}
 	
@@ -219,7 +219,7 @@ public class TaxonMatrixView implements IsWidget {
 	public Widget asWidget() {
 		container.setScrollMode(ScrollMode.AUTO);
 		
-		VerticalPanel panel = new VerticalPanel();		
+		VerticalPanel panel = new VerticalPanel();
 		panel.add(grid);
 		HorizontalPanel functionsPanel = new HorizontalPanel();
 		panel.add(functionsPanel);

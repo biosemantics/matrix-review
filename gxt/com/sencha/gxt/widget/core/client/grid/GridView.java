@@ -2655,12 +2655,13 @@ public class GridView<M> {
     }
 
     Size csize = grid.getElement().getStyleSize();
-
+    
     if (GXTLogConfiguration.loggingIsEnabled()) {
       logger.finest("resize() " + csize);
     }
 
-    int vw = csize.getWidth();
+    //int vw = csize.getWidth();
+    int vw = getTotalWidth();
     int vh = 0;
     if (vw < 10 || csize.getHeight() < 22) {
       return;

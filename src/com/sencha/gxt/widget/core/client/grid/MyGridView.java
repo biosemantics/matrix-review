@@ -324,12 +324,13 @@ public class MyGridView<M> extends GridView<M> {
 	
 			};
 		}
-		header.setMenuFactory(new HeaderContextMenuFactory() {
+		super.initHeader();
+		/*header.setMenuFactory(new HeaderContextMenuFactory() {
 		      @Override
 		      public Menu getMenuForColumn(int columnIndex) {
 		        return createContextMenu(columnIndex);
 		      }
 		    });
-		header.setSplitterWidth(splitterWidth);
+		header.setSplitterWidth(splitterWidth);*/
 	}
 }
