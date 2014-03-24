@@ -50,13 +50,13 @@ public class MyGridView<M> extends GridView<M> {
 		menu.add(item);
 
 		final CheckMenuItem lockItem = new CheckMenuItem("Lock");
-		lockItem.setChecked(taxonMatrixView.isLocked(colIndex));
+		lockItem.setChecked(taxonMatrixView.isLockedColumn(colIndex));
 		lockItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				boolean newValue = !taxonMatrixView.isLocked(colIndex);
+				boolean newValue = !taxonMatrixView.isLockedColumn(colIndex);
 				lockItem.setChecked(newValue);
-				taxonMatrixView.setLocked(colIndex, newValue);
+				taxonMatrixView.setLockedColumn(colIndex, newValue);
 			}
 		});
 		menu.add(lockItem);

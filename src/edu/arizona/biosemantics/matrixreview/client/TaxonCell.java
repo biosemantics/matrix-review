@@ -38,13 +38,13 @@ public class TaxonCell<C> extends MenuExtendedCell<C> {
 		final Menu menu = new Menu();
 		
 		final CheckMenuItem lockItem = new CheckMenuItem("Lock");
-		lockItem.setChecked(taxonMatrixView.isLocked(colIndex));
+		lockItem.setChecked(taxonMatrixView.isLockedRow(rowIndex));
 		lockItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				boolean newValue = !taxonMatrixView.isLocked(colIndex);
+				boolean newValue = !taxonMatrixView.isLockedRow(rowIndex);
 				lockItem.setChecked(newValue);
-				taxonMatrixView.setLocked(colIndex, newValue);
+				taxonMatrixView.setLockedRow(rowIndex, newValue);
 			}
 		});
 		menu.add(lockItem);

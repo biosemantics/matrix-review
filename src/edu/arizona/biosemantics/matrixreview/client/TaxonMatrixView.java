@@ -53,6 +53,7 @@ public class TaxonMatrixView implements IsWidget {
 	private FlowLayoutContainer container = new FlowLayoutContainer();
 	private RowExpander<Taxon> expander;
 	private Map<ColumnConfig, ControlMode> columnControlMap = new HashMap<ColumnConfig, ControlMode>();
+	private ListStore<Taxon> store;
 	
 	public TaxonMatrixView() {
 		this.grid = createGrid();
@@ -67,7 +68,7 @@ public class TaxonMatrixView implements IsWidget {
 
 	public void init(final TaxonMatrix taxonMatrix) {
 		this.taxonMatrix = taxonMatrix;
-		ListStore<Taxon> store = new ListStore<Taxon>(new TaxonModelKeyProvider());
+		this.store = new ListStore<Taxon>(new TaxonModelKeyProvider());
 		//yes or no? store.setAutoCommit(false);
 		store.setAutoCommit(true);
 		
@@ -88,12 +89,14 @@ public class TaxonMatrixView implements IsWidget {
 		grid.reconfigure(store, cm);
 		
 		//set up editing
-		editing = new MyGridInlineEditing<Taxon>(grid);
+		editing = new MyGridInlineEditing<Taxon>(grid, store);
 		for (int i=1; i<l.size(); i++) {
 			ColumnConfig columnConfig = l.get(i);
 			this.setControlMode(columnConfig, ControlMode.OFF);
 			this.enableEditing(columnConfig);
 		}
+		for(Taxon taxon : taxonMatrix.getTaxa())
+			editing.addEditor(taxon);
 		
 		// set up filtering (tied to the store internally, so has to be done after grid is reconfigured with new store object)
 		GridFilters<Taxon> filters = new GridFilters<Taxon>();
@@ -287,7 +290,7 @@ public class TaxonMatrixView implements IsWidget {
 		ColumnConfig<Taxon, String> nameCol = new ColumnConfig<Taxon, String>(
 			new TaxonNameValueProvider(), 200, "Taxon Concept");
 				
-		nameCol.setCell(new TaxonCell<String>(grid));
+		nameCol.setCell(new TaxonCell<String>(grid, this));
 		return nameCol;
 	}
 	
@@ -425,12 +428,34 @@ public class TaxonMatrixView implements IsWidget {
 		return this.isControlled(columnConfig);
 	}
 
-	public boolean isLocked(int colIndex) {
+	public boolean isLockedColumn(int colIndex) {
 		ColumnConfig columnConfig = grid.getColumnModel().getColumns().get(colIndex);
 		return editing.getEditor(columnConfig) == null;
 	}
+	
+	public boolean isLockedRow(int rowIndex) {
+		Taxon taxon = store.get(rowIndex);
+		return !editing.hasEditor(taxon);
+	}
 
-	public void setLocked(int colIndex, boolean newValue) {
+	public void setLockedRow(int rowIndex, boolean newValue) {
+		Taxon taxon = store.get(rowIndex);
+		if(newValue) {
+			this.disableEditing(taxon);
+		} else {
+			this.enableEditing(taxon);
+		}
+	}
+	
+	private void enableEditing(Taxon taxon) {
+		editing.addEditor(taxon);
+	}
+
+	private void disableEditing(Taxon taxon) {
+		editing.removeEditor(taxon);
+	}
+
+	public void setLockedColumn(int colIndex, boolean newValue) {
 		ColumnConfig columnConfig = grid.getColumnModel().getColumns().get(colIndex);
 		if(newValue) {
 			this.disableEditing(columnConfig);
