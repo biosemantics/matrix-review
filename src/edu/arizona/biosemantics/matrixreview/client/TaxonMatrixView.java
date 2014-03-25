@@ -21,11 +21,16 @@ import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
+import com.sencha.gxt.data.shared.MyListStore;
+import com.sencha.gxt.data.shared.Store;
+import com.sencha.gxt.data.shared.Store.StoreFilter;
+import com.sencha.gxt.data.shared.loader.FilterConfig;
 import com.sencha.gxt.dnd.core.client.DND.Feedback;
 import com.sencha.gxt.dnd.core.client.MyGridDragSource;
 import com.sencha.gxt.dnd.core.client.MyGridDropTarget;
 import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
+import com.sencha.gxt.widget.core.client.event.UpdateEvent;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
@@ -33,7 +38,9 @@ import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.MyGrid;
 import com.sencha.gxt.widget.core.client.grid.RowExpander;
 import com.sencha.gxt.widget.core.client.grid.editing.MyGridInlineEditing;
+import com.sencha.gxt.widget.core.client.grid.filters.Filter;
 import com.sencha.gxt.widget.core.client.grid.filters.GridFilters;
+import com.sencha.gxt.widget.core.client.grid.filters.HideTaxonFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.google.gwt.cell.client.AbstractCell;
@@ -53,7 +60,8 @@ public class TaxonMatrixView implements IsWidget {
 	private FlowLayoutContainer container = new FlowLayoutContainer();
 	private RowExpander<Taxon> expander;
 	private Map<ColumnConfig, ControlMode> columnControlMap = new HashMap<ColumnConfig, ControlMode>();
-	private ListStore<Taxon> store;
+	private MyListStore<Taxon> store;
+	private HideTaxonFilter hideTaxonFilter = new HideTaxonFilter();
 	
 	public TaxonMatrixView() {
 		this.grid = createGrid();
@@ -65,10 +73,12 @@ public class TaxonMatrixView implements IsWidget {
 			return taxonMatrix.getId(item);
 		}
 	}
-
+	
+	
 	public void init(final TaxonMatrix taxonMatrix) {
 		this.taxonMatrix = taxonMatrix;
-		this.store = new ListStore<Taxon>(new TaxonModelKeyProvider());
+		this.store = new MyListStore<Taxon>(new TaxonModelKeyProvider());
+		store.addFilter(this.hideTaxonFilter);
 		//yes or no? store.setAutoCommit(false);
 		store.setAutoCommit(true);
 		
@@ -101,7 +111,6 @@ public class TaxonMatrixView implements IsWidget {
 		// set up filtering (tied to the store internally, so has to be done after grid is reconfigured with new store object)
 		GridFilters<Taxon> filters = new GridFilters<Taxon>();
 		filters.setLocal(true);
-		
 		StringFilter<Taxon> taxonNameFilter = new StringFilter<Taxon>(new TaxonNameValueProvider());
 		filters.addFilter(taxonNameFilter);
 		for (int i=1; i<l.size(); i++) {
@@ -154,16 +163,13 @@ public class TaxonMatrixView implements IsWidget {
 		expander = new RowExpander<Taxon>(new IdentityValueProvider<Taxon>() {
 			  @Override
 			  public void setValue(Taxon object, Taxon value) {
-				  System.out.println("set value");
 			  }
 			  @Override
 			  public Taxon getValue(Taxon object) {
-				  System.out.println("get value");
 			    return object;
 			  }
 			  @Override
 			  public String getPath() {
-				  System.out.println("get path");
 			    return "";
 			  }
 		}, new AbstractCell<Taxon>() {
@@ -490,6 +496,41 @@ public class TaxonMatrixView implements IsWidget {
 		if(isNumeric(values))
 			return ControlMode.NUMERICAL;
 		return ControlMode.CATEGORICAL;
+	}
+
+	public int getTaxaCount() {
+		return this.store.sizeOfAllItems();
+	}
+	
+	public int getCharacterCount() {
+		return this.grid.getColumnModel().getColumnCount();
+	}
+
+	public boolean isHiddenTaxon(int indexOfAllItems) {
+		Taxon taxon = store.getFromAllItems(indexOfAllItems);
+		return this.hideTaxonFilter.isHidden(taxon);
+	}
+
+	public void setHiddenTaxon(int indexOfAllItems, boolean value) {
+		Taxon taxon = store.getFromAllItems(indexOfAllItems);
+		if(value) {
+			this.hideTaxonFilter.addHiddenTaxa(taxon);
+		} else {
+			this.hideTaxonFilter.removeHiddenTaxa(taxon);
+		}
+		store.enableAndRefreshFilters();
+	}
+
+	public Taxon getVisibleTaxon(int visibleIndex) {
+		return store.get(visibleIndex);
+	}
+
+	public int getVisibleTaxaCount() {
+		return store.size();
+	}
+
+	public Taxon getTaxonFromAll(int indexOfAllItems) {
+		return store.getFromAllItems(indexOfAllItems);
 	}
 	
 }

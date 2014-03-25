@@ -436,7 +436,7 @@ public abstract class Store<M> implements HasStoreHandlers<M> {
   private ModelKeyProvider<? super M> keyProvider;
   private List<StoreSortInfo<M>> comparators = new ArrayList<StoreSortInfo<M>>();
   private HandlerManager handlerManager;
-  private boolean filtersEnabled;
+  protected boolean filtersEnabled;
 
   /**
    * Using a LinkedHashSet so each filter can only be added once, and order

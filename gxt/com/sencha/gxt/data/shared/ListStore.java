@@ -32,7 +32,7 @@ import com.sencha.gxt.data.shared.event.StoreUpdateEvent;
  */
 public class ListStore<M> extends Store<M> {
 
-  private final List<M> allItems;
+  protected final List<M> allItems;
   private List<M> visibleItems;
 
   private Set<String> debugKeys;
