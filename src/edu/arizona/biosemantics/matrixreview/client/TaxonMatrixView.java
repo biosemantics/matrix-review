@@ -190,11 +190,13 @@ public class TaxonMatrixView implements IsWidget {
 	public void addTaxon(Taxon taxon) {
 		this.taxonMatrix.addTaxon(taxon);
 		grid.getStore().add(taxon);
+		editing.addEditor(taxon);
 	}
 	
 	public void removeTaxon(Taxon taxon) {
 		this.taxonMatrix.removeTaxon(taxon);
 		grid.getStore().remove(taxon);
+		editing.removeEditor(taxon);
 	}
 	
 	public void addCharacter(Character character) {
@@ -320,6 +322,11 @@ public class TaxonMatrixView implements IsWidget {
 		//name is not allowed to be deleted
 		if(colIndex > 0)
 			this.removeCharacter(colIndex - 1);
+	}
+	
+	public void deleteRow(int rowIndex) {
+		Taxon taxon = store.get(rowIndex);
+		this.removeTaxon(taxon);
 	}
 
 	public void toggleEditing(int colIndex) {

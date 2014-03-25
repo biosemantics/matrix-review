@@ -37,6 +37,17 @@ public class TaxonCell<C> extends MenuExtendedCell<C> {
 	protected Menu createContextMenu(final int colIndex, final int rowIndex) {
 		final Menu menu = new Menu();
 		
+		MenuItem item = new MenuItem();
+		item.setText("Delete");
+		// item.setIcon(header.getAppearance().sortAscendingIcon());
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				taxonMatrixView.deleteRow(rowIndex);
+			}
+		});
+		menu.add(item);
+		
 		final CheckMenuItem lockItem = new CheckMenuItem("Lock");
 		lockItem.setChecked(taxonMatrixView.isLockedRow(rowIndex));
 		lockItem.addSelectionHandler(new SelectionHandler<Item>() {
@@ -47,10 +58,9 @@ public class TaxonCell<C> extends MenuExtendedCell<C> {
 				taxonMatrixView.setLockedRow(rowIndex, newValue);
 			}
 		});
-		menu.add(lockItem);
+		menu.add(lockItem);	
 		
-		
-		MenuItem item = new MenuItem("Move after");
+		item = new MenuItem("Move after");
 		menu.add(item);
 		Menu moveMenu = new Menu();
 		item.setSubMenu(moveMenu);
