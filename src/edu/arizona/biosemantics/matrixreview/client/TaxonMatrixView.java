@@ -201,12 +201,14 @@ public class TaxonMatrixView implements IsWidget {
 		this.taxonMatrix.addTaxon(taxon);
 		grid.getStore().add(taxon);
 		editing.addEditor(taxon);
+		this.rowConfigs.put(taxon, new RowConfig<Taxon>(taxon));
 	}
 	
 	public void removeTaxon(Taxon taxon) {
 		this.taxonMatrix.removeTaxon(taxon);
 		grid.getStore().remove(taxon);
 		editing.removeEditor(taxon);
+		this.rowConfigs.remove(taxon);
 	}
 	
 	public void addCharacter(Character character) {
