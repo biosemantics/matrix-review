@@ -22,9 +22,9 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 public class TaxonCell<C> extends MenuExtendedCell<C> {
 
 	private MyGrid<Taxon> grid;
-	private TaxonMatrixView taxonMatrixView;
 
 	public TaxonCell(MyGrid<Taxon> grid, TaxonMatrixView taxonMatrixView) {
+		super(taxonMatrixView);
 		this.grid = grid;
 		this.taxonMatrixView = taxonMatrixView;
 	}

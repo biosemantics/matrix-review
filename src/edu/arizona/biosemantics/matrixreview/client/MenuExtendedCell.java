@@ -13,12 +13,16 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sencha.gxt.core.client.Style.Anchor;
 import com.sencha.gxt.core.client.Style.AnchorAlignment;
+import com.sencha.gxt.core.client.util.Format;
+import com.sencha.gxt.core.client.util.Params;
+import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
 import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderAppearance;
 import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderStyles;
 import com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance;
 import com.sencha.gxt.widget.core.client.grid.GridView.GridStyles;
+import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
@@ -29,6 +33,7 @@ public class MenuExtendedCell<C> extends AbstractCell<C> {
 	private GridAppearance gridAppearance;
 	protected ColumnHeaderStyles columnHeaderStyles;
 	protected GridStyles gridStyles;
+	protected TaxonMatrixView taxonMatrixView;
 
 	interface Templates extends SafeHtmlTemplates {
 		@SafeHtmlTemplates.Template("<div class=\"{0}\"><div class=\"{1}\" style=\"width: calc(100% - 9px); height:14px\">{3}<a href=\"#\" class=\"{2}\" style=\"height: 22px;\"></a></div></div>")
@@ -39,13 +44,13 @@ public class MenuExtendedCell<C> extends AbstractCell<C> {
 	protected static Templates templates = GWT.create(Templates.class);
 
 
-	public MenuExtendedCell() {
-		this(GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class), GWT.<GridAppearance> create(GridAppearance.class));
+	public MenuExtendedCell(TaxonMatrixView taxonMatrixView) {
+		this(taxonMatrixView, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class), GWT.<GridAppearance> create(GridAppearance.class));
 	}
 
-	public MenuExtendedCell(ColumnHeaderAppearance columnHeaderAppearance, GridAppearance gridAppearance) {
+	public MenuExtendedCell(TaxonMatrixView taxonMatrixView, ColumnHeaderAppearance columnHeaderAppearance, GridAppearance gridAppearance) {
 		super(BrowserEvents.MOUSEOVER, BrowserEvents.MOUSEOUT, BrowserEvents.CLICK);
-
+		this.taxonMatrixView = taxonMatrixView;
 		this.columnHeaderAppearance = columnHeaderAppearance;
 		this.gridAppearance = gridAppearance;
 		columnHeaderStyles = columnHeaderAppearance.styles();
@@ -141,23 +146,35 @@ public class MenuExtendedCell<C> extends AbstractCell<C> {
 		}
 	}
 		
-	  /**
-	   * Creates a context menu for the given column, including sort menu items and
-	   * column visibility sub-menu.
-	   * 
-	   * @param colIndex the column index
-	   * @return the context menu for the given column
-	   */
-	  protected Menu createContextMenu(final int colIndex, final int rowIndex) {
-	    final Menu menu = new Menu();
-	    MenuItem test = new MenuItem("wuha");
-	    test.addSelectionHandler(new SelectionHandler<Item>() {
+	/**
+	 * Creates a context menu for the given column, including sort menu items
+	 * and column visibility sub-menu.
+	 * 
+	 * @param colIndex
+	 *            the column index
+	 * @return the context menu for the given column
+	 */
+	protected Menu createContextMenu(final int colIndex, final int rowIndex) {
+		final Menu menu = new Menu();
+		MenuItem test = new MenuItem("Comment");
+		test.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				System.out.println("wuha at " + colIndex + " " + rowIndex);
+				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox("Comment", "");
+				box.setValue(taxonMatrixView.getComment(rowIndex, colIndex));
+				box.addHideHandler(new HideHandler() {
+					@Override
+					public void onHide(HideEvent event) {
+						taxonMatrixView.setComment(rowIndex, colIndex, box.getValue());
+						String comment = Format.ellipse(box.getValue(), 80);
+						String message = Format.substitute("'{0}' saved", new Params(comment));
+						Info.display("Comment", message);
+					}
+				});
+				box.show();
 			}
-	    });
-	    menu.add(test);
-	    return menu;
-	  }
+		});
+		menu.add(test);
+		return menu;
+	}
 }

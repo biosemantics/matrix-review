@@ -11,14 +11,20 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Event;
 import com.sencha.gxt.core.client.GXT;
+import com.sencha.gxt.core.client.util.Format;
+import com.sencha.gxt.core.client.util.Params;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.messages.client.DefaultMessages;
+import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent;
+import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent.CheckChangeHandler;
+import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderAppearance;
 import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderStyles;
 import com.sencha.gxt.widget.core.client.grid.ColumnHeader.HeaderContextMenuFactory;
+import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
@@ -45,6 +51,26 @@ public class MyGridView<M> extends GridView<M> {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				taxonMatrixView.deleteColumn(colIndex);
+			}
+		});
+		menu.add(item);
+		
+		item = new MenuItem("Comment");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox("Comment", "");
+				box.setValue(taxonMatrixView.getComment(colIndex));
+				box.addHideHandler(new HideHandler() {
+					@Override
+					public void onHide(HideEvent event) {
+						taxonMatrixView.setComment(colIndex, box.getValue());
+						String comment = Format.ellipse(box.getValue(), 80);
+						String message = Format.substitute("'{0}' saved", new Params(comment));
+						Info.display("Comment", message);
+					}
+				});
+				box.show();
 			}
 		});
 		menu.add(item);

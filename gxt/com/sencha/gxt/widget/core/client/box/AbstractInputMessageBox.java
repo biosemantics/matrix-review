@@ -47,6 +47,10 @@ public abstract class AbstractInputMessageBox extends MessageBox {
   public String getValue() {
     return field.getValue();
   }
+  
+  public void setValue(String value) {
+	  this.field.setValue(value);
+  }
 
   @Override
   protected void doAttachChildren() {
