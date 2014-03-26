@@ -617,6 +617,7 @@ public class TaxonMatrixView implements IsWidget {
 					if (h != null && h.isRendered() && h instanceof MyHead) {
 						MyHead myHead = (MyHead)h;
 						myHead.setCoverage(TaxonMatrixView.this.getCoverage(myColumnConfig.getCharacter()));
+						myHead.setQuickTipText(TaxonMatrixView.this.getSummary(myColumnConfig.getCharacter()));
 					}
 				}
 			}
@@ -638,6 +639,16 @@ public class TaxonMatrixView implements IsWidget {
 	
 	public String getSummary(Character character) {
 		return "Taxon coverage: " + getCoverage(character);
+	}
+
+	public String getQuickTipText(ColumnConfig columnConfig) {
+		if(columnConfig.equals(grid.getColumnModel().getColumn(1))) {
+			return "The matrix contains " + taxonMatrix.getTaxa().size() + " taxa and " + taxonMatrix.getCharacters().size() + " characters";
+		}
+		if(columnConfig instanceof MyColumnConfig) {
+			return this.getSummary(((MyColumnConfig)columnConfig).getCharacter());
+		}
+		return "";
 	}
 
 }

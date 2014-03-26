@@ -44,6 +44,9 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 
 			setElement(Document.get().createDivElement());
 
+			getElement().setAttribute("qtitle", "Summary");
+			getElement().setAttribute("qtip", taxonMatrixView.getQuickTipText(column));
+			
 			if(column instanceof MyColumnConfig) {
 				coverage = Document.get().createSpanElement();
 				coverage.setInnerText(taxonMatrixView.getCoverage(((MyColumnConfig)column).getCharacter()));
@@ -99,6 +102,10 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 
 		public String getCoverage() {
 			return coverage.getInnerText();
+		}
+		
+		public void setQuickTipText(String text) {
+			getElement().setAttribute("qtip", text);
 		}
 	}
 
