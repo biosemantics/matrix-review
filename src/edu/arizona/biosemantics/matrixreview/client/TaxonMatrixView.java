@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -16,7 +17,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
-import com.sencha.gxt.core.client.ValueProvider;
+import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ListStore;
@@ -30,33 +31,28 @@ import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent.CompleteEditHandler;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
+import com.sencha.gxt.widget.core.client.form.Field;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnHeader;
+import com.sencha.gxt.widget.core.client.grid.ColumnHeader.Head;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.MyColumnConfig;
-import com.sencha.gxt.widget.core.client.grid.MyColumnHeader;
 import com.sencha.gxt.widget.core.client.grid.MyColumnHeader.MyHead;
 import com.sencha.gxt.widget.core.client.grid.MyGrid;
 import com.sencha.gxt.widget.core.client.grid.RowConfig;
 import com.sencha.gxt.widget.core.client.grid.RowExpander;
-import com.sencha.gxt.widget.core.client.grid.ColumnHeader.Head;
 import com.sencha.gxt.widget.core.client.grid.editing.MyGridInlineEditing;
-import com.sencha.gxt.widget.core.client.grid.filters.Filter;
 import com.sencha.gxt.widget.core.client.grid.filters.GridFilters;
 import com.sencha.gxt.widget.core.client.grid.filters.HideTaxonFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.TaxonNameFilter;
 import com.sencha.gxt.widget.core.client.tips.QuickTip;
-import com.sencha.gxt.core.client.IdentityValueProvider;
-import com.google.gwt.cell.client.AbstractCell;
 
-import com.sencha.gxt.widget.core.client.form.Field;
-
-import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+
 
 public class TaxonMatrixView implements IsWidget {
 	
@@ -74,6 +70,9 @@ public class TaxonMatrixView implements IsWidget {
 	private RowExpander<Taxon> expander;
 	private HideTaxonFilter hideTaxonFilter = new HideTaxonFilter();
 	private QuickTip quickTip;
+	
+	private int taxonNameColumn = 1;
+	private int firstCharacterColumn = 2;
 
 	public TaxonMatrixView() {
 		this.grid = createGrid();
@@ -116,7 +115,7 @@ public class TaxonMatrixView implements IsWidget {
 		
 		//set up editing
 		editing = new MyGridInlineEditing<Taxon>(grid, store);
-		for (int i=1; i<columnConfigs.size(); i++) {
+		for (int i = taxonNameColumn; i<columnConfigs.size(); i++) {
 			final int theI = i;
 			ColumnConfig columnConfig = columnConfigs.get(i);
 			this.setControlMode(columnConfig, ControlMode.OFF);
@@ -142,7 +141,7 @@ public class TaxonMatrixView implements IsWidget {
 		//StringFilter<Taxon> taxonNameFilter = new StringFilter<Taxon>(new TaxonNameValueProvider());
 		TaxonNameFilter taxonNameFilter = new TaxonNameFilter(new TaxonNameValueProvider());
 		filters.addFilter(taxonNameFilter);
-		for (int i=2; i<columnConfigs.size(); i++) {
+		for (int i = this.firstCharacterColumn; i<columnConfigs.size(); i++) {
 			ColumnConfig columnConfig = columnConfigs.get(i);
 			StringFilter<Taxon> characterStateFilter = new StringFilter<Taxon>(columnConfig.getValueProvider());
 			filters.addFilter(characterStateFilter);
@@ -262,78 +261,19 @@ public class TaxonMatrixView implements IsWidget {
 		grid.reconfigure(grid.getStore(), cm);
 	}
 
+	
 	@Override
 	public Widget asWidget() {
 		container.setScrollMode(ScrollMode.AUTO);
-		
 		VerticalPanel panel = new VerticalPanel();
 		panel.add(grid);
-		HorizontalPanel functionsPanel = new HorizontalPanel();
-		panel.add(functionsPanel);
-		
-		Button addTaxonButton = new Button("Add Taxon");
-		addTaxonButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				for(int i=0; i<10; i++)
-					addTaxon(new Taxon("mu"));
-				
-			}
-		});
-		functionsPanel.add(addTaxonButton);
-		
-		Button addCharacterButton = new Button("Add Character");
-		addCharacterButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				addCharacter(new Character("ch"));
-			}
-		});
-		functionsPanel.add(addCharacterButton);
-
-		/*final TextButton removeButton = new TextButton("Remove Taxon");
-		removeButton.setEnabled(false);
-		SelectHandler removeButtonHandler = new SelectHandler() {
-			@Override
-			public void onSelect(SelectEvent event) {
-				for (Taxon taxon : grid.getSelectionModel().getSelectedItems()) {
-					grid.getStore().remove(taxon);
-				}
-				removeButton.setEnabled(false);
-			}
-		};
-		removeButton.addSelectHandler(removeButtonHandler);
-		functionsPanel.add(removeButton);
-		
-		grid.getSelectionModel().addSelectionChangedHandler(
-				new SelectionChangedHandler<Taxon>() {
-					@Override
-					public void onSelectionChanged(SelectionChangedEvent<Taxon> event) {
-						removeButton.setEnabled(!event.getSelection().isEmpty());
-					}
-				});
-		*/
-		
-		/*final Button lockButton = new Button("Lock Taxon");
-		lockButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				for (Taxon taxon : grid.getSelectionModel().getSelectedItems()) {
-					//grid.getR
-				}
-			}
-		});
-		functionsPanel.add(lockButton);
-		*/
 		container.add(panel);
 		return container;
-		//return panel;
 	}
 
 	private ColumnConfig<Taxon, Taxon> createNameColumnConfig() {
 		ColumnConfig<Taxon, Taxon> nameCol = new ColumnConfig<Taxon, Taxon>(
 			new TaxonNameValueProvider(), 200, "Taxon Concept / Character");
-				
 		nameCol.setCell(new TaxonCell(grid, this));
 		return nameCol;
 	}
@@ -625,7 +565,7 @@ public class TaxonMatrixView implements IsWidget {
 	}
 	
 	private void refreshColumnHeaders() {
-		for(int j = 2; j<grid.getColumnModel().getColumnCount(); j++) {
+		for(int j = this.firstCharacterColumn; j<grid.getColumnModel().getColumnCount(); j++) {
 			ColumnConfig columnConfig = grid.getColumnModel().getColumn(j);
 			if(columnConfig instanceof MyColumnConfig) {
 				refreshColumnHeader(j);
@@ -649,6 +589,14 @@ public class TaxonMatrixView implements IsWidget {
 			return this.getSummary(((MyColumnConfig)columnConfig).getCharacter());
 		}
 		return "";
+	}
+
+	public int getTaxonNameColumn() {
+		return taxonNameColumn;
+	}
+
+	public int getFirstCharacterColumn() {
+		return firstCharacterColumn;
 	}
 
 }

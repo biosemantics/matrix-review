@@ -33,6 +33,7 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import edu.arizona.biosemantics.matrixreview.client.ControlMode;
 import edu.arizona.biosemantics.matrixreview.client.TaxonMatrixView;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 
 public class MyGridView extends GridView<Taxon> {
 
@@ -43,101 +44,133 @@ public class MyGridView extends GridView<Taxon> {
 	}
 
 	protected Menu createContextMenu(final int colIndex) {
-		Menu menu = super.createContextMenu(colIndex);
-
-		MenuItem item = new MenuItem();
-		item.setText("Delete");
-		// item.setIcon(header.getAppearance().sortAscendingIcon());
-		item.addSelectionHandler(new SelectionHandler<Item>() {
-			@Override
-			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.deleteColumn(colIndex);
-			}
-		});
-		menu.add(item);
-		
-		item = new MenuItem("Comment");
-		item.addSelectionHandler(new SelectionHandler<Item>() {
-			@Override
-			public void onSelection(SelectionEvent<Item> event) {
-				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox("Comment", "");
-				box.setValue(taxonMatrixView.getComment(colIndex));
-				box.addHideHandler(new HideHandler() {
-					@Override
-					public void onHide(HideEvent event) {
-						taxonMatrixView.setComment(colIndex, box.getValue());
-						String comment = Format.ellipse(box.getValue(), 80);
-						String message = Format.substitute("'{0}' saved", new Params(comment));
-						Info.display("Comment", message);
-					}
-				});
-				box.show();
-			}
-		});
-		menu.add(item);
-
-		final CheckMenuItem lockItem = new CheckMenuItem("Lock");
-		lockItem.setChecked(taxonMatrixView.isLockedColumn(colIndex));
-		lockItem.addSelectionHandler(new SelectionHandler<Item>() {
-			@Override
-			public void onSelection(SelectionEvent<Item> event) {
-				boolean newValue = !taxonMatrixView.isLockedColumn(colIndex);
-				lockItem.setChecked(newValue);
-				taxonMatrixView.setLockedColumn(colIndex, newValue);
-			}
-		});
-		menu.add(lockItem);
-
-		final CheckMenuItem controlItem = new CheckMenuItem("Controlled");
-		controlItem.setChecked(taxonMatrixView.isControlled(colIndex));
-		controlItem.addSelectionHandler(new SelectionHandler<Item>() {
-			@Override
-			public void onSelection(SelectionEvent<Item> event) {
-				boolean activate = !taxonMatrixView.isControlled(colIndex);
-				if (activate) {
-					ControlMode controlMode = taxonMatrixView
-							.determineControlMode(colIndex);
-					taxonMatrixView.setControlMode(colIndex, controlMode);
-				} else {
-					taxonMatrixView.setControlMode(colIndex, ControlMode.OFF);
+		if(colIndex == taxonMatrixView.getTaxonNameColumn()) {
+			final Menu menu = new Menu();
+			MenuItem item = new MenuItem();
+			item.setText("Add Character");
+			// item.setIcon(header.getAppearance().sortAscendingIcon());
+			item.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					taxonMatrixView.addCharacter(new Character("ch"));
 				}
-				controlItem.setChecked(activate);
-			}
-		});
-		menu.add(controlItem);
+			});
+			menu.add(item);
 
-		item = new MenuItem("Move after");
-		menu.add(item);
-		Menu moveMenu = new Menu();
-		item.setSubMenu(moveMenu);
+			item = new MenuItem();
+			item.setText("Add Taxon");
+			// item.setIcon(header.getAppearance().sortAscendingIcon());
+			item.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					for (int i = 0; i < 10; i++)
+						taxonMatrixView.addTaxon(new Taxon("tax"));
+				}
+			});
+			menu.add(item);
+			return menu;
+		} else {
+			Menu menu = super.createContextMenu(colIndex);
 
-		item = new MenuItem("start");
-		item.addSelectionHandler(new SelectionHandler<Item>() {
-			@Override
-			public void onSelection(SelectionEvent<Item> event) {
-				cm.moveColumn(colIndex, 0);
-			}
-		});
-		moveMenu.add(item);
+			MenuItem item = new MenuItem();
+			item.setText("Delete");
+			// item.setIcon(header.getAppearance().sortAscendingIcon());
+			item.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					taxonMatrixView.deleteColumn(colIndex);
+				}
+			});
+			menu.add(item);
 
-		int cols = cm.getColumnCount();
-		
-		//col 0 is for the expander, col 1 is taxon name: Do we want them to be rearrangable too? when browsing vertically far maybe?
-		for (int i = 0; i < cols; i++) {
-			if(i != colIndex) {
-				final int theI = i;
-				item = new MenuItem(cm.getColumnHeader(i).asString());
-				item.addSelectionHandler(new SelectionHandler<Item>() {
-					@Override
-					public void onSelection(SelectionEvent<Item> event) {
-						cm.moveColumn(colIndex, theI + 1);
+			item = new MenuItem("Comment");
+			item.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox(
+							"Comment", "");
+					box.setValue(taxonMatrixView.getComment(colIndex));
+					box.addHideHandler(new HideHandler() {
+						@Override
+						public void onHide(HideEvent event) {
+							taxonMatrixView.setComment(colIndex, box.getValue());
+							String comment = Format.ellipse(box.getValue(), 80);
+							String message = Format.substitute("'{0}' saved",
+									new Params(comment));
+							Info.display("Comment", message);
+						}
+					});
+					box.show();
+				}
+			});
+			menu.add(item);
+
+			final CheckMenuItem lockItem = new CheckMenuItem("Lock");
+			lockItem.setChecked(taxonMatrixView.isLockedColumn(colIndex));
+			lockItem.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					boolean newValue = !taxonMatrixView
+							.isLockedColumn(colIndex);
+					lockItem.setChecked(newValue);
+					taxonMatrixView.setLockedColumn(colIndex, newValue);
+				}
+			});
+			menu.add(lockItem);
+
+			final CheckMenuItem controlItem = new CheckMenuItem("Controlled");
+			controlItem.setChecked(taxonMatrixView.isControlled(colIndex));
+			controlItem.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					boolean activate = !taxonMatrixView.isControlled(colIndex);
+					if (activate) {
+						ControlMode controlMode = taxonMatrixView
+								.determineControlMode(colIndex);
+						taxonMatrixView.setControlMode(colIndex, controlMode);
+					} else {
+						taxonMatrixView.setControlMode(colIndex,
+								ControlMode.OFF);
 					}
-				});
-				moveMenu.add(item);
-			}
-		}
+					controlItem.setChecked(activate);
+				}
+			});
+			menu.add(controlItem);
 
-		return menu;
+			item = new MenuItem("Move after");
+			menu.add(item);
+			Menu moveMenu = new Menu();
+			item.setSubMenu(moveMenu);
+
+			item = new MenuItem("start");
+			item.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					cm.moveColumn(colIndex, 0);
+				}
+			});
+			moveMenu.add(item);
+
+			int cols = cm.getColumnCount();
+
+			// col 0 is for the expander, col 1 is taxon name: Do we want them
+			// to be rearrangable too? when browsing vertically far maybe?
+			for (int i = 0; i < cols; i++) {
+				if (i != colIndex) {
+					final int theI = i;
+					item = new MenuItem(cm.getColumnHeader(i).asString());
+					item.addSelectionHandler(new SelectionHandler<Item>() {
+						@Override
+						public void onSelection(SelectionEvent<Item> event) {
+							cm.moveColumn(colIndex, theI + 1);
+						}
+					});
+					moveMenu.add(item);
+				}
+			}
+
+			return menu;
+		}
 	}
 	
 	@Override
