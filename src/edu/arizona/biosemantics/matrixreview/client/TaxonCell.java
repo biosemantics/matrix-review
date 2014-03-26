@@ -1,7 +1,9 @@
 package edu.arizona.biosemantics.matrixreview.client;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Widget;
@@ -18,9 +20,23 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 
 public class TaxonCell extends MenuExtendedCell<Taxon> {
 
-	private MyGrid<Taxon> grid;
+	private MyGrid grid;
 
-	public TaxonCell(MyGrid<Taxon> grid, TaxonMatrixView taxonMatrixView) {
+	interface Templates extends SafeHtmlTemplates {
+		@SafeHtmlTemplates.Template("<div class=\"{0}\">" +
+				"<div class=\"{1}\" style=\"width: calc(100% - 9px); height:14px\">{3}" +
+				//"<span>{4}</span>" +
+				"<span style=\"position:absolute;right:0px;background-color:#b0e0e6;width:35px;\">{4}</span>" + 
+				"<a href=\"#\" class=\"{2}\" style=\"height: 22px;\"></a>" +
+				"</div>" +
+				"</div>")
+		SafeHtml cell(String grandParentStyleClass, String parentStyleClass,
+				String aStyleClass, String value, String coverage);
+	}
+	
+	protected static Templates templates = GWT.create(Templates.class);
+	
+	public TaxonCell(MyGrid grid, TaxonMatrixView taxonMatrixView) {
 		super(taxonMatrixView);
 		this.grid = grid;
 		this.taxonMatrixView = taxonMatrixView;
@@ -32,7 +48,7 @@ public class TaxonCell extends MenuExtendedCell<Taxon> {
 			return;
 		SafeHtml rendered = templates.cell(columnHeaderStyles.header() + " "
 				+ columnHeaderStyles.head(), columnHeaderStyles.headInner(),
-				columnHeaderStyles.headButton(), value.getName() + " Coverage: " + taxonMatrixView.getCoverage(value));
+				columnHeaderStyles.headButton(), value.getName(), taxonMatrixView.getCoverage(value));
 		sb.append(rendered);
 	}
 

@@ -331,19 +331,21 @@ public class ColumnHeader<M> extends Component {
     protected int column;
     protected ColumnConfig<M, ?> config;
 
-    private AnchorElement btn;
-    private ImageElement img;
-    private InlineHTML text;
-    private Widget widget;
+    protected AnchorElement btn;
+    protected ImageElement img;
+    protected InlineHTML text;
+    protected Widget widget;
     protected int row;
 
+    public Head() {}
+    
     @SuppressWarnings({"rawtypes", "unchecked"})
     public Head(ColumnConfig column) {
       this.config = column;
       this.column = cm.indexOf(column);
 
       setElement(Document.get().createDivElement());
-
+      
       btn = Document.get().createAnchorElement();
       btn.setHref("#");
       btn.setClassName(styles.headButton());

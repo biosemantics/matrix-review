@@ -79,7 +79,7 @@ public class TaxonMatrix implements Serializable {
 				}
 			}
 		}
-		return result + "/" + taxa.size();
+		return result + "/" + characters.size();
 	}
 	
 	public String getCoverage(Character character) {
@@ -91,7 +91,7 @@ public class TaxonMatrix implements Serializable {
 				}
 			}
 		}
-		return result + "/" + characters.size();
+		return result + "/" + taxa.size();
 	}
 	
 	private boolean hasValue(Taxon taxon, Character character) {

@@ -32,8 +32,9 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
 import edu.arizona.biosemantics.matrixreview.client.ControlMode;
 import edu.arizona.biosemantics.matrixreview.client.TaxonMatrixView;
+import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 
-public class MyGridView<M> extends GridView<M> {
+public class MyGridView extends GridView<Taxon> {
 
 	private TaxonMatrixView taxonMatrixView;
 
@@ -140,7 +141,7 @@ public class MyGridView<M> extends GridView<M> {
 	}
 	
 	@Override
-	protected SafeHtml doRender(List<ColumnData> cs, List<M> rows, int startRow) {
+	protected SafeHtml doRender(List<ColumnData> cs, List<Taxon> rows, int startRow) {
 		final int colCount = cm.getColumnCount();
 		final int last = colCount - 1;
 
@@ -178,14 +179,14 @@ public class MyGridView<M> extends GridView<M> {
 
 		// loop over all rows
 		for (int j = 0; j < rows.size(); j++) {
-			M model = rows.get(j);
+			Taxon model = rows.get(j);
 
-			ListStore<M>.Record r = ds.hasRecord(model) ? ds.getRecord(model)
+			ListStore<Taxon>.Record r = ds.hasRecord(model) ? ds.getRecord(model)
 					: null;
 
 			int rowBodyColSpanCount = colCount;
 			if (enableRowBody) {
-				for (ColumnConfig<M, ?> c : cm.getColumns()) {
+				for (ColumnConfig<Taxon, ?> c : cm.getColumns()) {
 					if (c instanceof RowExpander) {
 						rowBodyColSpanCount--;
 					}
@@ -216,7 +217,7 @@ public class MyGridView<M> extends GridView<M> {
 			// loop each cell per row
 			for (int i = 0; i < colCount; i++) {
 				SafeHtml rv = getRenderedValue(rowIndex, i, model, r);
-				ColumnConfig<M, ?> columnConfig = cm.getColumn(i);
+				ColumnConfig<Taxon, ?> columnConfig = cm.getColumn(i);
 				ColumnData columnData = cs.get(i);
 
 				String cellClasses = "";
@@ -319,7 +320,7 @@ public class MyGridView<M> extends GridView<M> {
 	@Override
 	protected void initHeader() {
 		if(header == null) {
-			header = new MyColumnHeader<M>(grid, cm, taxonMatrixView.getContainer()) {
+			header = new MyColumnHeader(grid, cm, taxonMatrixView.getContainer(), taxonMatrixView) {
 				
 				/*
 				@Override
