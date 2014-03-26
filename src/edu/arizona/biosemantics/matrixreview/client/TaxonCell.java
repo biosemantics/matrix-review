@@ -5,12 +5,9 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.messages.client.DefaultMessages;
 import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent.CheckChangeHandler;
-import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
-import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.MyGrid;
 import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Item;
@@ -19,7 +16,7 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 
-public class TaxonCell<C> extends MenuExtendedCell<C> {
+public class TaxonCell extends MenuExtendedCell<Taxon> {
 
 	private MyGrid<Taxon> grid;
 
@@ -30,13 +27,12 @@ public class TaxonCell<C> extends MenuExtendedCell<C> {
 	}
 
 	@Override
-	public void render(Context context, C value, SafeHtmlBuilder sb) {
+	public void render(Context context, Taxon value, SafeHtmlBuilder sb) {
 		if (value == null)
 			return;
-
 		SafeHtml rendered = templates.cell(columnHeaderStyles.header() + " "
 				+ columnHeaderStyles.head(), columnHeaderStyles.headInner(),
-				columnHeaderStyles.headButton(), value.toString());
+				columnHeaderStyles.headButton(), value.getName() + " Coverage: " + taxonMatrixView.getCoverage(value));
 		sb.append(rendered);
 	}
 

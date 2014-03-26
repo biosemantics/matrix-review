@@ -69,6 +69,35 @@ public class TaxonMatrix implements Serializable {
 	public void removeTaxon(int i) {
 		this.taxa.remove(i);
 	}
+		
+	public String getCoverage(Taxon taxon) {
+		int result = 0;
+		if(taxa.contains(taxon)) {
+			for(Character character : this.characters) {
+				if(hasValue(taxon, character)) {
+					result++;
+				}
+			}
+		}
+		return result + "/" + taxa.size();
+	}
+	
+	public String getCoverage(Character character) {
+		int result = 0;
+		if(characters.contains(character)) {
+			for(Taxon taxon : this.taxa) {
+				if(hasValue(taxon, character)) {
+					result++;
+				}
+			}
+		}
+		return result + "/" + characters.size();
+	}
+	
+	private boolean hasValue(Taxon taxon, Character character) {
+		Value value = taxon.get(character);
+		return value != null && value.getValue() != null && !value.getValue().trim().isEmpty();
+	}
 	
 	/*public Value getCharacterValue(Character character, Taxon taxon) {
 		if(!taxa.contains(taxon)) {

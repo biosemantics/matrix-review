@@ -38,6 +38,7 @@ import com.sencha.gxt.widget.core.client.grid.editing.MyGridInlineEditing;
 import com.sencha.gxt.widget.core.client.grid.filters.GridFilters;
 import com.sencha.gxt.widget.core.client.grid.filters.HideTaxonFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
+import com.sencha.gxt.widget.core.client.grid.filters.TaxonNameFilter;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.google.gwt.cell.client.AbstractCell;
 
@@ -86,15 +87,15 @@ public class TaxonMatrixView implements IsWidget {
 			store.add(taxon);
 		}
 		
-		List<ColumnConfig<Taxon, ?>> l = new ArrayList<ColumnConfig<Taxon, ?>>();
-		l.add(expander);
+		List<ColumnConfig<Taxon, ?>> columnConfigs = new ArrayList<ColumnConfig<Taxon, ?>>();
+		columnConfigs.add(expander);
 		ColumnConfig nameColumnConfig = createNameColumnConfig();
-		l.add(nameColumnConfig);
+		columnConfigs.add(nameColumnConfig);
 		for (final Character character : taxonMatrix.getCharacters()) {
 			ColumnConfig characterColumnConfig = createCharacterColumnConfig(character);
-			l.add(characterColumnConfig);
+			columnConfigs.add(characterColumnConfig);
 		}
-		ColumnModel<Taxon> cm = new ColumnModel<Taxon>(l);
+		ColumnModel<Taxon> cm = new ColumnModel<Taxon>(columnConfigs);
 		
 		rowConfigs.clear();
 		for(Taxon taxon : taxonMatrix.getTaxa()) {
@@ -104,8 +105,8 @@ public class TaxonMatrixView implements IsWidget {
 		
 		//set up editing
 		editing = new MyGridInlineEditing<Taxon>(grid, store);
-		for (int i=1; i<l.size(); i++) {
-			ColumnConfig columnConfig = l.get(i);
+		for (int i=1; i<columnConfigs.size(); i++) {
+			ColumnConfig columnConfig = columnConfigs.get(i);
 			this.setControlMode(columnConfig, ControlMode.OFF);
 			this.enableEditing(columnConfig);
 		}
@@ -115,10 +116,11 @@ public class TaxonMatrixView implements IsWidget {
 		// set up filtering (tied to the store internally, so has to be done after grid is reconfigured with new store object)
 		GridFilters<Taxon> filters = new GridFilters<Taxon>();
 		filters.setLocal(true);
-		StringFilter<Taxon> taxonNameFilter = new StringFilter<Taxon>(new TaxonNameValueProvider());
+		//StringFilter<Taxon> taxonNameFilter = new StringFilter<Taxon>(new TaxonNameValueProvider());
+		TaxonNameFilter taxonNameFilter = new TaxonNameFilter(new TaxonNameValueProvider());
 		filters.addFilter(taxonNameFilter);
-		for (int i=1; i<l.size(); i++) {
-			ColumnConfig columnConfig = l.get(i);
+		for (int i=2; i<columnConfigs.size(); i++) {
+			ColumnConfig columnConfig = columnConfigs.get(i);
 			StringFilter<Taxon> characterStateFilter = new StringFilter<Taxon>(columnConfig.getValueProvider());
 			filters.addFilter(characterStateFilter);
 		}
@@ -300,11 +302,11 @@ public class TaxonMatrixView implements IsWidget {
 		//return panel;
 	}
 
-	private ColumnConfig<Taxon, String> createNameColumnConfig() {
-		ColumnConfig<Taxon, String> nameCol = new ColumnConfig<Taxon, String>(
+	private ColumnConfig<Taxon, Taxon> createNameColumnConfig() {
+		ColumnConfig<Taxon, Taxon> nameCol = new ColumnConfig<Taxon, Taxon>(
 			new TaxonNameValueProvider(), 200, "Taxon Concept");
 				
-		nameCol.setCell(new TaxonCell<String>(grid, this));
+		nameCol.setCell(new TaxonCell(grid, this));
 		return nameCol;
 	}
 	
@@ -574,4 +576,13 @@ public class TaxonMatrixView implements IsWidget {
 		ColumnConfig columnConfig = grid.getColumnModel().getColumn(column);
 		this.setComment(headerRowConfig, columnConfig, comment);
 	}
+
+	public String getCoverage(Taxon taxon) {
+		return taxonMatrix.getCoverage(taxon);
+	}
+	
+	public String getCoverage(Character character) {
+		return taxonMatrix.getCoverage(character);
+	}
+
 }
