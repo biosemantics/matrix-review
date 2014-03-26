@@ -47,6 +47,7 @@ import com.sencha.gxt.widget.core.client.grid.filters.GridFilters;
 import com.sencha.gxt.widget.core.client.grid.filters.HideTaxonFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.TaxonNameFilter;
+import com.sencha.gxt.widget.core.client.tips.QuickTip;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.google.gwt.cell.client.AbstractCell;
 
@@ -72,6 +73,7 @@ public class TaxonMatrixView implements IsWidget {
 	private Map<ColumnConfig, ControlMode> columnControlMap = new HashMap<ColumnConfig, ControlMode>();
 	private RowExpander<Taxon> expander;
 	private HideTaxonFilter hideTaxonFilter = new HideTaxonFilter();
+	private QuickTip quickTip;
 
 	public TaxonMatrixView() {
 		this.grid = createGrid();
@@ -179,6 +181,9 @@ public class TaxonMatrixView implements IsWidget {
 				new ColumnModel<Taxon>(new ArrayList<ColumnConfig<Taxon, ?>>()), this);
 		grid.getView().setForceFit(false); // if change in column width we want the table to become wider not stay fixed at overall width
 		grid.setColumnReordering(true);
+		
+		// setup up quicktips
+		quickTip = new QuickTip(grid);
 		
 		//set up row drag and drop for taxon move
 		MyGridDragSource<Taxon> dragSource = new MyGridDragSource<Taxon>(grid);
@@ -327,7 +332,7 @@ public class TaxonMatrixView implements IsWidget {
 
 	private ColumnConfig<Taxon, Taxon> createNameColumnConfig() {
 		ColumnConfig<Taxon, Taxon> nameCol = new ColumnConfig<Taxon, Taxon>(
-			new TaxonNameValueProvider(), 200, "Taxon Concept");
+			new TaxonNameValueProvider(), 200, "Taxon Concept / Character");
 				
 		nameCol.setCell(new TaxonCell(grid, this));
 		return nameCol;
@@ -548,6 +553,17 @@ public class TaxonMatrixView implements IsWidget {
 		return store.getFromAllItems(indexOfAllItems);
 	}
 	
+	public Taxon getTaxon(int row) {
+		return store.get(row);
+	}
+	
+	public Character getCharacter(int column) {
+		ColumnConfig columnConfig = grid.getColumnModel().getColumn(column);
+		if(columnConfig instanceof MyColumnConfig) 
+			return ((MyColumnConfig)columnConfig).getCharacter();
+		return null;
+	}
+	
 	public void setComment(RowConfig rowConfig, ColumnConfig columnConfig, String comment) {
 		if(!comments.containsKey(rowConfig))
 			comments.put(rowConfig, new HashMap<ColumnConfig, String>());
@@ -614,6 +630,14 @@ public class TaxonMatrixView implements IsWidget {
 				refreshColumnHeader(j);
 			}
 		}
+	}
+
+	public String getSummary(Taxon taxon) {
+		return "Character coverage: " + getCoverage(taxon);
+	}
+	
+	public String getSummary(Character character) {
+		return "Taxon coverage: " + getCoverage(character);
 	}
 
 }

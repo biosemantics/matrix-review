@@ -27,6 +27,10 @@ import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
+import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.Value;
+
 public class MenuExtendedCell<C> extends AbstractCell<C> {
 
 	private ColumnHeaderAppearance columnHeaderAppearance;
@@ -36,9 +40,13 @@ public class MenuExtendedCell<C> extends AbstractCell<C> {
 	protected TaxonMatrixView taxonMatrixView;
 
 	interface Templates extends SafeHtmlTemplates {
-		@SafeHtmlTemplates.Template("<div class=\"{0}\"><div class=\"{1}\" style=\"width: calc(100% - 9px); height:14px\">{3}<a href=\"#\" class=\"{2}\" style=\"height: 22px;\"></a></div></div>")
+		@SafeHtmlTemplates.Template("<div class=\"{0}\" qtip=\"{4}\">" +
+				"<div class=\"{1}\" style=\"width: calc(100% - 9px); height:14px\">{3}" +
+				"<a href=\"#\" class=\"{2}\" style=\"height: 22px;\"></a>" +
+				"</div>" +
+				"</div>")
 		SafeHtml cell(String grandParentStyleClass, String parentStyleClass,
-				String aStyleClass, String value);
+				String aStyleClass, String value, String quickTipText);
 	}
 
 	protected static Templates templates = GWT.create(Templates.class);
@@ -78,9 +86,17 @@ public class MenuExtendedCell<C> extends AbstractCell<C> {
 	public void render(Context context,	C value, SafeHtmlBuilder sb) {
 		if (value == null)
 			return;
-
+		Taxon taxon = taxonMatrixView.getTaxon(context.getIndex());
+		String quickTipText = taxon.getName();
+		
+		Character character = taxonMatrixView.getCharacter(context.getColumn());
+		if(character != null) {
+			Value characterValue = taxon.get(character);
+			quickTipText = character.getName() + " of " + taxon.getName() + " is " + characterValue.getValue(); 
+		}
+		
 		SafeHtml rendered = templates.cell("", columnHeaderStyles.headInner(),
-				columnHeaderStyles.headButton(), value.toString());
+				columnHeaderStyles.headButton(), value.toString(), quickTipText);
 		sb.append(rendered);
 	}
 

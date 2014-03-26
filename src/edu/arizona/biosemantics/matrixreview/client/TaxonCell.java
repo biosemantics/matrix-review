@@ -23,15 +23,14 @@ public class TaxonCell extends MenuExtendedCell<Taxon> {
 	private MyGrid grid;
 
 	interface Templates extends SafeHtmlTemplates {
-		@SafeHtmlTemplates.Template("<div class=\"{0}\">" +
+		@SafeHtmlTemplates.Template("<div class=\"{0}\" qtitle=\"Summary\" qtip=\"{5}\">" +
 				"<div class=\"{1}\" style=\"width: calc(100% - 9px); height:14px\">{3}" +
-				//"<span>{4}</span>" +
 				"<span style=\"position:absolute;right:0px;background-color:#b0e0e6;width:35px;\">{4}</span>" + 
 				"<a href=\"#\" class=\"{2}\" style=\"height: 22px;\"></a>" +
 				"</div>" +
 				"</div>")
 		SafeHtml cell(String grandParentStyleClass, String parentStyleClass,
-				String aStyleClass, String value, String coverage);
+				String aStyleClass, String value, String coverage, String quickTipText);
 	}
 	
 	protected static Templates templates = GWT.create(Templates.class);
@@ -48,7 +47,7 @@ public class TaxonCell extends MenuExtendedCell<Taxon> {
 			return;
 		SafeHtml rendered = templates.cell(columnHeaderStyles.header() + " "
 				+ columnHeaderStyles.head(), columnHeaderStyles.headInner(),
-				columnHeaderStyles.headButton(), value.getName(), taxonMatrixView.getCoverage(value));
+				columnHeaderStyles.headButton(), value.getName(), taxonMatrixView.getCoverage(value), taxonMatrixView.getSummary(value));
 		sb.append(rendered);
 	}
 
