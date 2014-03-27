@@ -283,9 +283,9 @@ public class TaxonMatrixView implements IsWidget {
 	}	
 	
 	public void removeCharacter(int i) {
-		taxonMatrix.removeCharacter(i);
+		taxonMatrix.removeCharacter(i - 1);
 		List<ColumnConfig<Taxon, ?>> columns = new ArrayList<ColumnConfig<Taxon, ?>>(grid.getColumnModel().getColumns());
-		ColumnConfig columnConfig = columns.remove(i + 1);
+		ColumnConfig columnConfig = columns.remove(i + this.taxonNameColumn);
 		ColumnModel<Taxon> cm = new ColumnModel<Taxon>(columns);
 		this.disableEditing(columnConfig);
 		this.columnControlMap.remove(columnConfig);
@@ -316,9 +316,9 @@ public class TaxonMatrixView implements IsWidget {
 	}
 
 	public void deleteColumn(int colIndex) {
-		//name is not allowed to be deleted
-		if(colIndex > 0)
-			this.removeCharacter(colIndex - 1);
+		if(colIndex > this.taxonNameColumn) {
+			this.removeCharacter(colIndex - this.taxonNameColumn);
+		}
 	}
 	
 	public void deleteRow(int rowIndex) {
