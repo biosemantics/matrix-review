@@ -48,6 +48,13 @@ public class TaxonMatrix implements Serializable {
 			taxon.addCharacter(character);
 		}
 	}
+	
+	public void addCharacter(int index, Character character) {
+		this.characters.add(index, character);
+		for(Taxon taxon : taxa) {
+			taxon.addCharacter(character);
+		}
+	}
 
 	//TODO, key really ID in order?
 	public String getId(Taxon item) {
@@ -83,6 +90,10 @@ public class TaxonMatrix implements Serializable {
 	}
 	
 	public String getCoverage(Character character) {
+		return this.getCharacterValueCount(character) + "/" + taxa.size();
+	}
+	
+	public int getCharacterValueCount(Character character) {
 		int result = 0;
 		if(characters.contains(character)) {
 			for(Taxon taxon : this.taxa) {
@@ -91,7 +102,7 @@ public class TaxonMatrix implements Serializable {
 				}
 			}
 		}
-		return result + "/" + taxa.size();
+		return result;
 	}
 	
 	private boolean hasValue(Taxon taxon, Character character) {

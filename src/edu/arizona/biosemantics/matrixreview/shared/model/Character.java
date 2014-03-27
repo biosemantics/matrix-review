@@ -4,13 +4,18 @@ import java.io.Serializable;
 
 public class Character implements Serializable {
 
-	private String name;
+	private String name = "";
+	private String organ= "";
 
 	public Character() { }
 	
 	public Character(String name) {
-		super();
 		this.name = name;
+	}
+	
+	public Character(String name, String organ) {
+		this.name = name;
+		this.organ = organ;
 	}
 
 	public String getName() {
@@ -21,6 +26,22 @@ public class Character implements Serializable {
 		this.name = name;
 	}
 	
+	public String getOrgan() {
+		return organ;
+	}
 	
+	public boolean hasOrgan() {
+		return organ != null && !organ.isEmpty();
+	}
+	
+	public void setOrgan(String organ) {
+		this.organ = organ;
+	}
+	
+	public String toString() {
+		if(organ == null || organ.isEmpty())
+			return name;
+		return name + " of " + organ;
+	}
 	
 }

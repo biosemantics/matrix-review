@@ -17,6 +17,7 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.messages.client.DefaultMessages;
 import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
+import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent.CheckChangeHandler;
@@ -52,7 +53,8 @@ public class MyGridView extends GridView<Taxon> {
 			item.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					taxonMatrixView.addCharacter(new Character("ch"));
+					for (int i = 0; i < 10; i++)
+						taxonMatrixView.addCharacter(new Character("ch", "organ"));
 				}
 			});
 			menu.add(item);
@@ -68,11 +70,97 @@ public class MyGridView extends GridView<Taxon> {
 				}
 			});
 			menu.add(item);
+			
+			item = new MenuItem();
+			item.setText("Sort Characters");
+			Menu sortMenu = new Menu();
+			item.setSubMenu(sortMenu);
+			MenuItem coverageSortDesc = new MenuItem("Coverage Desc");
+			sortMenu.add(coverageSortDesc);
+			MenuItem coverageSortAsc = new MenuItem("Coverage Asc");
+			sortMenu.add(coverageSortAsc);
+			MenuItem nameSortDesc = new MenuItem("Character Name Desc");
+			sortMenu.add(nameSortDesc);
+			MenuItem nameSortAsc = new MenuItem("Character Name Asc");
+			sortMenu.add(nameSortAsc);
+			MenuItem organSortDesc = new MenuItem("Character Organ Desc");
+			sortMenu.add(organSortDesc);
+			MenuItem organSortAsc = new MenuItem("Character Organ Asc");
+			sortMenu.add(organSortAsc);
+			
+			coverageSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					taxonMatrixView.sortColumnsByCoverage(true);
+				}
+			});
+			coverageSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					taxonMatrixView.sortColumnsByCoverage(false);
+				}
+			});
+			nameSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					taxonMatrixView.sortColumnsByName(true);
+				}
+			});
+			nameSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					taxonMatrixView.sortColumnsByName(false);
+				}
+			});
+			organSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					taxonMatrixView.sortColumnsByOrgan(true);
+				}
+			});
+			organSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					taxonMatrixView.sortColumnsByOrgan(false);
+				}
+			});
+			menu.add(item);
+			
+			
 			return menu;
 		} else {
 			Menu menu = super.createContextMenu(colIndex);
 
 			MenuItem item = new MenuItem();
+			item.setText("Add");
+			// item.setIcon(header.getAppearance().sortAscendingIcon());
+			item.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					final PromptMessageBox nameBox = new PromptMessageBox(
+							"Character Name", "");
+					nameBox.addHideHandler(new HideHandler() {
+						@Override
+						public void onHide(HideEvent event) {
+							final PromptMessageBox organBox = new PromptMessageBox(
+									"Character Organ", "");
+							organBox.addHideHandler(new HideHandler() {
+								@Override
+								public void onHide(HideEvent event) {
+									String name = nameBox.getValue();
+									String organ = organBox.getValue();
+									taxonMatrixView.addCharacterAfter(colIndex, new Character(name, organ));
+								}
+							});
+							organBox.show();
+						}
+					});
+					nameBox.show();
+				}
+			});
+			menu.add(item);
+			
+			item = new MenuItem();
 			item.setText("Delete");
 			// item.setIcon(header.getAppearance().sortAscendingIcon());
 			item.addSelectionHandler(new SelectionHandler<Item>() {

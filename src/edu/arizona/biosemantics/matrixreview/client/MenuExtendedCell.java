@@ -92,7 +92,7 @@ public class MenuExtendedCell<C> extends AbstractCell<C> {
 		Character character = taxonMatrixView.getCharacter(context.getColumn());
 		if(character != null) {
 			Value characterValue = taxon.get(character);
-			quickTipText = character.getName() + " of " + taxon.getName() + " is " + characterValue.getValue(); 
+			quickTipText = character.toString() + " of " + taxon.getName() + " is " + characterValue.getValue(); 
 		}
 		
 		SafeHtml rendered = templates.cell("", columnHeaderStyles.headInner(),

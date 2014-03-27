@@ -28,8 +28,8 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 	private TaxonMatrix createSampleMatrix() {
 		List<Character> characters = new LinkedList<Character>();
 		Character a = new Character("a");
-		Character b = new Character("b");
-		Character c = new Character("c");
+		Character b = new Character("b", "o");
+		Character c = new Character("c", "o2");
 		characters.add(a);
 		characters.add(b);
 		characters.add(c);

@@ -1,6 +1,8 @@
 package edu.arizona.biosemantics.matrixreview.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -241,6 +243,8 @@ public class TaxonMatrixView implements IsWidget {
 	}
 	
 	public void addCharacter(Character character) {
+		this.addCharacterAfter(grid.getColumnModel().getColumnCount() - 1, character);
+		/*
 		taxonMatrix.addCharacter(character);
 		List<ColumnConfig<Taxon, ?>> columns = new ArrayList<ColumnConfig<Taxon, ?>>(grid.getColumnModel().getColumns());
 		ColumnConfig columnConfig = createCharacterColumnConfig(character);
@@ -248,8 +252,19 @@ public class TaxonMatrixView implements IsWidget {
 		ColumnModel<Taxon> cm = new ColumnModel<Taxon>(columns);
 		this.setControlMode(columnConfig, ControlMode.OFF);
 		this.enableEditing(columnConfig);	
-		grid.reconfigure(grid.getStore(), cm);
+		grid.reconfigure(grid.getStore(), cm);*/
 	}
+	
+	public void addCharacterAfter(int colIndex, Character character) {
+		taxonMatrix.addCharacter(colIndex - this.taxonNameColumn, character);
+		List<ColumnConfig<Taxon, ?>> columns = new ArrayList<ColumnConfig<Taxon, ?>>(grid.getColumnModel().getColumns());
+		ColumnConfig columnConfig = createCharacterColumnConfig(character);
+		columns.add(colIndex + 1, columnConfig);
+		ColumnModel<Taxon> cm = new ColumnModel<Taxon>(columns);
+		this.setControlMode(columnConfig, ControlMode.OFF);
+		this.enableEditing(columnConfig);	
+		grid.reconfigure(grid.getStore(), cm);
+	}	
 	
 	public void removeCharacter(int i) {
 		taxonMatrix.removeCharacter(i);
@@ -599,4 +614,67 @@ public class TaxonMatrixView implements IsWidget {
 		return firstCharacterColumn;
 	}
 
+	public void sortColumns(Comparator<MyColumnConfig> comparator) {
+		int columnCount = grid.getColumnModel().getColumnCount();
+		List<MyColumnConfig> characterColumns = new ArrayList<MyColumnConfig>(columnCount);
+		for(int i=this.firstCharacterColumn; i<columnCount; i++) {
+			ColumnConfig config = grid.getColumnModel().getColumn(i);
+			if(config instanceof MyColumnConfig) 
+				characterColumns.add((MyColumnConfig)config);
+		}
+		Collections.sort(characterColumns, comparator);
+		List<ColumnConfig<Taxon, ?>> columns = new ArrayList<ColumnConfig<Taxon, ?>>(characterColumns);
+		for(int i=this.taxonNameColumn; i>=0; i--) {
+			columns.add(0, grid.getColumnModel().getColumn(i));
+		}
+		ColumnModel<Taxon> cm = new ColumnModel<Taxon>(columns);	
+		grid.reconfigure(grid.getStore(), cm);
+	}
+	
+	public void sortColumnsByCoverage(final boolean ascending) {
+		Comparator<MyColumnConfig> comparator = new Comparator<MyColumnConfig>() {
+			@Override
+			public int compare(MyColumnConfig o1, MyColumnConfig o2) {
+				if(ascending)
+					return taxonMatrix.getCharacterValueCount(o1.getCharacter()) - taxonMatrix.getCharacterValueCount(o2.getCharacter());
+				else
+					return taxonMatrix.getCharacterValueCount(o2.getCharacter()) - taxonMatrix.getCharacterValueCount(o1.getCharacter());
+			}
+		};
+		this.sortColumns(comparator);
+	}
+	
+	public void sortColumnsByName(final boolean ascending) {
+		Comparator<MyColumnConfig> comparator = new Comparator<MyColumnConfig>() {
+			@Override
+			public int compare(MyColumnConfig o1, MyColumnConfig o2) {
+				if(ascending)
+					//first by name then by organ
+					return (o1.getCharacter().getName() + o1.getCharacter().getOrgan()).compareTo(
+							o2.getCharacter().getName() + o2.getCharacter().getOrgan());
+				else
+					return (o2.getCharacter().getName() + o2.getCharacter().getOrgan()).compareTo(
+							o1.getCharacter().getName() + o1.getCharacter().getOrgan());
+			}
+		};
+		this.sortColumns(comparator);
+	}
+	
+	public void sortColumnsByOrgan(final boolean ascending) {
+		Comparator<MyColumnConfig> comparator = new Comparator<MyColumnConfig>() {
+			@Override
+			public int compare(MyColumnConfig o1, MyColumnConfig o2) {
+				if(ascending)
+					//first by organ then by character name
+					return (o1.getCharacter().getOrgan() + o1.getCharacter().getName()).compareTo(
+							o2.getCharacter().getOrgan() + o2.getCharacter().getName());
+				else
+					return (o2.getCharacter().getOrgan() + o2.getCharacter().getName()).compareTo(
+							o1.getCharacter().getOrgan() + o1.getCharacter().getName());
+			}
+		};
+		this.sortColumns(comparator);
+	}
+
+	
 }
