@@ -5,16 +5,20 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.editor.client.Editor;
+import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
+import com.sencha.gxt.cell.core.client.form.MyComboBoxCell;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.data.shared.Converter;
@@ -32,6 +36,8 @@ import com.sencha.gxt.widget.core.client.event.CompleteEditEvent.CompleteEditHan
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.Field;
 import com.sencha.gxt.widget.core.client.form.TextField;
+import com.sencha.gxt.widget.core.client.form.Validator;
+import com.sencha.gxt.widget.core.client.form.error.DefaultEditorError;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnHeader;
 import com.sencha.gxt.widget.core.client.grid.ColumnHeader.Head;
@@ -346,11 +352,11 @@ public class TaxonMatrixView implements IsWidget {
 			editing.addEditor(columnConfig, new TextField());
 			break;
 		case CATEGORICAL:
-			Set<String> values = new HashSet<String>();
+			final Set<String> values = new HashSet<String>();
 			for(Taxon taxon : taxonMatrix.getTaxa()) {
 				values.add((String)columnConfig.getValueProvider().getValue(taxon));
 			}
-			ListStore<String> comboValues = new ListStore<String>(
+			final MyListStore<String> comboValues = new MyListStore<String>(
 					new ModelKeyProvider<String>() {
 						@Override
 						public String getKey(String item) {
@@ -358,14 +364,28 @@ public class TaxonMatrixView implements IsWidget {
 						}
 					});
 			comboValues.addAll(values);
-			ComboBox<String> editComboBox = new ComboBox<String>(comboValues, new LabelProvider<String>() {
+			ComboBox<String> editComboBox = new ComboBox<String>(new MyComboBoxCell<String>(comboValues, new LabelProvider<String>() {
 				@Override
 				public String getLabel(String item) {
 					return item;
 				}
+			}));
+			editComboBox.addValidator(new Validator<String>() {
+				@Override
+				public List<EditorError> validate(Editor<String> editor, String value) {
+					List<EditorError> result = new LinkedList<EditorError>();
+					if(!values.contains(value)) {
+						result.add(new DefaultEditorError(editor, "Value entered not part of the character's vocabulary", value));
+					}
+					return result;
+				}
 			});
+			//editComboBox.setAutoValidate(true);
 			editComboBox.setEditable(true);
 			editComboBox.setTypeAhead(true);
+			//editComboBox.setAllowBlank(false);
+			//editComboBox.setClearValueOnParseError(false);
+			editComboBox.setForceSelection(true);
 			editComboBox.setTriggerAction(TriggerAction.ALL);
 			editing.addEditor(columnConfig, editComboBox);
 			break;

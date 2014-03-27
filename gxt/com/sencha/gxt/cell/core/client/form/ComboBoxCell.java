@@ -164,7 +164,7 @@ public class ComboBoxCell<T> extends TriggerFieldCell<T> implements HasBeforeSel
   private Handler storeHandler = new Handler();
   private boolean ignoreNextEnter;
 
-  private static Logger logger = Logger.getLogger(ComboBoxCell.class.getName());
+  protected static Logger logger = Logger.getLogger(ComboBoxCell.class.getName());
 
   /**
    * Creates a combo box cell that renders all items with the given label provider.
@@ -1351,7 +1351,7 @@ public class ComboBoxCell<T> extends TriggerFieldCell<T> implements HasBeforeSel
     super.triggerBlur(context, parent, value, valueUpdater);
   }
 
-  private String getRenderedValue(T item) {
+  protected String getRenderedValue(T item) {
     return getPropertyEditor().render(item);
   }
 
