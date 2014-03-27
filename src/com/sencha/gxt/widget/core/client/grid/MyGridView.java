@@ -239,21 +239,68 @@ public class MyGridView extends GridView<Taxon> {
 
 			final CheckMenuItem controlItem = new CheckMenuItem("Controlled");
 			controlItem.setChecked(taxonMatrixView.isControlled(colIndex));
-			controlItem.addSelectionHandler(new SelectionHandler<Item>() {
+			final Menu controlSelectMenu = new Menu();			
+			controlItem.setSubMenu(controlSelectMenu);
+			final CheckMenuItem off = new CheckMenuItem("Off");
+			off.setGroup("Controlled");
+			controlSelectMenu.add(off);
+			final CheckMenuItem automatic = new CheckMenuItem("Automatic");
+			automatic.setGroup("Controlled");
+			controlSelectMenu.add(automatic);
+			final CheckMenuItem numerical = new CheckMenuItem("Numerical");
+			numerical.setGroup("Controlled");
+			controlSelectMenu.add(numerical);
+			final CheckMenuItem categorical = new CheckMenuItem("Categorical");
+			categorical.setGroup("Controlled");
+			controlSelectMenu.add(categorical);
+			off.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					boolean activate = !taxonMatrixView.isControlled(colIndex);
-					if (activate) {
-						ControlMode controlMode = taxonMatrixView
-								.determineControlMode(colIndex);
-						taxonMatrixView.setControlMode(colIndex, controlMode);
-					} else {
-						taxonMatrixView.setControlMode(colIndex,
-								ControlMode.OFF);
+					if(!taxonMatrixView.getControlMode(colIndex).equals(ControlMode.OFF)) {
+						taxonMatrixView.setControlMode(colIndex, ControlMode.OFF);
+						controlItem.setChecked(false);
 					}
-					controlItem.setChecked(activate);
 				}
 			});
+			automatic.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					ControlMode controlMode = taxonMatrixView.determineControlMode(colIndex);
+					taxonMatrixView.setControlMode(colIndex, controlMode);
+					controlItem.setChecked(true);
+					switch(controlMode) {
+						case CATEGORICAL:
+							categorical.setChecked(true);
+							break;
+						case NUMERICAL:
+							numerical.setChecked(true);
+							break;
+						}
+				}
+			});
+			numerical.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					if(!taxonMatrixView.getControlMode(colIndex).equals(ControlMode.NUMERICAL)) {
+						taxonMatrixView.setControlMode(colIndex, ControlMode.NUMERICAL);
+						controlItem.setChecked(true);
+						numerical.setChecked(true);
+						categorical.setChecked(false);
+					}
+				}
+			});
+			categorical.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					if(!taxonMatrixView.getControlMode(colIndex).equals(ControlMode.CATEGORICAL)) {
+						taxonMatrixView.setControlMode(colIndex, ControlMode.CATEGORICAL);
+						controlItem.setChecked(true);
+						numerical.setChecked(false);
+						categorical.setChecked(true);
+					}
+				}
+			});
+			
 			menu.add(controlItem);
 
 			item = new MenuItem("Move after");
