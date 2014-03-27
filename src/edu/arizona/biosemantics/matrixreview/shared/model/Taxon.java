@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
-public class Taxon implements Serializable {
+public class Taxon implements Serializable, Comparable<Taxon> {
 
 	public String name;
 	private String description = "";
@@ -76,6 +76,11 @@ public class Taxon implements Serializable {
 
 	public String toString() {
 		return name + ": " + values.toString();
+	}
+
+	@Override
+	public int compareTo(Taxon o) {
+		return this.getName().compareTo(o.getName());
 	}
 	
 }
