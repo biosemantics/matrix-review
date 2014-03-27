@@ -13,12 +13,18 @@ import java.util.Set;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.EditorError;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
 import com.sencha.gxt.cell.core.client.form.MyComboBoxCell;
+import com.sencha.gxt.cell.core.client.form.MyValidator;
+import com.sencha.gxt.cell.core.client.form.TextFieldChangeHandler;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.data.shared.Converter;
@@ -31,6 +37,8 @@ import com.sencha.gxt.dnd.core.client.MyGridDragSource;
 import com.sencha.gxt.dnd.core.client.MyGridDropTarget;
 import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
+import com.sencha.gxt.widget.core.client.event.BeforeShowEvent;
+import com.sencha.gxt.widget.core.client.event.BeforeShowEvent.BeforeShowHandler;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent.CompleteEditHandler;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
@@ -349,7 +357,28 @@ public class TaxonMatrixView implements IsWidget {
 			break;
 		case NUMERICAL:
 			//TODO add validation to only allow numerical values from there on
-			editing.addEditor(columnConfig, new TextField());
+			final TextField textField = new TextField();
+			textField.setAllowBlank(false);
+			textField.addValidator(new Validator<String>() {
+				@Override
+				public List<EditorError> validate(Editor<String> editor, String value) {
+					List<EditorError> result = new LinkedList<EditorError>();
+					if(value == null || !value.matches("[0-9]*")) {
+						result.add(new DefaultEditorError(editor, "Value not numeric", value));
+					}
+					return result;
+				}
+			});
+			MyValidator numericalsValidator = new MyValidator() {
+				@Override
+				public boolean isValid(String value) {
+					return value != null && value.matches("[0-9]*");
+				}
+			};
+			TextFieldChangeHandler changeHandler = new TextFieldChangeHandler(numericalsValidator);
+			textField.addValueChangeHandler(changeHandler);
+			textField.addBeforeShowHandler(changeHandler);
+			editing.addEditor(columnConfig, textField);
 			break;
 		case CATEGORICAL:
 			final Set<String> values = new HashSet<String>();
