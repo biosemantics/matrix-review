@@ -116,7 +116,7 @@ public class TaxonMatrix implements Serializable {
 	}
 	
 	public String toString() {
-		return characters.toString() + " \n\n " + taxa.toString();
+		return characters.toString() + " \n " + taxa.toString() + "\n";
 	}
 	
 }

@@ -10,17 +10,14 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
+import com.sencha.gxt.data.shared.Converter;
 import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
@@ -86,7 +83,6 @@ public class TaxonMatrixView implements IsWidget {
 			return taxonMatrix.getId(item);
 		}
 	}
-
 	
 	public void init(final TaxonMatrix taxonMatrix) {
 		this.taxonMatrix = taxonMatrix;
@@ -117,9 +113,22 @@ public class TaxonMatrixView implements IsWidget {
 		
 		//set up editing
 		editing = new MyGridInlineEditing<Taxon>(grid, store);
-		for (int i = taxonNameColumn; i<columnConfigs.size(); i++) {
+		ColumnConfig columnConfig = columnConfigs.get(this.taxonNameColumn);
+		setControlMode(columnConfig, ControlMode.OFF);
+		editing.addEditor(columnConfig, new Converter<Taxon, String>() {
+			@Override
+			public Taxon convertFieldValue(String object) {
+				return new Taxon(object);
+			}
+			@Override
+			public String convertModelValue(Taxon object) {
+				return object.getName();
+			}
+		}, new TextField());
+		
+		for (int i = firstCharacterColumn; i<columnConfigs.size(); i++) {
 			final int theI = i;
-			ColumnConfig columnConfig = columnConfigs.get(i);
+			columnConfig = columnConfigs.get(i);
 			this.setControlMode(columnConfig, ControlMode.OFF);
 			this.enableEditing(columnConfig);
 			if(columnConfig instanceof MyColumnConfig) {
@@ -134,6 +143,7 @@ public class TaxonMatrixView implements IsWidget {
 				});
 			}
 		}
+		
 		for(Taxon taxon : taxonMatrix.getTaxa())
 			editing.addEditor(taxon);
 		
@@ -144,7 +154,7 @@ public class TaxonMatrixView implements IsWidget {
 		TaxonNameFilter taxonNameFilter = new TaxonNameFilter(new TaxonNameValueProvider());
 		filters.addFilter(taxonNameFilter);
 		for (int i = this.firstCharacterColumn; i<columnConfigs.size(); i++) {
-			ColumnConfig columnConfig = columnConfigs.get(i);
+			columnConfig = columnConfigs.get(i);
 			StringFilter<Taxon> characterStateFilter = new StringFilter<Taxon>(columnConfig.getValueProvider());
 			filters.addFilter(characterStateFilter);
 		}
@@ -227,7 +237,7 @@ public class TaxonMatrixView implements IsWidget {
 	}
 	
 	public void addTaxon(Taxon taxon) {
-		this.addTaxonAfter(grid.getStore().size(), taxon);
+		this.addTaxonAfter(grid.getStore().size() - 1, taxon);
 	}
 
 	public void addTaxonAfter(int rowIndex, Taxon taxon) {
@@ -567,7 +577,7 @@ public class TaxonMatrixView implements IsWidget {
 		return taxonMatrix.getCoverage(character);
 	}
 	
-	private void refreshColumnHeader(int column) {
+	public void refreshColumnHeader(int column) {
 		ColumnConfig<Taxon, ?> config = grid.getColumnModel().getColumn(column);
 		if(config instanceof MyColumnConfig) {
 			MyColumnConfig myColumnConfig = (MyColumnConfig)config;
@@ -577,6 +587,7 @@ public class TaxonMatrixView implements IsWidget {
 					Head h = header.getHead(column);
 					if (h != null && h.isRendered() && h instanceof MyHead) {
 						MyHead myHead = (MyHead)h;
+						myHead.setText(myColumnConfig.getCharacter().toString());
 						myHead.setCoverage(TaxonMatrixView.this.getCoverage(myColumnConfig.getCharacter()));
 						myHead.setQuickTipText(TaxonMatrixView.this.getSummary(myColumnConfig.getCharacter()));
 					}
@@ -682,6 +693,11 @@ public class TaxonMatrixView implements IsWidget {
 		this.sortColumns(comparator);
 	}
 
-
+	public void renameCharacter(int colIndex, String name, String organ) {
+		final Character character = getCharacter(colIndex);
+		character.setName(name);
+		character.setOrgan(organ);
+		refreshColumnHeader(colIndex);
+	}
 	
 }

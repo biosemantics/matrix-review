@@ -53,7 +53,7 @@ public class MyGridView extends GridView<Taxon> {
 			item.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					for (int i = 0; i < 10; i++)
+					//for (int i = 0; i < 10; i++)
 						taxonMatrixView.addCharacter(new Character("ch", "organ"));
 				}
 			});
@@ -65,7 +65,7 @@ public class MyGridView extends GridView<Taxon> {
 			item.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					for (int i = 0; i < 10; i++)
+					//for (int i = 0; i < 10; i++)
 						taxonMatrixView.addTaxon(new Taxon("tax"));
 				}
 			});
@@ -150,6 +150,37 @@ public class MyGridView extends GridView<Taxon> {
 									String name = nameBox.getValue();
 									String organ = organBox.getValue();
 									taxonMatrixView.addCharacterAfter(colIndex, new Character(name, organ));
+								}
+							});
+							organBox.show();
+						}
+					});
+					nameBox.show();
+				}
+			});
+			menu.add(item);
+			
+			item = new MenuItem();
+			item.setText("Rename");
+			item.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					final Character character = taxonMatrixView.getCharacter(colIndex);
+					final PromptMessageBox nameBox = new PromptMessageBox(
+							"Character Name", "");
+					nameBox.setValue(character.getName());
+					nameBox.addHideHandler(new HideHandler() {
+						@Override
+						public void onHide(HideEvent event) {
+							final PromptMessageBox organBox = new PromptMessageBox(
+									"Character Organ", "");
+							organBox.setValue(character.getOrgan());
+							organBox.addHideHandler(new HideHandler() {
+								@Override
+								public void onHide(HideEvent event) {
+									String name = nameBox.getValue();
+									String organ = organBox.getValue();
+									taxonMatrixView.renameCharacter(colIndex, name, organ);
 								}
 							});
 							organBox.show();

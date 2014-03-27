@@ -107,6 +107,10 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 		public void setQuickTipText(String text) {
 			getElement().setAttribute("qtip", text);
 		}
+		
+		public void setText(String text) {
+			this.text.setText(text);
+		}
 	}
 
 	protected class MyReorderDragHandler implements DragHandler {
