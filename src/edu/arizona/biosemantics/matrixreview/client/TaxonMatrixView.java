@@ -363,7 +363,9 @@ public class TaxonMatrixView implements IsWidget {
 							return item;
 						}
 					});
-			comboValues.addAll(values);
+			List<String> sortValues = new ArrayList<String>(values);
+			Collections.sort(sortValues);
+			comboValues.addAll(sortValues);
 			ComboBox<String> editComboBox = new ComboBox<String>(new MyComboBoxCell<String>(comboValues, new LabelProvider<String>() {
 				@Override
 				public String getLabel(String item) {
