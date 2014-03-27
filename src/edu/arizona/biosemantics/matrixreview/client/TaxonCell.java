@@ -8,14 +8,18 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Component;
+import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent;
+import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent.CheckChangeHandler;
+import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.grid.MyGrid;
 import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
+import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 
 public class TaxonCell extends MenuExtendedCell<Taxon> {
@@ -82,6 +86,26 @@ public class TaxonCell extends MenuExtendedCell<Taxon> {
 		final Menu menu = new Menu();
 		
 		MenuItem item = new MenuItem();
+		item.setText("Add");
+		// item.setIcon(header.getAppearance().sortAscendingIcon());
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				final PromptMessageBox nameBox = new PromptMessageBox(
+						"Taxon Name", "");
+				nameBox.addHideHandler(new HideHandler() {
+					@Override
+					public void onHide(HideEvent event) {
+						String name = nameBox.getValue();
+						taxonMatrixView.addTaxonAfter(rowIndex, new Taxon(name));
+					}
+				});
+				nameBox.show();
+			}
+		});
+		menu.add(item);
+		
+		item = new MenuItem();
 		item.setText("Delete");
 		// item.setIcon(header.getAppearance().sortAscendingIcon());
 		item.addSelectionHandler(new SelectionHandler<Item>() {

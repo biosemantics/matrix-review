@@ -227,11 +227,16 @@ public class TaxonMatrixView implements IsWidget {
 	}
 	
 	public void addTaxon(Taxon taxon) {
-		this.taxonMatrix.addTaxon(taxon);
-		grid.getStore().add(taxon);
+		this.addTaxonAfter(grid.getStore().size(), taxon);
+	}
+
+	public void addTaxonAfter(int rowIndex, Taxon taxon) {
+		this.taxonMatrix.addTaxon(rowIndex + 1, taxon);
+		grid.getStore().add(rowIndex + 1, taxon);
 		editing.addEditor(taxon);
 		this.rowConfigs.put(taxon, new RowConfig<Taxon>(taxon));
 		refreshColumnHeaders();
+		System.out.println(taxonMatrix);
 	}
 
 	public void removeTaxon(Taxon taxon) {
@@ -264,6 +269,7 @@ public class TaxonMatrixView implements IsWidget {
 		this.setControlMode(columnConfig, ControlMode.OFF);
 		this.enableEditing(columnConfig);	
 		grid.reconfigure(grid.getStore(), cm);
+		System.out.println(taxonMatrix);
 	}	
 	
 	public void removeCharacter(int i) {
@@ -675,6 +681,7 @@ public class TaxonMatrixView implements IsWidget {
 		};
 		this.sortColumns(comparator);
 	}
+
 
 	
 }

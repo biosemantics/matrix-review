@@ -42,6 +42,11 @@ public class TaxonMatrix implements Serializable {
 		taxa.add(taxon);
 	}
 	
+	public void addTaxon(int index, Taxon taxon) {
+		taxon.init(characters);
+		taxa.add(index, taxon);
+	}
+	
 	public void addCharacter(Character character) {
 		this.characters.add(character);
 		for(Taxon taxon : taxa) {
@@ -110,16 +115,8 @@ public class TaxonMatrix implements Serializable {
 		return value != null && value.getValue() != null && !value.getValue().trim().isEmpty();
 	}
 	
-	/*public Value getCharacterValue(Character character, Taxon taxon) {
-		if(!taxa.contains(taxon)) {
-			throw new IllegalArgumentException("Taxon is not contained in the matrix");
-		}
-		if(!characters.contains(character)) {
-			throw new IllegalArgumentException("Character is not contained in the matrix");
-		}
-		return 
-		
-		return values.get(taxon).get(character);
-	}*/
+	public String toString() {
+		return characters.toString() + " \n\n " + taxa.toString();
+	}
 	
 }

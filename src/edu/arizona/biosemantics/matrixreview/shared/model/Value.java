@@ -21,6 +21,10 @@ public class Value implements Serializable {
 		this.value = value;
 	}
 	
+	public String toString() {
+		return value;
+	}
+	
 	
 	
 }

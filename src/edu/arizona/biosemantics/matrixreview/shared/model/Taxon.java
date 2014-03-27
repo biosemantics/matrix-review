@@ -74,4 +74,8 @@ public class Taxon implements Serializable {
 		this.description = description;
 	}
 
+	public String toString() {
+		return name + ": " + values.toString();
+	}
+	
 }
