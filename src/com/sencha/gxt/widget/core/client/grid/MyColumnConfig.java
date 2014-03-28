@@ -3,6 +3,7 @@ package com.sencha.gxt.widget.core.client.grid;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.sencha.gxt.core.client.ValueProvider;
+import com.sencha.gxt.widget.core.client.grid.filters.Filter;
 
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
@@ -10,6 +11,7 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
 public class MyColumnConfig extends ColumnConfig<Taxon, String> {
 
+	private Filter<Taxon, ?> filter;
 	private Character character;
 	
 	public static class CharacterValueProvider implements ValueProvider<Taxon, String> {
@@ -52,5 +54,12 @@ public class MyColumnConfig extends ColumnConfig<Taxon, String> {
 		return character;
 	}
 
+	public Filter<Taxon, ?> getFilter() {
+		return filter;
+	}
+
+	public void setFilter(Filter<Taxon, ?> filter) {
+		this.filter = filter;
+	}
 	
 }

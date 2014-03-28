@@ -26,6 +26,7 @@ import com.sencha.gxt.cell.core.client.form.MyComboBoxCell;
 import com.sencha.gxt.cell.core.client.form.MyValidator;
 import com.sencha.gxt.cell.core.client.form.TextFieldChangeHandler;
 import com.sencha.gxt.core.client.IdentityValueProvider;
+import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.data.shared.Converter;
 import com.sencha.gxt.data.shared.LabelProvider;
@@ -43,6 +44,7 @@ import com.sencha.gxt.widget.core.client.event.CompleteEditEvent;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent.CompleteEditHandler;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.Field;
+import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.form.Validator;
 import com.sencha.gxt.widget.core.client.form.error.DefaultEditorError;
@@ -58,9 +60,12 @@ import com.sencha.gxt.widget.core.client.grid.RowExpander;
 import com.sencha.gxt.widget.core.client.grid.editing.MyGridInlineEditing;
 import com.sencha.gxt.widget.core.client.grid.filters.GridFilters;
 import com.sencha.gxt.widget.core.client.grid.filters.HideTaxonFilter;
+import com.sencha.gxt.widget.core.client.grid.filters.ListFilter;
+import com.sencha.gxt.widget.core.client.grid.filters.NumericFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.TaxonNameFilter;
 import com.sencha.gxt.widget.core.client.tips.QuickTip;
+import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor.DoublePropertyEditor;
 
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
@@ -83,6 +88,7 @@ public class TaxonMatrixView implements IsWidget {
 	private RowExpander<Taxon> expander;
 	private HideTaxonFilter hideTaxonFilter = new HideTaxonFilter();
 	private QuickTip quickTip;
+	private GridFilters<Taxon> filters;
 	
 	private int taxonNameColumn = 1;
 	private int firstCharacterColumn = 2;
@@ -160,16 +166,17 @@ public class TaxonMatrixView implements IsWidget {
 		
 		for(Taxon taxon : taxonMatrix.getTaxa())
 			editing.addEditor(taxon);
-		
+				
 		// set up filtering (tied to the store internally, so has to be done after grid is reconfigured with new store object)
-		GridFilters<Taxon> filters = new GridFilters<Taxon>();
+		filters = new GridFilters<Taxon>();
 		filters.setLocal(true);
 		//StringFilter<Taxon> taxonNameFilter = new StringFilter<Taxon>(new TaxonNameValueProvider());
 		TaxonNameFilter taxonNameFilter = new TaxonNameFilter(new TaxonNameValueProvider());
 		filters.addFilter(taxonNameFilter);
 		for (int i = this.firstCharacterColumn; i<columnConfigs.size(); i++) {
-			columnConfig = columnConfigs.get(i);
-			StringFilter<Taxon> characterStateFilter = new StringFilter<Taxon>(columnConfig.getValueProvider());
+			MyColumnConfig config = (MyColumnConfig)columnConfigs.get(i);
+			StringFilter<Taxon> characterStateFilter = new StringFilter<Taxon>(config.getValueProvider());
+			config.setFilter(characterStateFilter);
 			filters.addFilter(characterStateFilter);
 		}
 		filters.initPlugin(grid);
@@ -468,6 +475,54 @@ public class TaxonMatrixView implements IsWidget {
 	public void setControlMode(int colIndex, ControlMode controlMode) {
 		List<ColumnConfig<Taxon, ?>> columns = new ArrayList<ColumnConfig<Taxon, ?>>(grid.getColumnModel().getColumns());
 		ColumnConfig columnConfig = columns.remove(colIndex);
+		final MyColumnConfig myColumnConfig = (MyColumnConfig)columnConfig;
+		
+		// setup controlled filtering
+		switch(controlMode) {
+		case CATEGORICAL:
+			final Set<String> values = new HashSet<String>();
+			for(Taxon taxon : taxonMatrix.getTaxa()) {
+				values.add((String)columnConfig.getValueProvider().getValue(taxon));
+			}
+			final MyListStore<String> valueStore = new MyListStore<String>(
+					new ModelKeyProvider<String>() {
+						@Override
+						public String getKey(String item) {
+							return item;
+						}
+					});
+			List<String> sortValues = new ArrayList<String>(values);
+			Collections.sort(sortValues);
+			valueStore.addAll(sortValues);
+			filters.removeFilter(myColumnConfig.getFilter());
+			ListFilter<Taxon, String> listFilter = new ListFilter<Taxon, String>(columnConfig.getValueProvider(), valueStore);
+			filters.addFilter(listFilter);
+			break;
+		case NUMERICAL:
+			filters.removeFilter(myColumnConfig.getFilter());
+			NumericFilter<Taxon, Double> lastFilter = new NumericFilter<Taxon, Double>(new ValueProvider<Taxon, Double>() {
+				@Override
+				public Double getValue(Taxon object) {
+					return Double.valueOf(object.get(myColumnConfig.getCharacter()).getValue());
+				}
+				@Override
+				public void setValue(Taxon object, Double value) {
+					object.get(myColumnConfig.getCharacter()).setValue(String.valueOf(value));
+				}
+				@Override
+				public String getPath() {
+					return "/" + myColumnConfig.getCharacter().toString() + "/value";
+				}
+				}, new DoublePropertyEditor());
+			filters.addFilter(lastFilter);
+			break;
+		case OFF:
+			filters.removeFilter(myColumnConfig.getFilter());
+			StringFilter<Taxon> stringFilter = new StringFilter<Taxon>(columnConfig.getValueProvider());
+			filters.addFilter(stringFilter);
+			break;
+		}
+		
 		this.setControlMode(columnConfig, controlMode);
 	}
 	
