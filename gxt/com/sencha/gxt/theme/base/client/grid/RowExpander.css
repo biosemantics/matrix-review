@@ -8,7 +8,7 @@
 @eval rowExpand com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/row-expand-sprite.gif");
 
 .hasExpander .grid-cell, .hasExpander .grid-cellInner {
-  background: none repeat scroll 0 0 transparent;
+  /* background: none repeat scroll 0 0 transparent; this is responsible for now showing the dirty cells when using expander*/
   border-width: 0;
 }
 

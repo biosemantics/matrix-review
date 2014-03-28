@@ -111,7 +111,9 @@ public class TaxonMatrixView implements IsWidget {
 		this.taxonMatrix = taxonMatrix;
 		this.store = new MyListStore<Taxon>(new TaxonModelKeyProvider());
 		store.addFilter(this.hideTaxonFilter);
-		//yes or no? store.setAutoCommit(false);
+		//yes or no? store.setAutoCommit(false); // this also has influence on the dirty icon that comes out of the box; true wont show?
+		//also one may not directly use the model to calculate view related things, such as coverage, because it is not yet represented in model
+		//if autocommit is set to false
 		store.setAutoCommit(true);
 		
 		for (Taxon taxon : taxonMatrix.getTaxa()) {

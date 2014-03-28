@@ -138,8 +138,8 @@ public abstract class Store<M> implements HasStoreHandlers<M> {
    */
   public class Record {
 
-    private final M model;
-    private final Map<Object, Change<M, ?>> changes = new HashMap<Object, Store.Change<M, ?>>();
+    protected final M model;
+    protected final Map<Object, Change<M, ?>> changes = new HashMap<Object, Store.Change<M, ?>>();
 
     /**
      * Creates a new record that wraps the given model.
@@ -430,8 +430,8 @@ public abstract class Store<M> implements HasStoreHandlers<M> {
   }
 
   // TODO lazily init these?
-  private final Map<String, Record> records = new FastMap<Record>();
-  private Set<Record> modifiedRecords = new HashSet<Record>();
+  protected final Map<String, Record> records = new FastMap<Record>();
+  protected Set<Record> modifiedRecords = new HashSet<Record>();
   private boolean isAutoCommit = false;
   private ModelKeyProvider<? super M> keyProvider;
   private List<StoreSortInfo<M>> comparators = new ArrayList<StoreSortInfo<M>>();
