@@ -237,15 +237,11 @@ public class MyGridView extends GridView<Taxon> {
 			});
 			menu.add(lockItem);
 
-			final CheckMenuItem controlItem = new CheckMenuItem("Controlled");
-			controlItem.setChecked(taxonMatrixView.isControlled(colIndex));
+			final MenuItem controlItem = new MenuItem("Controlled");
 			final Menu controlSelectMenu = new Menu();			
 			controlItem.setSubMenu(controlSelectMenu);
-			final CheckMenuItem off = new CheckMenuItem("Off");
-			off.setGroup("Controlled");
-			controlSelectMenu.add(off);
-			final CheckMenuItem automatic = new CheckMenuItem("Automatic");
-			automatic.setGroup("Controlled");
+			final MenuItem automatic = new MenuItem("Automatic");
+			//automatic.setGroup("Controlled");
 			controlSelectMenu.add(automatic);
 			final CheckMenuItem numerical = new CheckMenuItem("Numerical");
 			numerical.setGroup("Controlled");
@@ -253,12 +249,14 @@ public class MyGridView extends GridView<Taxon> {
 			final CheckMenuItem categorical = new CheckMenuItem("Categorical");
 			categorical.setGroup("Controlled");
 			controlSelectMenu.add(categorical);
+			final CheckMenuItem off = new CheckMenuItem("Off");
+			off.setGroup("Controlled");
+			controlSelectMenu.add(off);
 			off.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
 					if(!taxonMatrixView.getControlMode(colIndex).equals(ControlMode.OFF)) {
 						taxonMatrixView.setControlMode(colIndex, ControlMode.OFF);
-						controlItem.setChecked(false);
 					}
 				}
 			});
@@ -267,15 +265,6 @@ public class MyGridView extends GridView<Taxon> {
 				public void onSelection(SelectionEvent<Item> event) {
 					ControlMode controlMode = taxonMatrixView.determineControlMode(colIndex);
 					taxonMatrixView.setControlMode(colIndex, controlMode);
-					controlItem.setChecked(true);
-					switch(controlMode) {
-						case CATEGORICAL:
-							categorical.setChecked(true);
-							break;
-						case NUMERICAL:
-							numerical.setChecked(true);
-							break;
-						}
 				}
 			});
 			numerical.addSelectionHandler(new SelectionHandler<Item>() {
@@ -283,9 +272,6 @@ public class MyGridView extends GridView<Taxon> {
 				public void onSelection(SelectionEvent<Item> event) {
 					if(!taxonMatrixView.getControlMode(colIndex).equals(ControlMode.NUMERICAL)) {
 						taxonMatrixView.setControlMode(colIndex, ControlMode.NUMERICAL);
-						controlItem.setChecked(true);
-						numerical.setChecked(true);
-						categorical.setChecked(false);
 					}
 				}
 			});
@@ -294,14 +280,21 @@ public class MyGridView extends GridView<Taxon> {
 				public void onSelection(SelectionEvent<Item> event) {
 					if(!taxonMatrixView.getControlMode(colIndex).equals(ControlMode.CATEGORICAL)) {
 						taxonMatrixView.setControlMode(colIndex, ControlMode.CATEGORICAL);
-						controlItem.setChecked(true);
-						numerical.setChecked(false);
-						categorical.setChecked(true);
 					}
 				}
 			});
-			
 			menu.add(controlItem);
+			switch(taxonMatrixView.getControlMode(colIndex)) {
+			case CATEGORICAL:
+				categorical.setChecked(true);
+				break;
+			case NUMERICAL:
+				numerical.setChecked(true);
+				break;
+			case OFF:
+				off.setChecked(true);
+				break;
+			}
 
 			item = new MenuItem("Move after");
 			menu.add(item);

@@ -537,6 +537,8 @@ public class TaxonMatrixView implements IsWidget {
 		}
 		if(isNumeric(values))
 			return ControlMode.NUMERICAL;
+		if(values.isEmpty())
+			return ControlMode.OFF;
 		return ControlMode.CATEGORICAL;
 	}
 
