@@ -47,13 +47,41 @@ public class MyGridView extends GridView<Taxon> {
 	protected Menu createContextMenu(final int colIndex) {
 		if(colIndex == taxonMatrixView.getTaxonNameColumn()) {
 			final Menu menu = new Menu();
+			
+			MenuItem editMode = new MenuItem("Edit");
+			Menu editMenu = new Menu();
+			editMode.setSubMenu(editMenu);
+			CheckMenuItem enable = new CheckMenuItem("Enable");
+			enable.setGroup("editMode");
+			CheckMenuItem disable = new CheckMenuItem("Disable");
+			disable.setGroup("editMode");
+			enable.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					taxonMatrixView.enableEditing(true);
+				}
+			});
+			disable.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					taxonMatrixView.enableEditing(false);
+				}
+			});
+			if(taxonMatrixView.isEditableAll())
+				enable.setChecked(true);
+			if(taxonMatrixView.isNotEditableAll())
+				disable.setChecked(true);
+			editMenu.add(enable);
+			editMenu.add(disable);
+			menu.add(editMode);
+			
 			MenuItem item = new MenuItem();
 			item.setText("Add Character");
 			// item.setIcon(header.getAppearance().sortAscendingIcon());
 			item.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					//for (int i = 0; i < 10; i++)
+					for (int i = 0; i < 10; i++)
 						taxonMatrixView.addCharacter(new Character("ch", "organ"));
 				}
 			});
@@ -65,23 +93,61 @@ public class MyGridView extends GridView<Taxon> {
 			item.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					//for (int i = 0; i < 10; i++)
+					for (int i = 0; i < 10; i++)
 						taxonMatrixView.addTaxon(new Taxon("tax"));
 				}
 			});
 			menu.add(item);
 			
 			item = new MenuItem();
-			item.setText("Sort Characters");
+			item.setText("Sort Taxa");
 			Menu sortMenu = new Menu();
 			item.setSubMenu(sortMenu);
 			MenuItem coverageSortDesc = new MenuItem("Coverage Desc");
 			sortMenu.add(coverageSortDesc);
 			MenuItem coverageSortAsc = new MenuItem("Coverage Asc");
 			sortMenu.add(coverageSortAsc);
-			MenuItem nameSortDesc = new MenuItem("Character Name Desc");
+			MenuItem nameSortDesc = new MenuItem("Taxon Name Desc");
 			sortMenu.add(nameSortDesc);
-			MenuItem nameSortAsc = new MenuItem("Character Name Asc");
+			MenuItem nameSortAsc = new MenuItem("Taxon Name Asc");
+			sortMenu.add(nameSortAsc);
+			coverageSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					taxonMatrixView.sortRowsByCoverage(true);
+				}
+			});
+			coverageSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					taxonMatrixView.sortRowsByCoverage(false);
+				}
+			});
+			nameSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					taxonMatrixView.sortRowsByName(true);
+				}
+			});
+			nameSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					taxonMatrixView.sortRowsByName(false);
+				}
+			});
+			menu.add(item);
+			
+			item = new MenuItem();
+			item.setText("Sort Characters");
+			sortMenu = new Menu();
+			item.setSubMenu(sortMenu);
+			coverageSortDesc = new MenuItem("Coverage Desc");
+			sortMenu.add(coverageSortDesc);
+			coverageSortAsc = new MenuItem("Coverage Asc");
+			sortMenu.add(coverageSortAsc);
+			nameSortDesc = new MenuItem("Character Name Desc");
+			sortMenu.add(nameSortDesc);
+			nameSortAsc = new MenuItem("Character Name Asc");
 			sortMenu.add(nameSortAsc);
 			MenuItem organSortDesc = new MenuItem("Character Organ Desc");
 			sortMenu.add(organSortDesc);

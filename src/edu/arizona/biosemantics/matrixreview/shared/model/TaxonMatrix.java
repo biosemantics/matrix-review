@@ -83,6 +83,10 @@ public class TaxonMatrix implements Serializable {
 	}
 		
 	public String getCoverage(Taxon taxon) {
+		return this.getTaxonValueCount(taxon) + "/" + characters.size();
+	}
+	
+	public int getTaxonValueCount(Taxon taxon) {
 		int result = 0;
 		if(taxa.contains(taxon)) {
 			for(Character character : this.characters) {
@@ -91,7 +95,7 @@ public class TaxonMatrix implements Serializable {
 				}
 			}
 		}
-		return result + "/" + characters.size();
+		return result;
 	}
 	
 	public String getCoverage(Character character) {

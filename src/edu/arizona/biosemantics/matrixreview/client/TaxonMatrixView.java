@@ -33,6 +33,8 @@ import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.MyListStore;
+import com.sencha.gxt.data.shared.SortDir;
+import com.sencha.gxt.data.shared.Store.StoreSortInfo;
 import com.sencha.gxt.dnd.core.client.DND.Feedback;
 import com.sencha.gxt.dnd.core.client.MyGridDragSource;
 import com.sencha.gxt.dnd.core.client.MyGridDropTarget;
@@ -55,6 +57,7 @@ import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.MyColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.MyColumnHeader.MyHead;
 import com.sencha.gxt.widget.core.client.grid.MyGrid;
+import com.sencha.gxt.widget.core.client.grid.MyGridView;
 import com.sencha.gxt.widget.core.client.grid.RowConfig;
 import com.sencha.gxt.widget.core.client.grid.RowExpander;
 import com.sencha.gxt.widget.core.client.grid.editing.MyGridInlineEditing;
@@ -79,7 +82,7 @@ public class TaxonMatrixView implements IsWidget {
 	private TaxonMatrix taxonMatrix;
 	private MyListStore<Taxon> store;
 	private MyGrid grid;
-	private Map<RowConfig, Map<ColumnConfig, String>> comments = new HashMap<RowConfig, Map<ColumnConfig, String>>();
+	private Map<RowConfig<Taxon>, Map<ColumnConfig, String>> comments = new HashMap<RowConfig<Taxon>, Map<ColumnConfig, String>>();
 	private Map<Taxon, RowConfig<Taxon>> rowConfigs = new HashMap<Taxon, RowConfig<Taxon>>();
 	private RowConfig<String> headerRowConfig = new RowConfig<String>("header");
 	
@@ -209,8 +212,10 @@ public class TaxonMatrixView implements IsWidget {
 	}
 
 	private MyGrid createGrid() {
+		MyGridView view = new MyGridView(this);
+		view.setShowDirtyCells(true);
 		MyGrid grid = new MyGrid(new ListStore<Taxon>(new TaxonModelKeyProvider()), 
-				new ColumnModel<Taxon>(new ArrayList<ColumnConfig<Taxon, ?>>()), this);
+				new ColumnModel<Taxon>(new ArrayList<ColumnConfig<Taxon, ?>>()), view);
 		grid.getView().setForceFit(false); // if change in column width we want the table to become wider not stay fixed at overall width
 		grid.setColumnReordering(true);
 		
@@ -267,7 +272,6 @@ public class TaxonMatrixView implements IsWidget {
 		editing.addEditor(taxon);
 		this.rowConfigs.put(taxon, new RowConfig<Taxon>(taxon));
 		refreshColumnHeaders();
-		System.out.println(taxonMatrix);
 	}
 
 	public void removeTaxon(Taxon taxon) {
@@ -300,7 +304,6 @@ public class TaxonMatrixView implements IsWidget {
 		this.setControlMode(columnConfig, ControlMode.OFF);
 		this.enableEditing(columnConfig);	
 		grid.reconfigure(grid.getStore(), cm);
-		System.out.println(taxonMatrix);
 	}	
 	
 	public void removeCharacter(int i) {
@@ -503,7 +506,11 @@ public class TaxonMatrixView implements IsWidget {
 			NumericFilter<Taxon, Double> lastFilter = new NumericFilter<Taxon, Double>(new ValueProvider<Taxon, Double>() {
 				@Override
 				public Double getValue(Taxon object) {
-					return Double.valueOf(object.get(myColumnConfig.getCharacter()).getValue());
+					try {
+						return Double.valueOf(object.get(myColumnConfig.getCharacter()).getValue());
+					} catch(NumberFormatException e) {
+						return 0.0;
+					}
 				}
 				@Override
 				public void setValue(Taxon object, Double value) {
@@ -738,6 +745,37 @@ public class TaxonMatrixView implements IsWidget {
 	public int getFirstCharacterColumn() {
 		return firstCharacterColumn;
 	}
+	
+	public void sortRows(Comparator<Taxon> comparator) {
+		store.clearSortInfo();
+		store.addSortInfo(new StoreSortInfo<Taxon>(comparator, SortDir.ASC));
+	}
+	
+	public void sortRowsByCoverage(final boolean ascending) {
+		Comparator<Taxon> comparator = new Comparator<Taxon>() {
+			@Override
+			public int compare(Taxon o1, Taxon o2) {
+				if(ascending)
+					return taxonMatrix.getTaxonValueCount(o1) - taxonMatrix.getTaxonValueCount(o2);
+				else
+					return taxonMatrix.getTaxonValueCount(o2) - taxonMatrix.getTaxonValueCount(o1);
+			}
+		};
+		this.sortRows(comparator);
+	}
+	
+	public void sortRowsByName(final boolean ascending) {
+		Comparator<Taxon> comparator = new Comparator<Taxon>() {
+			@Override
+			public int compare(Taxon o1, Taxon o2) {
+				if(ascending)
+					return o1.getName().compareTo(o2.getName());
+				else
+					return o2.getName().compareTo(o1.getName());
+			}
+		};
+		this.sortRows(comparator);
+	}
 
 	public void sortColumns(Comparator<MyColumnConfig> comparator) {
 		int columnCount = grid.getColumnModel().getColumnCount();
@@ -806,6 +844,59 @@ public class TaxonMatrixView implements IsWidget {
 		character.setName(name);
 		character.setOrgan(organ);
 		refreshColumnHeader(colIndex);
+	}
+
+	public void enableEditing(boolean activate) {
+		List<ColumnConfig<Taxon, ?>> columns = this.grid.getColumnModel().getColumns();
+		if(activate) {
+			for(int i=this.firstCharacterColumn; i<columns.size(); i++) {
+				this.enableEditing(columns.get(i));
+			}
+			for(Taxon taxon : taxonMatrix.getTaxa()) {
+				this.enableEditing(taxon);
+			}
+		} else {
+			for(int i=this.firstCharacterColumn; i<columns.size(); i++) {
+				this.disableEditing(columns.get(i));
+			}
+			for(Taxon taxon : taxonMatrix.getTaxa()) {
+				this.disableEditing(taxon);
+			}
+		}
+	}
+
+	public boolean isEditableAll() {
+		List<ColumnConfig<Taxon, ?>> columns = this.grid.getColumnModel().getColumns();
+		for(int i=this.firstCharacterColumn; i<columns.size(); i++) {
+			if(!this.isEditable(columns.get(i)))
+				return false;
+		}
+		for(Taxon taxon :  taxonMatrix.getTaxa()) {
+			if(!this.isEditable(taxon))
+				return false;
+		}
+		return true;
+	}
+	
+	private boolean isEditable(ColumnConfig config) {
+		return editing.getEditor(config) != null;
+	}
+
+	private boolean isEditable(Taxon taxon) {
+		return editing.hasEditor(taxon);
+	}
+
+	public boolean isNotEditableAll() {
+		List<ColumnConfig<Taxon, ?>> columns = this.grid.getColumnModel().getColumns();
+		for(int i=this.firstCharacterColumn; i<columns.size(); i++) {
+			if(this.isEditable(columns.get(i)))
+				return false;
+		}
+		for(Taxon taxon :  taxonMatrix.getTaxa()) {
+			if(this.isEditable(taxon))
+				return false;
+		}
+		return true;
 	}
 	
 }

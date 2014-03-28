@@ -7,5 +7,9 @@ public class RowConfig<M> {
 	public RowConfig(M model) {
 		this.model = model;
 	}
+
+	public M getModel() {
+		return model;
+	}
 	
 }
