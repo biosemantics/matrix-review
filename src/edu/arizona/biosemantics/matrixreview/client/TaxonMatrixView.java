@@ -300,11 +300,18 @@ public class TaxonMatrixView implements IsWidget {
 	public void addCharacterAfter(int colIndex, Character character) {
 		taxonMatrix.addCharacter(colIndex - this.taxonNameColumn, character);
 		List<ColumnConfig<Taxon, ?>> columns = new ArrayList<ColumnConfig<Taxon, ?>>(grid.getColumnModel().getColumns());
-		ColumnConfig columnConfig = createCharacterColumnConfig(character);
+		MyColumnConfig columnConfig = createCharacterColumnConfig(character);
 		columns.add(colIndex + 1, columnConfig);
 		ColumnModel<Taxon> cm = new ColumnModel<Taxon>(columns);
+		
 		this.setControlMode(columnConfig, ControlMode.OFF);
+		
 		this.enableEditing(columnConfig);	
+		
+		StringFilter<Taxon> characterStateFilter = new StringFilter<Taxon>(columnConfig.getValueProvider());
+		columnConfig.setFilter(characterStateFilter);
+		filters.addFilter(characterStateFilter);
+		
 		grid.reconfigure(grid.getStore(), cm);
 	}	
 	
@@ -335,8 +342,8 @@ public class TaxonMatrixView implements IsWidget {
 		return nameCol;
 	}
 	
-	private ColumnConfig<Taxon, String> createCharacterColumnConfig(final Character character) {
-		ColumnConfig<Taxon, String> characterCol = new MyColumnConfig(200, character);
+	private MyColumnConfig createCharacterColumnConfig(final Character character) {
+		MyColumnConfig characterCol = new MyColumnConfig(200, character);
 		characterCol.setCell(new MenuExtendedCell<String>(this));
 		return characterCol;
 	}

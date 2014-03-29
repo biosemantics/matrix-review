@@ -82,7 +82,7 @@ public class MyGridView extends GridView<Taxon> {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
 					for (int i = 0; i < 10; i++)
-						taxonMatrixView.addCharacter(new Character("ch", "organ"));
+						taxonMatrixView.addCharacter(new Character("character" + i, "organ" + i));
 				}
 			});
 			menu.add(item);
@@ -94,7 +94,7 @@ public class MyGridView extends GridView<Taxon> {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
 					for (int i = 0; i < 10; i++)
-						taxonMatrixView.addTaxon(new Taxon("tax"));
+						taxonMatrixView.addTaxon(new Taxon("taxon" + i));
 				}
 			});
 			menu.add(item);
