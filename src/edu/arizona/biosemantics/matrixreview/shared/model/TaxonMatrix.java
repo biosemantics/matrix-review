@@ -14,6 +14,7 @@ public class TaxonMatrix implements Serializable {
 
 	private List<Taxon> taxa = new ArrayList<Taxon>();
 	private List<Character> characters = new ArrayList<Character>();
+	
 
 	public TaxonMatrix() { }
 	

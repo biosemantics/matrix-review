@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class Value implements Serializable {
 
 	private String value;
+	private String comment = "";
 
 	public Value() { }
 	
@@ -24,7 +25,13 @@ public class Value implements Serializable {
 	public String toString() {
 		return value;
 	}
-	
-	
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
 	
 }

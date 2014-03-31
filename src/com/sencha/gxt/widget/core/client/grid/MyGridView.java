@@ -274,11 +274,11 @@ public class MyGridView extends GridView<Taxon> {
 				public void onSelection(SelectionEvent<Item> event) {
 					final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox(
 							"Comment", "");
-					box.setValue(taxonMatrixView.getComment(colIndex));
+					box.setValue(taxonMatrixView.getColumnComment(colIndex));
 					box.addHideHandler(new HideHandler() {
 						@Override
 						public void onHide(HideEvent event) {
-							taxonMatrixView.setComment(colIndex, box.getValue());
+							taxonMatrixView.setColumnComment(colIndex, box.getValue());
 							String comment = Format.ellipse(box.getValue(), 80);
 							String message = Format.substitute("'{0}' saved",
 									new Params(comment));

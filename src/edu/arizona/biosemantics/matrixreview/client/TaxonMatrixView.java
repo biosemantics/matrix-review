@@ -82,7 +82,6 @@ public class TaxonMatrixView implements IsWidget {
 	private TaxonMatrix taxonMatrix;
 	private MyListStore<Taxon> store;
 	private MyGrid grid;
-	private Map<RowConfig<Taxon>, Map<ColumnConfig, String>> comments = new HashMap<RowConfig<Taxon>, Map<ColumnConfig, String>>();
 	private Map<Taxon, RowConfig<Taxon>> rowConfigs = new HashMap<Taxon, RowConfig<Taxon>>();
 	private RowConfig<String> headerRowConfig = new RowConfig<String>("header");
 	
@@ -659,40 +658,34 @@ public class TaxonMatrixView implements IsWidget {
 		return null;
 	}
 	
-	public void setComment(RowConfig rowConfig, ColumnConfig columnConfig, String comment) {
-		if(!comments.containsKey(rowConfig))
-			comments.put(rowConfig, new HashMap<ColumnConfig, String>());
-		comments.get(rowConfig).put(columnConfig, comment);
-	}
-	
-	public String getComment(RowConfig rowConfig, ColumnConfig columnConfig) {
-		if(comments.containsKey(rowConfig) && comments.get(rowConfig).containsKey(columnConfig))
-			return comments.get(rowConfig).get(columnConfig);
-		return "";
-	}
-	
 	public void setComment(int row, int column, String comment) {
-		ColumnConfig columnConfig = grid.getColumnModel().getColumn(column);
-		RowConfig rowConfig = this.rowConfigs.get(store.get(row));
-		this.setComment(rowConfig, columnConfig, comment);
+		Taxon taxon = this.getTaxon(row);
+		Character character = this.getCharacter(column);
+		taxon.get(character).setComment(comment);
 	}
 	
 	public String getComment(int row, int column) {
-		ColumnConfig columnConfig = grid.getColumnModel().getColumn(column);
-		RowConfig rowConfig = this.rowConfigs.get(store.get(row));
-		return this.getComment(rowConfig, columnConfig);
+		Taxon taxon = this.getTaxon(row);
+		Character character = this.getCharacter(column);
+		return taxon.get(character).getComment();
 	}
 	
-	public String getComment(int column) {
-		ColumnConfig columnConfig = grid.getColumnModel().getColumn(column);
-		return this.getComment(headerRowConfig, columnConfig);
+	public String getColumnComment(int column) {
+		return this.getCharacter(column).getComment();
 	}
 
-	public void setComment(int column, String comment) {
-		ColumnConfig columnConfig = grid.getColumnModel().getColumn(column);
-		this.setComment(headerRowConfig, columnConfig, comment);
+	public void setColumnComment(int column, String comment) {
+		this.getCharacter(column).setComment(comment);
+	}
+	
+	public String getRowComment(int row) {
+		return this.getTaxon(row).getComment();
 	}
 
+	public void setRowComment(int row, String comment) {
+		this.getTaxon(row).setComment(comment);
+	}
+	
 	public String getCoverage(Taxon taxon) {
 		return taxonMatrix.getCoverage(taxon);
 	}

@@ -6,6 +6,7 @@ public class Character implements Serializable {
 
 	private String name = "";
 	private String organ= "";
+	private String comment = "";
 
 	public Character() { }
 	
@@ -43,5 +44,14 @@ public class Character implements Serializable {
 			return name;
 		return name + " of " + organ;
 	}
+	
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+	
 	
 }

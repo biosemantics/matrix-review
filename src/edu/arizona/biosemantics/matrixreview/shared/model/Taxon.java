@@ -11,6 +11,7 @@ public class Taxon implements Serializable, Comparable<Taxon> {
 	public String name;
 	private String description = "";
 	private Map<Character, Value> values = new HashMap<Character, Value>();
+	private String comment = "";
 
 	public Taxon() { }
 	
@@ -82,5 +83,14 @@ public class Taxon implements Serializable, Comparable<Taxon> {
 	public int compareTo(Taxon o) {
 		return this.getName().compareTo(o.getName());
 	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+	
 	
 }
