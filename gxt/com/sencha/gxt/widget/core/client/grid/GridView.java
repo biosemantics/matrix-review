@@ -235,6 +235,10 @@ public class GridView<M> {
     String footer();
 
     String grid();
+
+	String cellDirtyCommented();
+	
+	String cellCommented();
   }
 
   public interface GridTemplates extends SafeHtmlTemplates {

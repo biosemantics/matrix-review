@@ -661,29 +661,64 @@ public class TaxonMatrixView implements IsWidget {
 	public void setComment(int row, int column, String comment) {
 		Taxon taxon = this.getTaxon(row);
 		Character character = this.getCharacter(column);
-		taxon.get(character).setComment(comment);
+		if(taxon != null && character != null) {
+			taxon.get(character).setComment(comment);
+			grid.getView().refresh(false);
+		}
 	}
 	
 	public String getComment(int row, int column) {
 		Taxon taxon = this.getTaxon(row);
 		Character character = this.getCharacter(column);
-		return taxon.get(character).getComment();
+		return this.getComment(taxon, character);
+	}
+	
+	public String getComment(Taxon taxon, Character character) {
+		if(taxon != null && character != null) 
+			return taxon.get(character).getComment();
+		else
+			return "";
+	}
+	
+	public boolean hasComment(Taxon taxon, ColumnConfig<Taxon, ?> columnConfig) {
+		if(columnConfig instanceof MyColumnConfig)
+			return !this.getComment(taxon, ((MyColumnConfig)columnConfig).getCharacter()).isEmpty();
+		else
+			return !taxon.getComment().isEmpty();
 	}
 	
 	public String getColumnComment(int column) {
-		return this.getCharacter(column).getComment();
+		Character character = this.getCharacter(column);
+		if(character != null)
+			return character.getComment();
+		return "";
 	}
 
 	public void setColumnComment(int column, String comment) {
-		this.getCharacter(column).setComment(comment);
+		Character character = this.getCharacter(column);
+		if(character != null)
+			character.setComment(comment);
+	}
+	
+	public boolean hasColumnComment(int column) {
+		return !this.getColumnComment(column).isEmpty();
 	}
 	
 	public String getRowComment(int row) {
-		return this.getTaxon(row).getComment();
+		Taxon taxon = this.getTaxon(row);
+		if(taxon != null)
+			return taxon.getComment();
+		return "";
 	}
 
 	public void setRowComment(int row, String comment) {
-		this.getTaxon(row).setComment(comment);
+		Taxon taxon = this.getTaxon(row);
+		if(taxon != null)
+			taxon.setComment(comment);
+	}
+	
+	public boolean hasRowComment(int row) {
+		return !this.getRowComment(row).isEmpty();
 	}
 	
 	public String getCoverage(Taxon taxon) {
@@ -900,5 +935,7 @@ public class TaxonMatrixView implements IsWidget {
 		}
 		return true;
 	}
+
+
 	
 }

@@ -430,6 +430,9 @@ public class MyGridView extends GridView<Taxon> {
 		final String cellFirstClass = "x-grid-cell-first";
 		final String cellLastClass = "x-grid-cell-last";
 		final String cellDirty = styles.cellDirty();
+		final String cellCommented = styles.cellCommented();
+		final String cellDirtyCommented = styles.cellDirtyCommented();
+		
 
 		final String rowWrap = styles.rowWrap() + " " + states.rowWrap();
 		final String rowBody = styles.rowBody() + " " + states.rowBody();
@@ -507,10 +510,15 @@ public class MyGridView extends GridView<Taxon> {
 				if (columnConfig.getCellClassName() != null) {
 					cellClasses += " " + columnConfig.getCellClassName();
 				}
-
+				
 				if (this.isShowDirtyCells() && r != null
-						&& r.getChange(columnConfig.getValueProvider()) != null) {
+						&& r.getChange(columnConfig.getValueProvider()) != null && !taxonMatrixView.hasComment(model, columnConfig)) {
 					cellClasses += " " + cellDirty;
+				} else if(this.isShowDirtyCells() && r != null && r.getChange(columnConfig.getValueProvider()) != null && 
+						taxonMatrixView.hasComment(model, columnConfig)) {
+					cellClasses += " " + cellDirtyCommented;
+				} else if(taxonMatrixView.hasComment(model, columnConfig)) {
+					cellClasses += " " + cellCommented;
 				}
 
 				if (viewConfig != null) {
