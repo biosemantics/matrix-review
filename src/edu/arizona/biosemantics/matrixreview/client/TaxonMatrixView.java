@@ -713,8 +713,10 @@ public class TaxonMatrixView implements IsWidget {
 
 	public void setRowComment(int row, String comment) {
 		Taxon taxon = this.getTaxon(row);
-		if(taxon != null)
+		if(taxon != null) {
 			taxon.setComment(comment);
+			grid.getView().refresh(false);
+		}
 	}
 	
 	public boolean hasRowComment(int row) {
