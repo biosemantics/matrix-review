@@ -696,8 +696,10 @@ public class TaxonMatrixView implements IsWidget {
 
 	public void setColumnComment(int column, String comment) {
 		Character character = this.getCharacter(column);
-		if(character != null)
+		if(character != null) {
 			character.setComment(comment);
+			refreshColumnHeader(column);
+		}
 	}
 	
 	public boolean hasColumnComment(int column) {
@@ -744,6 +746,7 @@ public class TaxonMatrixView implements IsWidget {
 						myHead.setText(myColumnConfig.getCharacter().toString());
 						myHead.setCoverage(TaxonMatrixView.this.getCoverage(myColumnConfig.getCharacter()));
 						myHead.setQuickTipText(TaxonMatrixView.this.getSummary(myColumnConfig.getCharacter()));
+						myHead.setCommented(hasColumnComment(column));
 					}
 				}
 			}

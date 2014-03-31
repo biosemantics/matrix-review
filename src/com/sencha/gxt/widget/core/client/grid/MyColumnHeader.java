@@ -4,6 +4,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ClientBundle.Source;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Event;
@@ -26,6 +29,9 @@ import com.sencha.gxt.widget.core.client.ComponentHelper;
 import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent.CompleteEditHandler;
+import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderAppearance;
+import com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance;
+import com.sencha.gxt.widget.core.client.grid.GridView.GridStateStyles;
 
 import edu.arizona.biosemantics.matrixreview.client.TaxonMatrixView;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
@@ -37,8 +43,17 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 	public class MyHead extends Head {
 		
 		protected SpanElement coverage;
+		private GridAppearance gridAppearance;
+		private com.sencha.gxt.widget.core.client.grid.GridView.GridStyles gridStyles;
 
 		public MyHead(ColumnConfig column) {
+			this(column, GWT.<GridAppearance> create(GridAppearance.class));
+		}
+		
+		public MyHead(ColumnConfig column, GridAppearance gridAppearance) {
+		    this.gridAppearance = gridAppearance;
+		    this.gridStyles = gridAppearance.styles();
+			
 			this.config = column;
 			this.column = cm.indexOf(column);
 
@@ -110,6 +125,13 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 		
 		public void setText(String text) {
 			this.text.setText(text);
+		}
+
+		public void setCommented(boolean hasColumnComment) {
+			if(hasColumnComment)
+				this.addStyleName(gridStyles.cellCommented());
+			else
+				this.removeStyleName(gridStyles.cellCommented());
 		}
 	}
 
