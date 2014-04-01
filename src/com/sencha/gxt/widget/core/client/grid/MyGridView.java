@@ -39,9 +39,15 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 public class MyGridView extends GridView<Taxon> {
 
 	private TaxonMatrixView taxonMatrixView;
-
+	private ColumnHeaderStyles columnHeaderStyles;
+	
 	public MyGridView(TaxonMatrixView taxonMatrixView) {
+		this(taxonMatrixView, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
+	}
+	
+	public MyGridView(TaxonMatrixView taxonMatrixView, ColumnHeaderAppearance columnHeaderAppearance) {
 		this.taxonMatrixView = taxonMatrixView;
+		this.columnHeaderStyles = columnHeaderAppearance.styles();
 	}
 
 	protected Menu createContextMenu(final int colIndex) {
@@ -432,6 +438,9 @@ public class MyGridView extends GridView<Taxon> {
 		final String cellDirty = styles.cellDirty();
 		final String cellCommented = styles.cellCommented();
 		final String cellDirtyCommented = styles.cellDirtyCommented();
+		System.out.println(cellCommented);
+		System.out.println(cellDirtyCommented);
+		System.out.println(cellDirty);
 		
 
 		final String rowWrap = styles.rowWrap() + " " + states.rowWrap();
@@ -511,6 +520,10 @@ public class MyGridView extends GridView<Taxon> {
 					cellClasses += " " + columnConfig.getCellClassName();
 				}
 				
+				if(i == taxonMatrixView.getTaxonNameColumn()) {
+					String grandParentStyleClass = columnHeaderStyles.header() + " " + columnHeaderStyles.head();
+					cellClasses += " " + grandParentStyleClass;		
+				}
 				if (this.isShowDirtyCells() && r != null
 						&& r.getChange(columnConfig.getValueProvider()) != null && !taxonMatrixView.hasComment(model, columnConfig)) {
 					cellClasses += " " + cellDirty;
@@ -520,6 +533,7 @@ public class MyGridView extends GridView<Taxon> {
 				} else if(taxonMatrixView.hasComment(model, columnConfig)) {
 					cellClasses += " " + cellCommented;
 				}
+				
 
 				if (viewConfig != null) {
 					cellClasses += " "

@@ -16,6 +16,7 @@ import com.sencha.gxt.widget.core.client.event.CheckChangeEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent.CheckChangeHandler;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
+import com.sencha.gxt.widget.core.client.grid.GridView.GridStyles;
 import com.sencha.gxt.widget.core.client.grid.MyGrid;
 import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
@@ -29,9 +30,10 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 public class TaxonCell extends MenuExtendedCell<Taxon> {
 
 	private MyGrid grid;
+	private GridStyles styles;
 
 	interface Templates extends SafeHtmlTemplates {
-		@SafeHtmlTemplates.Template("<div class=\"{0}\" qtitle=\"Summary\" qtip=\"{5}\">" +
+		@SafeHtmlTemplates.Template("<div qtitle=\"Summary\" qtip=\"{5}\">" +
 				"<div class=\"{1}\" style=\"width: calc(100% - 9px); height:14px\">{3}" +
 				"<span style=\"position:absolute;right:0px;background-color:#b0e0e6;width:35px;\">{4}</span>" + 
 				"<a href=\"#\" class=\"{2}\" style=\"height: 22px;\"></a>" +
@@ -47,15 +49,32 @@ public class TaxonCell extends MenuExtendedCell<Taxon> {
 		super(taxonMatrixView);
 		this.grid = grid;
 		this.taxonMatrixView = taxonMatrixView;
+		this.styles = grid.getView().getAppearance().styles();
 	}
 
 	@Override
 	public void render(Context context, Taxon value, SafeHtmlBuilder sb) {
 		if (value == null)
 			return;
-		SafeHtml rendered = templates.cell(columnHeaderStyles.header() + " "
-				+ columnHeaderStyles.head(), columnHeaderStyles.headInner(),
-				columnHeaderStyles.headButton(), value.getName(), taxonMatrixView.getCoverage(value), taxonMatrixView.getSummary(value));
+		String grandParentStyleClass = columnHeaderStyles.header() + " " + columnHeaderStyles.head();
+		String parentStyleClass = columnHeaderStyles.headInner();
+		String aStyleClass = columnHeaderStyles.headButton();
+		
+		/*String cellClasses = "";
+		if (grid.getView().isShowDirtyCells() && r != null
+				&& r.getChange(columnConfig.getValueProvider()) != null && value.getComment().isEmpty()) {
+			cellClasses += " " + styles.cellDirty();
+		} else if(grid.getView().isShowDirtyCells() && r != null && r.getChange(columnConfig.getValueProvider()) != null && 
+				!value.getComment().isEmpty()) {
+			cellClasses += " " + styles.cellDirtyCommented();
+		} else if(!value.getComment().isEmpty()) {
+			cellClasses += " " + styles.cellCommented();
+		}
+		if(!value.getComment().isEmpty()) {
+			grandParentStyleClass += " " + cellClasses;
+		}*/
+		SafeHtml rendered = templates.cell(grandParentStyleClass, parentStyleClass, aStyleClass, 
+				value.getName(), taxonMatrixView.getCoverage(value), taxonMatrixView.getSummary(value));
 		sb.append(rendered);
 	}
 
