@@ -62,12 +62,12 @@ public class ValueCell extends MenuExtendedCell<Value> {
 		String backgroundImage = "";
 		if(value.isDirty()) {
 			if(!value.isCommented()) {
-				backgroundImage = ImageHelper.createModuleBasedUrl("base/images/grid/dirty_red.gif");
+				backgroundImage = ImageHelper.createModuleBasedUrl("base/images/grid/black.gif");
 			} else {
-				backgroundImage = ImageHelper.createModuleBasedUrl("base/images/grid/dirty_red_black.gif");
+				backgroundImage = ImageHelper.createModuleBasedUrl("base/images/grid/black_red.gif");
 			}
 		} else if(value.isCommented()) {
-			backgroundImage = ImageHelper.createModuleBasedUrl("base/images/grid/dirty_black.gif");
+			backgroundImage = ImageHelper.createModuleBasedUrl("base/images/grid/red.gif");
 		}		
 		
 		SafeHtml rendered = templates.cell("", columnHeaderStyles.headInner(),
