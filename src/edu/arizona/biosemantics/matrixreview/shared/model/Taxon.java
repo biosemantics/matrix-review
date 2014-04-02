@@ -98,6 +98,10 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 	protected void setComment(String comment) {
 		this.comment = comment;
 	}
+	
+	public boolean isCommented() {
+		return !comment.trim().isEmpty();
+	}
 
 	public Color getColor() {
 		return color;
