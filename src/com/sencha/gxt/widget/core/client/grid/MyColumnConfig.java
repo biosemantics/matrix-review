@@ -9,24 +9,24 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
-public class MyColumnConfig extends ColumnConfig<Taxon, String> {
+public class MyColumnConfig extends ColumnConfig<Taxon, Value> {
 
 	private Filter<Taxon, ?> filter;
 	private Character character;
 	
-	public static class CharacterValueProvider implements ValueProvider<Taxon, String> {
+	public static class CharacterValueProvider implements ValueProvider<Taxon, Value> {
 		private Character character;
 		public CharacterValueProvider(Character character) {
 			this.character = character;
 		}
 		@Override
-		public String getValue(Taxon object) {
-			return object.get(character).getValue();
+		public Value getValue(Taxon object) {
+			return object.get(character);
 		}
 
 		@Override
-		public void setValue(Taxon object, String value) {
-			object.put(character, new Value(value));
+		public void setValue(Taxon object, Value value) {
+			object.setValue(character, value);
 		}
 
 		@Override

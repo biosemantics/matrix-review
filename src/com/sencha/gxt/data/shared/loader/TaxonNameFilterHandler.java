@@ -9,6 +9,8 @@ public class TaxonNameFilterHandler extends FilterHandler<Taxon> {
 		//How to do this? Cell rendering gets passed in from valueprovider. If not Taxon instance passed in, coverage can not be display in same cell
 		//because that information would not be easily accessible. Therefore ValueProvider has to provide taxon, which in turn requires to create own
 		//filter that works StringFilter-like on taxon name cells. The filter then requires this filterHandler.
+		
+		//according to references in code this is never called anyway
 		return null;
 	}
 

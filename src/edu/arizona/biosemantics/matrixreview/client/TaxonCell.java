@@ -120,7 +120,7 @@ public class TaxonCell extends MenuExtendedCell<Taxon> {
 					@Override
 					public void onHide(HideEvent event) {
 						String name = nameBox.getValue();
-						taxonMatrixView.addTaxonAfter(rowIndex, new Taxon(name));
+						taxonMatrixView.addTaxonAfter(rowIndex, name);
 					}
 				});
 				nameBox.show();

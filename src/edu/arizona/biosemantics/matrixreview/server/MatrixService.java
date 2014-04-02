@@ -33,9 +33,10 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		characters.add(a);
 		characters.add(b);
 		characters.add(c);
+		TaxonMatrix taxonMatrix = new TaxonMatrix(characters);
 
-		Taxon t1 = new Taxon("t1", "this is the description about t1");
-		Taxon t2 = new Taxon("t2", "this is the description about t2");
+		Taxon t1 = new Taxon("t1", "this is the description about t1", taxonMatrix);
+		Taxon t2 = new Taxon("t2", "this is the description about t2", taxonMatrix);
 		Taxon t3 = new Taxon(
 				"t3",
 				"Lorem ipsum dolor sit amet, consectetuer adipiscing elit. "
@@ -46,9 +47,9 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 						+ "fringilla vel, urna.<br/><br/>Aliquam commodo ullamcorper erat. Nullam vel justo in neque "
 						+ "porttitor laoreet. Aenean lacus dui, consequat eu, adipiscing eget, nonummy non, nisi. "
 						+ "Morbi nunc est, dignissim non, ornare sed, luctus eu, massa. Vivamus eget quam. Vivamus "
-						+ "tincidunt diam nec urna. Curabitur velit.");
+						+ "tincidunt diam nec urna. Curabitur velit.", taxonMatrix);
 
-		TaxonMatrix taxonMatrix = new TaxonMatrix(characters);
+		
 		taxonMatrix.addTaxon(t1);
 		taxonMatrix.addTaxon(t2);
 		taxonMatrix.addTaxon(t3);
@@ -73,7 +74,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 			TaxonMatrix taxonMatrix = new TaxonMatrix(characters);
 						
 			for(Element taxonEntry : taxonEntryList) {
-				Taxon taxon = new Taxon(taxonEntry.getAttributeValue("recordID"), "The description");
+				Taxon taxon = new Taxon(taxonEntry.getAttributeValue("recordID"), "The description", taxonMatrix);
 				taxonMatrix.addTaxon(taxon);
 				
 				List<Element> itemsList = taxonEntry.getChildren("Items");
@@ -84,7 +85,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 					for(Element item : items) {
 						value += item.getValue() + " | ";
 					}
-					taxon.put(characterMap.get(itemsElement.getAttributeValue("name")), new Value(value.substring(0, value.length() - 3)));
+					taxonMatrix.setValue(taxon, characterMap.get(itemsElement.getAttributeValue("name")), new Value(value.substring(0, value.length() - 3)));
 				}
 				taxonMatrix.addTaxon(taxon);
 			}

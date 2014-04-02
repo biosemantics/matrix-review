@@ -13,7 +13,7 @@ public class TaxonNameValueProvider implements ValueProvider<Taxon, Taxon> {
 
 	@Override
 	public void setValue(Taxon object, Taxon value) {
-		object.setName(value.getName());
+		object.getTaxonMatrix().renameTaxon(object, value.getName());
 	}
 
 	@Override

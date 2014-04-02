@@ -13,10 +13,6 @@ import java.util.Set;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.EditorError;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -40,13 +36,10 @@ import com.sencha.gxt.dnd.core.client.MyGridDragSource;
 import com.sencha.gxt.dnd.core.client.MyGridDropTarget;
 import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
-import com.sencha.gxt.widget.core.client.event.BeforeShowEvent;
-import com.sencha.gxt.widget.core.client.event.BeforeShowEvent.BeforeShowHandler;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent.CompleteEditHandler;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.Field;
-import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.form.Validator;
 import com.sencha.gxt.widget.core.client.form.error.DefaultEditorError;
@@ -67,12 +60,15 @@ import com.sencha.gxt.widget.core.client.grid.filters.ListFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.NumericFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.TaxonNameFilter;
+import com.sencha.gxt.widget.core.client.grid.filters.ValueFilter;
 import com.sencha.gxt.widget.core.client.tips.QuickTip;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor.DoublePropertyEditor;
 
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
 
 public class TaxonMatrixView implements IsWidget {
@@ -142,7 +138,7 @@ public class TaxonMatrixView implements IsWidget {
 		editing.addEditor(columnConfig, new Converter<Taxon, String>() {
 			@Override
 			public Taxon convertFieldValue(String object) {
-				return new Taxon(object);
+				return new Taxon(object, taxonMatrix);
 			}
 			@Override
 			public String convertModelValue(Taxon object) {
@@ -156,6 +152,18 @@ public class TaxonMatrixView implements IsWidget {
 			this.setControlMode(columnConfig, ControlMode.OFF);
 			this.enableEditing(columnConfig);
 			if(columnConfig instanceof MyColumnConfig) {
+				MyColumnConfig myColumnConfig = (MyColumnConfig)columnConfig;
+				editing.addEditor(myColumnConfig, new Converter<Value, String>() {
+					@Override
+					public Value convertFieldValue(String object) {
+						return new Value(object);
+					}
+
+					@Override
+					public String convertModelValue(Value object) {
+						return object.getValue();
+					}
+				}, new TextField());
 				editing.addCompleteEditHandler(new CompleteEditHandler<Taxon>() {
 					@Override
 					public void onCompleteEdit(CompleteEditEvent<Taxon> event) {
@@ -179,7 +187,7 @@ public class TaxonMatrixView implements IsWidget {
 		filters.addFilter(taxonNameFilter);
 		for (int i = this.firstCharacterColumn; i<columnConfigs.size(); i++) {
 			MyColumnConfig config = (MyColumnConfig)columnConfigs.get(i);
-			StringFilter<Taxon> characterStateFilter = new StringFilter<Taxon>(config.getValueProvider());
+			ValueFilter characterStateFilter = new ValueFilter(config.getValueProvider());
 			config.setFilter(characterStateFilter);
 			filters.addFilter(characterStateFilter);
 		}
@@ -214,7 +222,7 @@ public class TaxonMatrixView implements IsWidget {
 
 	private MyGrid createGrid() {
 		MyGridView view = new MyGridView(this);
-		view.setShowDirtyCells(true);
+		view.setShowDirtyCells(false); //will create my own dirty image in cell rendering
 		MyGrid grid = new MyGrid(new ListStore<Taxon>(new TaxonModelKeyProvider()), 
 				new ColumnModel<Taxon>(new ArrayList<ColumnConfig<Taxon, ?>>()), view);
 		grid.getView().setForceFit(false); // if change in column width we want the table to become wider not stay fixed at overall width
@@ -263,8 +271,8 @@ public class TaxonMatrixView implements IsWidget {
 		return grid;
 	}
 	
-	public void addTaxon(Taxon taxon) {
-		this.addTaxonAfter(grid.getStore().size() - 1, taxon);
+	public void addTaxon(String name) {
+		this.addTaxonAfter(grid.getStore().size() - 1, name);
 	}
 
 	public void addTaxonAfter(int rowIndex, Taxon taxon) {
@@ -274,6 +282,15 @@ public class TaxonMatrixView implements IsWidget {
 		this.rowConfigs.put(taxon, new RowConfig<Taxon>(taxon));
 		refreshColumnHeaders();
 	}
+	
+	public void addTaxonAfter(int rowIndex, String name) {
+		Taxon taxon = this.taxonMatrix.addTaxon(rowIndex + 1, name);
+		grid.getStore().add(rowIndex + 1, taxon);
+		editing.addEditor(taxon);
+		this.rowConfigs.put(taxon, new RowConfig<Taxon>(taxon));
+		refreshColumnHeaders();
+	}
+	
 
 	public void removeTaxon(Taxon taxon) {
 		this.taxonMatrix.removeTaxon(taxon);
@@ -307,7 +324,7 @@ public class TaxonMatrixView implements IsWidget {
 		
 		this.enableEditing(columnConfig);	
 		
-		StringFilter<Taxon> characterStateFilter = new StringFilter<Taxon>(columnConfig.getValueProvider());
+		ValueFilter characterStateFilter = new ValueFilter(columnConfig.getValueProvider());
 		columnConfig.setFilter(characterStateFilter);
 		filters.addFilter(characterStateFilter);
 		
@@ -343,7 +360,7 @@ public class TaxonMatrixView implements IsWidget {
 	
 	private MyColumnConfig createCharacterColumnConfig(final Character character) {
 		MyColumnConfig characterCol = new MyColumnConfig(200, character);
-		characterCol.setCell(new MenuExtendedCell<String>(this));
+		characterCol.setCell(new ValueCell(this));
 		return characterCol;
 	}
 
@@ -522,7 +539,8 @@ public class TaxonMatrixView implements IsWidget {
 				}
 				@Override
 				public void setValue(Taxon object, Double value) {
-					object.get(myColumnConfig.getCharacter()).setValue(String.valueOf(value));
+					Value v = new Value(String.valueOf(value));
+					object.setValue(myColumnConfig.getCharacter(), v);
 				}
 				@Override
 				public String getPath() {
@@ -662,7 +680,7 @@ public class TaxonMatrixView implements IsWidget {
 		Taxon taxon = this.getTaxon(row);
 		Character character = this.getCharacter(column);
 		if(taxon != null && character != null) {
-			taxon.get(character).setComment(comment);
+			taxonMatrix.setComment(taxon, character, comment);
 			grid.getView().refresh(false);
 		}
 	}
@@ -697,7 +715,7 @@ public class TaxonMatrixView implements IsWidget {
 	public void setColumnComment(int column, String comment) {
 		Character character = this.getCharacter(column);
 		if(character != null) {
-			character.setComment(comment);
+			taxonMatrix.setComment(character, comment);
 			refreshColumnHeader(column);
 		}
 	}
@@ -716,7 +734,7 @@ public class TaxonMatrixView implements IsWidget {
 	public void setRowComment(int row, String comment) {
 		Taxon taxon = this.getTaxon(row);
 		if(taxon != null) {
-			taxon.setComment(comment);
+			taxonMatrix.setComment(taxon, comment);
 			grid.getView().refresh(false);
 		}
 	}
@@ -883,8 +901,8 @@ public class TaxonMatrixView implements IsWidget {
 
 	public void renameCharacter(int colIndex, String name, String organ) {
 		final Character character = getCharacter(colIndex);
-		character.setName(name);
-		character.setOrgan(organ);
+		taxonMatrix.renameCharacter(character, name);
+		taxonMatrix.setOrgan(character, organ);
 		refreshColumnHeader(colIndex);
 	}
 
@@ -941,6 +959,35 @@ public class TaxonMatrixView implements IsWidget {
 		return true;
 	}
 
-
+	public List<Color> getColors() {
+		return taxonMatrix.getColors();
+	}
 	
+	public void setColors(List<Color> colors) {
+		taxonMatrix.setColors(colors);
+	}
+
+	public void setColor(int row, int column, Color color) {
+		// set this in the model, possibly through the store to autoupdate the cell?
+		//editing.startEditing(cell)
+		//editing.completeEditing();
+		Value value = this.getValue(row, column);
+		if(value != null)
+			taxonMatrix.setColor(value, color);
+		grid.getView().refresh(false);
+	}
+
+	public Value getValue(int row, int column) {
+		Taxon taxon = this.getTaxon(row);
+		Character character = this.getCharacter(column);
+		if(taxon != null && character != null)
+			return this.getValue(taxon, character);
+		return null;
+	}
+	
+	public Value getValue(Taxon taxon, Character character) {
+		return taxon.get(character);
+	}
+
+
 }

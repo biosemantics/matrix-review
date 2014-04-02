@@ -17,7 +17,7 @@ public class MyListStore<M> extends ListStore<M> {
 	 * dirty only when there's outstanding commits to be made to the underlying model
 	 * @author rodenhausen
 	 */
-	public class MyRecord extends Record {
+	/*public class MyRecord extends Record {
 
 		protected final Map<Object, Change<M, ?>> outstandingCommitChanges = new HashMap<Object, Store.Change<M, ?>>();
 		
@@ -94,7 +94,7 @@ public class MyListStore<M> extends ListStore<M> {
 			outstandingCommitChanges.clear();
 			fireEvent(new StoreUpdateEvent<M>(Collections.singletonList(this.model)));
 		}
-	}
+	}*/
 	
 	public MyListStore(ModelKeyProvider<? super M> keyProvider) {
 		super(keyProvider);
@@ -113,7 +113,7 @@ public class MyListStore<M> extends ListStore<M> {
 		return this.allItems.get(indexOfAllItems);
 	}
 	
-	@Override
+	/*@Override
 	public Record getRecord(M data) {
 		String key = getKeyProvider().getKey(data);
 		MyRecord rec = (MyRecord)records.get(key);
@@ -122,6 +122,6 @@ public class MyListStore<M> extends ListStore<M> {
 			records.put(key, rec);
 		}
 		return rec;
-	}
+	}*/
 
 }
