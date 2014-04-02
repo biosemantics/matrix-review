@@ -2,11 +2,13 @@ package edu.arizona.biosemantics.matrixreview.shared.model;
 
 import java.io.Serializable;
 
-public class Character implements Serializable {
+public class Character implements Serializable, HasColor, HasComment, HasDirty {
 
 	private String name = "";
 	private String organ= "";
 	private String comment = "";
+	private Color color;
+	private boolean dirty = false;
 
 	public Character() { }
 	
@@ -23,7 +25,7 @@ public class Character implements Serializable {
 		return name;
 	}
 
-	public void setName(String name) {
+	protected void setName(String name) {
 		this.name = name;
 	}
 	
@@ -35,7 +37,7 @@ public class Character implements Serializable {
 		return organ != null && !organ.isEmpty();
 	}
 	
-	public void setOrgan(String organ) {
+	protected void setOrgan(String organ) {
 		this.organ = organ;
 	}
 	
@@ -49,9 +51,29 @@ public class Character implements Serializable {
 		return comment;
 	}
 
-	public void setComment(String comment) {
+	protected void setComment(String comment) {
 		this.comment = comment;
 	}
-	
+
+	public Color getColor() {
+		return color;
+	}
+
+	protected void setColor(Color color) {
+		this.color = color;
+	}
+
+	@Override
+	public boolean isDirty() {
+		return dirty;
+	}
+
+	protected void clearDirty() {
+		dirty = false;
+	}
+
+	protected void setDirty() {
+		dirty = true;
+	}
 	
 }
