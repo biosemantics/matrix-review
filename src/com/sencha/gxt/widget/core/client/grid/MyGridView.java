@@ -654,9 +654,6 @@ public class MyGridView extends GridView<Taxon> {
 		final String cellDirty = styles.cellDirty();
 		final String cellCommented = styles.cellCommented();
 		final String cellDirtyCommented = styles.cellDirtyCommented();
-		System.out.println(cellCommented);
-		System.out.println(cellDirtyCommented);
-		System.out.println(cellDirty);
 		
 
 		final String rowWrap = styles.rowWrap() + " " + states.rowWrap();

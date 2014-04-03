@@ -89,8 +89,6 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 				}
 				taxonMatrix.addTaxon(taxon);
 			}
-			System.out.println(taxonMatrix.getCharacters().size());
-			System.out.println(taxonMatrix.getTaxa().size());
 			return taxonMatrix;
 		} catch(Exception e) {
 			e.printStackTrace();

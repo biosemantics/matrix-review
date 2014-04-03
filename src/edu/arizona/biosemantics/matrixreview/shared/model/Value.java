@@ -17,6 +17,8 @@ public class Value implements Serializable, HasColor, HasComment, HasDirty {
 	}
 
 	public String getValue() {
+		if(value == null)
+			return "";
 		return value;
 	}
 
@@ -25,7 +27,7 @@ public class Value implements Serializable, HasColor, HasComment, HasDirty {
 	}
 	
 	public String toString() {
-		return value;
+		return getValue();
 	}
 
 	public String getComment() {

@@ -143,31 +143,29 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 		}
 
 		public void setCommented(boolean hasColumnComment) {
+			this.hasColumnComment = hasColumnComment;
 			this.removeStyleName(gridStyles.cellDirty());
 			this.removeStyleName(gridStyles.cellCommented());
 			this.removeStyleName(gridStyles.cellDirtyCommented());
-			
-			this.hasColumnComment = hasColumnComment;
-			if(hasColumnComment && isDirty) 
+			this.setCommentedDirty();
+		}
+		
+		private void setCommentedDirty() {
+			if(hasColumnComment && isDirty) {
 				this.addStyleName(gridStyles.cellDirtyCommented());
-			else if(hasColumnComment)
-				this.addStyleName(gridStyles.cellCommented());
-			else
-				this.removeStyleName(gridStyles.cellCommented());
+			} else if(hasColumnComment) {
+				this.addStyleName(gridStyles.cellCommented());	
+			} else if(isDirty) {
+				this.addStyleName(gridStyles.cellDirty());	
+			}
 		}
 		
 		public void setDirty(boolean isDirty) {
+			this.isDirty = isDirty;
 			this.removeStyleName(gridStyles.cellDirty());
 			this.removeStyleName(gridStyles.cellCommented());
 			this.removeStyleName(gridStyles.cellDirtyCommented());
-			
-			this.isDirty = isDirty;
-			if(hasColumnComment && isDirty)
-				this.addStyleName(gridStyles.cellDirtyCommented());
-			else if(isDirty)
-				this.addStyleName(gridStyles.cellDirty());
-			else 
-				this.removeStyleName(gridStyles.cellDirty());
+			setCommentedDirty();
 		}
 	}
 
