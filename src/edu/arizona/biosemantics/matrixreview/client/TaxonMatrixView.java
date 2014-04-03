@@ -55,6 +55,8 @@ import com.sencha.gxt.widget.core.client.grid.MyGridView;
 import com.sencha.gxt.widget.core.client.grid.RowConfig;
 import com.sencha.gxt.widget.core.client.grid.RowExpander;
 import com.sencha.gxt.widget.core.client.grid.editing.MyGridInlineEditing;
+import com.sencha.gxt.widget.core.client.grid.editing.TaxonConverter;
+import com.sencha.gxt.widget.core.client.grid.editing.ValueConverter;
 import com.sencha.gxt.widget.core.client.grid.filters.GridFilters;
 import com.sencha.gxt.widget.core.client.grid.filters.HideTaxonFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.ListFilter;
@@ -134,46 +136,24 @@ public class TaxonMatrixView implements IsWidget {
 		
 		//set up editing
 		editing = new MyGridInlineEditing<Taxon>(grid, store);
+		editing.addCompleteEditHandler(new CompleteEditHandler<Taxon>() {
+			@Override
+			public void onCompleteEdit(CompleteEditEvent<Taxon> event) {
+				int j = event.getEditCell().getCol();
+				refreshColumnHeader(j);
+			}
+		});
 		ColumnConfig columnConfig = columnConfigs.get(this.taxonNameColumn);
 		setControlMode(columnConfig, ControlMode.OFF);
-		editing.addEditor(columnConfig, new Converter<Taxon, String>() {
-			@Override
-			public Taxon convertFieldValue(String object) {
-				return new Taxon(object, taxonMatrix);
-			}
-			@Override
-			public String convertModelValue(Taxon object) {
-				return object.getName();
-			}
-		}, new TextField());
+		editing.addEditor(columnConfig, new TaxonConverter(taxonMatrix), new TextField());
 		
 		for (int i = firstCharacterColumn; i<columnConfigs.size(); i++) {
-			final int theI = i;
 			columnConfig = columnConfigs.get(i);
 			this.setControlMode(columnConfig, ControlMode.OFF);
 			this.enableEditing(columnConfig);
 			if(columnConfig instanceof MyColumnConfig) {
 				MyColumnConfig myColumnConfig = (MyColumnConfig)columnConfig;
-				editing.addEditor(myColumnConfig, new Converter<Value, String>() {
-					@Override
-					public Value convertFieldValue(String object) {
-						return new Value(object);
-					}
-
-					@Override
-					public String convertModelValue(Value object) {
-						return object.getValue();
-					}
-				}, new TextField());
-				editing.addCompleteEditHandler(new CompleteEditHandler<Taxon>() {
-					@Override
-					public void onCompleteEdit(CompleteEditEvent<Taxon> event) {
-						int j = event.getEditCell().getCol();
-						if(theI ==j) {
-							refreshColumnHeader(j);
-						}
-					}
-				});
+				editing.addEditor(myColumnConfig, new ValueConverter(), new TextField());
 			}
 		}
 		
@@ -390,76 +370,83 @@ public class TaxonMatrixView implements IsWidget {
 	
 	public void enableEditing(ColumnConfig columnConfig) {
 		switch(this.getControlMode(columnConfig)) {
-		case OFF:
-			editing.addEditor(columnConfig, new TextField());
-			break;
 		case NUMERICAL:
 			//TODO add validation to only allow numerical values from there on
-			final TextField textField = new TextField();
-			textField.setAllowBlank(false);
-			textField.addValidator(new Validator<String>() {
-				@Override
-				public List<EditorError> validate(Editor<String> editor, String value) {
-					List<EditorError> result = new LinkedList<EditorError>();
-					if(value == null || !value.matches("[0-9]*")) {
-						result.add(new DefaultEditorError(editor, "Value not numeric", value));
+			if(columnConfig instanceof MyColumnConfig) {
+				final TextField textField = new TextField();
+				textField.setAllowBlank(false);
+				textField.addValidator(new Validator<String>() {
+					@Override
+					public List<EditorError> validate(Editor<String> editor, String value) {
+						List<EditorError> result = new LinkedList<EditorError>();
+						if(value == null || !value.matches("[0-9]*")) {
+							result.add(new DefaultEditorError(editor, "Value not numeric", value));
+						}
+						return result;
 					}
-					return result;
-				}
-			});
-			MyValidator numericalsValidator = new MyValidator() {
-				@Override
-				public boolean isValid(String value) {
-					return value != null && value.matches("[0-9]*");
-				}
-			};
-			TextFieldChangeHandler changeHandler = new TextFieldChangeHandler(numericalsValidator);
-			textField.addValueChangeHandler(changeHandler);
-			textField.addBeforeShowHandler(changeHandler);
-			editing.addEditor(columnConfig, textField);
+				});
+				MyValidator numericalsValidator = new MyValidator() {
+					@Override
+					public boolean isValid(String value) {
+						return value != null && value.matches("[0-9]*");
+					}
+				};
+				TextFieldChangeHandler changeHandler = new TextFieldChangeHandler(numericalsValidator);
+				textField.addValueChangeHandler(changeHandler);
+				textField.addBeforeShowHandler(changeHandler);
+				editing.addEditor((MyColumnConfig)columnConfig, new ValueConverter(), textField);
+			}
 			break;
 		case CATEGORICAL:
-			final Set<String> values = new HashSet<String>();
-			for(Taxon taxon : taxonMatrix.getTaxa()) {
-				values.add((String)columnConfig.getValueProvider().getValue(taxon));
-			}
-			final MyListStore<String> comboValues = new MyListStore<String>(
-					new ModelKeyProvider<String>() {
-						@Override
-						public String getKey(String item) {
-							return item;
-						}
-					});
-			List<String> sortValues = new ArrayList<String>(values);
-			Collections.sort(sortValues);
-			comboValues.addAll(sortValues);
-			ComboBox<String> editComboBox = new ComboBox<String>(new MyComboBoxCell<String>(comboValues, new LabelProvider<String>() {
-				@Override
-				public String getLabel(String item) {
-					return item;
+			if(columnConfig instanceof MyColumnConfig) {
+				MyColumnConfig myColumnConfig = (MyColumnConfig)columnConfig;
+				ValueConverter converter = new ValueConverter();
+				final Set<String> values = new HashSet<String>();
+				for(Taxon taxon : taxonMatrix.getTaxa()) {
+					values.add(converter.convertModelValue(myColumnConfig.getValueProvider().getValue(taxon)));
 				}
-			}));
-			editComboBox.addValidator(new Validator<String>() {
-				@Override
-				public List<EditorError> validate(Editor<String> editor, String value) {
-					List<EditorError> result = new LinkedList<EditorError>();
-					if(!values.contains(value)) {
-						result.add(new DefaultEditorError(editor, "Value entered not part of the character's vocabulary", value));
+				final MyListStore<String> comboValues = new MyListStore<String>(
+						new ModelKeyProvider<String>() {
+							@Override
+							public String getKey(String item) {
+								return item;
+							}
+						});
+				List<String> sortValues = new ArrayList<String>(values);
+				Collections.sort(sortValues);
+				comboValues.addAll(sortValues);
+				ComboBox<String> editComboBox = new ComboBox<String>(new MyComboBoxCell<String>(comboValues, new LabelProvider<String>() {
+					@Override
+					public String getLabel(String item) {
+						return item;
 					}
-					return result;
-				}
-			});
-			//editComboBox.setAutoValidate(true);
-			editComboBox.setEditable(true);
-			editComboBox.setTypeAhead(true);
-			//editComboBox.setAllowBlank(false);
-			//editComboBox.setClearValueOnParseError(false);
-			editComboBox.setForceSelection(true);
-			editComboBox.setTriggerAction(TriggerAction.ALL);
-			editing.addEditor(columnConfig, editComboBox);
+				}));
+				editComboBox.addValidator(new Validator<String>() {
+					@Override
+					public List<EditorError> validate(Editor<String> editor, String value) {
+						List<EditorError> result = new LinkedList<EditorError>();
+						if(!values.contains(value)) {
+							result.add(new DefaultEditorError(editor, "Value entered not part of the character's vocabulary", value));
+						}
+						return result;
+					}
+				});
+				//editComboBox.setAutoValidate(true);
+				editComboBox.setEditable(true);
+				editComboBox.setTypeAhead(true);
+				//editComboBox.setAllowBlank(false);
+				//editComboBox.setClearValueOnParseError(false);
+				editComboBox.setForceSelection(true);
+				editComboBox.setTriggerAction(TriggerAction.ALL);
+				editing.addEditor((MyColumnConfig)columnConfig, new ValueConverter(), editComboBox);
+			}
 			break;
-		default:
-			editing.addEditor(columnConfig, new TextField());
+		default: // same as OFF
+			if(columnConfig instanceof MyColumnConfig) {
+				editing.addEditor((MyColumnConfig)columnConfig, new ValueConverter(), new TextField());
+			} else {
+				editing.addEditor(columnConfig, new TaxonConverter(taxonMatrix), new TextField());
+			}
 			break;
 		}	
 	}
@@ -511,9 +498,10 @@ public class TaxonMatrixView implements IsWidget {
 		// setup controlled filtering
 		switch(controlMode) {
 		case CATEGORICAL:
+			ValueConverter valueConverter = new ValueConverter();
 			final Set<String> values = new HashSet<String>();
 			for(Taxon taxon : taxonMatrix.getTaxa()) {
-				values.add((String)columnConfig.getValueProvider().getValue(taxon));
+				values.add(valueConverter.convertModelValue(myColumnConfig.getValueProvider().getValue(taxon)));
 			}
 			final MyListStore<String> valueStore = new MyListStore<String>(
 					new ModelKeyProvider<String>() {
@@ -622,15 +610,20 @@ public class TaxonMatrixView implements IsWidget {
 	
 	public ControlMode determineControlMode(int colIndex) {
 		ColumnConfig columnConfig = grid.getColumnModel().getColumns().get(colIndex);
-		Set<String> values = new HashSet<String>();
-		for(Taxon taxon : taxonMatrix.getTaxa()) {
-			values.add((String)columnConfig.getValueProvider().getValue(taxon));
+		if(columnConfig instanceof MyColumnConfig) {
+			MyColumnConfig myColumnConfig = (MyColumnConfig)columnConfig;
+			Set<String> values = new HashSet<String>();
+			ValueConverter valueConverter = new ValueConverter();
+			for(Taxon taxon : taxonMatrix.getTaxa()) {
+				values.add(valueConverter.convertModelValue(myColumnConfig.getValueProvider().getValue(taxon)));
+			}
+			if(isNumeric(values))
+				return ControlMode.NUMERICAL;
+			if(values.isEmpty())
+				return ControlMode.OFF;
+			return ControlMode.CATEGORICAL;
 		}
-		if(isNumeric(values))
-			return ControlMode.NUMERICAL;
-		if(values.isEmpty())
-			return ControlMode.OFF;
-		return ControlMode.CATEGORICAL;
+		return ControlMode.OFF;
 	}
 
 	public int getTaxaCount() {

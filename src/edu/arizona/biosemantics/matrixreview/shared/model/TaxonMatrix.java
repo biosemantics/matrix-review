@@ -55,7 +55,7 @@ public class TaxonMatrix implements Serializable, HasDirty {
 	public void addTaxon(Taxon taxon) {
 		taxon.setTaxonMatrix(this);
 		taxon.init(characters);
-		addTaxon(taxa.size() - 1, taxon);
+		addTaxon(taxa.size(), taxon);
 	}
 	
 	public Taxon addTaxon(int index, String name) {
@@ -74,7 +74,7 @@ public class TaxonMatrix implements Serializable, HasDirty {
 	}
 	
 	public void addCharacter(Character character) {
-		this.addCharacter(characters.size() - 1, character);
+		this.addCharacter(characters.size(), character);
 	}
 	
 	public void addCharacter(int index, Character character) {
@@ -242,6 +242,8 @@ public class TaxonMatrix implements Serializable, HasDirty {
 
 	private boolean isDirtyCharacter(Character character) {
 		for(Taxon taxon : taxonCharacterChanges.keySet()) {
+			if(noChanges(taxon, character))
+				continue;
 			String initialValue = taxonCharacterChanges.get(taxon).get(character).getFirst().getOldValue().getValue();
 			String newValue = taxonCharacterChanges.get(taxon).get(character).getLast().getNewValue().getValue();
 			if(!initialValue.equals(newValue)) {
@@ -253,6 +255,8 @@ public class TaxonMatrix implements Serializable, HasDirty {
 
 	private boolean isDirtyTaxon(Taxon taxon) {
 		for(Character character : taxonCharacterChanges.get(taxon).keySet()) {
+			if(noChanges(taxon, character))
+				continue;
 			String initialValue = taxonCharacterChanges.get(taxon).get(character).getFirst().getOldValue().getValue();
 			String newValue = taxonCharacterChanges.get(taxon).get(character).getLast().getNewValue().getValue();
 			if(!initialValue.equals(newValue)) {
@@ -263,6 +267,8 @@ public class TaxonMatrix implements Serializable, HasDirty {
 	}
 
 	private boolean isDirtyValue(Taxon taxon, Character character, Value value) {
+		if(noChanges(taxon, character))
+			return false;
 		String initialValue = taxonCharacterChanges.get(taxon).get(character).getFirst().getOldValue().getValue();
 		String newValue = taxonCharacterChanges.get(taxon).get(character).getLast().getNewValue().getValue();
 		if(!initialValue.equals(newValue)) {
@@ -271,10 +277,16 @@ public class TaxonMatrix implements Serializable, HasDirty {
 		return false;
 	}
 	
+	private boolean noChanges(Taxon taxon, Character character) {
+		return taxonCharacterChanges.get(taxon).get(character).isEmpty();
+	}
+	
 	@Override
 	public boolean isDirty() {
 		for(Taxon taxon : taxonCharacterChanges.keySet()) {
 			for(Character character : taxonCharacterChanges.get(taxon).keySet()) {
+				if(noChanges(taxon, character))
+					continue;
 				String initialValue = taxonCharacterChanges.get(taxon).get(character).getFirst().getOldValue().getValue();
 				String newValue = taxonCharacterChanges.get(taxon).get(character).getLast().getNewValue().getValue();
 				if(!initialValue.equals(newValue)) {
