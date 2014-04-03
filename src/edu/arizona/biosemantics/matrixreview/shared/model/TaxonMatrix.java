@@ -48,14 +48,14 @@ public class TaxonMatrix implements Serializable, HasDirty {
 	
 	public Taxon addTaxon(String name) {
 		Taxon result = new Taxon(name, "", characters, this);
-		taxa.add(result);
+		this.addTaxon(result);
 		return result;
 	}
 	
 	public void addTaxon(Taxon taxon) {
 		taxon.setTaxonMatrix(this);
 		taxon.init(characters);
-		taxa.add(taxon);
+		addTaxon(taxa.size() - 1, taxon);
 	}
 	
 	public Taxon addTaxon(int index, String name) {
@@ -67,20 +67,23 @@ public class TaxonMatrix implements Serializable, HasDirty {
 	public void addTaxon(int index, Taxon taxon) {
 		taxon.setTaxonMatrix(this);
 		taxon.init(characters);
+		taxonCharacterChanges.put(taxon, new HashMap<Character, LinkedList<Change>>());
+		for(Character character : characters)
+			taxonCharacterChanges.get(taxon).put(character, new LinkedList<Change>());
 		taxa.add(index, taxon);
 	}
 	
 	public void addCharacter(Character character) {
-		this.characters.add(character);
-		for(Taxon taxon : taxa) {
-			taxon.addCharacter(character);
-		}
+		this.addCharacter(characters.size() - 1, character);
 	}
 	
 	public void addCharacter(int index, Character character) {
 		this.characters.add(index, character);
 		for(Taxon taxon : taxa) {
 			taxon.addCharacter(character);
+		}
+		for(Taxon taxon : this.taxonCharacterChanges.keySet()) {
+			taxonCharacterChanges.get(taxon).put(character, new LinkedList<Change>());
 		}
 	}
 
@@ -96,16 +99,21 @@ public class TaxonMatrix implements Serializable, HasDirty {
 
 	public void removeCharacter(Character character) {
 		this.characters.remove(character);
-		for(Taxon taxon : taxa)
+		for(Taxon taxon : taxa) 
 			taxon.remove(character);
+		for(Taxon taxon : this.taxonCharacterChanges.keySet()) {
+			taxonCharacterChanges.get(taxon).remove(character);
+		}
 	}
 	
 	public void removeTaxon(Taxon taxon) {
 		this.taxa.remove(taxon);
+		this.taxonCharacterChanges.remove(taxon);
 	}
 	
 	public void removeTaxon(int i) {
-		this.taxa.remove(i);
+		Taxon taxon = this.taxa.remove(i);
+		this.taxonCharacterChanges.remove(taxon);
 	}
 	
 	private boolean hasValue(Taxon taxon, Character character) {
