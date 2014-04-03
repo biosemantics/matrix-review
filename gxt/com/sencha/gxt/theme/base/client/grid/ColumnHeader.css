@@ -116,12 +116,12 @@ a.headButton:hover {
   border-right-color: #aaccf6;
 }
 
-@sprite .headOver .headInner, .headMenuOpen .headInner {
+/*@sprite .headOver .headInner, .headMenuOpen .headInner {
   background-color: #ebf3fd;
   gwt-image: 'columnHeaderOver';
   background-position: left bottom;
   height: auto;
-}
+}*/
 
 .sortIcon {
   background-repeat: no-repeat;

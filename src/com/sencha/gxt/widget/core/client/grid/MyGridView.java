@@ -93,7 +93,7 @@ public class MyGridView extends GridView<Taxon> {
 		if(colIndex == taxonMatrixView.getTaxonNameColumn()) {
 			final Menu menu = new Menu();
 			
-			MenuItem editMode = new MenuItem("Edit");
+			MenuItem editMode = new MenuItem("Lock all");
 			Menu editMenu = new Menu();
 			editMode.setSubMenu(editMenu);
 			CheckMenuItem enable = new CheckMenuItem("Enable");
@@ -237,7 +237,7 @@ public class MyGridView extends GridView<Taxon> {
 			});
 			menu.add(item);
 			
-			item = new MenuItem("Colors");
+			item = new MenuItem("Color Setting");
 			item.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
