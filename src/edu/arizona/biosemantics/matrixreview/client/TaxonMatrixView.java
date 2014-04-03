@@ -48,6 +48,7 @@ import com.sencha.gxt.widget.core.client.grid.ColumnHeader;
 import com.sencha.gxt.widget.core.client.grid.ColumnHeader.Head;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.MyColumnConfig;
+import com.sencha.gxt.widget.core.client.grid.MyColumnConfig.CharacterValueProvider;
 import com.sencha.gxt.widget.core.client.grid.MyColumnHeader.MyHead;
 import com.sencha.gxt.widget.core.client.grid.MyGrid;
 import com.sencha.gxt.widget.core.client.grid.MyGridView;
@@ -359,7 +360,9 @@ public class TaxonMatrixView implements IsWidget {
 	}
 	
 	private MyColumnConfig createCharacterColumnConfig(final Character character) {
-		MyColumnConfig characterCol = new MyColumnConfig(200, character);
+		MyColumnConfig characterCol = new MyColumnConfig(200, character, this);
+		CharacterValueProvider characterValueProvider = (CharacterValueProvider)characterCol.getValueProvider();
+		characterValueProvider.setMyColumnConfig(characterCol);
 		characterCol.setCell(new ValueCell(this));
 		return characterCol;
 	}
@@ -755,23 +758,35 @@ public class TaxonMatrixView implements IsWidget {
 		ColumnConfig<Taxon, ?> config = grid.getColumnModel().getColumn(column);
 		if(config instanceof MyColumnConfig) {
 			MyColumnConfig myColumnConfig = (MyColumnConfig)config;
+			Character character = myColumnConfig.getCharacter();
 			if (!myColumnConfig.isHidden()) {
 				ColumnHeader<Taxon> header = grid.getView().getHeader();
 				if (header != null) {
 					Head h = header.getHead(column);
 					if (h != null && h.isRendered() && h instanceof MyHead) {
 						MyHead myHead = (MyHead)h;
-						myHead.setText(myColumnConfig.getCharacter().toString());
-						myHead.setCoverage(TaxonMatrixView.this.getCoverage(myColumnConfig.getCharacter()));
-						myHead.setQuickTipText(TaxonMatrixView.this.getSummary(myColumnConfig.getCharacter()));
+						myHead.setText(character.toString());
+						myHead.setCoverage(TaxonMatrixView.this.getCoverage(character));
+						myHead.setQuickTipText(TaxonMatrixView.this.getSummary(character));
 						myHead.setCommented(hasColumnComment(column));
+						myHead.setBackgroundColor(character.getColor());
+						myHead.setDirty(character.isDirty());
 					}
 				}
 			}
 		}
 	}
 	
-	private void refreshColumnHeaders() {
+	public void refreshColumnHeader(MyColumnConfig toRefresh) {
+		for(int j = this.firstCharacterColumn; j<grid.getColumnModel().getColumnCount(); j++) {
+			ColumnConfig columnConfig = grid.getColumnModel().getColumn(j);
+			if(columnConfig instanceof MyColumnConfig && columnConfig.equals(toRefresh)) {
+				refreshColumnHeader(j);
+			}
+		}
+	}
+	
+	public void refreshColumnHeaders() {
 		for(int j = this.firstCharacterColumn; j<grid.getColumnModel().getColumnCount(); j++) {
 			ColumnConfig columnConfig = grid.getColumnModel().getColumn(j);
 			if(columnConfig instanceof MyColumnConfig) {
@@ -971,10 +986,26 @@ public class TaxonMatrixView implements IsWidget {
 		// set this in the model, possibly through the store to autoupdate the cell?
 		//editing.startEditing(cell)
 		//editing.completeEditing();
-		Value value = this.getValue(row, column);
-		if(value != null)
-			taxonMatrix.setColor(value, color);
-		grid.getView().refresh(false);
+		Taxon taxon = this.getTaxon(row);
+		if(column == this.taxonNameColumn && taxon != null) {
+			taxonMatrix.setColor(taxon, color);
+			grid.getView().refresh(false);
+		} else {
+			Value value = this.getValue(row, column);
+			if(value != null) {
+				taxonMatrix.setColor(value, color);
+				grid.getView().refresh(false);
+			}
+		}
+	}
+	
+	public void setColumnColor(int colIndex, Color color) {
+		ColumnConfig config = grid.getColumnModel().getColumn(colIndex);
+		if(config instanceof MyColumnConfig) {
+			MyColumnConfig myColumnConfig = (MyColumnConfig)config;
+			taxonMatrix.setColor(myColumnConfig.getCharacter(), color);
+			grid.getView().refresh(true);
+		}
 	}
 
 	public Value getValue(int row, int column) {
@@ -989,5 +1020,7 @@ public class TaxonMatrixView implements IsWidget {
 		return taxon.get(character);
 	}
 
-
+	public TaxonMatrix getTaxonMatrix() {
+		return taxonMatrix;
+	}
 }

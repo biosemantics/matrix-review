@@ -8,6 +8,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Format;
+import com.sencha.gxt.core.client.util.ImageHelper;
 import com.sencha.gxt.core.client.util.Params;
 import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
@@ -25,6 +26,7 @@ import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 
 public class TaxonCell extends MenuExtendedCell<Taxon> {
@@ -34,13 +36,19 @@ public class TaxonCell extends MenuExtendedCell<Taxon> {
 
 	interface Templates extends SafeHtmlTemplates {
 		@SafeHtmlTemplates.Template("<div qtitle=\"Summary\" qtip=\"{5}\">" +
-				"<div class=\"{1}\" style=\"width: calc(100% - 9px); height:14px\">{3}" +
-				"<span style=\"position:absolute;right:0px;background-color:#b0e0e6;width:35px;\">{4}</span>" + 
+				"<div class=\"{1}\" " +
+				"style=\"" +
+				"width: calc(100% - 9px); " +
+				"height:14px;" +
+				"background: no-repeat 0 0;" +
+				"background-image:{7};" +
+				"background-color:{6};\"" +
+				">{3}<span style=\"position:absolute;right:0px;background-color:#b0e0e6;width:35px;\">{4}</span>" + 
 				"<a href=\"#\" class=\"{2}\" style=\"height: 22px;\"></a>" +
 				"</div>" +
 				"</div>")
 		SafeHtml cell(String grandParentStyleClass, String parentStyleClass,
-				String aStyleClass, String value, String coverage, String quickTipText);
+				String aStyleClass, String value, String coverage, String quickTipText, String colorHex, String backgroundImage);
 	}
 	
 	protected static Templates templates = GWT.create(Templates.class);
@@ -60,21 +68,33 @@ public class TaxonCell extends MenuExtendedCell<Taxon> {
 		String parentStyleClass = columnHeaderStyles.headInner();
 		String aStyleClass = columnHeaderStyles.headButton();
 		
-		/*String cellClasses = "";
-		if (grid.getView().isShowDirtyCells() && r != null
-				&& r.getChange(columnConfig.getValueProvider()) != null && value.getComment().isEmpty()) {
-			cellClasses += " " + styles.cellDirty();
-		} else if(grid.getView().isShowDirtyCells() && r != null && r.getChange(columnConfig.getValueProvider()) != null && 
-				!value.getComment().isEmpty()) {
-			cellClasses += " " + styles.cellDirtyCommented();
-		} else if(!value.getComment().isEmpty()) {
-			cellClasses += " " + styles.cellCommented();
+		String quickTipText = value.getName();
+		quickTipText += "<br>" + taxonMatrixView.getSummary(value);
+		
+		String comment = value.getComment();
+		if(!comment.isEmpty())
+			quickTipText += "<br>Comment:" + comment;
+		
+		Color color = value.getColor();
+		String colorHex = "";
+		if(color != null) {
+			colorHex = "#" + color.getHex();
+			quickTipText += "<br>Colorized: " + color.getUse();
 		}
-		if(!value.getComment().isEmpty()) {
-			grandParentStyleClass += " " + cellClasses;
-		}*/
+		
+		String backgroundImage = "";
+		if(value.isDirty()) {
+			if(!value.isCommented()) {
+				backgroundImage = ImageHelper.createModuleBasedUrl("base/images/grid/black.gif");
+			} else {
+				backgroundImage = ImageHelper.createModuleBasedUrl("base/images/grid/black_red.gif");
+			}
+		} else if(value.isCommented()) {
+			backgroundImage = ImageHelper.createModuleBasedUrl("base/images/grid/red.gif");
+		}	
+		
 		SafeHtml rendered = templates.cell(grandParentStyleClass, parentStyleClass, aStyleClass, 
-				value.getName(), taxonMatrixView.getCoverage(value), taxonMatrixView.getSummary(value));
+				value.getName(), taxonMatrixView.getCoverage(value), quickTipText, colorHex, backgroundImage);
 		sb.append(rendered);
 	}
 
@@ -236,6 +256,32 @@ public class TaxonCell extends MenuExtendedCell<Taxon> {
 			}
 		});
 		menu.add(item);
+		
+		item = new MenuItem("Colorize");
+		Menu colorMenu = new Menu();
+		item.setSubMenu(colorMenu);
+		MenuItem offItem = new MenuItem("None");
+		offItem.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				taxonMatrixView.setColor(rowIndex, colIndex, null);
+			}
+		});
+		colorMenu.add(offItem);
+		for(final Color color : taxonMatrixView.getColors()) {
+			MenuItem colorItem = new MenuItem(color.getUse());
+			colorItem.getElement().getStyle().setProperty("backgroundColor", "#" + color.getHex());
+			colorItem.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					taxonMatrixView.setColor(rowIndex, colIndex, color);
+				}
+			});
+			colorMenu.add(colorItem);
+		}
+		
+		menu.add(item);
+		
 		
 		
 		return menu;

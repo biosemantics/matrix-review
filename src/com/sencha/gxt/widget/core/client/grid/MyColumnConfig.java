@@ -5,6 +5,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.widget.core.client.grid.filters.Filter;
 
+import edu.arizona.biosemantics.matrixreview.client.TaxonMatrixView;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.Value;
@@ -16,8 +17,11 @@ public class MyColumnConfig extends ColumnConfig<Taxon, Value> {
 	
 	public static class CharacterValueProvider implements ValueProvider<Taxon, Value> {
 		private Character character;
-		public CharacterValueProvider(Character character) {
+		private TaxonMatrixView taxonMatrixView;
+		private MyColumnConfig myColumnConfig;
+		public CharacterValueProvider(Character character, TaxonMatrixView taxonMatrixView) {
 			this.character = character;
+			this.taxonMatrixView = taxonMatrixView;
 		}
 		@Override
 		public Value getValue(Taxon object) {
@@ -27,6 +31,8 @@ public class MyColumnConfig extends ColumnConfig<Taxon, Value> {
 		@Override
 		public void setValue(Taxon object, Value value) {
 			object.setValue(character, value);
+			if(myColumnConfig != null)
+				taxonMatrixView.refreshColumnHeader(myColumnConfig);
 		}
 
 		@Override
@@ -34,20 +40,24 @@ public class MyColumnConfig extends ColumnConfig<Taxon, Value> {
 			return "/" + character.toString() + "/value";
 		}
 		
+		public void setMyColumnConfig(MyColumnConfig myColumnConfig) {
+			this.myColumnConfig = myColumnConfig;
+		}
+		
 	}
 
-	public MyColumnConfig(final Character character) {
-		super(new CharacterValueProvider(character));
+	public MyColumnConfig(final Character character, TaxonMatrixView taxonMatrixView) {
+		super(new CharacterValueProvider(character, taxonMatrixView));
 		this.character = character;
 	}
 
-	public MyColumnConfig(int width, SafeHtml header, final Character character) {
-		super(new CharacterValueProvider(character), width, header);
+	public MyColumnConfig(int width, SafeHtml header, final Character character, TaxonMatrixView taxonMatrixView) {
+		super(new CharacterValueProvider(character, taxonMatrixView), width, header);
 		this.character = character;
 	}
 
-	public MyColumnConfig(int width, final Character character) {
-		this(width, SafeHtmlUtils.fromString(character.toString()), character);
+	public MyColumnConfig(int width, final Character character, TaxonMatrixView taxonMatrixView) {
+		this(width, SafeHtmlUtils.fromString(character.toString()), character, taxonMatrixView);
 	}
 
 	public Character getCharacter() {

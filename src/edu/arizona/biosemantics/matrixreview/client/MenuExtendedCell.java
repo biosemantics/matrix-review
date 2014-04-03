@@ -194,25 +194,16 @@ public class MenuExtendedCell<C> extends AbstractCell<C> {
 		menu.add(item);
 		
 		item = new MenuItem("Colorize");
-		item.addSelectionHandler(new SelectionHandler<Item>() {
-			@Override
-			public void onSelection(SelectionEvent<Item> event) {
-				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox("Comment", "");
-				box.setValue(taxonMatrixView.getComment(rowIndex, colIndex));
-				box.addHideHandler(new HideHandler() {
-					@Override
-					public void onHide(HideEvent event) {
-						taxonMatrixView.setComment(rowIndex, colIndex, box.getValue());
-						String comment = Format.ellipse(box.getValue(), 80);
-						String message = Format.substitute("'{0}' saved", new Params(comment));
-						Info.display("Comment", message);
-					}
-				});
-				box.show();
-			}
-		});
 		Menu colorMenu = new Menu();
 		item.setSubMenu(colorMenu);
+		MenuItem offItem = new MenuItem("None");
+		offItem.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				taxonMatrixView.setColor(rowIndex, colIndex, null);
+			}
+		});
+		colorMenu.add(offItem);
 		for(final Color color : taxonMatrixView.getColors()) {
 			MenuItem colorItem = new MenuItem(color.getUse());
 			colorItem.getElement().getStyle().setProperty("backgroundColor", "#" + color.getHex());

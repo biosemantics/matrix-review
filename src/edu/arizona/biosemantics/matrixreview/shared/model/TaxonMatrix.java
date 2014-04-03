@@ -154,14 +154,20 @@ public class TaxonMatrix implements Serializable, HasDirty {
 
 	public void renameTaxon(Taxon taxon, String name) {
 		taxon.setName(name);
+		//only set dirty based on character value changes for the taxon. not the taxon name itself
+		//taxon.setDirty();
 	}
 	
 	public void renameCharacter(Character character, String name) {
 		character.setName(name);
+		//only set dirty based on character value changes for the character. not the character name itself
+		//character.setDirty();
 	}
 	
 	public void setOrgan(Character character, String organ) {
 		character.setOrgan(organ);
+		//only set dirty based on character value changes for the character. not the character organ itself
+		//character.setDirty();
 	}
 	
 	public void setComment(Taxon taxon, String comment) {
@@ -182,6 +188,8 @@ public class TaxonMatrix implements Serializable, HasDirty {
 	
 	public void setColor(Character character, Color color) {
 		character.setColor(color);
+		for(Taxon taxon : taxa)
+			taxon.get(character).setColor(color);
 	}
 	
 	public void setColor(Value value, Color color) {

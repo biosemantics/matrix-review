@@ -342,6 +342,31 @@ public class MyGridView extends GridView<Taxon> {
 				}
 			});
 			menu.add(item);
+			
+			item = new MenuItem("Colorize");
+			Menu colorMenu = new Menu();
+			item.setSubMenu(colorMenu);
+			MenuItem offItem = new MenuItem("None");
+			offItem.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					taxonMatrixView.setColumnColor(colIndex, null);
+				}
+			});
+			colorMenu.add(offItem);
+			for(final Color color : taxonMatrixView.getColors()) {
+				MenuItem colorItem = new MenuItem(color.getUse());
+				colorItem.getElement().getStyle().setProperty("backgroundColor", "#" + color.getHex());
+				colorItem.addSelectionHandler(new SelectionHandler<Item>() {
+					@Override
+					public void onSelection(SelectionEvent<Item> event) {
+						taxonMatrixView.setColumnColor(colIndex, color);
+					}
+				});
+				colorMenu.add(colorItem);
+			}
+			
+			menu.add(item);
 
 			final CheckMenuItem lockItem = new CheckMenuItem("Lock");
 			lockItem.setChecked(taxonMatrixView.isLockedColumn(colIndex));

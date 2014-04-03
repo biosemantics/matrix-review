@@ -4,13 +4,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ClientBundle.Source;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.ButtonBase;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.GXT;
@@ -27,14 +23,12 @@ import com.sencha.gxt.fx.client.DragMoveEvent;
 import com.sencha.gxt.fx.client.DragStartEvent;
 import com.sencha.gxt.widget.core.client.ComponentHelper;
 import com.sencha.gxt.widget.core.client.container.Container;
-import com.sencha.gxt.widget.core.client.event.CompleteEditEvent;
-import com.sencha.gxt.widget.core.client.event.CompleteEditEvent.CompleteEditHandler;
-import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderAppearance;
 import com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance;
-import com.sencha.gxt.widget.core.client.grid.GridView.GridStateStyles;
 
 import edu.arizona.biosemantics.matrixreview.client.TaxonMatrixView;
+import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 
 public class MyColumnHeader extends ColumnHeader<Taxon> {
 
@@ -45,6 +39,8 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 		protected SpanElement coverage;
 		private GridAppearance gridAppearance;
 		private com.sencha.gxt.widget.core.client.grid.GridView.GridStyles gridStyles;
+		private boolean hasColumnComment = false;
+		private boolean isDirty = false;
 
 		public MyHead(ColumnConfig column) {
 			this(column, GWT.<GridAppearance> create(GridAppearance.class));
@@ -108,6 +104,20 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 			if (column.getColumnHeaderClassName() != null) {
 				addStyleName(column.getColumnHeaderClassName());
 			}
+			
+			if(column instanceof MyColumnConfig) {
+				MyColumnConfig myColumnConfig = (MyColumnConfig)column;
+				Character character = myColumnConfig.getCharacter();
+				Color color = character.getColor();
+				if(color != null)
+					getElement().getStyle().setBackgroundColor("#" + color.getHex());
+				
+				if(character.isDirty())
+					addStyleName(gridStyles.cellDirty());
+				if(character.isCommented()) 
+					addStyleName(gridStyles.cellCommented());
+			}
+			
 			heads.add(this);
 		}
 
@@ -123,15 +133,41 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 			getElement().setAttribute("qtip", text);
 		}
 		
+		public void setBackgroundColor(Color color) {
+			if(color != null)
+				getElement().getStyle().setBackgroundColor("#" + color.getHex());
+		}
+		
 		public void setText(String text) {
 			this.text.setText(text);
 		}
 
 		public void setCommented(boolean hasColumnComment) {
-			if(hasColumnComment)
+			this.removeStyleName(gridStyles.cellDirty());
+			this.removeStyleName(gridStyles.cellCommented());
+			this.removeStyleName(gridStyles.cellDirtyCommented());
+			
+			this.hasColumnComment = hasColumnComment;
+			if(hasColumnComment && isDirty) 
+				this.addStyleName(gridStyles.cellDirtyCommented());
+			else if(hasColumnComment)
 				this.addStyleName(gridStyles.cellCommented());
 			else
 				this.removeStyleName(gridStyles.cellCommented());
+		}
+		
+		public void setDirty(boolean isDirty) {
+			this.removeStyleName(gridStyles.cellDirty());
+			this.removeStyleName(gridStyles.cellCommented());
+			this.removeStyleName(gridStyles.cellDirtyCommented());
+			
+			this.isDirty = isDirty;
+			if(hasColumnComment && isDirty)
+				this.addStyleName(gridStyles.cellDirtyCommented());
+			else if(isDirty)
+				this.addStyleName(gridStyles.cellDirty());
+			else 
+				this.removeStyleName(gridStyles.cellDirty());
 		}
 	}
 

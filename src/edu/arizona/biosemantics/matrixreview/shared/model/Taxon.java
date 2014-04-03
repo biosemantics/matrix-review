@@ -109,6 +109,9 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 
 	protected void setColor(Color color) {
 		this.color = color;
+		for(Value value : this.values.values()) {
+			value.setColor(color);
+		}
 	}
 
 	public TaxonMatrix getTaxonMatrix() {

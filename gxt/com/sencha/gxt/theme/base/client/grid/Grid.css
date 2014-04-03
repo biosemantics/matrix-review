@@ -5,16 +5,11 @@
  *
  * http://www.sencha.com/products/gxt/license/
  */
-@eval dirty com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/dirty_red.gif");
+@eval dirty com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/black.gif");
+@eval commented com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/red.gif");
+@eval dirtyCommented com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/black_red.gif");
 @eval invalidLine com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/invalid_line.gif");
-@eval dirtyBlack com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/dirty_black.gif");
-@eval dirtyRedBlack com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/dirty_red_black.gif");
-@eval dirtyBlue com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/dirty_blue.gif");
-@eval dirtyDarkBlue com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/dirty_darkblue.gif");
-@eval dirtyGray com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/dirty_gray.gif");
-@eval dirtyGreen com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/dirty_green.gif");
-@eval dirtyOrange com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/dirty_orange.gif");
-@eval dirtyYellow com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/dirty_yellow.gif");
+
 
 @external x-treegrid x-treegrid-column;
 
@@ -99,7 +94,7 @@
 
 .cellDirty {
   background: transparent no-repeat 0 0; 
-  background-image: dirty;
+  background-image: black;
 }
 
 .cellDirty {
@@ -108,11 +103,11 @@
 }
 .cellCommented {
   background: transparent no-repeat 0 0;
-  background-image: dirtyBlack;
+  background-image: commented;
 }
 .cellDirtyCommented {
   background: transparent no-repeat 0 0;
-  background-image: dirtyRedBlack;
+  background-image: dirtyCommented;
 }
 
 .row .grid-cellSelected {
