@@ -32,7 +32,7 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
-public class MenuExtendedCell<C> extends AbstractCell<C> {
+public abstract class MenuExtendedCell<C> extends AbstractCell<C> {
 
 	private ColumnHeaderAppearance columnHeaderAppearance;
 	private GridAppearance gridAppearance;
@@ -81,24 +81,6 @@ public class MenuExtendedCell<C> extends AbstractCell<C> {
 		System.out.println(styles.sortIcon());
 		System.out.println(styles.headerInner());
 		*/
-	}
-
-	@Override
-	public void render(Context context,	C value, SafeHtmlBuilder sb) {
-		if (value == null)
-			return;
-		Taxon taxon = taxonMatrixView.getTaxon(context.getIndex());
-		String quickTipText = taxon.getName();
-		
-		Character character = taxonMatrixView.getCharacter(context.getColumn());
-		if(character != null) {
-			Value characterValue = taxon.get(character);
-			quickTipText = character.toString() + " of " + taxon.getName() + " is " + characterValue.getValue(); 
-		}
-		
-		SafeHtml rendered = templates.cell("", columnHeaderStyles.headInner(),
-				columnHeaderStyles.headButton(), value.toString(), quickTipText);
-		sb.append(rendered);
 	}
 
 	@Override
@@ -162,61 +144,6 @@ public class MenuExtendedCell<C> extends AbstractCell<C> {
 					Anchor.BOTTOM_LEFT, true));
 		}
 	}
-		
-	/**
-	 * Creates a context menu for the given column, including sort menu items
-	 * and column visibility sub-menu.
-	 * 
-	 * @param colIndex
-	 *            the column index
-	 * @return the context menu for the given column
-	 */
-	protected Menu createContextMenu(final int colIndex, final int rowIndex) {
-		final Menu menu = new Menu();
-		MenuItem item = new MenuItem("Comment");
-		item.addSelectionHandler(new SelectionHandler<Item>() {
-			@Override
-			public void onSelection(SelectionEvent<Item> event) {
-				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox("Comment", "");
-				box.setValue(taxonMatrixView.getComment(rowIndex, colIndex));
-				box.addHideHandler(new HideHandler() {
-					@Override
-					public void onHide(HideEvent event) {
-						taxonMatrixView.setComment(rowIndex, colIndex, box.getValue());
-						String comment = Format.ellipse(box.getValue(), 80);
-						String message = Format.substitute("'{0}' saved", new Params(comment));
-						Info.display("Comment", message);
-					}
-				});
-				box.show();
-			}
-		});
-		menu.add(item);
-		
-		item = new MenuItem("Colorize");
-		Menu colorMenu = new Menu();
-		item.setSubMenu(colorMenu);
-		MenuItem offItem = new MenuItem("None");
-		offItem.addSelectionHandler(new SelectionHandler<Item>() {
-			@Override
-			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.setColor(rowIndex, colIndex, null);
-			}
-		});
-		colorMenu.add(offItem);
-		for(final Color color : taxonMatrixView.getColors()) {
-			MenuItem colorItem = new MenuItem(color.getUse());
-			colorItem.getElement().getStyle().setProperty("backgroundColor", "#" + color.getHex());
-			colorItem.addSelectionHandler(new SelectionHandler<Item>() {
-				@Override
-				public void onSelection(SelectionEvent<Item> event) {
-					taxonMatrixView.setColor(rowIndex, colIndex, color);
-				}
-			});
-			colorMenu.add(colorItem);
-		}
-		
-		menu.add(item);
-		return menu;
-	}
+
+	protected abstract Menu createContextMenu(int column, int row);
 }

@@ -1,10 +1,22 @@
 package edu.arizona.biosemantics.matrixreview.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.sencha.gxt.core.client.util.Format;
 import com.sencha.gxt.core.client.util.ImageHelper;
+import com.sencha.gxt.core.client.util.Params;
+import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
+import com.sencha.gxt.widget.core.client.event.HideEvent;
+import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
+import com.sencha.gxt.widget.core.client.info.Info;
+import com.sencha.gxt.widget.core.client.menu.Item;
+import com.sencha.gxt.widget.core.client.menu.Menu;
+import com.sencha.gxt.widget.core.client.menu.MenuItem;
+import com.sencha.gxt.widget.core.client.menu.ValueMenu;
 
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
@@ -73,5 +85,10 @@ public class ValueCell extends MenuExtendedCell<Value> {
 		SafeHtml rendered = templates.cell("", columnHeaderStyles.headInner(),
 				columnHeaderStyles.headButton(), value.toString(), quickTipText, colorHex, backgroundImage);
 		sb.append(rendered);
+	}
+
+	protected Menu createContextMenu(final int colIndex, final int rowIndex) {
+		final Menu menu = new ValueMenu(taxonMatrixView, rowIndex, colIndex);
+		return menu;
 	}
 }
