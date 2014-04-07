@@ -275,7 +275,7 @@ public class TreeGridView<M> extends GridView<M> {
   }
 
   @Override
-  protected void doSort(int colIndex, SortDir sortDir) {
+  public void doSort(int colIndex, SortDir sortDir) {
     ColumnConfig<M, ?> column = cm.getColumn(colIndex);
     if (!isRemoteSort()) {
       treeStore.clearSortInfo();

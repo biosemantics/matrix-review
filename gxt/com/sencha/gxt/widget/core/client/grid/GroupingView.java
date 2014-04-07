@@ -318,7 +318,7 @@ public class GroupingView<M> extends GridView<M> implements HasCollapseItemHandl
   }
 
   @Override
-  protected void doSort(int colIndex, SortDir sortDir) {
+  public void doSort(int colIndex, SortDir sortDir) {
     ColumnConfig<M, ?> column = cm.getColumn(colIndex);
     if (groupingColumn != null) {
       if (grid.getLoader() == null || !grid.getLoader().isRemoteSort()) {

@@ -21,9 +21,12 @@ import com.sencha.gxt.widget.core.client.grid.GridView.GridStyles;
 import com.sencha.gxt.widget.core.client.grid.MyGrid;
 import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
+import com.sencha.gxt.widget.core.client.menu.HeaderMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
+import com.sencha.gxt.widget.core.client.menu.RowMenu;
+import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
 
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
@@ -126,164 +129,7 @@ public class TaxonCell extends MenuExtendedCell<Taxon> {
 	
 	@Override
 	protected Menu createContextMenu(final int colIndex, final int rowIndex) {
-		final Menu menu = new Menu();
-		
-		MenuItem item = new MenuItem();
-		item.setText("Add");
-		// item.setIcon(header.getAppearance().sortAscendingIcon());
-		item.addSelectionHandler(new SelectionHandler<Item>() {
-			@Override
-			public void onSelection(SelectionEvent<Item> event) {
-				final PromptMessageBox nameBox = new PromptMessageBox(
-						"Taxon Name", "");
-				nameBox.addHideHandler(new HideHandler() {
-					@Override
-					public void onHide(HideEvent event) {
-						String name = nameBox.getValue();
-						taxonMatrixView.addTaxonAfter(rowIndex, name);
-					}
-				});
-				nameBox.show();
-			}
-		});
-		menu.add(item);
-		
-		item = new MenuItem();
-		item.setText("Delete");
-		// item.setIcon(header.getAppearance().sortAscendingIcon());
-		item.addSelectionHandler(new SelectionHandler<Item>() {
-			@Override
-			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.deleteRow(rowIndex);
-			}
-		});
-		menu.add(item);
-		
-		final CheckMenuItem lockItem = new CheckMenuItem("Lock");
-		lockItem.setChecked(taxonMatrixView.isLockedRow(rowIndex));
-		lockItem.addSelectionHandler(new SelectionHandler<Item>() {
-			@Override
-			public void onSelection(SelectionEvent<Item> event) {
-				boolean newValue = !taxonMatrixView.isLockedRow(rowIndex);
-				lockItem.setChecked(newValue);
-				taxonMatrixView.setLockedRow(rowIndex, newValue);
-			}
-		});
-		menu.add(lockItem);	
-		
-		
-		MenuItem rows = new MenuItem();
-		rows.setText("Taxa");
-		// rows.setIcon(header.getAppearance().columnsIcon());
-		// rows.setData("gxt-columns", "true");
-
-		final Menu rowMenu = new Menu();
-
-		int rowCount = taxonMatrixView.getTaxaCount();
-		for (int i = 0; i < rowCount; i++) {
-			Taxon taxon = taxonMatrixView.getTaxonFromAll(i);
-			final int finalRow = i;
-			final CheckMenuItem check = new CheckMenuItem();
-			check.setHideOnClick(false);
-			check.setHTML(taxon.getName());
-			check.setChecked(!taxonMatrixView.isHiddenTaxon(i));
-			check.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
-				@Override
-				public void onCheckChange(CheckChangeEvent<CheckMenuItem> event) {
-					taxonMatrixView.setHiddenTaxon(finalRow,
-							!taxonMatrixView.isHiddenTaxon(finalRow));
-					restrictMenu(rowMenu);
-				}
-			});
-			rowMenu.add(check);
-		}
-
-		restrictMenu(rowMenu);
-		rows.setEnabled(rowMenu.getWidgetCount() > 0);
-		rows.setSubMenu(rowMenu);
-		menu.add(rows);
-		
-		item = new MenuItem("Move after");
-		menu.add(item);
-		Menu moveMenu = new Menu();
-		item.setSubMenu(moveMenu);
-
-		item = new MenuItem("start");
-		item.addSelectionHandler(new SelectionHandler<Item>() {
-			@Override
-			public void onSelection(SelectionEvent<Item> event) {
-				Taxon taxon =  grid.getStore().remove(rowIndex);
-				grid.getStore().add(0, taxon);
-			}
-		});
-		moveMenu.add(item);
-		
-		int visibleRowCount = taxonMatrixView.getVisibleTaxaCount();
-		for (int i = 0; i < visibleRowCount; i++) {
-			if(i != rowIndex) {
-				final int theI = i;
-				item = new MenuItem(taxonMatrixView.getVisibleTaxon(i).getName());
-				item.addSelectionHandler(new SelectionHandler<Item>() {
-					@Override
-					public void onSelection(SelectionEvent<Item> event) {
-						Taxon taxon =  grid.getStore().remove(rowIndex);
-						int finalI = theI;
-						if(rowIndex < theI)
-							finalI--;				
-						grid.getStore().add(finalI + 1, taxon);
-					}
-				});
-				moveMenu.add(item);
-			}
-		}
-		
-		item = new MenuItem("Comment");
-		item.addSelectionHandler(new SelectionHandler<Item>() {
-			@Override
-			public void onSelection(SelectionEvent<Item> event) {
-				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox("Comment", "");
-				box.setValue(taxonMatrixView.getRowComment(rowIndex));
-				box.addHideHandler(new HideHandler() {
-					@Override
-					public void onHide(HideEvent event) {
-						taxonMatrixView.setRowComment(rowIndex, box.getValue());
-						String comment = Format.ellipse(box.getValue(), 80);
-						String message = Format.substitute("'{0}' saved", new Params(comment));
-						Info.display("Comment", message);
-					}
-				});
-				box.show();
-			}
-		});
-		menu.add(item);
-		
-		item = new MenuItem("Colorize");
-		Menu colorMenu = new Menu();
-		item.setSubMenu(colorMenu);
-		MenuItem offItem = new MenuItem("None");
-		offItem.addSelectionHandler(new SelectionHandler<Item>() {
-			@Override
-			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.setColor(rowIndex, colIndex, null);
-			}
-		});
-		colorMenu.add(offItem);
-		for(final Color color : taxonMatrixView.getColors()) {
-			MenuItem colorItem = new MenuItem(color.getUse());
-			colorItem.getElement().getStyle().setProperty("backgroundColor", "#" + color.getHex());
-			colorItem.addSelectionHandler(new SelectionHandler<Item>() {
-				@Override
-				public void onSelection(SelectionEvent<Item> event) {
-					taxonMatrixView.setColor(rowIndex, colIndex, color);
-				}
-			});
-			colorMenu.add(colorItem);
-		}
-		
-		menu.add(item);
-		
-		
-		
+		final Menu menu = new RowMenu(taxonMatrixView, grid, rowIndex);
 		return menu;
 	}
 }

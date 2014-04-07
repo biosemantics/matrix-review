@@ -301,7 +301,7 @@ public class LiveGridView<M> extends GridView<M> implements HasLiveGridViewUpdat
   }
 
   @Override
-  protected void doSort(int colIndex, SortDir sortDir) {
+  public void doSort(int colIndex, SortDir sortDir) {
     cacheStore.clear();
     ColumnConfig<M, ?> column = cm.getColumn(colIndex);
 

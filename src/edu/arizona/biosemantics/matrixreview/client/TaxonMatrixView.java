@@ -60,6 +60,7 @@ import com.sencha.gxt.widget.core.client.grid.editing.ValueConverter;
 import com.sencha.gxt.widget.core.client.grid.filters.GridFilters;
 import com.sencha.gxt.widget.core.client.grid.filters.HideTaxonFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.ListFilter;
+import com.sencha.gxt.widget.core.client.grid.filters.MyGridFilters;
 import com.sencha.gxt.widget.core.client.grid.filters.NumericFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.TaxonNameFilter;
@@ -161,7 +162,7 @@ public class TaxonMatrixView implements IsWidget {
 			editing.addEditor(taxon);
 				
 		// set up filtering (tied to the store internally, so has to be done after grid is reconfigured with new store object)
-		filters = new GridFilters<Taxon>();
+		filters = new MyGridFilters();
 		filters.setLocal(true);
 		//StringFilter<Taxon> taxonNameFilter = new StringFilter<Taxon>(new TaxonNameValueProvider());
 		TaxonNameFilter taxonNameFilter = new TaxonNameFilter(new TaxonNameValueProvider());
@@ -979,17 +980,17 @@ public class TaxonMatrixView implements IsWidget {
 		// set this in the model, possibly through the store to autoupdate the cell?
 		//editing.startEditing(cell)
 		//editing.completeEditing();
-		Taxon taxon = this.getTaxon(row);
-		if(column == this.taxonNameColumn && taxon != null) {
-			taxonMatrix.setColor(taxon, color);
+		Value value = this.getValue(row, column);
+		if(value != null) {
+			taxonMatrix.setColor(value, color);
 			grid.getView().refresh(false);
-		} else {
-			Value value = this.getValue(row, column);
-			if(value != null) {
-				taxonMatrix.setColor(value, color);
-				grid.getView().refresh(false);
-			}
 		}
+	}
+	
+	public void setRowColor(int row, Color color) {
+		Taxon taxon = this.getTaxon(row);
+		taxonMatrix.setColor(taxon, color);
+		grid.getView().refresh(false);
 	}
 	
 	public void setColumnColor(int colIndex, Color color) {

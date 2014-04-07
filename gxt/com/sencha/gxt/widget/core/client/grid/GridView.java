@@ -1546,7 +1546,7 @@ public class GridView<M> {
    * @param colIndex the column to sort
    * @param sortDir the sort direction
    */
-  protected void doSort(int colIndex, SortDir sortDir) {
+  public void doSort(int colIndex, SortDir sortDir) {
     ColumnConfig<M, ?> column = cm.getColumn(colIndex);
     if (!isRemoteSort()) {
       ds.clearSortInfo();
@@ -2947,7 +2947,7 @@ public class GridView<M> {
     }
   }
 
-  private void restrictMenu(ColumnModel<M> cm, Menu columns) {
+  public void restrictMenu(ColumnModel<M> cm, Menu columns) {
     int count = 0;
     for (int i = 0, len = cm.getColumnCount(); i < len; i++) {
       if (hasHeaderValue(i)) {
@@ -2977,8 +2977,12 @@ public class GridView<M> {
     }
   }
 
-  private boolean hasHeaderValue(int columnIndex) {
+  public boolean hasHeaderValue(int columnIndex) {
     return cm.getColumnHeader(columnIndex) != null && !cm.getColumnHeader(columnIndex).asString().equals("") ;
+  }
+  
+  public ColumnModel<M> getColumnModel() {
+	  return cm;
   }
 
 }
