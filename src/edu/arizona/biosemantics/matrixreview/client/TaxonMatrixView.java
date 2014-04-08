@@ -40,6 +40,8 @@ import com.sencha.gxt.widget.core.client.event.CompleteEditEvent;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent.CompleteEditHandler;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.Field;
+import com.sencha.gxt.widget.core.client.form.MyStringComboBox;
+import com.sencha.gxt.widget.core.client.form.StringComboBox;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.form.Validator;
 import com.sencha.gxt.widget.core.client.form.error.DefaultEditorError;
@@ -416,6 +418,10 @@ public class TaxonMatrixView implements IsWidget {
 				List<String> sortValues = new ArrayList<String>(values);
 				Collections.sort(sortValues);
 				comboValues.addAll(sortValues);
+				
+				//http://www.sencha.com/forum/showthread.php?196281-GXT-3-rc2-ComboBox-setForceSelection(false)-does-not-work/page2
+				//for ComboBox vs StringComboBox: ComboBox does not allow "new values" -> StringComboBox is made for this use case
+				//MyStringComboBox editComboBox = new MyStringComboBox(sortValues);
 				ComboBox<String> editComboBox = new ComboBox<String>(new MyComboBoxCell<String>(comboValues, new LabelProvider<String>() {
 					@Override
 					public String getLabel(String item) {
@@ -432,13 +438,17 @@ public class TaxonMatrixView implements IsWidget {
 						return result;
 					}
 				});
+				//editComboBox.setAddUserValues(true);
+				//editComboBox.setFinishEditOnEnter(true);
+				editComboBox.setForceSelection(false);
 				//editComboBox.setAutoValidate(true);
-				editComboBox.setEditable(true);
+				//editComboBox.setEditable(true);
 				editComboBox.setTypeAhead(true);
 				//editComboBox.setAllowBlank(false);
 				//editComboBox.setClearValueOnParseError(false);
-				editComboBox.setForceSelection(true);
-				editComboBox.setTriggerAction(TriggerAction.ALL);
+				//editComboBox.setForceSelection(true);
+				//editComboBox.setTriggerAction(TriggerAction.ALL);
+				editComboBox.setForceSelection(false);
 				editing.addEditor((MyColumnConfig)columnConfig, new ValueConverter(), editComboBox);
 			}
 			break;

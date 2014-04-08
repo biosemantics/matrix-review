@@ -27,8 +27,8 @@ import com.sencha.gxt.data.shared.ListStore;
  */
 public class StringComboBoxCell extends ComboBoxCell<String> {
 
-  private boolean isAddUserValues;
-  private List<String> userValues;
+  protected boolean isAddUserValues;
+  protected List<String> userValues;
 
   /**
    * Creates a combo box cell for use with strings.
