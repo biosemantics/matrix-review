@@ -3,7 +3,6 @@ package edu.arizona.biosemantics.matrixreview.shared.model;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 
 public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComment, HasDirty {

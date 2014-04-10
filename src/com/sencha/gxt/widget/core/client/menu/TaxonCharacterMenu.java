@@ -33,18 +33,22 @@ import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.form.Validator;
 import com.sencha.gxt.widget.core.client.form.error.DefaultEditorError;
 
-import edu.arizona.biosemantics.matrixreview.client.ColorCell;
-import edu.arizona.biosemantics.matrixreview.client.TaxonMatrixView;
+import edu.arizona.biosemantics.matrixreview.client.cells.ColorCell;
+import edu.arizona.biosemantics.matrixreview.client.manager.AnnotationManager;
+import edu.arizona.biosemantics.matrixreview.client.manager.ControlManager;
+import edu.arizona.biosemantics.matrixreview.client.manager.DataManager;
+import edu.arizona.biosemantics.matrixreview.client.manager.ViewManager;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 
 public class TaxonCharacterMenu extends Menu {
 
-	private TaxonMatrixView taxonMatrixView;
+	private AnnotationManager annotationManager;
 
-	public TaxonCharacterMenu(final TaxonMatrixView taxonMatrixView) {
+	public TaxonCharacterMenu(final DataManager dataManager, final ViewManager viewManager, final ControlManager controlManager, 
+			final AnnotationManager annotationManager) {
 		super();
-		this.taxonMatrixView = taxonMatrixView;
+		this.annotationManager = annotationManager;
 		
 		add(new HeaderMenuItem("Taxa/Characters"));
 		
@@ -55,7 +59,7 @@ public class TaxonCharacterMenu extends Menu {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				for (int i = 0; i < 10; i++)
-					taxonMatrixView.addCharacter(new Character("character" + i, "organ" + i));
+					dataManager.addCharacter(new Character("character" + i, "organ" + i));
 			}
 		});
 		add(item);
@@ -67,7 +71,7 @@ public class TaxonCharacterMenu extends Menu {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				for (int i = 0; i < 10; i++)
-					taxonMatrixView.addTaxon("taxon" + i);
+					dataManager.addTaxon("taxon" + i);
 			}
 		});
 		add(item);
@@ -82,18 +86,18 @@ public class TaxonCharacterMenu extends Menu {
 		enable.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.enableEditing(true);
+				controlManager.enableEditing(true);
 			}
 		});
 		disable.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.enableEditing(false);
+				controlManager.enableEditing(false);
 			}
 		});
-		if(taxonMatrixView.isEditableAll())
+		if(controlManager.isEditableAll())
 			enable.setChecked(true);
-		if(taxonMatrixView.isNotEditableAll())
+		if(controlManager.isNotEditableAll())
 			disable.setChecked(true);
 		editMenu.add(enable);
 		editMenu.add(disable);
@@ -116,25 +120,25 @@ public class TaxonCharacterMenu extends Menu {
 		coverageSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.sortRowsByCoverage(true);
+				viewManager.sortRowsByCoverage(true);
 			}
 		});
 		coverageSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.sortRowsByCoverage(false);
+				viewManager.sortRowsByCoverage(false);
 			}
 		});
 		nameSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.sortRowsByName(true);
+				viewManager.sortRowsByName(true);
 			}
 		});
 		nameSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.sortRowsByName(false);
+				viewManager.sortRowsByName(false);
 			}
 		});
 		add(item);
@@ -159,37 +163,37 @@ public class TaxonCharacterMenu extends Menu {
 		coverageSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.sortColumnsByCoverage(true);
+				viewManager.sortColumnsByCoverage(true);
 			}
 		});
 		coverageSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.sortColumnsByCoverage(false);
+				viewManager.sortColumnsByCoverage(false);
 			}
 		});
 		nameSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.sortColumnsByName(true);
+				viewManager.sortColumnsByName(true);
 			}
 		});
 		nameSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.sortColumnsByName(false);
+				viewManager.sortColumnsByName(false);
 			}
 		});
 		organSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.sortColumnsByOrgan(true);
+				viewManager.sortColumnsByOrgan(true);
 			}
 		});
 		organSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.sortColumnsByOrgan(false);
+				viewManager.sortColumnsByOrgan(false);
 			}
 		});
 		add(item);
@@ -270,10 +274,10 @@ public class TaxonCharacterMenu extends Menu {
 		addButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				List<Color> colors = taxonMatrixView.getColors();
+				List<Color> colors = annotationManager.getColors();
 				colors.add(new Color(textField.getText(), ""));
 				colorsTable.setRowData(colors);
-				taxonMatrixView.setColors(colors);
+				annotationManager.setColors(colors);
 			}
 		});
 		
@@ -320,7 +324,7 @@ public class TaxonCharacterMenu extends Menu {
 	    colorsTable.addColumn(checkColumn, "Select");
 	    colorsTable.addColumn(colorColumn, "Color");
 	    colorsTable.addColumn(useColumn, "Usage");
-	    colorsTable.setRowData(taxonMatrixView.getColors());
+	    colorsTable.setRowData(annotationManager.getColors());
 		
 	    ScrollPanel scrollPanel = new ScrollPanel();
 	    Button removeButton = new Button("remove");
@@ -329,7 +333,7 @@ public class TaxonCharacterMenu extends Menu {
 			@Override
 			public void onClick(ClickEvent event) {
 				Set<Color> toRemove = new HashSet<Color>();
-				List<Color> colors = taxonMatrixView.getColors();
+				List<Color> colors = annotationManager.getColors();
 				for(Color color : colors) {
 					Boolean checked = checkboxCell.getViewData(color);
 					if(checked == null)

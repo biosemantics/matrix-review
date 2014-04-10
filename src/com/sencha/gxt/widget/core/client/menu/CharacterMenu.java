@@ -1,48 +1,37 @@
 package com.sencha.gxt.widget.core.client.menu;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.util.Format;
 import com.sencha.gxt.core.client.util.Params;
 import com.sencha.gxt.data.shared.SortDir;
-import com.sencha.gxt.data.shared.SortInfoBean;
-import com.sencha.gxt.data.shared.Store.StoreSortInfo;
 import com.sencha.gxt.messages.client.DefaultMessages;
-import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
 import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent;
-import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent.CheckChangeHandler;
+import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
-import com.sencha.gxt.widget.core.client.grid.ColumnHeader;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
-import com.sencha.gxt.widget.core.client.grid.MyGridView;
+import com.sencha.gxt.widget.core.client.grid.GridView;
 import com.sencha.gxt.widget.core.client.info.Info;
 
-import edu.arizona.biosemantics.matrixreview.client.ControlMode;
-import edu.arizona.biosemantics.matrixreview.client.TaxonMatrixView;
+import edu.arizona.biosemantics.matrixreview.client.manager.AnnotationManager;
+import edu.arizona.biosemantics.matrixreview.client.manager.ControlManager;
+import edu.arizona.biosemantics.matrixreview.client.manager.ControlManager.ControlMode;
+import edu.arizona.biosemantics.matrixreview.client.manager.DataManager;
+import edu.arizona.biosemantics.matrixreview.client.manager.ViewManager;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 
 public class CharacterMenu extends Menu {
 
-	private TaxonMatrixView taxonMatrixView;
-	private int colIndex;
-	private MyGridView myGridView;
-	private ColumnModel<Taxon> cm;
-
-	public CharacterMenu(final TaxonMatrixView taxonMatrixView, final MyGridView myGridView, final int colIndex) {
+	public CharacterMenu(final DataManager dataManager, final ViewManager viewManager, final ControlManager controlManager,
+			final AnnotationManager annotationManager, final GridView<Taxon> gridView, final int colIndex) {
 		super();
-		this.taxonMatrixView = taxonMatrixView;
-		this.colIndex = colIndex;
-		this.myGridView = myGridView;
-		this.cm = myGridView.getColumnModel();
+		final ColumnModel<Taxon> cm = gridView.getColumnModel();
 		
 		int cols = cm.getColumnCount();
 		
@@ -65,7 +54,7 @@ public class CharacterMenu extends Menu {
 							public void onHide(HideEvent event) {
 								String name = nameBox.getValue();
 								String organ = organBox.getValue();
-								taxonMatrixView.addCharacterAfter(colIndex, new Character(name, organ));
+								dataManager.addCharacterAfter(colIndex, new Character(name, organ));
 							}
 						});
 						organBox.show();
@@ -82,7 +71,7 @@ public class CharacterMenu extends Menu {
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.deleteColumn(colIndex);
+				dataManager.deleteColumn(colIndex);
 			}
 		});
 		add(item);
@@ -92,7 +81,7 @@ public class CharacterMenu extends Menu {
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				final Character character = taxonMatrixView.getCharacter(colIndex);
+				final Character character = dataManager.getCharacter(colIndex);
 				final PromptMessageBox nameBox = new PromptMessageBox(
 						"Character Name", "");
 				nameBox.setValue(character.getName());
@@ -107,7 +96,7 @@ public class CharacterMenu extends Menu {
 							public void onHide(HideEvent event) {
 								String name = nameBox.getValue();
 								String organ = organBox.getValue();
-								taxonMatrixView.renameCharacter(colIndex, name, organ);
+								dataManager.renameCharacter(colIndex, name, organ);
 							}
 						});
 						organBox.show();
@@ -149,14 +138,13 @@ public class CharacterMenu extends Menu {
 		}
 
 		final CheckMenuItem lockItem = new CheckMenuItem("Lock");
-		lockItem.setChecked(taxonMatrixView.isLockedColumn(colIndex));
+		lockItem.setChecked(controlManager.isLockedColumn(colIndex));
 		lockItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				boolean newValue = !taxonMatrixView
-						.isLockedColumn(colIndex);
+				boolean newValue = !controlManager.isLockedColumn(colIndex);
 				lockItem.setChecked(newValue);
-				taxonMatrixView.setLockedColumn(colIndex, newValue);
+				controlManager.setLockedColumn(colIndex, newValue);
 			}
 		});
 		add(lockItem);
@@ -181,36 +169,36 @@ public class CharacterMenu extends Menu {
 		off.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				if(!taxonMatrixView.getControlMode(colIndex).equals(ControlMode.OFF)) {
-					taxonMatrixView.setControlMode(colIndex, ControlMode.OFF);
+				if(!controlManager.getControlMode(colIndex).equals(ControlMode.OFF)) {
+					controlManager.setControlMode(colIndex, ControlMode.OFF);
 				}
 			}
 		});
 		automatic.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				ControlMode controlMode = taxonMatrixView.determineControlMode(colIndex);
-				taxonMatrixView.setControlMode(colIndex, controlMode);
+				ControlMode controlMode = controlManager.determineControlMode(colIndex);
+				controlManager.setControlMode(colIndex, controlMode);
 			}
 		});
 		numerical.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				if(!taxonMatrixView.getControlMode(colIndex).equals(ControlMode.NUMERICAL)) {
-					taxonMatrixView.setControlMode(colIndex, ControlMode.NUMERICAL);
+				if(!controlManager.getControlMode(colIndex).equals(ControlMode.NUMERICAL)) {
+					controlManager.setControlMode(colIndex, ControlMode.NUMERICAL);
 				}
 			}
 		});
 		categorical.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				if(!taxonMatrixView.getControlMode(colIndex).equals(ControlMode.CATEGORICAL)) {
-					taxonMatrixView.setControlMode(colIndex, ControlMode.CATEGORICAL);
+				if(!controlManager.getControlMode(colIndex).equals(ControlMode.CATEGORICAL)) {
+					controlManager.setControlMode(colIndex, ControlMode.CATEGORICAL);
 				}
 			}
 		});
 		add(controlItem);
-		switch(taxonMatrixView.getControlMode(colIndex)) {
+		switch(controlManager.getControlMode(colIndex)) {
 		case CATEGORICAL:
 			categorical.setChecked(true);
 			break;
@@ -227,12 +215,12 @@ public class CharacterMenu extends Menu {
 			item = new MenuItem();
 			item.setText(DefaultMessages.getMessages()
 					.gridView_sortAscText());
-			item.setIcon(myGridView.getHeader().getAppearance().sortAscendingIcon());
+			item.setIcon(gridView.getHeader().getAppearance().sortAscendingIcon());
 			item.addSelectionHandler(new SelectionHandler<Item>() {
 
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					myGridView.doSort(colIndex, SortDir.ASC);
+					gridView.doSort(colIndex, SortDir.ASC);
 
 				}
 			});
@@ -241,12 +229,12 @@ public class CharacterMenu extends Menu {
 			item = new MenuItem();
 			item.setText(DefaultMessages.getMessages()
 					.gridView_sortDescText());
-			item.setIcon(myGridView.getHeader().getAppearance().sortDescendingIcon());
+			item.setIcon(gridView.getHeader().getAppearance().sortDescendingIcon());
 			item.addSelectionHandler(new SelectionHandler<Item>() {
 
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					myGridView.doSort(colIndex, SortDir.DESC);
+					gridView.doSort(colIndex, SortDir.DESC);
 
 				}
 			});
@@ -256,7 +244,7 @@ public class CharacterMenu extends Menu {
 		MenuItem columns = new MenuItem();
 		columns.setText(DefaultMessages.getMessages()
 				.gridView_columnsText());
-		columns.setIcon(myGridView.getHeader().getAppearance().columnsIcon());
+		columns.setIcon(gridView.getHeader().getAppearance().columnsIcon());
 		columns.setData("gxt-columns", "true");
 
 		final Menu columnMenu = new Menu();
@@ -264,7 +252,7 @@ public class CharacterMenu extends Menu {
 		for (int i = 0; i < cols; i++) {
 			ColumnConfig<Taxon, ?> config = cm.getColumn(i);
 			// ignore columns with no header text
-			if (!myGridView.hasHeaderValue(i)) {
+			if (!gridView.hasHeaderValue(i)) {
 				continue;
 			}
 			final int fcol = i;
@@ -283,14 +271,14 @@ public class CharacterMenu extends Menu {
 				public void onCheckChange(
 						CheckChangeEvent<CheckMenuItem> event) {
 					cm.setHidden(fcol, !cm.isHidden(fcol));
-					myGridView.restrictMenu(cm, columnMenu);
+					gridView.restrictMenu(cm, columnMenu);
 
 				}
 			});
 			columnMenu.add(check);
 		}
 
-		myGridView.restrictMenu(cm, columnMenu);
+		gridView.restrictMenu(cm, columnMenu);
 		columns.setEnabled(columnMenu.getWidgetCount() > 0);
 		columns.setSubMenu(columnMenu);
 		add(columns);
@@ -302,11 +290,11 @@ public class CharacterMenu extends Menu {
 			public void onSelection(SelectionEvent<Item> event) {
 				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox(
 						"Comment", "");
-				box.setValue(taxonMatrixView.getColumnComment(colIndex));
+				box.setValue(annotationManager.getColumnComment(colIndex));
 				box.addHideHandler(new HideHandler() {
 					@Override
 					public void onHide(HideEvent event) {
-						taxonMatrixView.setColumnComment(colIndex, box.getValue());
+						annotationManager.setColumnComment(colIndex, box.getValue());
 						String comment = Format.ellipse(box.getValue(), 80);
 						String message = Format.substitute("'{0}' saved",
 								new Params(comment));
@@ -325,17 +313,17 @@ public class CharacterMenu extends Menu {
 		offItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.setColumnColor(colIndex, null);
+				annotationManager.setColumnColor(colIndex, null);
 			}
 		});
 		colorMenu.add(offItem);
-		for(final Color color : taxonMatrixView.getColors()) {
+		for(final Color color : annotationManager.getColors()) {
 			MenuItem colorItem = new MenuItem(color.getUse());
 			colorItem.getElement().getStyle().setProperty("backgroundColor", "#" + color.getHex());
 			colorItem.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					taxonMatrixView.setColumnColor(colIndex, color);
+					annotationManager.setColumnColor(colIndex, color);
 				}
 			});
 			colorMenu.add(colorItem);

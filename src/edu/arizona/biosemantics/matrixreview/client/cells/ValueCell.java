@@ -1,23 +1,15 @@
-package edu.arizona.biosemantics.matrixreview.client;
+package edu.arizona.biosemantics.matrixreview.client.cells;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.sencha.gxt.core.client.util.Format;
 import com.sencha.gxt.core.client.util.ImageHelper;
-import com.sencha.gxt.core.client.util.Params;
-import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
-import com.sencha.gxt.widget.core.client.event.HideEvent;
-import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
-import com.sencha.gxt.widget.core.client.info.Info;
-import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
-import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.menu.ValueMenu;
 
+import edu.arizona.biosemantics.matrixreview.client.manager.AnnotationManager;
+import edu.arizona.biosemantics.matrixreview.client.manager.DataManager;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
@@ -42,19 +34,23 @@ public class ValueCell extends MenuExtendedCell<Value> {
 	}
 	
 	protected static Templates templates = GWT.create(Templates.class);
+	private DataManager dataManager;
+	private AnnotationManager annotationManager;
 	
-	public ValueCell(TaxonMatrixView taxonMatrixView) {
-		super(taxonMatrixView);
+	public ValueCell(DataManager dataManager, AnnotationManager annotationManager) {
+		super();
+		this.dataManager = dataManager;
+		this.annotationManager = annotationManager;
 	}
 
 	@Override
 	public void render(Context context,	Value value, SafeHtmlBuilder sb) {
 		if (value == null)
 			return;
-		Taxon taxon = taxonMatrixView.getTaxon(context.getIndex());
+		Taxon taxon = dataManager.getTaxon(context.getIndex());
 		String quickTipText = taxon.getName();
 		
-		Character character = taxonMatrixView.getCharacter(context.getColumn());
+		Character character = dataManager.getCharacter(context.getColumn());
 		if(character != null) {
 			Value characterValue = taxon.get(character);
 			quickTipText = character.toString() + " of " + taxon.getName() + " is " + characterValue.getValue(); 
@@ -88,7 +84,7 @@ public class ValueCell extends MenuExtendedCell<Value> {
 	}
 
 	protected Menu createContextMenu(final int colIndex, final int rowIndex) {
-		final Menu menu = new ValueMenu(taxonMatrixView, rowIndex, colIndex);
+		final Menu menu = new ValueMenu(annotationManager, rowIndex, colIndex);
 		return menu;
 	}
 }

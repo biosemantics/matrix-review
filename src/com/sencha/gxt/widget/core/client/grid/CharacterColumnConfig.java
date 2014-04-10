@@ -5,24 +5,26 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.widget.core.client.grid.filters.Filter;
 
-import edu.arizona.biosemantics.matrixreview.client.TaxonMatrixView;
+import edu.arizona.biosemantics.matrixreview.client.manager.ViewManager;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
-public class MyColumnConfig extends ColumnConfig<Taxon, Value> {
+public class CharacterColumnConfig extends ColumnConfig<Taxon, Value> {
 
 	private Filter<Taxon, ?> filter;
 	private Character character;
-	
+
 	public static class CharacterValueProvider implements ValueProvider<Taxon, Value> {
 		private Character character;
-		private TaxonMatrixView taxonMatrixView;
-		private MyColumnConfig myColumnConfig;
-		public CharacterValueProvider(Character character, TaxonMatrixView taxonMatrixView) {
+		private CharacterColumnConfig characterColumnConfig;
+		private ViewManager viewManager;
+
+		public CharacterValueProvider(Character character, ViewManager viewManager) {
 			this.character = character;
-			this.taxonMatrixView = taxonMatrixView;
+			this.viewManager = viewManager;
 		}
+
 		@Override
 		public Value getValue(Taxon object) {
 			return object.get(character);
@@ -31,33 +33,33 @@ public class MyColumnConfig extends ColumnConfig<Taxon, Value> {
 		@Override
 		public void setValue(Taxon object, Value value) {
 			object.setValue(character, value);
-			if(myColumnConfig != null)
-				taxonMatrixView.refreshColumnHeader(myColumnConfig);
+			if (characterColumnConfig != null)
+				viewManager.refreshColumnHeader(characterColumnConfig);
 		}
 
 		@Override
 		public String getPath() {
 			return "/" + character.toString() + "/value";
 		}
-		
-		public void setMyColumnConfig(MyColumnConfig myColumnConfig) {
-			this.myColumnConfig = myColumnConfig;
+
+		public void setCharacterColumnConfig(CharacterColumnConfig characterColumnConfig) {
+			this.characterColumnConfig = characterColumnConfig;
 		}
-		
+
 	}
 
-	public MyColumnConfig(final Character character, TaxonMatrixView taxonMatrixView) {
-		super(new CharacterValueProvider(character, taxonMatrixView));
+	public CharacterColumnConfig(final Character character, ViewManager viewManager) {
+		super(new CharacterValueProvider(character, viewManager));
 		this.character = character;
 	}
 
-	public MyColumnConfig(int width, SafeHtml header, final Character character, TaxonMatrixView taxonMatrixView) {
-		super(new CharacterValueProvider(character, taxonMatrixView), width, header);
+	public CharacterColumnConfig(int width, SafeHtml header, final Character character, ViewManager viewManager) {
+		super(new CharacterValueProvider(character, viewManager), width, header);
 		this.character = character;
 	}
 
-	public MyColumnConfig(int width, final Character character, TaxonMatrixView taxonMatrixView) {
-		this(width, SafeHtmlUtils.fromString(character.toString()), character, taxonMatrixView);
+	public CharacterColumnConfig(int width, final Character character, ViewManager viewManager) {
+		this(width, SafeHtmlUtils.fromString(character.toString()), character, viewManager);
 	}
 
 	public Character getCharacter() {
@@ -71,5 +73,5 @@ public class MyColumnConfig extends ColumnConfig<Taxon, Value> {
 	public void setFilter(Filter<Taxon, ?> filter) {
 		this.filter = filter;
 	}
-	
+
 }

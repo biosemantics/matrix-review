@@ -6,15 +6,12 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
-import com.sencha.gxt.cell.core.client.form.FieldCell.FieldViewData;
 import com.sencha.gxt.core.client.GXTLogConfiguration;
 import com.sencha.gxt.core.client.dom.XElement;
+import com.sencha.gxt.data.shared.AllAccessListStore;
 import com.sencha.gxt.data.shared.LabelProvider;
-import com.sencha.gxt.data.shared.ListStore;
-import com.sencha.gxt.data.shared.MyListStore;
 import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.event.ParseErrorEvent;
-import com.sencha.gxt.widget.core.client.form.PropertyEditor;
 
 public class MyComboBoxCell<T> extends ComboBoxCell<T> {
 
@@ -38,33 +35,33 @@ public class MyComboBoxCell<T> extends ComboBoxCell<T> {
 
 	}*/
 
-	public MyComboBoxCell(MyListStore<T> store,
+	public MyComboBoxCell(AllAccessListStore<T> store,
 			LabelProvider<? super T> labelProvider) {
 		this(store, labelProvider, GWT
 				.<TriggerFieldAppearance> create(TriggerFieldAppearance.class));
 	}
 
-	public MyComboBoxCell(MyListStore<T> store,
+	public MyComboBoxCell(AllAccessListStore<T> store,
 			LabelProvider<? super T> labelProvider, ListView<T, ?> view) {
 		this(store, labelProvider, view, GWT
 				.<TriggerFieldAppearance> create(TriggerFieldAppearance.class));
 	}
 
-	public MyComboBoxCell(MyListStore<T> store,
+	public MyComboBoxCell(AllAccessListStore<T> store,
 			LabelProvider<? super T> labelProvider, ListView<T, ?> view,
 			TriggerFieldAppearance appearance) {
 		super(store, labelProvider, view, appearance);
 		//setPropertyEditor(new MyComboPropertyEditor());
 	}
 
-	public MyComboBoxCell(MyListStore<T> store,
+	public MyComboBoxCell(AllAccessListStore<T> store,
 			LabelProvider<? super T> labelProvider,
 			final SafeHtmlRenderer<T> renderer) {
 		this(store, labelProvider, renderer, GWT
 				.<TriggerFieldAppearance> create(TriggerFieldAppearance.class));
 	}
 
-	public MyComboBoxCell(MyListStore<T> store,
+	public MyComboBoxCell(AllAccessListStore<T> store,
 			LabelProvider<? super T> labelProvider,
 			final SafeHtmlRenderer<T> renderer,
 			TriggerFieldAppearance appearance) {
@@ -72,7 +69,7 @@ public class MyComboBoxCell<T> extends ComboBoxCell<T> {
 		//setPropertyEditor(new MyComboPropertyEditor());
 	}
 
-	public MyComboBoxCell(MyListStore<T> store,
+	public MyComboBoxCell(AllAccessListStore<T> store,
 			LabelProvider<? super T> labelProvider,
 			TriggerFieldAppearance appearance) {
 		super(store, labelProvider, appearance);
@@ -81,9 +78,9 @@ public class MyComboBoxCell<T> extends ComboBoxCell<T> {
 	
 	@Override
 	protected T getByValue(String value) {
-		int count = ((MyListStore<T>)store).sizeOfAllItems();
+		int count = ((AllAccessListStore<T>)store).sizeOfAllItems();
 		for (int i = 0; i < count; i++) {
-			T item = ((MyListStore<T>)store).getFromAllItems(i);
+			T item = ((AllAccessListStore<T>)store).getFromAllItems(i);
 			String v = getRenderedValue(item);
 			if (v != null && v.equals(value)) {
 				return item;

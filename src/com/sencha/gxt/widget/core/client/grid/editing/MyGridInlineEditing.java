@@ -10,17 +10,12 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.sencha.gxt.data.shared.ListStore;
-import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.form.Field;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
+import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderAppearance;
 import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderStyles;
 import com.sencha.gxt.widget.core.client.grid.Grid;
-import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderAppearance;
 import com.sencha.gxt.widget.core.client.grid.Grid.GridCell;
-import com.sencha.gxt.widget.core.client.grid.editing.ClicksToEdit;
-import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
-
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 
 public class MyGridInlineEditing<M> extends GridInlineEditing<M> {
 

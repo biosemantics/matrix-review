@@ -4,8 +4,6 @@ import java.util.LinkedList;
 
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
-import com.sencha.gxt.cell.core.client.form.StringComboBoxCell;
-import com.sencha.gxt.cell.core.client.form.FieldCell.FieldViewData;
 import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ListStore;

@@ -2,14 +2,12 @@ package com.sencha.gxt.widget.core.client.grid.filters;
 
 import com.sencha.gxt.messages.client.DefaultMessages;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent;
-import com.sencha.gxt.widget.core.client.event.HeaderContextMenuEvent;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent.CheckChangeHandler;
+import com.sencha.gxt.widget.core.client.event.HeaderContextMenuEvent;
+import com.sencha.gxt.widget.core.client.menu.CharacterMenu;
 import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Menu;
-import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
-
 import com.sencha.gxt.widget.core.client.menu.TaxonCharacterMenu;
-import com.sencha.gxt.widget.core.client.menu.CharacterMenu;
 
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 
@@ -35,8 +33,7 @@ public class MyGridFilters extends GridFilters<Taxon> {
 		checkFilterItem.setData("index", column);
 		
 		
-		Filter<Taxon, ?> f = getFilter(grid.getColumnModel().getColumn(column)
-				.getValueProvider().getPath());
+		Filter<Taxon, ?> f = getFilter(grid.getColumnModel().getColumn(column).getValueProvider().getPath());
 		
 		if (f != null) {
 			Menu filterMenu = f.getMenu();

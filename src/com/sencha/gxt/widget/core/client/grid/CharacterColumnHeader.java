@@ -25,44 +25,41 @@ import com.sencha.gxt.widget.core.client.ComponentHelper;
 import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance;
 
-import edu.arizona.biosemantics.matrixreview.client.TaxonMatrixView;
+import edu.arizona.biosemantics.matrixreview.client.manager.DataManager;
+import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 
-public class MyColumnHeader extends ColumnHeader<Taxon> {
+public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 
-	private TaxonMatrixView taxonMatrixView;
-	
-	public class MyHead extends Head {
-		
+	public class CharacterHead extends Head {
+
 		protected SpanElement coverage;
 		private GridAppearance gridAppearance;
 		private com.sencha.gxt.widget.core.client.grid.GridView.GridStyles gridStyles;
 		private boolean hasColumnComment = false;
 		private boolean isDirty = false;
 
-		public MyHead(ColumnConfig column) {
-			this(column, GWT.<GridAppearance> create(GridAppearance.class));
+		public CharacterHead(CharacterColumnConfig column, DataManager dataManager) {
+			this(column, dataManager, GWT.<GridAppearance> create(GridAppearance.class));
 		}
-		
-		public MyHead(ColumnConfig column, GridAppearance gridAppearance) {
-		    this.gridAppearance = gridAppearance;
-		    this.gridStyles = gridAppearance.styles();
-			
+
+		public CharacterHead(CharacterColumnConfig column, DataManager dataManager, GridAppearance gridAppearance) {
+			this.gridAppearance = gridAppearance;
+			this.gridStyles = gridAppearance.styles();
+
 			this.config = column;
 			this.column = cm.indexOf(column);
 
 			setElement(Document.get().createDivElement());
 
 			getElement().setAttribute("qtitle", "Summary");
-			getElement().setAttribute("qtip", taxonMatrixView.getQuickTipText(column));
-			
-			if(column instanceof MyColumnConfig) {
+			getElement().setAttribute("qtip", dataManager.getQuickTipText(column));
+
+			if (column instanceof CharacterColumnConfig) {
 				coverage = Document.get().createSpanElement();
-				coverage.setInnerText(taxonMatrixView.getCoverage(((MyColumnConfig)column).getCharacter()));
-				coverage.setAttribute("style",
-						"position:absolute;right:0px;background-color:#b0e0e6;width:35px;");
+				coverage.setInnerText(dataManager.getCoverage(((CharacterColumnConfig) column).getCharacter()));
+				coverage.setAttribute("style", "position:absolute;right:0px;background-color:#b0e0e6;width:35px;");
 				getElement().appendChild(coverage);
 			}
 
@@ -82,9 +79,7 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 				span.appendChild(widget.getElement());
 				getElement().appendChild(span);
 			} else {
-				text = new InlineHTML(
-						config.getHeader() != null ? config.getHeader()
-								: SafeHtmlUtils.fromString(""));
+				text = new InlineHTML(config.getHeader() != null ? config.getHeader() : SafeHtmlUtils.fromString(""));
 				getElement().appendChild(text.getElement());
 			}
 
@@ -95,29 +90,27 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 				getElement().setAttribute("qtip", tip.asString());
 			}
 
-			sinkEvents(Event.ONCLICK | Event.MOUSEEVENTS | Event.FOCUSEVENTS
-					| Event.ONKEYPRESS);
+			sinkEvents(Event.ONCLICK | Event.MOUSEEVENTS | Event.FOCUSEVENTS | Event.ONKEYPRESS);
 
-			String s = config.getCellClassName() == null ? "" : " "
-					+ config.getCellClassName();
+			String s = config.getCellClassName() == null ? "" : " " + config.getCellClassName();
 			addStyleName(styles.headInner() + s);
 			if (column.getColumnHeaderClassName() != null) {
 				addStyleName(column.getColumnHeaderClassName());
 			}
-			
-			if(column instanceof MyColumnConfig) {
-				MyColumnConfig myColumnConfig = (MyColumnConfig)column;
+
+			if (column instanceof CharacterColumnConfig) {
+				CharacterColumnConfig myColumnConfig = (CharacterColumnConfig) column;
 				Character character = myColumnConfig.getCharacter();
 				Color color = character.getColor();
-				if(color != null)
+				if (color != null)
 					getElement().getStyle().setBackgroundColor("#" + color.getHex());
-				
-				if(character.isDirty())
+
+				if (character.isDirty())
 					addStyleName(gridStyles.cellDirty());
-				if(character.isCommented()) 
+				if (character.isCommented())
 					addStyleName(gridStyles.cellCommented());
 			}
-			
+
 			heads.add(this);
 		}
 
@@ -128,16 +121,16 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 		public String getCoverage() {
 			return coverage.getInnerText();
 		}
-		
+
 		public void setQuickTipText(String text) {
 			getElement().setAttribute("qtip", text);
 		}
-		
+
 		public void setBackgroundColor(Color color) {
-			if(color != null)
+			if (color != null)
 				getElement().getStyle().setBackgroundColor("#" + color.getHex());
 		}
-		
+
 		public void setText(String text) {
 			this.text.setText(text);
 		}
@@ -149,17 +142,17 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 			this.removeStyleName(gridStyles.cellDirtyCommented());
 			this.setCommentedDirty();
 		}
-		
+
 		private void setCommentedDirty() {
-			if(hasColumnComment && isDirty) {
+			if (hasColumnComment && isDirty) {
 				this.addStyleName(gridStyles.cellDirtyCommented());
-			} else if(hasColumnComment) {
-				this.addStyleName(gridStyles.cellCommented());	
-			} else if(isDirty) {
-				this.addStyleName(gridStyles.cellDirty());	
+			} else if (hasColumnComment) {
+				this.addStyleName(gridStyles.cellCommented());
+			} else if (isDirty) {
+				this.addStyleName(gridStyles.cellDirty());
 			}
 		}
-		
+
 		public void setDirty(boolean isDirty) {
 			this.isDirty = isDirty;
 			this.removeStyleName(gridStyles.cellDirty());
@@ -198,10 +191,8 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 
 		@Override
 		public void onDragMove(DragMoveEvent event) {
-			event.setX(event.getNativeEvent().getClientX() + 12
-					+ XDOM.getBodyScrollLeft());
-			event.setY(event.getNativeEvent().getClientY() + 12
-					+ XDOM.getBodyScrollTop());
+			event.setX(event.getNativeEvent().getClientX() + 12 + XDOM.getBodyScrollLeft());
+			event.setY(event.getNativeEvent().getClientY() + 12 + XDOM.getBodyScrollTop());
 
 			Element target = event.getNativeEvent().getEventTarget().cast();
 
@@ -212,24 +203,15 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 				HeaderGroupConfig s = cm.getGroup(start.row - 1, start.column);
 				if ((g == null && s == null) || (g != null && g.equals(s))) {
 					active = h;
-					boolean before = event.getNativeEvent().getClientX() < active
-							.getAbsoluteLeft() + active.getOffsetWidth() / 2;
+					boolean before = event.getNativeEvent().getClientX() < active.getAbsoluteLeft() + active.getOffsetWidth() / 2;
 					showStatusIndicator(true);
 
 					if (before) {
-						statusIndicatorTop.alignTo(active.getElement(),
-								new AnchorAlignment(Anchor.BOTTOM,
-										Anchor.TOP_LEFT), -1, 0);
-						statusIndicatorBottom.alignTo(active.getElement(),
-								new AnchorAlignment(Anchor.TOP,
-										Anchor.BOTTOM_LEFT), -1, 0);
+						statusIndicatorTop.alignTo(active.getElement(), new AnchorAlignment(Anchor.BOTTOM, Anchor.TOP_LEFT), -1, 0);
+						statusIndicatorBottom.alignTo(active.getElement(), new AnchorAlignment(Anchor.TOP, Anchor.BOTTOM_LEFT), -1, 0);
 					} else {
-						statusIndicatorTop.alignTo(active.getElement(),
-								new AnchorAlignment(Anchor.BOTTOM,
-										Anchor.TOP_RIGHT), 1, 0);
-						statusIndicatorBottom.alignTo(active.getElement(),
-								new AnchorAlignment(Anchor.TOP,
-										Anchor.BOTTOM_RIGHT), 1, 0);
+						statusIndicatorTop.alignTo(active.getElement(), new AnchorAlignment(Anchor.BOTTOM, Anchor.TOP_RIGHT), 1, 0);
+						statusIndicatorBottom.alignTo(active.getElement(), new AnchorAlignment(Anchor.TOP, Anchor.BOTTOM_RIGHT), 1, 0);
 					}
 
 					int i = active.column;
@@ -265,11 +247,9 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 		@Override
 		public void onDragStart(DragStartEvent event) {
 			if (scrollSupport == null) {
-				scrollSupport = new MyHorizontalAutoScrollSupport(
-						scrollContainer.getElement());
+				scrollSupport = new MyHorizontalAutoScrollSupport(scrollContainer.getElement());
 			} else if (scrollSupport.getScrollElement() == null) {
-				scrollSupport.setScrollElement(container.getView()
-						.getScroller());
+				scrollSupport.setScrollElement(container.getView().getScroller());
 			}
 			scrollSupport.start();
 
@@ -285,8 +265,7 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 
 				if (statusIndicatorBottom == null) {
 					statusIndicatorBottom = XElement.createElement("div");
-					statusIndicatorBottom.addClassName(styles
-							.columnMoveBottom());
+					statusIndicatorBottom.addClassName(styles.columnMoveBottom());
 					statusIndicatorTop = XElement.createElement("div");
 					statusIndicatorTop.addClassName(styles.columnMoveTop());
 				}
@@ -303,8 +282,7 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 		}
 
 		protected Element adjustTargetElement(Element target) {
-			return (Element) (target.getFirstChildElement() != null ? target
-					.getFirstChildElement() : target);
+			return (Element) (target.getFirstChildElement() != null ? target.getFirstChildElement() : target);
 		}
 
 		protected void afterDragEnd() {
@@ -348,29 +326,32 @@ public class MyColumnHeader extends ColumnHeader<Taxon> {
 	}
 
 	private Container scrollContainer;
+	private DataManager dataManager;
 
-	public MyColumnHeader(Grid<Taxon> container, ColumnModel<Taxon> cm,
-			Container scrollContainer, TaxonMatrixView taxonMatrixView) {
-		super(container, cm, GWT
-				.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
-		this.scrollContainer = scrollContainer;
-		this.taxonMatrixView = taxonMatrixView;
+	public CharacterColumnHeader(Grid<Taxon> container, ColumnModel<Taxon> cm, DataManager dataManager) {
+		this(container, cm, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class), dataManager);
 	}
 
-	public MyColumnHeader(Grid<Taxon> container, ColumnModel<Taxon> cm,
-			Container scrollContainer, TaxonMatrixView taxonMatrixView, ColumnHeaderAppearance appearance) {
+	public CharacterColumnHeader(Grid<Taxon> container, ColumnModel<Taxon> cm, ColumnHeaderAppearance appearance, DataManager dataManager) {
 		super(container, cm, appearance);
-		this.scrollContainer = scrollContainer;
-		this.taxonMatrixView = taxonMatrixView;
+		this.dataManager = dataManager;
 	}
 
 	@Override
 	public DragHandler newColumnReorderingDragHandler() {
 		return new MyReorderDragHandler();
 	}
-	
+
+	@Override
 	@SuppressWarnings("rawtypes")
 	protected Head createNewHead(ColumnConfig config) {
-		return new MyHead(config);
+		if(config instanceof CharacterColumnConfig)
+			return new CharacterHead((CharacterColumnConfig)config, dataManager);
+		return super.createNewHead(config);
+	}
+	
+	@Override
+	public CharacterHead getHead(int column) {
+		return (column > -1 && column < heads.size()) ? (CharacterHead)heads.get(column) : null;
 	}
 }

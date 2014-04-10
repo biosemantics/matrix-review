@@ -120,7 +120,7 @@ public class TaxonMatrix implements Serializable, HasDirty {
 		Value value = taxon.get(character);
 		return value != null && value.getValue() != null && !value.getValue().trim().isEmpty();
 	}
-	
+		
 	public void setValue(Taxon taxon, Character character, Value value) {
 		if(this.taxa.contains(taxon) && this.characters.contains(character)) {
 			Value oldValue = taxon.get(character);

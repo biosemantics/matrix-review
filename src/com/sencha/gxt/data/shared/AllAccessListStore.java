@@ -1,15 +1,7 @@
 package com.sencha.gxt.data.shared;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
-import com.sencha.gxt.core.client.ValueProvider;
-import com.sencha.gxt.data.shared.event.StoreRecordChangeEvent;
-import com.sencha.gxt.data.shared.event.StoreUpdateEvent;
-
-public class MyListStore<M> extends ListStore<M> {
+public class AllAccessListStore<M> extends ListStore<M> {
 
 	/**
 	 * Record that always auto commits to the model;
@@ -96,7 +88,7 @@ public class MyListStore<M> extends ListStore<M> {
 		}
 	}*/
 	
-	public MyListStore(ModelKeyProvider<? super M> keyProvider) {
+	public AllAccessListStore(ModelKeyProvider<? super M> keyProvider) {
 		super(keyProvider);
 	}
 	

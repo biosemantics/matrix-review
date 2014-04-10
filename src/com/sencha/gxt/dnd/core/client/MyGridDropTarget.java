@@ -1,11 +1,6 @@
 package com.sencha.gxt.dnd.core.client;
 
 import com.sencha.gxt.core.client.dom.AutoScrollSupport;
-import com.sencha.gxt.dnd.core.client.DndDragCancelEvent;
-import com.sencha.gxt.dnd.core.client.DndDragEnterEvent;
-import com.sencha.gxt.dnd.core.client.DndDragLeaveEvent;
-import com.sencha.gxt.dnd.core.client.DndDropEvent;
-import com.sencha.gxt.dnd.core.client.GridDropTarget;
 import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 

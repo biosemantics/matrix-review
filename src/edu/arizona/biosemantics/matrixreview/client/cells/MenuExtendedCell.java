@@ -1,4 +1,4 @@
-package edu.arizona.biosemantics.matrixreview.client;
+package edu.arizona.biosemantics.matrixreview.client.cells;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -6,39 +6,26 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sencha.gxt.core.client.Style.Anchor;
 import com.sencha.gxt.core.client.Style.AnchorAlignment;
-import com.sencha.gxt.core.client.util.Format;
-import com.sencha.gxt.core.client.util.Params;
-import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
+import com.sencha.gxt.core.client.dom.XDOM;
 import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderAppearance;
 import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderStyles;
 import com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance;
 import com.sencha.gxt.widget.core.client.grid.GridView.GridStyles;
-import com.sencha.gxt.widget.core.client.info.Info;
-import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
-import com.sencha.gxt.widget.core.client.menu.MenuItem;
-
-import edu.arizona.biosemantics.matrixreview.shared.model.Color;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
 public abstract class MenuExtendedCell<C> extends AbstractCell<C> {
 
-	private ColumnHeaderAppearance columnHeaderAppearance;
-	private GridAppearance gridAppearance;
+	protected ColumnHeaderAppearance columnHeaderAppearance;
+	protected GridAppearance gridAppearance;
 	protected ColumnHeaderStyles columnHeaderStyles;
 	protected GridStyles gridStyles;
-	protected TaxonMatrixView taxonMatrixView;
 
 	interface Templates extends SafeHtmlTemplates {
 		@SafeHtmlTemplates.Template("<div class=\"{0}\" qtip=\"{4}\">" +
@@ -53,13 +40,13 @@ public abstract class MenuExtendedCell<C> extends AbstractCell<C> {
 	protected static Templates templates = GWT.create(Templates.class);
 
 
-	public MenuExtendedCell(TaxonMatrixView taxonMatrixView) {
-		this(taxonMatrixView, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class), GWT.<GridAppearance> create(GridAppearance.class));
+	public MenuExtendedCell() {
+		this(GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class), GWT.<GridAppearance> create(GridAppearance.class));
 	}
 
-	public MenuExtendedCell(TaxonMatrixView taxonMatrixView, ColumnHeaderAppearance columnHeaderAppearance, GridAppearance gridAppearance) {
+	public MenuExtendedCell(ColumnHeaderAppearance columnHeaderAppearance, GridAppearance gridAppearance) {
 		super(BrowserEvents.MOUSEOVER, BrowserEvents.MOUSEOUT, BrowserEvents.CLICK);
-		this.taxonMatrixView = taxonMatrixView;
+		
 		this.columnHeaderAppearance = columnHeaderAppearance;
 		this.gridAppearance = gridAppearance;
 		columnHeaderStyles = columnHeaderAppearance.styles();
@@ -109,6 +96,7 @@ public abstract class MenuExtendedCell<C> extends AbstractCell<C> {
 		if(aParent != null && aGrandParent != null) {
 			if(event.getType().equals(BrowserEvents.MOUSEOVER)) {							
 				aGrandParent.addClassName(columnHeaderStyles.headOver());
+				//aGrandParent.getStyle().setRight(XDOM.getScrollBarWidth(), Unit.PX);
 				//aParent.addClassName(styles.headInner());
 			}
 			if(event.getType().equals(BrowserEvents.MOUSEOUT)) {

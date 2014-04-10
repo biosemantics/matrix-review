@@ -1,4 +1,4 @@
-package com.sencha.gxt.cell.core.client.form;
+package com.google.gwt.event.logical.shared;
 
 public interface MyValidator {
 

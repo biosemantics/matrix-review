@@ -39,6 +39,12 @@ public class ColumnModel<M> implements HasColumnModelHandlers {
   private HandlerManager handlerManager;
   private boolean userResized;
 
+  
+  /**
+   * For subclasses
+   */
+  protected ColumnModel() { }
+  
   /**
    * Creates a new column model.
    * 

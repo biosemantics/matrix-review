@@ -9,20 +9,12 @@ import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.info.Info;
 
-import edu.arizona.biosemantics.matrixreview.client.TaxonMatrixView;
+import edu.arizona.biosemantics.matrixreview.client.manager.AnnotationManager;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 
 public class ValueMenu extends Menu {
 
-	private TaxonMatrixView taxonMatrixView;
-	private int rowIndex;
-	private int colIndex;
-
-	public ValueMenu(final TaxonMatrixView taxonMatrixView, final int rowIndex, final int colIndex) {
-		this.taxonMatrixView = taxonMatrixView;
-		this.rowIndex = rowIndex;
-		this.colIndex = colIndex;
-		
+	public ValueMenu(final AnnotationManager annotationManager, final int rowIndex, final int colIndex) {		
 		add(new HeaderMenuItem("Annotation"));
 		
 		MenuItem item = new MenuItem("Comment");
@@ -30,11 +22,11 @@ public class ValueMenu extends Menu {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox("Comment", "");
-				box.setValue(taxonMatrixView.getComment(rowIndex, colIndex));
+				box.setValue(annotationManager.getComment(rowIndex, colIndex));
 				box.addHideHandler(new HideHandler() {
 					@Override
 					public void onHide(HideEvent event) {
-						taxonMatrixView.setComment(rowIndex, colIndex, box.getValue());
+						annotationManager.setComment(rowIndex, colIndex, box.getValue());
 						String comment = Format.ellipse(box.getValue(), 80);
 						String message = Format.substitute("'{0}' saved", new Params(comment));
 						Info.display("Comment", message);
@@ -52,17 +44,17 @@ public class ValueMenu extends Menu {
 		offItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				taxonMatrixView.setColor(rowIndex, colIndex, null);
+				annotationManager.setColor(rowIndex, colIndex, null);
 			}
 		});
 		colorMenu.add(offItem);
-		for(final Color color : taxonMatrixView.getColors()) {
+		for(final Color color : annotationManager.getColors()) {
 			MenuItem colorItem = new MenuItem(color.getUse());
 			colorItem.getElement().getStyle().setProperty("backgroundColor", "#" + color.getHex());
 			colorItem.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					taxonMatrixView.setColor(rowIndex, colIndex, color);
+					annotationManager.setColor(rowIndex, colIndex, color);
 				}
 			});
 			colorMenu.add(colorItem);

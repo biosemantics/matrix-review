@@ -2664,8 +2664,8 @@ public class GridView<M> {
       logger.finest("resize() " + csize);
     }
 
-    //int vw = csize.getWidth();
-    int vw = getTotalWidth();
+    int vw = csize.getWidth();
+    //int vw = getTotalWidth();
     int vh = 0;
     if (vw < 10 || csize.getHeight() < 22) {
       return;
