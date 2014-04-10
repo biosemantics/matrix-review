@@ -47,7 +47,6 @@ public class TaxonMatrixView implements IsWidget {
 		}
 	}
 
-	private HorizontalLayoutContainer container;
 	private TaxaGrid taxaGrid;
 	private CharactersGrid charactersGrid;
 	private DataManager dataManager;
@@ -72,7 +71,7 @@ public class TaxonMatrixView implements IsWidget {
 		
 		// instantiate managers for different aspects of matrix/grid interaction
 		this.dataManager = new DataManager(taxonMatrix, store);		
-		this.viewManager = new ViewManager(container, taxonMatrix, store);
+		this.viewManager = new ViewManager(taxonMatrix, store);
 		this.controlManager = new ControlManager(taxonMatrix, store);
 		this.annotationManager = new AnnotationManager(taxonMatrix);
 		
@@ -154,7 +153,7 @@ public class TaxonMatrixView implements IsWidget {
 			}
 		});		
 		
-		container = new HorizontalLayoutContainer();
+		HorizontalLayoutContainer container = new HorizontalLayoutContainer();
 		container.getScrollSupport().setScrollMode(ScrollMode.AUTO);
 
 		// add locked column, only 300px wide (in this example, use layouts

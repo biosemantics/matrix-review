@@ -8,6 +8,7 @@ import java.util.List;
 import com.sencha.gxt.data.shared.AllAccessListStore;
 import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.data.shared.Store.StoreSortInfo;
+import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
 import com.sencha.gxt.widget.core.client.grid.CharacterColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.CharacterColumnHeader;
@@ -22,8 +23,6 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
 
 public class ViewManager {
-
-	private HorizontalLayoutContainer container;
 	
 	private TaxaGrid taxaGrid;
 	private CharactersGrid charactersGrid;
@@ -35,8 +34,7 @@ public class ViewManager {
 	
 	private HideTaxonStoreFilter hideTaxonFilter = new HideTaxonStoreFilter();
 
-	public ViewManager(HorizontalLayoutContainer container, TaxonMatrix taxonMatrix,  AllAccessListStore<Taxon> store) {
-		this.container = container;
+	public ViewManager(TaxonMatrix taxonMatrix,  AllAccessListStore<Taxon> store) {
 		this.store = store;
 		this.store.addFilter(this.hideTaxonFilter);
 		this.taxonMatrix = taxonMatrix;
@@ -56,10 +54,6 @@ public class ViewManager {
 
 	public void setCharactersGrid(CharactersGrid charactersGrid) {
 		this.charactersGrid = charactersGrid;
-	}
-
-	public HorizontalLayoutContainer getContainer() {
-		return container;
 	}
 
 	public void refreshCharacterHeaderHeader(int column) {

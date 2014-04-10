@@ -234,6 +234,8 @@ public class DataManager {
 		charactersColumnModel = new CharactersColumnModel(columns);
 		controlManager.init(columnConfig);
 		charactersGrid.reconfigure(store, charactersColumnModel);
+		//re-render to update coverage
+		viewManager.refreshTaxaGridView();
 	}
 
 	public void removeCharacter(int i) {

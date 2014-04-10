@@ -22,7 +22,7 @@ public class MyHorizontalAutoScrollSupport {
   private int scrollRegionHeight = 50;
   private XElement scrollElement;
   private boolean active;
-  private int scrollZone = 100;
+  private int scrollZone = 250;
 
   private DelayedTask scrollLeftTask = new DelayedTask() {
 
@@ -184,6 +184,12 @@ public class MyHorizontalAutoScrollSupport {
 
   protected void onMove(NativeEvent event) {
     Point p = new Point(event.getClientX(), event.getClientY());
+    
+    /*
+    System.out.println(p.toString());
+    System.out.println(rightBounds.toString());
+    */
+    
     if (leftBounds.contains(p)) {
       scrollLeftTask.delay(scrollDelay);
       scrollRightTask.cancel();
@@ -197,6 +203,11 @@ public class MyHorizontalAutoScrollSupport {
   }
 
   protected void onScrollRight() {
+	/*
+	System.out.println("scroll right");
+	System.out.println(scrollElement.getScrollWidth());
+	System.out.println(scrollElement.getScrollLeft());
+    */
     scrollElement.setScrollLeft(scrollElement.getScrollLeft() + scrollRegionHeight);
     scrollRightTask.delay(scrollRepeatDelay);
   }
@@ -209,7 +220,8 @@ public class MyHorizontalAutoScrollSupport {
   protected void onStart() {
     if (!autoScroll) return;
 
-    /*System.out.println(scrollElement.getBounds());
+    /*
+    System.out.println(scrollElement.getBounds());
     System.out.println(scrollElement.getBounds(true));
     System.out.println(scrollElement.getBounds(true, true));
     System.out.println(scrollElement.getBounds(false, true));

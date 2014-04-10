@@ -23,7 +23,6 @@ import com.sencha.gxt.fx.client.DragHandler;
 import com.sencha.gxt.fx.client.DragMoveEvent;
 import com.sencha.gxt.fx.client.DragStartEvent;
 import com.sencha.gxt.widget.core.client.ComponentHelper;
-import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance;
 
 import edu.arizona.biosemantics.matrixreview.client.manager.DataManager;
@@ -263,7 +262,7 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 		@Override
 		public void onDragStart(DragStartEvent event) {
 			if (scrollSupport == null) {
-				scrollSupport = new MyHorizontalAutoScrollSupport(scrollContainer.getElement());
+				scrollSupport = new MyHorizontalAutoScrollSupport(container.getView().getScroller());
 			} else if (scrollSupport.getScrollElement() == null) {
 				scrollSupport.setScrollElement(container.getView().getScroller());
 			}
@@ -341,14 +340,13 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 		}
 	}
 
-	private Container scrollContainer;
 	private DataManager dataManager;
-
-	public CharacterColumnHeader(Grid<Taxon> container, ColumnModel<Taxon> cm, DataManager dataManager) {
+	
+	public CharacterColumnHeader(CharactersGrid container, ColumnModel<Taxon> cm, DataManager dataManager) {
 		this(container, cm, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class), dataManager);
 	}
 
-	public CharacterColumnHeader(Grid<Taxon> container, ColumnModel<Taxon> cm, ColumnHeaderAppearance appearance, DataManager dataManager) {
+	public CharacterColumnHeader(CharactersGrid container, ColumnModel<Taxon> cm, ColumnHeaderAppearance appearance, DataManager dataManager) {
 		super(container, cm, appearance);
 		this.dataManager = dataManager;
 	}

@@ -229,7 +229,7 @@ public class CharactersGridView extends GridView<Taxon> {
 	@Override
 	protected void initHeader() {
 		if (header == null) {
-			header = new CharacterColumnHeader(grid, cm, dataManager) {
+			header = new CharacterColumnHeader((CharactersGrid)grid, cm, dataManager) {
 
 				/*
 				 * @Override protected Menu getContextMenu(int column) { return
