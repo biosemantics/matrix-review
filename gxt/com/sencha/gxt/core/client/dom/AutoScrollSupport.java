@@ -29,7 +29,7 @@ public class AutoScrollSupport {
   private int scrollRegionHeight = 50;
   private XElement scrollElement;
   private boolean active;
-  private int scrollZone = 100;
+  private int scrollZone = 250;
 
   private DelayedTask scrollUpTask = new DelayedTask() {
 

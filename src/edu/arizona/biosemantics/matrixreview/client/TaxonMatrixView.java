@@ -11,6 +11,9 @@ import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.data.shared.AllAccessListStore;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
+import com.sencha.gxt.dnd.core.client.MyGridDragSource;
+import com.sencha.gxt.dnd.core.client.MyGridDropTarget;
+import com.sencha.gxt.dnd.core.client.DND.Feedback;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData;
 import com.sencha.gxt.widget.core.client.event.BodyScrollEvent;
@@ -134,6 +137,12 @@ public class TaxonMatrixView implements IsWidget {
 		grid.setStateful(true);
 		grid.setStateId("taxaGrid");
 		QuickTip quickTip = new QuickTip(grid);
+		
+		MyGridDragSource<Taxon> dragSource = new MyGridDragSource<Taxon>(grid);
+		MyGridDropTarget<Taxon> target = new MyGridDropTarget<Taxon>(grid);
+		target.setFeedback(Feedback.INSERT);
+		target.setAllowSelfAsSource(true);
+		
 		return grid;
 	}
 

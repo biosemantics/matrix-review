@@ -9,7 +9,7 @@ public class MyGridDropTarget<T> extends GridDropTarget<T> {
     private AutoScrollSupport scrollSupport;
     private Container scrollContainer;
     
-    public MyGridDropTarget(Grid<T> grid, Container scrollContainer) {
+    public MyGridDropTarget(Grid<T> grid) {
         super(grid);
         this.scrollContainer = scrollContainer;
     }
@@ -32,9 +32,9 @@ public class MyGridDropTarget<T> extends GridDropTarget<T> {
     @Override
     protected void onDragEnter(DndDragEnterEvent e) {
         if (scrollSupport == null) {
-            scrollSupport = new AutoScrollSupport(scrollContainer.getElement());
+            scrollSupport = new AutoScrollSupport(grid.getView().getScroller());
         } else if (scrollSupport.getScrollElement() == null) {
-            scrollSupport.setScrollElement(scrollContainer.getElement());
+            scrollSupport.setScrollElement(grid.getView().getScroller());
         }
         scrollSupport.start();
         super.onDragEnter(e);
