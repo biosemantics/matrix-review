@@ -21,7 +21,6 @@ import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent.CompleteEditHandler;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
-import com.sencha.gxt.widget.core.client.form.Field;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor.DoublePropertyEditor;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.form.Validator;
@@ -32,10 +31,11 @@ import com.sencha.gxt.widget.core.client.grid.TaxaColumnConfig.TaxonNameValuePro
 import com.sencha.gxt.widget.core.client.grid.TaxaGrid;
 import com.sencha.gxt.widget.core.client.grid.editing.MyGridInlineEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.ValueConverter;
+import com.sencha.gxt.widget.core.client.grid.filters.CharactersGridFilters;
 import com.sencha.gxt.widget.core.client.grid.filters.ListFilter;
-import com.sencha.gxt.widget.core.client.grid.filters.MyGridFilters;
 import com.sencha.gxt.widget.core.client.grid.filters.NumericFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
+import com.sencha.gxt.widget.core.client.grid.filters.TaxaGridFilters;
 import com.sencha.gxt.widget.core.client.grid.filters.TaxonNameFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.ValueFilter;
 
@@ -59,8 +59,8 @@ public class ControlManager {
 	
 	private MyGridInlineEditing<Taxon> characterEditing;
 	private Map<CharacterColumnConfig, ControlMode> characterColumnControlMap = new HashMap<CharacterColumnConfig, ControlMode>();
-	private MyGridFilters characterFilters;
-	private MyGridFilters taxaFilters;
+	private CharactersGridFilters charactersFilters;
+	private TaxaGridFilters taxaFilters;
 	
 	public ControlManager(TaxonMatrix taxonMatrix, AllAccessListStore<Taxon> store) {
 		this.store = store;
@@ -89,18 +89,15 @@ public class ControlManager {
 	 */
 	public void init() {
 		// init editing for taxaGrid
-		// none right now: Edit/rename will be possible via menu, similar to character rename
+		// none right now: Edit/rename is possible via menu, similar to character rename
 		
-		// init filtering for taxaGrid
-		taxaFilters = new MyGridFilters();
+		// init control (none right now for taxaGrid) and filtering for taxaGrid
+		taxaFilters = new TaxaGridFilters();
 		// StringFilter<Taxon> taxonNameFilter = new StringFilter<Taxon>(new TaxonNameValueProvider());
 		TaxonNameFilter taxonNameFilter = new TaxonNameFilter(new TaxonNameValueProvider());
+		taxaFilters.setLocal(true);
 		taxaFilters.addFilter(taxonNameFilter);	
-		taxaFilters.initPlugin(taxaGrid);
-		
-		// init control mode for taxaGrid
-		// none right now, only for character columns
-		
+		taxaFilters.initPlugin(taxaGrid);		
 		
 		// init editing for charactersGrid
 		this.characterEditing = new MyGridInlineEditing<Taxon>(charactersGrid, store);
@@ -108,40 +105,39 @@ public class ControlManager {
 			@Override
 			public void onCompleteEdit(CompleteEditEvent<Taxon> event) {
 				int j = event.getEditCell().getCol();
-				ControlManager.this.viewManager.refreshColumnHeader(j);
+				ControlManager.this.viewManager.refreshCharacterHeaderHeader(j);
 			}
 		});
 		
-		// init filtering for charactersGrid
-		characterFilters = new MyGridFilters();
-		characterFilters.setLocal(true);
-		List<CharacterColumnConfig> characterColumnConfigs = charactersGrid.getColumnModel().getCharacterColumns();
-		for (int i = 0; i < characterColumnConfigs.size(); i++) {
-			CharacterColumnConfig characterColumnConfig = characterColumnConfigs.get(i);
-			ValueFilter characterStateFilter = new ValueFilter(characterColumnConfigs.get(i).getValueProvider());
-			characterColumnConfig.setFilter(characterStateFilter);
-			characterFilters.addFilter(characterStateFilter);
-		}
-		characterFilters.initPlugin(charactersGrid);
-		
-		// init control mode for charactersGrid
-		for(CharacterColumnConfig characterColumnConfig : charactersGrid.getColumnModel().getCharacterColumns()) {
-			setControlMode(characterColumnConfig, ControlMode.OFF);
-			enableEditing(characterColumnConfig);
-			characterEditing.addEditor(characterColumnConfig, new ValueConverter(), new TextField());
-		}
+		// init control and filtering for charactersGrid
+		charactersFilters = new CharactersGridFilters();
+		charactersFilters.setLocal(true);
+		for(CharacterColumnConfig characterColumnConfig : charactersGrid.getColumnModel().getCharacterColumns()) 
+			init(characterColumnConfig);
 		for(Taxon taxon : taxonMatrix.getTaxa())
-			characterEditing.addEditor(taxon);
+			init(taxon);
+		charactersFilters.initPlugin(charactersGrid);
+	}
+	
+	public void init(Taxon taxon) {
+		this.enableEditing(taxon);
 	}
 
-	public void toggleEditing(int colIndex) {
-		CharacterColumnConfig characterColumnConfig = charactersGrid.getColumnModel().getCharacterColumns().get(colIndex);
-		Field<?> field = characterEditing.getEditor(characterColumnConfig);
-		if (characterEditing.getEditor(characterColumnConfig) != null) {
-			this.disableEditing(characterColumnConfig);
-		} else {
-			this.enableEditing(characterColumnConfig);
-		}
+	public void remove(Taxon taxon) {
+		characterEditing.removeEditor(taxon);
+	}
+
+	public void init(CharacterColumnConfig columnConfig) {
+		ValueFilter characterStateFilter = new ValueFilter(columnConfig.getValueProvider());
+		columnConfig.setFilter(characterStateFilter);
+		charactersFilters.addFilter(characterStateFilter);
+		this.setControlMode(columnConfig, ControlMode.OFF);
+	}
+	
+	public void remove(CharacterColumnConfig columnConfig) {
+		this.disableEditing(columnConfig);
+		this.characterColumnControlMap.remove(columnConfig);
+		charactersFilters.removeFilter(columnConfig.getFilter());
 	}
 
 	public void enableEditing(CharacterColumnConfig characterColumnConfig) {
@@ -230,165 +226,19 @@ public class ControlManager {
 		}
 	}
 
-	/**
-	 * Determine whether the values are probably more numerical. Simplistic
-	 * implementation for now
-	 * 
-	 * @param values
-	 * @return
-	 */
-	private boolean isNumeric(Set<String> values) {
-		int numericalCount = 0;
-		for (String value : values) {
-			if (value.matches("[0-9]*")) {
-				numericalCount++;
-			}
-		}
-		return numericalCount > values.size() / 2;
-	}
-
-	private boolean isControlled(CharacterColumnConfig characterColumnConfig) {
-		if (characterColumnControlMap.containsKey(characterColumnConfig))
-			return !characterColumnControlMap.get(characterColumnConfig).equals(ControlMode.OFF);
-		else
-			return false;
-	}
-
 	public void disableEditing(CharacterColumnConfig characterColumnConfig) {
 		characterEditing.removeEditor(characterColumnConfig);
 	}
-
-	/*
-	 * // final ListLoader<ListLoadConfig, ListLoadResult<Taxon>> loader = new
-	 * // ListLoader<ListLoadConfig, ListLoadResult<Taxon>>( // proxy, reader);
-	 * //
-	 * loader.useLoadConfig(XmlAutoBeanFactory.instance.create(ListLoadConfig.
-	 * class).as()); // /loader.addLoadHandler(new
-	 * LoadResultListStoreBinding<ListLoadConfig, // Taxon,
-	 * ListLoadResult<Taxon>>(store));
-	 */
-
-	public void setControlMode(int colIndex, ControlMode controlMode) {
-		List<CharacterColumnConfig> columns = new ArrayList<CharacterColumnConfig>(charactersGrid.getColumnModel().getCharacterColumns());
-		final CharacterColumnConfig characterColumnConfig = columns.remove(colIndex);
-		
-		// setup controlled filtering
-		switch (controlMode) {
-		case CATEGORICAL:
-			ValueConverter valueConverter = new ValueConverter();
-			//final Set<String> values = new HashSet<String>();
-			final Set<Value> values = new HashSet<Value>();
-			for (Taxon taxon : taxonMatrix.getTaxa()) {
-				values.add(characterColumnConfig.getValueProvider().getValue(taxon));
-				//values.add(valueConverter.convertModelValue(characterColumnConfig.getValueProvider().getValue(taxon)));
-			}
-			final AllAccessListStore<Value> valueStore = new AllAccessListStore<Value>(new ModelKeyProvider<Value>() {
-				@Override
-				public String getKey(Value item) {
-					return item.getValue();
-				}
-			});
-			List<Value> sortValues = new ArrayList<Value>(values);
-			Collections.sort(sortValues, new Comparator<Value>() {
-				@Override
-				public int compare(Value o1, Value o2) {
-					return o1.getValue().compareTo(o2.getValue());
-				}
-			});
-			valueStore.addAll(sortValues);
-			characterFilters.removeFilter(characterColumnConfig.getFilter());
-			
-			ListFilter<Taxon, Value> listFilter = new ListFilter<Taxon, Value>(characterColumnConfig.getValueProvider(), valueStore);
-			characterFilters.addFilter(listFilter);
-			break;
-		case NUMERICAL:
-			characterFilters.removeFilter(characterColumnConfig.getFilter());
-			NumericFilter<Taxon, Double> lastFilter = new NumericFilter<Taxon, Double>(dataManager.new NumericValueProvider(characterColumnConfig), new DoublePropertyEditor());
-			characterFilters.addFilter(lastFilter);
-			break;
-		case OFF:
-			characterFilters.removeFilter(characterColumnConfig.getFilter());
-			StringFilter<Taxon> stringFilter = new StringFilter<Taxon>(dataManager.new StringValueProvider(characterColumnConfig));
-			characterFilters.addFilter(stringFilter);
-			break;
-		}
-
-		this.setControlMode(characterColumnConfig, controlMode);
-	}
-
-	public void setControlMode(CharacterColumnConfig characterColumnConfig, ControlMode controlMode) {
-		this.characterColumnControlMap.put(characterColumnConfig, controlMode);
-		// refresh editing
-		this.enableEditing(characterColumnConfig);
-	}
-
-	public boolean isControlled(int colIndex) {
-		List<CharacterColumnConfig> columns = new ArrayList<CharacterColumnConfig>(charactersGrid.getColumnModel().getCharacterColumns());
-		CharacterColumnConfig characterColumnConfig = columns.remove(colIndex);
-		return this.isControlled(characterColumnConfig);
-	}
-
-	public boolean isLockedColumn(int colIndex) {
-		// return false;
-		CharacterColumnConfig characterColumnConfig = charactersGrid.getColumnModel().getCharacterColumns().get(colIndex);
-		return characterEditing.getEditor(characterColumnConfig) == null;
-	}
-
-	public boolean isLockedRow(int rowIndex) {
-		Taxon taxon = store.get(rowIndex);
-		return !characterEditing.hasEditor(taxon);
-	}
-
-	public void setLockedRow(int rowIndex, boolean newValue) {
-		Taxon taxon = store.get(rowIndex);
-		if (newValue) {
-			this.disableEditing(taxon);
-		} else {
-			this.enableEditing(taxon);
-		}
-	}
-
-	private void enableEditing(Taxon taxon) {
+	
+	public void enableEditing(Taxon taxon) {
 		characterEditing.addEditor(taxon);
 	}
 
-	private void disableEditing(Taxon taxon) {
+	public void disableEditing(Taxon taxon) {
 		characterEditing.removeEditor(taxon);
 	}
-
-	public void setLockedColumn(int colIndex, boolean newValue) {
-		CharacterColumnConfig characterColumnConfig = charactersGrid.getColumnModel().getCharacterColumns().get(colIndex);
-		if (newValue) {
-			this.disableEditing(characterColumnConfig);
-		} else {
-			this.enableEditing(characterColumnConfig);
-		}
-	}
-
-	public ControlMode getControlMode(int colIndex) {
-		CharacterColumnConfig characterColumnConfig = charactersGrid.getColumnModel().getCharacterColumns().get(colIndex);
-		return this.characterColumnControlMap.get(characterColumnConfig);
-	}
-
-	private ControlMode getControlMode(CharacterColumnConfig characterColumnConfig) {
-		return this.characterColumnControlMap.get(characterColumnConfig);
-	}
-
-	public ControlMode determineControlMode(int colIndex) {
-		CharacterColumnConfig characterColumnConfig = charactersGrid.getColumnModel().getCharacterColumns().get(colIndex);
-		Set<String> values = new HashSet<String>();
-		ValueConverter valueConverter = new ValueConverter();
-		for (Taxon taxon : taxonMatrix.getTaxa()) {
-			values.add(valueConverter.convertModelValue(characterColumnConfig.getValueProvider().getValue(taxon)));
-		}
-		if (isNumeric(values))
-			return ControlMode.NUMERICAL;
-		if (values.isEmpty())
-			return ControlMode.OFF;
-		return ControlMode.CATEGORICAL;
-	}
-
-	public void enableEditing(boolean activate) {
+	
+	public void enableEditingAll(boolean activate) {
 		List<CharacterColumnConfig> columns = this.charactersGrid.getColumnModel().getCharacterColumns();
 		if (activate) {
 			for (int i = 0; i < columns.size(); i++) {
@@ -419,15 +269,7 @@ public class ControlManager {
 		}
 		return true;
 	}
-
-	private boolean isEditable(CharacterColumnConfig characterColumnConfig) {
-		return characterEditing.getEditor(characterColumnConfig) != null;
-	}
-
-	private boolean isEditable(Taxon taxon) {
-		return characterEditing.hasEditor(taxon);
-	}
-
+	
 	public boolean isNotEditableAll() {
 		List<CharacterColumnConfig> columns = this.charactersGrid.getColumnModel().getCharacterColumns();
 		for (int i = 0; i < columns.size(); i++) {
@@ -441,4 +283,142 @@ public class ControlManager {
 		return true;
 	}
 
+	private boolean isEditable(CharacterColumnConfig characterColumnConfig) {
+		return characterEditing.getEditor(characterColumnConfig) != null;
+	}
+
+	private boolean isEditable(Taxon taxon) {
+		return characterEditing.hasEditor(taxon);
+	}
+
+
+	
+	public void setControlMode(int colIndex, ControlMode controlMode) {
+		final CharacterColumnConfig characterColumnConfig = charactersGrid.getColumnModel().getCharacterColumns().get(colIndex);
+		this.setControlMode(characterColumnConfig, controlMode);
+	}
+	
+	public void setControlMode(CharacterColumnConfig characterColumnConfig, ControlMode controlMode) {
+		this.characterColumnControlMap.put(characterColumnConfig, controlMode);
+		
+		// setup controlled filtering
+		switch (controlMode) {
+		case CATEGORICAL:
+			ValueConverter valueConverter = new ValueConverter();
+			//final Set<String> values = new HashSet<String>();
+			final Set<Value> values = new HashSet<Value>();
+			for (Taxon taxon : taxonMatrix.getTaxa()) {
+				values.add(characterColumnConfig.getValueProvider().getValue(taxon));
+				//values.add(valueConverter.convertModelValue(characterColumnConfig.getValueProvider().getValue(taxon)));
+			}
+			final AllAccessListStore<Value> valueStore = new AllAccessListStore<Value>(new ModelKeyProvider<Value>() {
+				@Override
+				public String getKey(Value item) {
+					return item.getValue();
+				}
+			});
+			List<Value> sortValues = new ArrayList<Value>(values);
+			Collections.sort(sortValues, new Comparator<Value>() {
+				@Override
+				public int compare(Value o1, Value o2) {
+					return o1.getValue().compareTo(o2.getValue());
+				}
+			});
+			valueStore.addAll(sortValues);
+			charactersFilters.removeFilter(characterColumnConfig.getFilter());
+			
+			ListFilter<Taxon, Value> listFilter = new ListFilter<Taxon, Value>(characterColumnConfig.getValueProvider(), valueStore);
+			charactersFilters.addFilter(listFilter);
+			break;
+		case NUMERICAL:
+			charactersFilters.removeFilter(characterColumnConfig.getFilter());
+			NumericFilter<Taxon, Double> lastFilter = new NumericFilter<Taxon, Double>(dataManager.new NumericValueProvider(characterColumnConfig), new DoublePropertyEditor());
+			charactersFilters.addFilter(lastFilter);
+			break;
+		case OFF:
+			charactersFilters.removeFilter(characterColumnConfig.getFilter());
+			StringFilter<Taxon> stringFilter = new StringFilter<Taxon>(dataManager.new StringValueProvider(characterColumnConfig));
+			charactersFilters.addFilter(stringFilter);
+			break;
+		}
+		
+		// refresh editing
+		this.enableEditing(characterColumnConfig);
+	}
+	
+	public ControlMode getControlMode(int colIndex) {
+		CharacterColumnConfig characterColumnConfig = charactersGrid.getColumnModel().getCharacterColumns().get(colIndex);
+		return this.characterColumnControlMap.get(characterColumnConfig);
+	}
+
+	private ControlMode getControlMode(CharacterColumnConfig characterColumnConfig) {
+		return this.characterColumnControlMap.get(characterColumnConfig);
+	}
+
+	public ControlMode determineControlMode(int colIndex) {
+		CharacterColumnConfig characterColumnConfig = charactersGrid.getColumnModel().getCharacterColumns().get(colIndex);
+		Set<String> values = new HashSet<String>();
+		ValueConverter valueConverter = new ValueConverter();
+		for (Taxon taxon : taxonMatrix.getTaxa()) {
+			values.add(valueConverter.convertModelValue(characterColumnConfig.getValueProvider().getValue(taxon)));
+		}
+		if (isNumeric(values))
+			return ControlMode.NUMERICAL;
+		if (values.isEmpty())
+			return ControlMode.OFF;
+		return ControlMode.CATEGORICAL;
+	}
+	
+	/**
+	 * Determine whether the values are probably more numerical. Simplistic
+	 * implementation for now
+	 * 
+	 * @param values
+	 * @return
+	 */
+	private boolean isNumeric(Set<String> values) {
+		int numericalCount = 0;
+		for (String value : values) {
+			if (value.matches("[0-9]*")) {
+				numericalCount++;
+			}
+		}
+		return numericalCount > values.size() / 2;
+	}
+	
+	private boolean isControlled(CharacterColumnConfig characterColumnConfig) {
+		if (characterColumnControlMap.containsKey(characterColumnConfig))
+			return !characterColumnControlMap.get(characterColumnConfig).equals(ControlMode.OFF);
+		else
+			return false;
+	}
+
+	public void setLockedTaxon(int rowIndex, boolean newValue) {
+		Taxon taxon = store.get(rowIndex);
+		if (newValue) {
+			this.disableEditing(taxon);
+		} else {
+			this.enableEditing(taxon);
+		}
+	}
+	
+	public boolean isLockedCharacter(int colIndex) {
+		// return false;
+		CharacterColumnConfig characterColumnConfig = charactersGrid.getColumnModel().getCharacterColumns().get(colIndex);
+		return characterEditing.getEditor(characterColumnConfig) == null;
+	}
+
+	public boolean isLockedTaxon(int rowIndex) {
+		Taxon taxon = store.get(rowIndex);
+		return !characterEditing.hasEditor(taxon);
+	}
+
+	public void setLockedCharacter(int colIndex, boolean newValue) {
+		CharacterColumnConfig characterColumnConfig = charactersGrid.getColumnModel().getCharacterColumns().get(colIndex);
+		if (newValue) {
+			this.disableEditing(characterColumnConfig);
+		} else {
+			this.enableEditing(characterColumnConfig);
+		}
+	}
 }

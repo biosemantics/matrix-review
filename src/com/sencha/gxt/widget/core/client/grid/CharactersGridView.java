@@ -273,5 +273,10 @@ public class CharactersGridView extends GridView<Taxon> {
 	public CharacterColumnHeader getHeader() {
 		return (CharacterColumnHeader) header;
 	}
+	
+	@Override
+	public CharactersColumnModel getColumnModel() {
+		return (CharactersColumnModel)cm;
+	}
 
 }

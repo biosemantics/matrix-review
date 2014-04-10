@@ -1,31 +1,13 @@
 package edu.arizona.biosemantics.matrixreview.client;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 
-import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.DateCell;
-import com.google.gwt.cell.client.Cell.Context;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.Style.ScrollDirection;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.core.client.dom.XDOM;
 import com.sencha.gxt.core.client.util.Margins;
-import com.sencha.gxt.core.client.util.Size;
 import com.sencha.gxt.data.shared.AllAccessListStore;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
@@ -37,14 +19,11 @@ import com.sencha.gxt.widget.core.client.grid.CharacterColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.CharactersColumnModel;
 import com.sencha.gxt.widget.core.client.grid.CharactersGrid;
 import com.sencha.gxt.widget.core.client.grid.CharactersGridView;
-import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
-import com.sencha.gxt.widget.core.client.grid.ColumnModel;
-import com.sencha.gxt.widget.core.client.grid.Grid;
-import com.sencha.gxt.widget.core.client.grid.GridView;
 import com.sencha.gxt.widget.core.client.grid.TaxaColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.TaxaColumnModel;
 import com.sencha.gxt.widget.core.client.grid.TaxaGrid;
 import com.sencha.gxt.widget.core.client.grid.TaxaGridView;
+import com.sencha.gxt.widget.core.client.tips.QuickTip;
 
 import edu.arizona.biosemantics.matrixreview.client.cells.TaxonCell;
 import edu.arizona.biosemantics.matrixreview.client.cells.ValueCell;
@@ -98,13 +77,14 @@ public class TaxonMatrixView implements IsWidget {
 		this.annotationManager = new AnnotationManager(taxonMatrix);
 		
 		// create grids
-		this.taxaGrid = createTaxaGrid(store, dataManager, viewManager, controlManager, annotationManager);
 		this.charactersGrid = createCharactersGrid(store, dataManager, viewManager, controlManager, annotationManager);
+		this.taxaGrid = createTaxaGrid(store, dataManager, viewManager, controlManager, annotationManager, charactersGrid.getView());
 		
 		// complete wiring of components
 		dataManager.setCharactersGrid(charactersGrid);
 		dataManager.setTaxaGrid(taxaGrid);
 		dataManager.setViewManager(viewManager);
+		dataManager.setControlManager(controlManager);
 		dataManager.setTaxonCell(new TaxonCell(dataManager, viewManager, controlManager, annotationManager));
 		dataManager.setValueCell(new ValueCell(dataManager, annotationManager));
 		dataManager.init();
@@ -138,12 +118,13 @@ public class TaxonMatrixView implements IsWidget {
 		grid.setColumnReordering(true);
 		grid.setStateful(true);
 		grid.setStateId("charactersGrid");
+		QuickTip quickTip = new QuickTip(grid);
 		return grid;
 	}
 
 	private TaxaGrid createTaxaGrid(ListStore<Taxon> store, DataManager dataManager, ViewManager viewManager, ControlManager controlManager,
-			AnnotationManager annotationManager) {
-		TaxaGridView view = new TaxaGridView(dataManager, viewManager, controlManager, annotationManager);
+			AnnotationManager annotationManager, CharactersGridView charactersGridView) {
+		TaxaGridView view = new TaxaGridView(dataManager, viewManager, controlManager, annotationManager, charactersGridView);
 		view.setShowDirtyCells(false);// require columns to always fit, preventing scrollbar
 		view.setForceFit(true);
 		view.setStripeRows(true);
@@ -153,6 +134,7 @@ public class TaxonMatrixView implements IsWidget {
 		grid.setColumnReordering(true);
 		grid.setStateful(true);
 		grid.setStateId("taxaGrid");
+		QuickTip quickTip = new QuickTip(grid);
 		return grid;
 	}
 

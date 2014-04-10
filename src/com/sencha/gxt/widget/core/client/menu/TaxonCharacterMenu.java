@@ -29,9 +29,15 @@ import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData;
+import com.sencha.gxt.widget.core.client.event.CheckChangeEvent;
+import com.sencha.gxt.widget.core.client.event.CheckChangeEvent.CheckChangeHandler;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.form.Validator;
 import com.sencha.gxt.widget.core.client.form.error.DefaultEditorError;
+import com.sencha.gxt.widget.core.client.grid.CharacterColumnConfig;
+import com.sencha.gxt.widget.core.client.grid.CharactersColumnModel;
+import com.sencha.gxt.widget.core.client.grid.CharactersGridView;
+import com.sencha.gxt.widget.core.client.grid.TaxaGridView;
 
 import edu.arizona.biosemantics.matrixreview.client.cells.ColorCell;
 import edu.arizona.biosemantics.matrixreview.client.manager.AnnotationManager;
@@ -40,13 +46,14 @@ import edu.arizona.biosemantics.matrixreview.client.manager.DataManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.ViewManager;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
+import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 
 public class TaxonCharacterMenu extends Menu {
 
 	private AnnotationManager annotationManager;
 
 	public TaxonCharacterMenu(final DataManager dataManager, final ViewManager viewManager, final ControlManager controlManager, 
-			final AnnotationManager annotationManager) {
+			final AnnotationManager annotationManager, final CharactersGridView charactersGridView, final TaxaGridView taxaGridView) {
 		super();
 		this.annotationManager = annotationManager;
 		
@@ -79,28 +86,28 @@ public class TaxonCharacterMenu extends Menu {
 		MenuItem editMode = new MenuItem("Lock all");
 		Menu editMenu = new Menu();
 		editMode.setSubMenu(editMenu);
-		CheckMenuItem enable = new CheckMenuItem("Enable");
-		enable.setGroup("editMode");
-		CheckMenuItem disable = new CheckMenuItem("Disable");
-		disable.setGroup("editMode");
-		enable.addSelectionHandler(new SelectionHandler<Item>() {
+		CheckMenuItem set = new CheckMenuItem("Set");
+		set.setGroup("editMode");
+		CheckMenuItem unset = new CheckMenuItem("Unset");
+		unset.setGroup("editMode");
+		set.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				controlManager.enableEditing(true);
+				controlManager.enableEditingAll(false);
 			}
 		});
-		disable.addSelectionHandler(new SelectionHandler<Item>() {
+		unset.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				controlManager.enableEditing(false);
+				controlManager.enableEditingAll(true);
 			}
 		});
 		if(controlManager.isEditableAll())
-			enable.setChecked(true);
+			unset.setChecked(true);
 		if(controlManager.isNotEditableAll())
-			disable.setChecked(true);
-		editMenu.add(enable);
-		editMenu.add(disable);
+			set.setChecked(true);
+		editMenu.add(set);
+		editMenu.add(unset);
 		add(editMode);
 		
 		add(new HeaderMenuItem("View"));
@@ -120,25 +127,25 @@ public class TaxonCharacterMenu extends Menu {
 		coverageSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				viewManager.sortRowsByCoverage(true);
+				viewManager.sortTaxaByCoverage(true);
 			}
 		});
 		coverageSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				viewManager.sortRowsByCoverage(false);
+				viewManager.sortTaxaByCoverage(false);
 			}
 		});
 		nameSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				viewManager.sortRowsByName(true);
+				viewManager.sortTaxaByName(true);
 			}
 		});
 		nameSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				viewManager.sortRowsByName(false);
+				viewManager.sortTaxaByName(false);
 			}
 		});
 		add(item);
@@ -163,40 +170,115 @@ public class TaxonCharacterMenu extends Menu {
 		coverageSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				viewManager.sortColumnsByCoverage(true);
+				viewManager.sortCharactersByCoverage(true);
 			}
 		});
 		coverageSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				viewManager.sortColumnsByCoverage(false);
+				viewManager.sortCharactersByCoverage(false);
 			}
 		});
 		nameSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				viewManager.sortColumnsByName(true);
+				viewManager.sortCharactersByName(true);
 			}
 		});
 		nameSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				viewManager.sortColumnsByName(false);
+				viewManager.sortCharactersByName(false);
 			}
 		});
 		organSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				viewManager.sortColumnsByOrgan(true);
+				viewManager.sortCharactersByOrgan(true);
 			}
 		});
 		organSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				viewManager.sortColumnsByOrgan(false);
+				viewManager.sortCharactersByOrgan(false);
 			}
 		});
 		add(item);
+		
+		MenuItem rows = new MenuItem();
+		rows.setText("Taxa");
+		// rows.setIcon(header.getAppearance().columnsIcon());
+		// rows.setData("gxt-columns", "true");
+
+		final Menu rowMenu = new Menu();
+
+		int rowCount = dataManager.getTaxaCount();
+		for (int i = 0; i < rowCount; i++) {
+			Taxon taxon = dataManager.getTaxonFromAll(i);
+			final int finalRow = i;
+			final CheckMenuItem check = new CheckMenuItem();
+			check.setHideOnClick(false);
+			check.setHTML(taxon.getName());
+			check.setChecked(!viewManager.isHiddenTaxon(i));
+			check.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
+				@Override
+				public void onCheckChange(CheckChangeEvent<CheckMenuItem> event) {
+					viewManager.setHiddenTaxon(finalRow,
+							!viewManager.isHiddenTaxon(finalRow));
+					restrictMenu(rowMenu);
+				}
+			});
+			rowMenu.add(check);
+		}
+
+		restrictMenu(rowMenu);
+		rows.setEnabled(rowMenu.getWidgetCount() > 0);
+		rows.setSubMenu(rowMenu);
+		add(rows);
+		
+		MenuItem columns = new MenuItem();
+		columns.setText("Characters");
+		//columns.setIcon(charactersGridView.getHeader().getAppearance().columnsIcon());
+		columns.setData("gxt-columns", "true");
+		
+		final CharactersColumnModel charactersColumnModel = charactersGridView.getColumnModel();
+		int cols = charactersColumnModel.getColumnCount();
+		
+		final Menu columnMenu = new Menu();
+
+		for (int i = 0; i < cols; i++) {
+			CharacterColumnConfig config = charactersColumnModel.getColumn(i);
+			// ignore columns with no header text
+			if (!charactersGridView.hasHeaderValue(i)) {
+				continue;
+			}
+			final int fcol = i;
+			final CheckMenuItem check = new CheckMenuItem();
+			check.setHideOnClick(false);
+			check.setHTML(charactersColumnModel.getColumnHeader(i));
+			check.setChecked(!charactersColumnModel.isHidden(i));
+
+			if (!config.isHideable()) {
+				check.disable();
+			}
+
+			check.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
+
+				@Override
+				public void onCheckChange(
+						CheckChangeEvent<CheckMenuItem> event) {
+					charactersColumnModel.setHidden(fcol, !charactersColumnModel.isHidden(fcol));
+					charactersGridView.restrictMenu(charactersColumnModel, columnMenu);
+
+				}
+			});
+			columnMenu.add(check);
+		}
+
+		charactersGridView.restrictMenu(charactersColumnModel, columnMenu);
+		columns.setEnabled(columnMenu.getWidgetCount() > 0);
+		columns.setSubMenu(columnMenu);
+		add(columns);
 		
 		add(new HeaderMenuItem("Annotation"));
 		
@@ -344,8 +426,9 @@ public class TaxonCharacterMenu extends Menu {
 				}
 				for(Color color : toRemove) {
 					colors.remove(color);
-				}
+				}	
 				colorsTable.setRowData(colors);
+				annotationManager.setColors(colors);
 			}
 	    });
 	    scrollPanel.setWidget(colorsTable);
@@ -353,5 +436,37 @@ public class TaxonCharacterMenu extends Menu {
 		centerPanel.addButton(removeButton);
 		
 		return dialog;
+	}
+	
+	private void restrictMenu(Menu rows) {
+	//private void restrictMenu(ColumnModel<Taxon> cm, Menu columns) {
+		//TODO for rows rather than columns
+		/*int count = 0;
+		for (int i = 0, len = cm.getColumnCount(); i < len; i++) {
+			if (hasHeaderValue(i)) {
+				ColumnConfig<M, ?> cc = cm.getColumn(i);
+				if (cc.isHidden() || !cc.isHideable()) {
+					continue;
+				}
+				count++;
+			}
+		}
+
+		if (count == 1) {
+			for (Widget item : columns) {
+				CheckMenuItem ci = (CheckMenuItem) item;
+				if (ci.isChecked()) {
+					ci.disable();
+				}
+			}
+		} else {
+			for (int i = 0, len = columns.getWidgetCount(); i < len; i++) {
+				Widget item = columns.getWidget(i);
+				ColumnConfig<M, ?> config = cm.getColumn(i);
+				if (item instanceof Component && config.isHideable()) {
+					((Component) item).enable();
+				}
+			}
+		} */
 	}
 }

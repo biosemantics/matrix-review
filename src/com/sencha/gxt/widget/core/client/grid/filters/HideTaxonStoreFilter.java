@@ -8,7 +8,7 @@ import com.sencha.gxt.data.shared.Store.StoreFilter;
 
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 
-public class HideTaxonFilter implements StoreFilter<Taxon> {
+public class HideTaxonStoreFilter implements StoreFilter<Taxon> {
 
 	public Set<Taxon> hiddenTaxa = new HashSet<Taxon>();
 

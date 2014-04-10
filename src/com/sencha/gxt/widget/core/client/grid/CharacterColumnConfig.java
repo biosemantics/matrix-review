@@ -34,7 +34,7 @@ public class CharacterColumnConfig extends ColumnConfig<Taxon, Value> {
 		public void setValue(Taxon object, Value value) {
 			object.setValue(character, value);
 			if (characterColumnConfig != null)
-				viewManager.refreshColumnHeader(characterColumnConfig);
+				viewManager.refreshCharacterHeader(characterColumnConfig);
 		}
 
 		@Override

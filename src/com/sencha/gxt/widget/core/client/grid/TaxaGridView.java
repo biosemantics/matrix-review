@@ -27,22 +27,31 @@ public class TaxaGridView extends GridView<Taxon> {
 	private ViewManager viewManager;
 	private ControlManager controlManager;
 	private AnnotationManager annotationManager;
+	private CharactersGridView charactersGridView;
 
-	public TaxaGridView(DataManager dataManager, ViewManager viewManager, ControlManager controlManager, AnnotationManager annotationManager) {
-		this(dataManager, viewManager, controlManager, annotationManager, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
+	public TaxaGridView(DataManager dataManager, ViewManager viewManager, ControlManager controlManager, AnnotationManager annotationManager, 
+			CharactersGridView charactersGridView) {
+		this(dataManager, viewManager, controlManager, annotationManager, charactersGridView, 
+				GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
 	}
 
-	public TaxaGridView(DataManager dataManager, ViewManager viewManager, ControlManager controlManager, AnnotationManager annotationManager, ColumnHeaderAppearance apperance) {
+	public TaxaGridView(DataManager dataManager, ViewManager viewManager, ControlManager controlManager, AnnotationManager annotationManager, 
+			CharactersGridView charactersGridView, ColumnHeaderAppearance apperance) {
 		this.dataManager = dataManager;
 		this.viewManager = viewManager;
 		this.controlManager = controlManager;
 		this.annotationManager = annotationManager;
+		this.charactersGridView = charactersGridView;
 		this.columnHeaderStyles = apperance.styles();
 		this.scrollOffset = 0;
 	}
+		
+	public void setCharactersGridView(CharactersGridView charactersGridView) {
+		this.charactersGridView = charactersGridView;
+	}
 
 	protected Menu createContextMenu(final int colIndex) {
-		final Menu menu = new TaxonCharacterMenu(dataManager, viewManager, controlManager, annotationManager);
+		final Menu menu = new TaxonCharacterMenu(dataManager, viewManager, controlManager, annotationManager, charactersGridView, this);
 		return menu;
 	}
 
@@ -268,5 +277,11 @@ public class TaxaGridView extends GridView<Taxon> {
 	@Override
 	public TaxaColumnHeader getHeader() {
 		return (TaxaColumnHeader) header;
+	}
+	
+	
+	@Override
+	public TaxaColumnModel getColumnModel() {
+		return (TaxaColumnModel)cm;
 	}
 }

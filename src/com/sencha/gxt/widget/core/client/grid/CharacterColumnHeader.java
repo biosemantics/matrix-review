@@ -15,6 +15,7 @@ import com.sencha.gxt.core.client.Style.AnchorAlignment;
 import com.sencha.gxt.core.client.dom.MyHorizontalAutoScrollSupport;
 import com.sencha.gxt.core.client.dom.XDOM;
 import com.sencha.gxt.core.client.dom.XElement;
+import com.sencha.gxt.core.client.util.ImageHelper;
 import com.sencha.gxt.dnd.core.client.StatusProxy;
 import com.sencha.gxt.fx.client.DragCancelEvent;
 import com.sencha.gxt.fx.client.DragEndEvent;
@@ -137,27 +138,42 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 
 		public void setCommented(boolean hasColumnComment) {
 			this.hasColumnComment = hasColumnComment;
-			this.removeStyleName(gridStyles.cellDirty());
-			this.removeStyleName(gridStyles.cellCommented());
-			this.removeStyleName(gridStyles.cellDirtyCommented());
+			this.getElement().getStyle().clearBackgroundImage();
+			this.getElement().getStyle().clearProperty("background");
+			//this.removeStyleName(gridStyles.cellDirty());
+			//this.removeStyleName(gridStyles.cellCommented());
+			//this.removeStyleName(gridStyles.cellDirtyCommented());
 			this.setCommentedDirty();
 		}
 
 		private void setCommentedDirty() {
+			String backgroundImage = "";		
 			if (hasColumnComment && isDirty) {
-				this.addStyleName(gridStyles.cellDirtyCommented());
+				backgroundImage = ImageHelper.createModuleBasedUrl("base/images/grid/black_red.gif");
+				  
+				//this.addStyleName(gridStyles.cellDirtyCommented());
 			} else if (hasColumnComment) {
-				this.addStyleName(gridStyles.cellCommented());
+				backgroundImage = ImageHelper.createModuleBasedUrl("base/images/grid/red.gif");
+				//this.addStyleName(gridStyles.cellCommented());
 			} else if (isDirty) {
-				this.addStyleName(gridStyles.cellDirty());
+				backgroundImage = ImageHelper.createModuleBasedUrl("base/images/grid/black.gif");
+				//this.addStyleName(gridStyles.cellDirty());
+			}
+			if(isDirty || hasColumnComment) {
+				this.getElement().getStyle().setProperty("background", "transparent no-repeat 0 0");
+				// may not end with a colon, otherwise set style will fail
+				backgroundImage = backgroundImage.substring(0, backgroundImage.length()-1);
+				this.getElement().getStyle().setBackgroundImage(backgroundImage);
 			}
 		}
 
 		public void setDirty(boolean isDirty) {
 			this.isDirty = isDirty;
-			this.removeStyleName(gridStyles.cellDirty());
-			this.removeStyleName(gridStyles.cellCommented());
-			this.removeStyleName(gridStyles.cellDirtyCommented());
+			this.getElement().getStyle().clearBackgroundImage();
+			this.getElement().getStyle().clearProperty("background");
+			//this.removeStyleName(gridStyles.cellDirty());
+			//this.removeStyleName(gridStyles.cellCommented());
+			//this.removeStyleName(gridStyles.cellDirtyCommented());
 			setCommentedDirty();
 		}
 	}

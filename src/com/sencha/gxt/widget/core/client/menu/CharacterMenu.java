@@ -8,13 +8,10 @@ import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.messages.client.DefaultMessages;
 import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
 import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
-import com.sencha.gxt.widget.core.client.event.CheckChangeEvent;
-import com.sencha.gxt.widget.core.client.event.CheckChangeEvent.CheckChangeHandler;
 import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
-import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
+import com.sencha.gxt.widget.core.client.grid.CharactersGridView;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
-import com.sencha.gxt.widget.core.client.grid.GridView;
 import com.sencha.gxt.widget.core.client.info.Info;
 
 import edu.arizona.biosemantics.matrixreview.client.manager.AnnotationManager;
@@ -29,9 +26,9 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 public class CharacterMenu extends Menu {
 
 	public CharacterMenu(final DataManager dataManager, final ViewManager viewManager, final ControlManager controlManager,
-			final AnnotationManager annotationManager, final GridView<Taxon> gridView, final int colIndex) {
+			final AnnotationManager annotationManager, final CharactersGridView charactersGridView, final int colIndex) {
 		super();
-		final ColumnModel<Taxon> cm = gridView.getColumnModel();
+		final ColumnModel<Taxon> cm = charactersGridView.getColumnModel();
 		
 		int cols = cm.getColumnCount();
 		
@@ -71,7 +68,7 @@ public class CharacterMenu extends Menu {
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				dataManager.deleteColumn(colIndex);
+				dataManager.removeCharacter(colIndex);
 			}
 		});
 		add(item);
@@ -138,13 +135,13 @@ public class CharacterMenu extends Menu {
 		}
 
 		final CheckMenuItem lockItem = new CheckMenuItem("Lock");
-		lockItem.setChecked(controlManager.isLockedColumn(colIndex));
+		lockItem.setChecked(controlManager.isLockedCharacter(colIndex));
 		lockItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				boolean newValue = !controlManager.isLockedColumn(colIndex);
+				boolean newValue = !controlManager.isLockedCharacter(colIndex);
 				lockItem.setChecked(newValue);
-				controlManager.setLockedColumn(colIndex, newValue);
+				controlManager.setLockedCharacter(colIndex, newValue);
 			}
 		});
 		add(lockItem);
@@ -215,12 +212,12 @@ public class CharacterMenu extends Menu {
 			item = new MenuItem();
 			item.setText(DefaultMessages.getMessages()
 					.gridView_sortAscText());
-			item.setIcon(gridView.getHeader().getAppearance().sortAscendingIcon());
+			item.setIcon(charactersGridView.getHeader().getAppearance().sortAscendingIcon());
 			item.addSelectionHandler(new SelectionHandler<Item>() {
 
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					gridView.doSort(colIndex, SortDir.ASC);
+					charactersGridView.doSort(colIndex, SortDir.ASC);
 
 				}
 			});
@@ -229,22 +226,22 @@ public class CharacterMenu extends Menu {
 			item = new MenuItem();
 			item.setText(DefaultMessages.getMessages()
 					.gridView_sortDescText());
-			item.setIcon(gridView.getHeader().getAppearance().sortDescendingIcon());
+			item.setIcon(charactersGridView.getHeader().getAppearance().sortDescendingIcon());
 			item.addSelectionHandler(new SelectionHandler<Item>() {
 
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					gridView.doSort(colIndex, SortDir.DESC);
+					charactersGridView.doSort(colIndex, SortDir.DESC);
 
 				}
 			});
 			add(item);
 		}
 
-		MenuItem columns = new MenuItem();
+		/*MenuItem columns = new MenuItem();
 		columns.setText(DefaultMessages.getMessages()
 				.gridView_columnsText());
-		columns.setIcon(gridView.getHeader().getAppearance().columnsIcon());
+		columns.setIcon(charactersGridView.getHeader().getAppearance().columnsIcon());
 		columns.setData("gxt-columns", "true");
 
 		final Menu columnMenu = new Menu();
@@ -252,7 +249,7 @@ public class CharacterMenu extends Menu {
 		for (int i = 0; i < cols; i++) {
 			ColumnConfig<Taxon, ?> config = cm.getColumn(i);
 			// ignore columns with no header text
-			if (!gridView.hasHeaderValue(i)) {
+			if (!charactersGridView.hasHeaderValue(i)) {
 				continue;
 			}
 			final int fcol = i;
@@ -271,17 +268,17 @@ public class CharacterMenu extends Menu {
 				public void onCheckChange(
 						CheckChangeEvent<CheckMenuItem> event) {
 					cm.setHidden(fcol, !cm.isHidden(fcol));
-					gridView.restrictMenu(cm, columnMenu);
+					charactersGridView.restrictMenu(cm, columnMenu);
 
 				}
 			});
 			columnMenu.add(check);
 		}
 
-		gridView.restrictMenu(cm, columnMenu);
+		charactersGridView.restrictMenu(cm, columnMenu);
 		columns.setEnabled(columnMenu.getWidgetCount() > 0);
 		columns.setSubMenu(columnMenu);
-		add(columns);
+		add(columns);*/
 
 		add(new HeaderMenuItem("Annotation"));
 		item = new MenuItem("Comment");
@@ -290,11 +287,11 @@ public class CharacterMenu extends Menu {
 			public void onSelection(SelectionEvent<Item> event) {
 				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox(
 						"Comment", "");
-				box.setValue(annotationManager.getColumnComment(colIndex));
+				box.setValue(annotationManager.getCharacterComment(colIndex));
 				box.addHideHandler(new HideHandler() {
 					@Override
 					public void onHide(HideEvent event) {
-						annotationManager.setColumnComment(colIndex, box.getValue());
+						annotationManager.setCharacterComment(colIndex, box.getValue());
 						String comment = Format.ellipse(box.getValue(), 80);
 						String message = Format.substitute("'{0}' saved",
 								new Params(comment));
@@ -313,7 +310,7 @@ public class CharacterMenu extends Menu {
 		offItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				annotationManager.setColumnColor(colIndex, null);
+				annotationManager.setCharacterColor(colIndex, null);
 			}
 		});
 		colorMenu.add(offItem);
@@ -323,7 +320,7 @@ public class CharacterMenu extends Menu {
 			colorItem.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					annotationManager.setColumnColor(colIndex, color);
+					annotationManager.setCharacterColor(colIndex, color);
 				}
 			});
 			colorMenu.add(colorItem);

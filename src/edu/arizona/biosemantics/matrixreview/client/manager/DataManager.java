@@ -81,17 +81,19 @@ public class DataManager {
 	private CharactersGrid charactersGrid;
 	
 	private ViewManager viewManager;
+	private ControlManager controlManager;
 	
 	private TaxonCell taxonCell;
 	private ValueCell valueCell;
 
 	public DataManager(TaxonMatrix taxonMatrix, AllAccessListStore<Taxon> store, TaxaGrid taxaGrid, CharactersGrid charactersGrid, 
-			ViewManager viewManager, TaxonCell taxonCell, ValueCell valueCell) {
+			ViewManager viewManager, ControlManager controlManager, TaxonCell taxonCell, ValueCell valueCell) {
 		this.taxonMatrix = taxonMatrix;
 		this.store = store;
 		this.taxaGrid = taxaGrid;
 		this.charactersGrid = charactersGrid;
 		this.viewManager = viewManager;
+		this.controlManager = controlManager;
 		this.taxonCell = taxonCell;
 		this.valueCell = valueCell;
 	}
@@ -111,6 +113,10 @@ public class DataManager {
 
 	public void setViewManager(ViewManager viewManager) {
 		this.viewManager = viewManager;
+	}
+	
+	public void setControlManager(ControlManager controlManager) {
+		this.controlManager = controlManager;
 	}
 	
 	public void setTaxonCell(TaxonCell taxonCell) {
@@ -160,42 +166,62 @@ public class DataManager {
 	public void addTaxonAfter(int rowIndex, Taxon taxon) {
 		taxonMatrix.addTaxon(rowIndex + 1, taxon);
 		store.add(rowIndex + 1, taxon);
-		//editing.addEditor(taxon);
-		//this.rowConfigs.put(taxon, new RowConfig<Taxon>(taxon));
+		controlManager.init(taxon);
 		if(viewManager != null)
-			viewManager.refreshColumnHeaders();
+			viewManager.refreshCharacterHeaders();
 	}
 
 	public void addTaxonAfter(int rowIndex, String name) {
 		Taxon taxon = this.taxonMatrix.addTaxon(rowIndex + 1, name);
 		store.add(rowIndex + 1, taxon);
-		//editing.addEditor(taxon);
-		//this.rowConfigs.put(taxon, new RowConfig<Taxon>(taxon));
+		controlManager.init(taxon);
 		if(viewManager != null)
-			viewManager.refreshColumnHeaders();
+			viewManager.refreshCharacterHeaders();
 	}
 
 	public void removeTaxon(Taxon taxon) {
 		taxonMatrix.removeTaxon(taxon);
 		store.remove(taxon);
-		//editing.removeEditor(taxon);
-		//this.rowConfigs.remove(taxon);
+		controlManager.remove(taxon);
 		if(viewManager != null)
-			viewManager.refreshColumnHeaders();
+			viewManager.refreshCharacterHeaders();
+	}
+	
+	public void removeTaxon(int rowIndex) {
+		Taxon taxon = store.get(rowIndex);
+		this.removeTaxon(taxon);
+	}
+	
+	public void renameTaxon(int rowIndex, String newName) {
+		Taxon taxon = store.get(rowIndex);
+		taxonMatrix.renameTaxon(taxon, newName);
+		viewManager.refreshTaxaGridView();
+	}
+	
+	public void moveTaxon(int source, int target) {
+		Taxon taxon =  store.remove(source);
+		store.add(target, taxon);
+	}
+	
+	public Taxon getTaxon(int row) {
+		return store.get(row);
+	}
+	
+	public Taxon getTaxonFromAll(int indexOfAllItems) {
+		return store.getFromAllItems(indexOfAllItems);
+	}
+	
+	public int getTaxaCount() {
+		return this.store.sizeOfAllItems();
 	}
 
+	public int getVisibleTaxaCount() {
+		return store.size();
+	}
+	
 	public void addCharacter(Character character) {
 		this.addCharacterAfter(charactersGrid.getColumnModel().getColumnCount() - 1, character);
-		/*
-		 * taxonMatrix.addCharacter(character); List<ColumnConfig<Taxon, ?>>
-		 * columns = new ArrayList<ColumnConfig<Taxon,
-		 * ?>>(grid.getColumnModel().getColumns()); ColumnConfig columnConfig =
-		 * createCharacterColumnConfig(character); columns.add(columnConfig);
-		 * ColumnModel<Taxon> cm = new ColumnModel<Taxon>(columns);
-		 * this.setControlMode(columnConfig, ControlMode.OFF);
-		 * this.enableEditing(columnConfig); grid.reconfigure(grid.getStore(),
-		 * cm);
-		 */
+		taxonMatrix.addCharacter(character);;
 	}
 
 	public void addCharacterAfter(int colIndex, Character character) {
@@ -206,54 +232,48 @@ public class DataManager {
 		CharacterColumnConfig columnConfig = createCharacterColumnConfig(character);
 		columns.add(colIndex + 1, columnConfig);
 		charactersColumnModel = new CharactersColumnModel(columns);
-
-		//this.setControlMode(columnConfig, ControlMode.OFF);
-
-		//this.enableEditing(columnConfig);
-
-		//ValueFilter characterStateFilter = new ValueFilter(columnConfig.getValueProvider());
-		//columnConfig.setFilter(characterStateFilter);
-		//filters.addFilter(characterStateFilter);
-
+		controlManager.init(columnConfig);
 		charactersGrid.reconfigure(store, charactersColumnModel);
 	}
 
 	public void removeCharacter(int i) {
-		taxonMatrix.removeCharacter(i - 1);
+		taxonMatrix.removeCharacter(i);
 		CharactersColumnModel charactersColumnModel = charactersGrid.getColumnModel();
 		List<CharacterColumnConfig> columns = new ArrayList<CharacterColumnConfig>(charactersColumnModel.getCharacterColumns());
 		CharacterColumnConfig columnConfig = columns.remove(i);
-		// ColumnConfig columnConfig = columns.remove(i + this.taxonNameColumn);
 		charactersColumnModel = new CharactersColumnModel(columns);
-		//this.disableEditing(columnConfig);
-		//this.columnControlMap.remove(columnConfig);
+		controlManager.remove(columnConfig);
 		charactersGrid.reconfigure(store, charactersColumnModel);
-	}
-
-	public void deleteColumn(int colIndex) {
-		// if(colIndex > this.taxonNameColumn) {
-		this.removeCharacter(colIndex);
-		// this.removeCharacter(colIndex - this.taxonNameColumn);
-		// }
-	}
-
-	public void deleteRow(int rowIndex) {
-		Taxon taxon = store.get(rowIndex);
-		this.removeTaxon(taxon);
-	}
-
-	public Character getCharacter(int column) {
-		CharacterColumnConfig columnConfig = charactersGrid.getColumnModel().getColumn(column);
-		return columnConfig.getCharacter();
 	}
 
 	public void renameCharacter(int colIndex, String name, String organ) {
 		final Character character = getCharacter(colIndex);
 		taxonMatrix.renameCharacter(character, name);
 		taxonMatrix.setOrgan(character, organ);
-		viewManager.refreshColumnHeader(colIndex);
+		viewManager.refreshCharacterHeaderHeader(colIndex);
+	}
+	
+	public Character getCharacter(int column) {
+		CharacterColumnConfig columnConfig = charactersGrid.getColumnModel().getColumn(column);
+		return columnConfig.getCharacter();
+	}
+	
+	public int getCharacterCount() {
+		return charactersGrid.getColumnModel().getColumnCount();
 	}
 
+	public Value getValue(int row, int column) {
+		Taxon taxon = this.getTaxon(row);
+		Character character = this.getCharacter(column);
+		if (taxon != null && character != null)
+			return this.getValue(taxon, character);
+		return null;
+	}
+
+	public Value getValue(Taxon taxon, Character character) {
+		return taxon.get(character);
+	}
+	
 	public String getCoverage(Taxon taxon) {
 		return taxonMatrix.getCoverage(taxon);
 	}
@@ -277,48 +297,5 @@ public class DataManager {
 	public String getQuickTipText(TaxaColumnConfig columnConfig) {
 		return "The matrix contains " + taxonMatrix.getTaxa().size() + " taxa and " + taxonMatrix.getCharacters().size() + " characters";
 	}
-
-	public Value getValue(int row, int column) {
-		Taxon taxon = this.getTaxon(row);
-		Character character = this.getCharacter(column);
-		if (taxon != null && character != null)
-			return this.getValue(taxon, character);
-		return null;
-	}
-
-	public Value getValue(Taxon taxon, Character character) {
-		return taxon.get(character);
-	}
 	
-	public int getTaxaCount() {
-		return this.store.sizeOfAllItems();
-	}
-
-	public int getCharacterCount() {
-		return charactersGrid.getColumnModel().getColumnCount();
-	}
-	
-
-	public Taxon getTaxonFromAll(int indexOfAllItems) {
-		return store.getFromAllItems(indexOfAllItems);
-	}
-	
-	public Taxon getVisibleTaxon(int visibleIndex) {
-		return store.get(visibleIndex);
-	}
-
-	public int getVisibleTaxaCount() {
-		return store.size();
-	}
-
-	public void moveTaxon(int source, int target) {
-		Taxon taxon =  store.remove(source);
-		store.add(target, taxon);
-	}
-	
-	public Taxon getTaxon(int row) {
-		return store.get(row);
-	}
-
-
 }

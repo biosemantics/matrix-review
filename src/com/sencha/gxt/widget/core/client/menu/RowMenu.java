@@ -6,8 +6,6 @@ import com.sencha.gxt.core.client.util.Format;
 import com.sencha.gxt.core.client.util.Params;
 import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
 import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
-import com.sencha.gxt.widget.core.client.event.CheckChangeEvent;
-import com.sencha.gxt.widget.core.client.event.CheckChangeEvent.CheckChangeHandler;
 import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.info.Info;
@@ -51,7 +49,29 @@ public class RowMenu extends Menu {
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				dataManager.deleteRow(rowIndex);
+				dataManager.removeTaxon(rowIndex);
+			}
+		});
+		add(item);
+		
+		item = new MenuItem();
+		item.setText("Rename");
+		// item.setIcon(header.getAppearance().sortAscendingIcon());
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				final Taxon taxon = dataManager.getTaxon(rowIndex);
+				final PromptMessageBox nameBox = new PromptMessageBox(
+						"Taxon Name", "");
+				nameBox.setValue(taxon.getName());
+				nameBox.addHideHandler(new HideHandler() {
+					@Override
+					public void onHide(HideEvent event) {
+						String name = nameBox.getValue();
+						dataManager.renameTaxon(rowIndex, name);
+					}
+				});
+				nameBox.show();
 			}
 		});
 		add(item);
@@ -71,56 +91,25 @@ public class RowMenu extends Menu {
 		moveMenu.add(item);
 		
 		final CheckMenuItem lockItem = new CheckMenuItem("Lock");
-		lockItem.setChecked(controlManager.isLockedRow(rowIndex));
+		lockItem.setChecked(controlManager.isLockedTaxon(rowIndex));
 		lockItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				boolean newValue = !controlManager.isLockedRow(rowIndex);
+				boolean newValue = !controlManager.isLockedTaxon(rowIndex);
 				lockItem.setChecked(newValue);
-				controlManager.setLockedRow(rowIndex, newValue);
+				controlManager.setLockedTaxon(rowIndex, newValue);
 			}
 		});
 		add(lockItem);	
 		
 		//menu.add(new SeparatorMenuItem());
 		add(new HeaderMenuItem("View"));
-		
-		MenuItem rows = new MenuItem();
-		rows.setText("Taxa");
-		// rows.setIcon(header.getAppearance().columnsIcon());
-		// rows.setData("gxt-columns", "true");
-
-		final Menu rowMenu = new Menu();
-
-		int rowCount = dataManager.getTaxaCount();
-		for (int i = 0; i < rowCount; i++) {
-			Taxon taxon = dataManager.getTaxonFromAll(i);
-			final int finalRow = i;
-			final CheckMenuItem check = new CheckMenuItem();
-			check.setHideOnClick(false);
-			check.setHTML(taxon.getName());
-			check.setChecked(!viewManager.isHiddenTaxon(i));
-			check.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
-				@Override
-				public void onCheckChange(CheckChangeEvent<CheckMenuItem> event) {
-					viewManager.setHiddenTaxon(finalRow,
-							!viewManager.isHiddenTaxon(finalRow));
-					restrictMenu(rowMenu);
-				}
-			});
-			rowMenu.add(check);
-		}
-
-		restrictMenu(rowMenu);
-		rows.setEnabled(rowMenu.getWidgetCount() > 0);
-		rows.setSubMenu(rowMenu);
-		add(rows);
 
 		int visibleRowCount = dataManager.getVisibleTaxaCount();
 		for (int i = 0; i < visibleRowCount; i++) {
 			if(i != rowIndex) {
 				final int theI = i;
-				item = new MenuItem(dataManager.getVisibleTaxon(i).getName());
+				item = new MenuItem(dataManager.getTaxon(i).getName());
 				item.addSelectionHandler(new SelectionHandler<Item>() {
 					@Override
 					public void onSelection(SelectionEvent<Item> event) {
@@ -144,11 +133,11 @@ public class RowMenu extends Menu {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox("Comment", "");
-				box.setValue(annotationManager.getRowComment(rowIndex));
+				box.setValue(annotationManager.getTaxonComment(rowIndex));
 				box.addHideHandler(new HideHandler() {
 					@Override
 					public void onHide(HideEvent event) {
-						annotationManager.setRowComment(rowIndex, box.getValue());
+						annotationManager.setTaxonComment(rowIndex, box.getValue());
 						String comment = Format.ellipse(box.getValue(), 80);
 						String message = Format.substitute("'{0}' saved", new Params(comment));
 						Info.display("Comment", message);
@@ -166,7 +155,7 @@ public class RowMenu extends Menu {
 		offItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				annotationManager.setRowColor(rowIndex, null);
+				annotationManager.setTaxonColor(rowIndex, null);
 			}
 		});
 		colorMenu.add(offItem);
@@ -176,7 +165,7 @@ public class RowMenu extends Menu {
 			colorItem.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					annotationManager.setRowColor(rowIndex, color);
+					annotationManager.setTaxonColor(rowIndex, color);
 				}
 			});
 			colorMenu.add(colorItem);

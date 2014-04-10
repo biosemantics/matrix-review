@@ -40,7 +40,23 @@ public class AnnotationManager {
 		Character character = dataManager.getCharacter(column);
 		if (taxon != null && character != null) {
 			taxonMatrix.setComment(taxon, character, comment);
-			viewManager.refreshCharactersGridView();
+			viewManager.refreshCharactersGridView(false);
+		}
+	}
+	
+	public void setTaxonComment(int row, String comment) {
+		Taxon taxon = dataManager.getTaxon(row);
+		if (taxon != null) {
+			taxonMatrix.setComment(taxon, comment);
+			viewManager.refreshTaxaGridView();
+		}
+	}
+	
+	public void setCharacterComment(int column, String comment) {
+		Character character = dataManager.getCharacter(column);
+		if (character != null) {
+			taxonMatrix.setComment(character, comment);
+			viewManager.refreshCharacterHeaderHeader(column);
 		}
 	}
 
@@ -56,6 +72,20 @@ public class AnnotationManager {
 		else
 			return "";
 	}
+	
+	public String getCharacterComment(int column) {
+		Character character = dataManager.getCharacter(column);
+		if (character != null)
+			return character.getComment();
+		return "";
+	}
+	
+	public String getTaxonComment(int row) {
+		Taxon taxon = dataManager.getTaxon(row);
+		if (taxon != null)
+			return taxon.getComment();
+		return "";
+	}
 
 	public boolean hasComment(Taxon taxon, CharacterColumnConfig characterColumnConfig) {
 		return !this.getComment(taxon, characterColumnConfig.getCharacter()).isEmpty();
@@ -65,42 +95,12 @@ public class AnnotationManager {
 		return !taxon.getComment().isEmpty();
 	}
 	
-	public String getColumnComment(int column) {
-		Character character = dataManager.getCharacter(column);
-		if (character != null)
-			return character.getComment();
-		return "";
+	public boolean hasCharacterComment(int column) {
+		return !this.getCharacterComment(column).isEmpty();
 	}
 
-	public void setColumnComment(int column, String comment) {
-		Character character = dataManager.getCharacter(column);
-		if (character != null) {
-			taxonMatrix.setComment(character, comment);
-			viewManager.refreshColumnHeader(column);
-		}
-	}
-
-	public boolean hasColumnComment(int column) {
-		return !this.getColumnComment(column).isEmpty();
-	}
-
-	public String getRowComment(int row) {
-		Taxon taxon = dataManager.getTaxon(row);
-		if (taxon != null)
-			return taxon.getComment();
-		return "";
-	}
-
-	public void setRowComment(int row, String comment) {
-		Taxon taxon = dataManager.getTaxon(row);
-		if (taxon != null) {
-			taxonMatrix.setComment(taxon, comment);
-			viewManager.refreshCharactersGridView();
-		}
-	}
-
-	public boolean hasRowComment(int row) {
-		return !this.getRowComment(row).isEmpty();
+	public boolean hasTaxonComment(int row) {
+		return !this.getTaxonComment(row).isEmpty();
 	}
 
 	public List<Color> getColors() {
@@ -112,28 +112,26 @@ public class AnnotationManager {
 	}
 
 	public void setColor(int row, int column, Color color) {
-		// set this in the model, possibly through the store to autoupdate the
-		// cell?
-		// editing.startEditing(cell)
-		// editing.completeEditing();
 		Value value = dataManager.getValue(row, column);
 		if (value != null) {
 			taxonMatrix.setColor(value, color);
-			viewManager.refreshCharactersGridView();
+			viewManager.refreshCharactersGridView(false);
 		}
 	}
 
-	public void setRowColor(int row, Color color) {
+	public void setTaxonColor(int row, Color color) {
 		Taxon taxon = dataManager.getTaxon(row);
 		taxonMatrix.setColor(taxon, color);
-		viewManager.refreshCharactersGridView();
+		viewManager.refreshCharactersGridView(false);
+		viewManager.refreshTaxaGridView();
 	}
 
-	public void setColumnColor(int colIndex, Color color) {
+	public void setCharacterColor(int colIndex, Color color) {
 		if(charactersGrid != null) {
 			CharacterColumnConfig characterColumnConfig = charactersGrid.getColumnModel().getColumn(colIndex);
 			taxonMatrix.setColor(characterColumnConfig.getCharacter(), color);
-			viewManager.refreshCharactersGridView();
+			viewManager.refreshCharactersGridView(true);
+			viewManager.refreshTaxaGridView();
 		}
 	}
 

@@ -4,14 +4,14 @@ import com.sencha.gxt.messages.client.DefaultMessages;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent.CheckChangeHandler;
 import com.sencha.gxt.widget.core.client.event.HeaderContextMenuEvent;
-import com.sencha.gxt.widget.core.client.menu.CharacterMenu;
 import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Menu;
-import com.sencha.gxt.widget.core.client.menu.TaxonCharacterMenu;
 
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 
-public class MyGridFilters extends GridFilters<Taxon> {
+public class CharactersGridFilters extends GridFilters<Taxon> {
+	
+	private int insertPositionFilters = 11;
 
 	protected void onContextMenu(HeaderContextMenuEvent event) {
 		int column = event.getColumnIndex();
@@ -25,7 +25,7 @@ public class MyGridFilters extends GridFilters<Taxon> {
 						@Override
 						public void onCheckChange(
 								CheckChangeEvent<CheckMenuItem> event) {
-							MyGridFilters.this.onCheckChange(event);
+							CharactersGridFilters.this.onCheckChange(event);
 						}
 					});
 		}
@@ -40,13 +40,7 @@ public class MyGridFilters extends GridFilters<Taxon> {
 			Menu menu = event.getMenu();
 			checkFilterItem.setChecked(f.isActive(), true);
 			checkFilterItem.setSubMenu(filterMenu);
-			if(menu instanceof CharacterMenu) {
-				menu.insert(checkFilterItem, 12);
-			}
-			if(menu instanceof TaxonCharacterMenu) {
-				menu.insert(checkFilterItem, 7);
-			}
+			menu.insert(checkFilterItem, insertPositionFilters);
 		}
 	}
-	
 }

@@ -2,7 +2,7 @@ package edu.arizona.biosemantics.matrixreview.shared.model;
 
 import java.io.Serializable;
 
-public class Value implements Serializable, HasColor, HasComment, HasDirty {
+public class Value implements Serializable, HasColor, HasComment, HasDirty, Comparable<Value> {
 
 	private String value;
 	private String comment = "";
@@ -61,6 +61,11 @@ public class Value implements Serializable, HasColor, HasComment, HasDirty {
 
 	protected void setDirty() {
 		dirty = true;
+	}
+
+	@Override
+	public int compareTo(Value o) {
+		return this.getValue().compareTo(o.getValue());
 	}
 	
 }
