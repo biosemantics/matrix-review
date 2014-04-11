@@ -38,6 +38,7 @@ import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.TaxaGridFilters;
 import com.sencha.gxt.widget.core.client.grid.filters.TaxonNameFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.ValueFilter;
+import edu.arizona.biosemantics.matrixreview.client.manager.DataManager.StringValueProvider;
 
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
@@ -138,6 +139,10 @@ public class ControlManager {
 		this.disableEditing(columnConfig);
 		this.characterColumnControlMap.remove(columnConfig);
 		charactersFilters.removeFilter(columnConfig.getFilter());
+	}
+	
+	public void remove(int col) {
+		this.remove(charactersGrid.getColumnModel().getColumn(col));
 	}
 
 	public void enableEditing(CharacterColumnConfig characterColumnConfig) {
@@ -306,28 +311,28 @@ public class ControlManager {
 		case CATEGORICAL:
 			ValueConverter valueConverter = new ValueConverter();
 			//final Set<String> values = new HashSet<String>();
-			final Set<Value> values = new HashSet<Value>();
+			final Set<String> values = new HashSet<String>();
 			for (Taxon taxon : taxonMatrix.getTaxa()) {
-				values.add(characterColumnConfig.getValueProvider().getValue(taxon));
+				values.add(characterColumnConfig.getValueProvider().getValue(taxon).getValue());
 				//values.add(valueConverter.convertModelValue(characterColumnConfig.getValueProvider().getValue(taxon)));
 			}
-			final AllAccessListStore<Value> valueStore = new AllAccessListStore<Value>(new ModelKeyProvider<Value>() {
+			final AllAccessListStore<String> valueStore = new AllAccessListStore<String>(new ModelKeyProvider<String>() {
 				@Override
-				public String getKey(Value item) {
-					return item.getValue();
+				public String getKey(String item) {
+					return item;
 				}
 			});
-			List<Value> sortValues = new ArrayList<Value>(values);
-			Collections.sort(sortValues, new Comparator<Value>() {
+			List<String> sortValues = new ArrayList<String>(values);
+			Collections.sort(sortValues, new Comparator<String>() {
 				@Override
-				public int compare(Value o1, Value o2) {
-					return o1.getValue().compareTo(o2.getValue());
+				public int compare(String o1, String o2) {
+					return o1.compareTo(o2);
 				}
 			});
 			valueStore.addAll(sortValues);
 			charactersFilters.removeFilter(characterColumnConfig.getFilter());
 			
-			ListFilter<Taxon, Value> listFilter = new ListFilter<Taxon, Value>(characterColumnConfig.getValueProvider(), valueStore);
+			ListFilter<Taxon, String> listFilter = new ListFilter<Taxon, String>(dataManager.new StringValueProvider(characterColumnConfig), valueStore);
 			charactersFilters.addFilter(listFilter);
 			break;
 		case NUMERICAL:
@@ -421,4 +426,5 @@ public class ControlManager {
 			this.enableEditing(characterColumnConfig);
 		}
 	}
+
 }

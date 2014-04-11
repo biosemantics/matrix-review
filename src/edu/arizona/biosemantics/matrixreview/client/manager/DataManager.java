@@ -15,7 +15,9 @@ import com.sencha.gxt.widget.core.client.grid.TaxaGrid;
 
 import edu.arizona.biosemantics.matrixreview.client.cells.TaxonCell;
 import edu.arizona.biosemantics.matrixreview.client.cells.ValueCell;
+import edu.arizona.biosemantics.matrixreview.client.manager.ControlManager.ControlMode;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.Value;
@@ -75,6 +77,10 @@ public class DataManager {
 		}
 	}
 	
+	public enum MergeMode {
+		A_OVER_B, B_OVER_A, MIX
+	}
+	
 	private TaxonMatrix taxonMatrix;
 	private AllAccessListStore<Taxon> store;
 	private TaxaGrid taxaGrid;
@@ -82,12 +88,13 @@ public class DataManager {
 	
 	private ViewManager viewManager;
 	private ControlManager controlManager;
+	private AnnotationManager annotationManager;
 	
 	private TaxonCell taxonCell;
 	private ValueCell valueCell;
 
 	public DataManager(TaxonMatrix taxonMatrix, AllAccessListStore<Taxon> store, TaxaGrid taxaGrid, CharactersGrid charactersGrid, 
-			ViewManager viewManager, ControlManager controlManager, TaxonCell taxonCell, ValueCell valueCell) {
+			ViewManager viewManager, ControlManager controlManager, AnnotationManager annotationManager, TaxonCell taxonCell, ValueCell valueCell) {
 		this.taxonMatrix = taxonMatrix;
 		this.store = store;
 		this.taxaGrid = taxaGrid;
@@ -117,6 +124,10 @@ public class DataManager {
 	
 	public void setControlManager(ControlManager controlManager) {
 		this.controlManager = controlManager;
+	}
+	
+	public void setAnnotationManager(AnnotationManager annotationManager) {
+		this.annotationManager = annotationManager;
 	}
 	
 	public void setTaxonCell(TaxonCell taxonCell) {
@@ -247,7 +258,7 @@ public class DataManager {
 		controlManager.remove(columnConfig);
 		charactersGrid.reconfigure(store, charactersColumnModel);
 	}
-
+	
 	public void renameCharacter(int colIndex, String name, String organ) {
 		final Character character = getCharacter(colIndex);
 		taxonMatrix.renameCharacter(character, name);
@@ -255,6 +266,53 @@ public class DataManager {
 		viewManager.refreshCharacterHeaderHeader(colIndex);
 	}
 	
+	public void moveCharacter(int source, int target) {
+		charactersGrid.getColumnModel().moveColumn(source, target);
+	}
+
+	public void mergeCharacters(int colA, int colB, MergeMode mergeMode) {
+		Character characterA = this.getCharacter(colA);
+		Character characterB = this.getCharacter(colB);
+		for(Taxon taxon : taxonMatrix.getTaxa()) {
+			Value a = taxon.get(characterA);
+			Value b = taxon.get(characterB);
+			
+			String mergedValue = mergeValues(a, b, mergeMode);
+			Color mergedColor = annotationManager.mergeColors(a.getColor(), b.getColor(), mergeMode);
+			String mergedComment = annotationManager.mergeComment(a.getComment(), b.getComment(), mergeMode);
+			
+			Value newValue = new Value(mergedValue);
+			taxonMatrix.setValue(taxon, characterA, newValue);
+			taxonMatrix.setColor(newValue, mergedColor);
+			taxonMatrix.setComment(taxon, characterA, mergedComment);
+		}
+		
+		//set control to off and clean up
+		controlManager.setControlMode(colA, ControlMode.OFF);
+		controlManager.remove(colB);
+		this.removeCharacter(colB);
+		
+	}
+	
+	private String mergeValues(Value a, Value b, MergeMode mergeMode) {
+		String aValue = a.getValue().trim();
+		String bValue = b.getValue().trim();
+		if(aValue.isEmpty())
+			return bValue;
+		if(bValue.isEmpty())
+			return aValue;
+
+		switch(mergeMode) {
+		case A_OVER_B:
+			return aValue;
+		case B_OVER_A:
+			return bValue;
+		case MIX:
+		default:
+			return a.getValue() + " ; " + b.getValue();
+		}
+	}
+
 	public Character getCharacter(int column) {
 		CharacterColumnConfig columnConfig = charactersGrid.getColumnModel().getColumn(column);
 		return columnConfig.getCharacter();

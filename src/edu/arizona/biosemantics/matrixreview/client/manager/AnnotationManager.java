@@ -6,6 +6,7 @@ import com.sencha.gxt.widget.core.client.grid.CharacterColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.CharactersGrid;
 import com.sencha.gxt.widget.core.client.grid.TaxaColumnConfig;
 
+import edu.arizona.biosemantics.matrixreview.client.manager.DataManager.MergeMode;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
@@ -132,6 +133,37 @@ public class AnnotationManager {
 			taxonMatrix.setColor(characterColumnConfig.getCharacter(), color);
 			viewManager.refreshCharactersGridView(true);
 			viewManager.refreshTaxaGridView();
+		}
+	}
+
+	public Color mergeColors(Color a, Color b, MergeMode mergeMode) {
+		switch(mergeMode) {
+		case A_OVER_B:
+			return a;
+		case B_OVER_A:
+			return b;
+		case MIX:
+		default:
+			return null;
+		}
+	}
+
+	public String mergeComment(String a, String b, MergeMode mergeMode) {
+		a = a.trim();
+		b = b.trim();
+		if(a.isEmpty())
+			return b;
+		if(b.isEmpty())
+			return a;
+
+		switch(mergeMode) {
+		case A_OVER_B:
+			return a;
+		case B_OVER_A:
+			return b;
+		case MIX:
+		default:
+			return a + " ; " + b;
 		}
 	}
 

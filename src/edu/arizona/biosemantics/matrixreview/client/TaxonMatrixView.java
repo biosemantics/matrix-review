@@ -87,6 +87,7 @@ public class TaxonMatrixView implements IsWidget {
 		dataManager.setTaxaGrid(taxaGrid);
 		dataManager.setViewManager(viewManager);
 		dataManager.setControlManager(controlManager);
+		dataManager.setAnnotationManager(annotationManager);
 		dataManager.setTaxonCell(new TaxonCell(dataManager, viewManager, controlManager, annotationManager));
 		dataManager.setValueCell(new ValueCell(dataManager, annotationManager));
 		dataManager.init();

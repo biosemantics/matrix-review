@@ -17,6 +17,7 @@ import com.sencha.gxt.widget.core.client.info.Info;
 import edu.arizona.biosemantics.matrixreview.client.manager.AnnotationManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.ControlManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.ControlManager.ControlMode;
+import edu.arizona.biosemantics.matrixreview.client.manager.DataManager.MergeMode;
 import edu.arizona.biosemantics.matrixreview.client.manager.DataManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.ViewManager;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
@@ -28,9 +29,8 @@ public class CharacterMenu extends Menu {
 	public CharacterMenu(final DataManager dataManager, final ViewManager viewManager, final ControlManager controlManager,
 			final AnnotationManager annotationManager, final CharactersGridView charactersGridView, final int colIndex) {
 		super();
+		int characters = dataManager.getCharacterCount();
 		final ColumnModel<Taxon> cm = charactersGridView.getColumnModel();
-		
-		int cols = cm.getColumnCount();
 		
 		add(new HeaderMenuItem("Character"));
 		MenuItem item = new MenuItem();
@@ -104,6 +104,43 @@ public class CharacterMenu extends Menu {
 		});
 		add(item);
 		
+		item = new MenuItem("Merge with");
+		add(item);
+		Menu targetMenu = new Menu();
+		item.setSubMenu(targetMenu);
+		for (int i = 0; i < characters; i++) {
+			if(i != colIndex) {
+				final int theI = i;
+				MenuItem targetItem = new MenuItem(cm.getColumnHeader(i).asString());
+				
+				Menu modeMenu = new Menu();
+				targetItem.setSubMenu(modeMenu);
+				for(final MergeMode mergeMode : MergeMode.values()) {
+					MenuItem modeItem = new MenuItem();
+					switch(mergeMode) {
+					case A_OVER_B:
+						modeItem.setText("Priority: " + cm.getColumnHeader(i).asString());
+						break;
+					case B_OVER_A:
+						modeItem.setText("Priority: " + cm.getColumnHeader(colIndex).asString());
+						break;
+					case MIX:
+						modeItem.setText("Mix: " + cm.getColumnHeader(colIndex).asString() + " ; " + cm.getColumnHeader(i).asString());
+						break;
+					}
+					modeMenu.add(modeItem);
+					modeItem.addSelectionHandler(new SelectionHandler<Item>() {
+						@Override
+						public void onSelection(SelectionEvent<Item> event) {
+							dataManager.mergeCharacters(colIndex, theI, mergeMode);
+						}
+					});
+				}
+
+				targetMenu.add(targetItem);
+			}
+		}
+		
 		item = new MenuItem("Move after");
 		add(item);
 		Menu moveMenu = new Menu();
@@ -113,21 +150,19 @@ public class CharacterMenu extends Menu {
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				cm.moveColumn(colIndex, 0);
+				dataManager.moveCharacter(colIndex, 0);
 			}
 		});
 		moveMenu.add(item);
 
-		// col 0 is for the expander, col 1 is taxon name: Do we want them
-		// to be rearrangable too? when browsing vertically far maybe?
-		for (int i = 0; i < cols; i++) {
+		for (int i = 0; i < characters; i++) {
 			if (i != colIndex) {
 				final int theI = i;
 				item = new MenuItem(cm.getColumnHeader(i).asString());
 				item.addSelectionHandler(new SelectionHandler<Item>() {
 					@Override
 					public void onSelection(SelectionEvent<Item> event) {
-						cm.moveColumn(colIndex, theI + 1);
+						dataManager.moveCharacter(colIndex, theI + 1);
 					}
 				});
 				moveMenu.add(item);
