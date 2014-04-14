@@ -273,6 +273,7 @@ public class DataManager {
 	public void mergeCharacters(int colA, int colB, MergeMode mergeMode) {
 		Character characterA = this.getCharacter(colA);
 		Character characterB = this.getCharacter(colB);
+		String mergedName = mergeName(characterA.getName(), characterB.getName(), mergeMode);
 		for(Taxon taxon : taxonMatrix.getTaxa()) {
 			Value a = taxon.get(characterA);
 			Value b = taxon.get(characterB);
@@ -285,15 +286,35 @@ public class DataManager {
 			taxonMatrix.setValue(taxon, characterA, newValue);
 			taxonMatrix.setColor(newValue, mergedColor);
 			taxonMatrix.setComment(taxon, characterA, mergedComment);
+			taxonMatrix.renameCharacter(characterA, mergedName);
 		}
 		
 		//set control to off and clean up
 		controlManager.setControlMode(colA, ControlMode.OFF);
 		controlManager.remove(colB);
+		viewManager.refreshCharacterHeaderHeader(colA);
 		this.removeCharacter(colB);
-		
 	}
 	
+	private String mergeName(String a, String b, MergeMode mergeMode) {
+		a = a.trim();
+		b = b.trim();
+		if(a.isEmpty())
+			return b;
+		if(b.isEmpty())
+			return a;
+
+		switch(mergeMode) {
+		case A_OVER_B:
+			return a;
+		case B_OVER_A:
+			return b;
+		case MIX:
+		default:
+			return a + " ; " + b;
+		}
+	}
+
 	private String mergeValues(Value a, Value b, MergeMode mergeMode) {
 		String aValue = a.getValue().trim();
 		String bValue = b.getValue().trim();

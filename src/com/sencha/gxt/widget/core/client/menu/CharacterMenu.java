@@ -119,13 +119,13 @@ public class CharacterMenu extends Menu {
 					MenuItem modeItem = new MenuItem();
 					switch(mergeMode) {
 					case A_OVER_B:
-						modeItem.setText("Priority: " + cm.getColumnHeader(i).asString());
-						break;
-					case B_OVER_A:
 						modeItem.setText("Priority: " + cm.getColumnHeader(colIndex).asString());
 						break;
+					case B_OVER_A:
+						modeItem.setText("Priority: " + cm.getColumnHeader(i).asString());
+						break;
 					case MIX:
-						modeItem.setText("Mix: " + cm.getColumnHeader(colIndex).asString() + " ; " + cm.getColumnHeader(i).asString());
+						modeItem.setText("Mix: " + cm.getColumnHeader(i).asString() + " ; " + cm.getColumnHeader(colIndex).asString());
 						break;
 					}
 					modeMenu.add(modeItem);
