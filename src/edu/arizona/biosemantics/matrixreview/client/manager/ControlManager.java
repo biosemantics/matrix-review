@@ -14,6 +14,7 @@ import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.event.logical.shared.MyValidator;
 import com.google.gwt.event.logical.shared.TextFieldChangeHandler;
+import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
 import com.sencha.gxt.cell.core.client.form.MyComboBoxCell;
 import com.sencha.gxt.data.shared.AllAccessListStore;
 import com.sencha.gxt.data.shared.LabelProvider;
@@ -211,14 +212,16 @@ public class ControlManager {
 			});
 			// editComboBox.setAddUserValues(true);
 			// editComboBox.setFinishEditOnEnter(true);
-			editComboBox.setForceSelection(false);
+			//editComboBox.setForceSelection(false);
 			// editComboBox.setAutoValidate(true);
 			// editComboBox.setEditable(true);
-			editComboBox.setTypeAhead(true);
+			//editComboBox.setTypeAhead(true);
 			// editComboBox.setAllowBlank(false);
 			// editComboBox.setClearValueOnParseError(false);
 			// editComboBox.setForceSelection(true);
-			// editComboBox.setTriggerAction(TriggerAction.ALL);
+			editComboBox.setTriggerAction(TriggerAction.ALL); 
+			//upon trigger ("open combo"), a query is constructred that retrievaes all values of the underlying list. 
+			// otherwise upon trigger only the selected value will be queried and displayed in the open box
 			editComboBox.setForceSelection(false);
 			characterEditing.addEditor(characterColumnConfig, new ValueConverter(), editComboBox);
 			break;
