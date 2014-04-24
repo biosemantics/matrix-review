@@ -8,6 +8,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
@@ -25,6 +26,9 @@ import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.dnd.core.client.MyGridDragSource;
 import com.sencha.gxt.dnd.core.client.MyGridDropTarget;
 import com.sencha.gxt.dnd.core.client.DND.Feedback;
+import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.container.Container;
+import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData;
 import com.sencha.gxt.widget.core.client.event.BodyScrollEvent;
@@ -70,7 +74,7 @@ public class TaxonMatrixView implements IsWidget {
 	private AnnotationManager annotationManager;
 	private AnalysisManager analysisManager;
 	
-	private FocusPanel footerPanel;
+	private FlowLayoutContainer footerPanel;
 	private SplitLayoutPanel splitLayoutPanel;
 	
 	public TaxonMatrixView() {
@@ -200,7 +204,8 @@ public class TaxonMatrixView implements IsWidget {
 		container.add(charactersGrid, new HorizontalLayoutData(1.0, 1.0));
 		
 		splitLayoutPanel = new SplitLayoutPanel();
-		footerPanel = new FocusPanel();
+		footerPanel = new FlowLayoutContainer();
+		footerPanel.setScrollMode(ScrollMode.AUTO);
 		splitLayoutPanel.addSouth(footerPanel, 0);
 		/*footerPanel.addClickHandler(new ClickHandler() {
 			@Override
@@ -229,8 +234,12 @@ public class TaxonMatrixView implements IsWidget {
 	}
 
 	public void setFooterPanel(IsWidget widget) {
-		footerPanel.clear();
+		//footerPanel.clear();
 		footerPanel.add(widget);
+	}
+	
+	public Container getFooterPanel() {
+		return footerPanel;
 	}
 	
 }

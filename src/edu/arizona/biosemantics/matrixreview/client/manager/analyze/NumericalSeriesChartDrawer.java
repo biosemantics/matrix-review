@@ -140,36 +140,7 @@ public class NumericalSeriesChartDrawer implements ChartDrawer {
 		series.setHighlighting(true);
 		chart.addSeries(series);
 
-		FramedPanel panel = new FramedPanel();
-		panel.getElement().getStyle().setMargin(10, Unit.PX);
-		panel.setCollapsible(true);
-		panel.setHeadingText("Line Chart");
-		panel.setPixelSize(620, 500);
-		panel.setBodyBorder(true);
-
-
-		final Resizable resize = new Resizable(panel, Dir.E, Dir.SE, Dir.S);
-		resize.setMinHeight(400);
-		resize.setMinWidth(400);
-
-		panel.addExpandHandler(new ExpandHandler() {
-			@Override
-			public void onExpand(ExpandEvent event) {
-				resize.setEnabled(true);
-			}
-		});
-		panel.addCollapseHandler(new CollapseHandler() {
-			@Override
-			public void onCollapse(CollapseEvent event) {
-				resize.setEnabled(false);
-			}
-		});
-
-		new Draggable(panel, panel.getHeader()).setUseProxy(false);
-
-		panel.add(chart);
-
-		return panel;
+		return chart;
 	}
 
 }

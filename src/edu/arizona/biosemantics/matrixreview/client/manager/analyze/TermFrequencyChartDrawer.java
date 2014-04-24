@@ -125,60 +125,7 @@ public class TermFrequencyChartDrawer implements ChartDrawer {
 		chart.addSeries(bar);
 		chart.setAnimated(true);
 
-		/*
-		 * ToggleButton animation = new ToggleButton("Animate");
-		 * animation.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-		 * 
-		 * @Override public void onValueChange(ValueChangeEvent<Boolean> event)
-		 * { chart.setAnimated(event.getValue()); } }); animation.setValue(true,
-		 * true); ToggleButton shadow = new ToggleButton("Shadow");
-		 * shadow.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-		 * 
-		 * @Override public void onValueChange(ValueChangeEvent<Boolean> event)
-		 * { chart.setShadowChart(event.getValue()); chart.redrawChart(); } });
-		 * shadow.setValue(false);
-		 * 
-		 * ToolBar toolBar = new ToolBar(); toolBar.add(animation);
-		 * toolBar.add(shadow);
-		 */
-
-		FramedPanel panel = new FramedPanel();
-		panel.getElement().getStyle().setMargin(10, Unit.PX);
-		panel.setCollapsible(true);
-		panel.setHeadingText("Bar Chart");
-		panel.setPixelSize(620, 500);
-		panel.setBodyBorder(true);
-
-		final Resizable resize = new Resizable(panel, Dir.E, Dir.SE, Dir.S);
-		resize.setMinHeight(400);
-		resize.setMinWidth(400);
-
-		panel.addExpandHandler(new ExpandHandler() {
-			@Override
-			public void onExpand(ExpandEvent event) {
-				resize.setEnabled(true);
-			}
-		});
-		panel.addCollapseHandler(new CollapseHandler() {
-			@Override
-			public void onCollapse(CollapseEvent event) {
-				resize.setEnabled(false);
-			}
-		});
-		new Draggable(panel, panel.getHeader()).setUseProxy(false);
-
-		// VerticalLayoutContainer layout = new VerticalLayoutContainer();
-		// panel.add(layout);
-
-		// toolBar.setLayoutData(new VerticalLayoutData(1, -1));
-		// layout.add(toolBar);
-
-		// chart.setLayoutData(new VerticalLayoutData(1, 1));
-		// layout.add(chart);
-
-		panel.add(chart);
-
-		return panel;
+		return chart;
 	}
 
 }

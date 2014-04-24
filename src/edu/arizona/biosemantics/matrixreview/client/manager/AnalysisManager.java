@@ -7,7 +7,9 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.editor.client.Editor.Path;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.chart.client.chart.Chart;
 import com.sencha.gxt.chart.client.chart.Chart.Position;
 import com.sencha.gxt.chart.client.chart.Legend;
@@ -33,11 +35,14 @@ import com.sencha.gxt.widget.core.client.FramedPanel;
 import com.sencha.gxt.widget.core.client.Resizable;
 import com.sencha.gxt.widget.core.client.Resizable.Dir;
 import com.sencha.gxt.widget.core.client.button.ToggleButton;
+import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.CollapseEvent;
 import com.sencha.gxt.widget.core.client.event.CollapseEvent.CollapseHandler;
 import com.sencha.gxt.widget.core.client.event.ExpandEvent;
 import com.sencha.gxt.widget.core.client.event.ExpandEvent.ExpandHandler;
+import com.sencha.gxt.widget.core.client.menu.Menu;
+import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
 
@@ -131,14 +136,56 @@ public class AnalysisManager implements DataChangeEventHandler {
 
 	private void showNumericalDistribution(int col) {
 		NumericalSeriesChartDrawer drawer = new NumericalSeriesChartDrawer(taxonMatrix, dataManager.getCharacter(col));
+		Widget chart = drawer.getChart();
+		addToFooterPanel(chart, "Numerical Distribution: " + dataManager.getCharacter(col).toString());
+	}
+	
+	public void addToFooterPanel(Widget chart, String title) {
+		FramedPanel panel = new FramedPanel();
+		panel.getElement().getStyle().setMargin(10, Unit.PX);
+		panel.setCollapsible(true);
+		Menu menu = new Menu();
+		menu.add(new MenuItem("Refresh?"));
+		menu.add(new MenuItem("Axis layout??? Sorting?"));
+		menu.add(new MenuItem("Delte"));
+		panel.setContextMenu(menu);
+		panel.setHeadingText(title);
+		panel.setPixelSize(300, 300);
+		panel.setBodyBorder(true);
+
+		final Resizable resize = new Resizable(panel, Dir.E, Dir.SE, Dir.S);
+		//resize.setMinHeight(400);
+		//resize.setMinWidth(400);
+
+		panel.addExpandHandler(new ExpandHandler() {
+			@Override
+			public void onExpand(ExpandEvent event) {
+				resize.setEnabled(true);
+			}
+		});
+		panel.addCollapseHandler(new CollapseHandler() {
+			@Override
+			public void onCollapse(CollapseEvent event) {
+				resize.setEnabled(false);
+			}
+		});
+
+		Draggable draggablePanel = new Draggable(panel, panel.getHeader());
+		draggablePanel.setUseProxy(false);
+		
+		panel.add(chart);
+		
+		Container footerPanel = taxonMatrixView.getFooterPanel();
+		draggablePanel.setContainer(footerPanel);
+		
 		taxonMatrixView.showFooter();
-		taxonMatrixView.setFooterPanel(drawer.getChart());
+		footerPanel.add(panel);
 	}
 		
 	private void showTermFrequencyChart(int col) {
 		TermFrequencyChartDrawer drawer = new TermFrequencyChartDrawer(taxonMatrix, dataManager.getCharacter(col));
-		taxonMatrixView.showFooter();
-		taxonMatrixView.setFooterPanel(drawer.getChart());
+		Widget chart = drawer.getChart();
+		addToFooterPanel(chart, "State Frequency: " + dataManager.getCharacter(col).toString());
 	}
 
 	@Override
