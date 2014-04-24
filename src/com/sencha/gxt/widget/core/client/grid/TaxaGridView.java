@@ -14,6 +14,8 @@ import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderStyles;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.TaxonCharacterMenu;
 
+import edu.arizona.biosemantics.matrixreview.client.TaxonMatrixView;
+import edu.arizona.biosemantics.matrixreview.client.manager.AnalysisManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.AnnotationManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.ControlManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.DataManager;
@@ -28,20 +30,22 @@ public class TaxaGridView extends GridView<Taxon> {
 	private ControlManager controlManager;
 	private AnnotationManager annotationManager;
 	private CharactersGridView charactersGridView;
+	private AnalysisManager analysisManager;
 
 	public TaxaGridView(DataManager dataManager, ViewManager viewManager, ControlManager controlManager, AnnotationManager annotationManager, 
-			CharactersGridView charactersGridView) {
-		this(dataManager, viewManager, controlManager, annotationManager, charactersGridView, 
+			CharactersGridView charactersGridView, AnalysisManager analysisManager) {
+		this(dataManager, viewManager, controlManager, annotationManager, charactersGridView, analysisManager,
 				GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
 	}
 
 	public TaxaGridView(DataManager dataManager, ViewManager viewManager, ControlManager controlManager, AnnotationManager annotationManager, 
-			CharactersGridView charactersGridView, ColumnHeaderAppearance apperance) {
+			CharactersGridView charactersGridView, AnalysisManager analysisManager, ColumnHeaderAppearance apperance) {
 		this.dataManager = dataManager;
 		this.viewManager = viewManager;
 		this.controlManager = controlManager;
 		this.annotationManager = annotationManager;
 		this.charactersGridView = charactersGridView;
+		this.analysisManager = analysisManager;
 		this.columnHeaderStyles = apperance.styles();
 		this.scrollOffset = 0;
 	}
@@ -51,7 +55,7 @@ public class TaxaGridView extends GridView<Taxon> {
 	}
 
 	protected Menu createContextMenu(final int colIndex) {
-		final Menu menu = new TaxonCharacterMenu(dataManager, viewManager, controlManager, annotationManager, charactersGridView, this);
+		final Menu menu = new TaxonCharacterMenu(dataManager, viewManager, controlManager, annotationManager, charactersGridView, analysisManager, this);
 		return menu;
 	}
 

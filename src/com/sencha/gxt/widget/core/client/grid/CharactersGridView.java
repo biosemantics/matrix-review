@@ -14,6 +14,8 @@ import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderStyles;
 import com.sencha.gxt.widget.core.client.menu.CharacterMenu;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 
+import edu.arizona.biosemantics.matrixreview.client.TaxonMatrixView;
+import edu.arizona.biosemantics.matrixreview.client.manager.AnalysisManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.AnnotationManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.ControlManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.DataManager;
@@ -27,16 +29,20 @@ public class CharactersGridView extends GridView<Taxon> {
 	private ViewManager viewManager;
 	private ControlManager controlManager;
 	private AnnotationManager annotationManager;
+	private AnalysisManager analysisManager;
 
-	public CharactersGridView(DataManager dataManager, ViewManager viewManager, ControlManager controlManager, AnnotationManager annotationManager) {
-		this(dataManager, viewManager, controlManager, annotationManager, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
+	public CharactersGridView(DataManager dataManager, ViewManager viewManager, ControlManager controlManager, AnnotationManager annotationManager, 
+			AnalysisManager analysisManager) {
+		this(dataManager, viewManager, controlManager, annotationManager, analysisManager, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
 	}
 
-	public CharactersGridView(DataManager dataManager, ViewManager viewManager, ControlManager controlManager, AnnotationManager annotationManager, ColumnHeaderAppearance apperance) {
+	public CharactersGridView(DataManager dataManager, ViewManager viewManager, ControlManager controlManager, AnnotationManager annotationManager, 
+			AnalysisManager analysisManager, ColumnHeaderAppearance apperance) {
 		this.dataManager = dataManager;
 		this.viewManager = viewManager;
 		this.controlManager = controlManager;
 		this.annotationManager = annotationManager;
+		this.analysisManager = analysisManager;
 		this.columnHeaderStyles = apperance.styles();
 	}
 
@@ -45,7 +51,7 @@ public class CharactersGridView extends GridView<Taxon> {
 		 * if(colIndex == taxonMatrixView.getTaxonNameColumn()) { final Menu
 		 * menu = new TaxonCharacterMenu(taxonMatrixView); return menu; } else {
 		 */
-		final Menu menu = new CharacterMenu(dataManager, viewManager, controlManager, annotationManager, this, colIndex);
+		final Menu menu = new CharacterMenu(dataManager, viewManager, controlManager, annotationManager, this, analysisManager, colIndex);
 		return menu;
 		// }
 	}

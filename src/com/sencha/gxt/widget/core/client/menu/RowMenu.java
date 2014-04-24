@@ -10,6 +10,8 @@ import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.info.Info;
 
+import edu.arizona.biosemantics.matrixreview.client.TaxonMatrixView;
+import edu.arizona.biosemantics.matrixreview.client.manager.AnalysisManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.AnnotationManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.ControlManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.DataManager;
@@ -20,7 +22,7 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 public class RowMenu extends Menu {
 
 	public RowMenu(final DataManager dataManager, final ViewManager viewManager, final ControlManager controlManager,
-			final AnnotationManager annotationManager, final int rowIndex)	{
+			final AnnotationManager annotationManager, final AnalysisManager analysisManager, final int rowIndex)	{
 		add(new HeaderMenuItem("Taxon"));
 			
 		MenuItem item = new MenuItem();
@@ -171,6 +173,16 @@ public class RowMenu extends Menu {
 			colorMenu.add(colorItem);
 		}
 		
+		add(item);
+		
+		add(new HeaderMenuItem("Analysis"));
+		item = new MenuItem("Start");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				analysisManager.analyzeRow(rowIndex);
+			}
+		});
 		add(item);
 	}
 	

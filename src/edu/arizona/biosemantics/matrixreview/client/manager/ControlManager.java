@@ -19,8 +19,11 @@ import com.sencha.gxt.cell.core.client.form.MyComboBoxCell;
 import com.sencha.gxt.data.shared.AllAccessListStore;
 import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
+import com.sencha.gxt.widget.core.client.event.BeforeStartEditEvent.BeforeStartEditHandler;
+import com.sencha.gxt.widget.core.client.event.CancelEditEvent.CancelEditHandler;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent.CompleteEditHandler;
+import com.sencha.gxt.widget.core.client.event.StartEditEvent.StartEditHandler;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor.DoublePropertyEditor;
 import com.sencha.gxt.widget.core.client.form.TextField;
@@ -429,5 +432,14 @@ public class ControlManager {
 			this.enableEditing(characterColumnConfig);
 		}
 	}
-
+	
+	public interface EditHandler extends BeforeStartEditHandler<Taxon>, StartEditHandler<Taxon>, CancelEditHandler<Taxon>, CompleteEditHandler<Taxon> {	}
+	
+	public void addEditHandler(EditHandler handler) {
+		characterEditing.addCompleteEditHandler(handler);
+		characterEditing.addCancelEditHandler(handler);
+		characterEditing.addStartEditHandler(handler);
+		characterEditing.addBeforeStartEditHandler(handler);
+	}
+	
 }

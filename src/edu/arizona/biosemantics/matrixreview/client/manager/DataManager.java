@@ -3,8 +3,24 @@ package edu.arizona.biosemantics.matrixreview.client.manager;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.AllAccessListStore;
+import com.sencha.gxt.data.shared.event.StoreAddEvent;
+import com.sencha.gxt.data.shared.event.StoreClearEvent;
+import com.sencha.gxt.data.shared.event.StoreDataChangeEvent;
+import com.sencha.gxt.data.shared.event.StoreFilterEvent;
+import com.sencha.gxt.data.shared.event.StoreHandlers;
+import com.sencha.gxt.data.shared.event.StoreRecordChangeEvent;
+import com.sencha.gxt.data.shared.event.StoreRemoveEvent;
+import com.sencha.gxt.data.shared.event.StoreSortEvent;
+import com.sencha.gxt.data.shared.event.StoreUpdateEvent;
+import com.sencha.gxt.widget.core.client.event.BeforeStartEditEvent;
+import com.sencha.gxt.widget.core.client.event.CancelEditEvent;
+import com.sencha.gxt.widget.core.client.event.CompleteEditEvent;
+import com.sencha.gxt.widget.core.client.event.CompleteEditEvent.CompleteEditHandler;
+import com.sencha.gxt.widget.core.client.event.StartEditEvent;
 import com.sencha.gxt.widget.core.client.grid.CharacterColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.CharacterColumnConfig.CharacterValueProvider;
 import com.sencha.gxt.widget.core.client.grid.CharactersColumnModel;
@@ -16,13 +32,16 @@ import com.sencha.gxt.widget.core.client.grid.TaxaGrid;
 import edu.arizona.biosemantics.matrixreview.client.cells.TaxonCell;
 import edu.arizona.biosemantics.matrixreview.client.cells.ValueCell;
 import edu.arizona.biosemantics.matrixreview.client.manager.ControlManager.ControlMode;
+import edu.arizona.biosemantics.matrixreview.client.manager.ControlManager.EditHandler;
+import edu.arizona.biosemantics.matrixreview.client.manager.event.ValueChangedEvent;
+import edu.arizona.biosemantics.matrixreview.client.manager.event.ValueChangedEventHandler;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
-public class DataManager {
+public class DataManager implements EditHandler, StoreHandlers<Taxon> {
 
 	public class StringValueProvider implements ValueProvider<Taxon, String> {
 		
@@ -55,7 +74,6 @@ public class DataManager {
 		public NumericValueProvider(CharacterColumnConfig characterColumnConfig) {
 			this.characterColumnConfig = characterColumnConfig;
 		}
-		
 		
 		@Override
 		public Double getValue(Taxon object) {
@@ -92,6 +110,8 @@ public class DataManager {
 	
 	private TaxonCell taxonCell;
 	private ValueCell valueCell;
+	
+	private EventBus eventBus = new SimpleEventBus();
 
 	public DataManager(TaxonMatrix taxonMatrix, AllAccessListStore<Taxon> store, TaxaGrid taxaGrid, CharactersGrid charactersGrid, 
 			ViewManager viewManager, ControlManager controlManager, AnnotationManager annotationManager, TaxonCell taxonCell, ValueCell valueCell) {
@@ -377,6 +397,82 @@ public class DataManager {
 	
 	public String getQuickTipText(TaxaColumnConfig columnConfig) {
 		return "The matrix contains " + taxonMatrix.getTaxa().size() + " taxa and " + taxonMatrix.getCharacters().size() + " characters";
+	}
+
+	/*@Override
+	public void onCompleteEdit(CompleteEditEvent<Taxon> event) {
+		this.eventBus.fireEvent(new ValueChangedEvent(event.getEditCell().getRow(), event.getEditCell().getCol()));
+	}*/
+
+	/**
+	 * Parts of these events will be fire directly through the interface of DataManager not through store events
+	 */
+	@Override
+	public void onAdd(StoreAddEvent<Taxon> event) { 
+		System.out.println("on add");
+	}
+
+	@Override
+	public void onRemove(StoreRemoveEvent<Taxon> event) {
+		System.out.println("on remove");
+	}
+
+	@Override
+	public void onFilter(StoreFilterEvent<Taxon> event) { 
+		System.out.println("on filter");
+	}
+
+	@Override
+	public void onClear(StoreClearEvent<Taxon> event) { 
+		System.out.println("on clear");
+	}
+
+	@Override
+	public void onUpdate(StoreUpdateEvent<Taxon> event) { 
+		// can only get taxon but not character/value where change occured from this
+		System.out.println("on update");
+	}
+
+	@Override
+	public void onDataChange(StoreDataChangeEvent<Taxon> event) { 
+		System.out.println("on data change");
+	}
+
+	@Override
+	public void onRecordChange(StoreRecordChangeEvent<Taxon> event) {
+		System.out.println("on record change");
+		event.getRecord().getChanges();
+	}
+
+	@Override
+	public void onSort(StoreSortEvent<Taxon> event) { 
+		System.out.println("on sort");
+	}
+
+	private Value startEditValue;
+	
+	@Override
+	public void onBeforeStartEdit(BeforeStartEditEvent<Taxon> event) {
+		int row = event.getEditCell().getRow();
+		int column = event.getEditCell().getCol();
+		this.startEditValue = this.getValue(row, column);
+	}
+
+	@Override
+	public void onStartEdit(StartEditEvent<Taxon> event) {	}
+
+	@Override
+	public void onCancelEdit(CancelEditEvent<Taxon> event) {}
+
+	@Override
+	public void onCompleteEdit(CompleteEditEvent<Taxon> event) {
+		int row = event.getEditCell().getRow();
+		int column = event.getEditCell().getCol();
+		eventBus.fireEvent(new ValueChangedEvent(this.getTaxon(row), this.getCharacter(column), row, column, startEditValue, this.getValue(row, column)));
+	}
+
+	public void addValueChangeHandler(ValueChangedEventHandler handler) {
+		eventBus.addHandler(ValueChangedEvent.TYPE, handler);
 	}
 	
 }

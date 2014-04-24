@@ -2,8 +2,19 @@ package edu.arizona.biosemantics.matrixreview.client;
 
 import java.util.ArrayList;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SplitLayoutPanel;
+import com.google.gwt.user.client.ui.VerticalSplitPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.VerticalSplitPanel.Resources;
 import com.sencha.gxt.core.client.Style.ScrollDirection;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.core.client.dom.XDOM;
@@ -30,6 +41,7 @@ import com.sencha.gxt.widget.core.client.tips.QuickTip;
 
 import edu.arizona.biosemantics.matrixreview.client.cells.TaxonCell;
 import edu.arizona.biosemantics.matrixreview.client.cells.ValueCell;
+import edu.arizona.biosemantics.matrixreview.client.manager.AnalysisManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.AnnotationManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.ControlManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.DataManager;
@@ -56,6 +68,10 @@ public class TaxonMatrixView implements IsWidget {
 	private ViewManager viewManager;
 	private ControlManager controlManager;
 	private AnnotationManager annotationManager;
+	private AnalysisManager analysisManager;
+	
+	private FocusPanel footerPanel;
+	private SplitLayoutPanel splitLayoutPanel;
 	
 	public TaxonMatrixView() {
 
@@ -77,6 +93,7 @@ public class TaxonMatrixView implements IsWidget {
 		this.viewManager = new ViewManager(taxonMatrix, store);
 		this.controlManager = new ControlManager(taxonMatrix, store);
 		this.annotationManager = new AnnotationManager(taxonMatrix);
+		this.analysisManager = new AnalysisManager(this, taxonMatrix, store);
 		
 		// create grids
 		this.charactersGrid = createCharactersGrid(store, dataManager, viewManager, controlManager, annotationManager);
@@ -88,7 +105,7 @@ public class TaxonMatrixView implements IsWidget {
 		dataManager.setViewManager(viewManager);
 		dataManager.setControlManager(controlManager);
 		dataManager.setAnnotationManager(annotationManager);
-		dataManager.setTaxonCell(new TaxonCell(dataManager, viewManager, controlManager, annotationManager));
+		dataManager.setTaxonCell(new TaxonCell(dataManager, viewManager, controlManager, annotationManager, analysisManager));
 		dataManager.setValueCell(new ValueCell(dataManager, annotationManager));
 		dataManager.init();
 
@@ -106,11 +123,17 @@ public class TaxonMatrixView implements IsWidget {
 		annotationManager.setCharactersGrid(charactersGrid);
 		annotationManager.setDataManager(dataManager);
 		annotationManager.setViewManager(viewManager);
+		
+		analysisManager.setDataManager(dataManager);
+		analysisManager.setControlManager(controlManager);
+		
+		store.addStoreHandlers(dataManager);
+		controlManager.addEditHandler(dataManager);
 	}
 	
 	private CharactersGrid createCharactersGrid(ListStore<Taxon> store, DataManager dataManager, ViewManager viewManager, ControlManager controlManager,
 			AnnotationManager annotationManager) {
-		CharactersGridView view = new CharactersGridView(dataManager, viewManager, controlManager, annotationManager);
+		CharactersGridView view = new CharactersGridView(dataManager, viewManager, controlManager, annotationManager, analysisManager);
 		view.setShowDirtyCells(false);
 		view.setStripeRows(true);
 		view.setColumnLines(true);		
@@ -127,7 +150,7 @@ public class TaxonMatrixView implements IsWidget {
 
 	private TaxaGrid createTaxaGrid(ListStore<Taxon> store, DataManager dataManager, ViewManager viewManager, ControlManager controlManager,
 			AnnotationManager annotationManager, CharactersGridView charactersGridView) {
-		TaxaGridView view = new TaxaGridView(dataManager, viewManager, controlManager, annotationManager, charactersGridView);
+		TaxaGridView view = new TaxaGridView(dataManager, viewManager, controlManager, annotationManager, charactersGridView, analysisManager);
 		view.setShowDirtyCells(false);// require columns to always fit, preventing scrollbar
 		view.setForceFit(true);
 		view.setStripeRows(true);
@@ -163,7 +186,7 @@ public class TaxonMatrixView implements IsWidget {
 			}
 		});		
 		
-		HorizontalLayoutContainer container = new HorizontalLayoutContainer();
+		final HorizontalLayoutContainer container = new HorizontalLayoutContainer();
 		container.getScrollSupport().setScrollMode(ScrollMode.AUTO);
 
 		// add locked column, only 300px wide (in this example, use layouts
@@ -176,7 +199,38 @@ public class TaxonMatrixView implements IsWidget {
 		// add non-locked section, taking up all remaining width
 		container.add(charactersGrid, new HorizontalLayoutData(1.0, 1.0));
 		
-		return container;
+		splitLayoutPanel = new SplitLayoutPanel();
+		footerPanel = new FocusPanel();
+		splitLayoutPanel.addSouth(footerPanel, 0);
+		/*footerPanel.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				toggleFooter();
+			}
+		});*/
+		splitLayoutPanel.add(container);
+		return splitLayoutPanel;
+	}
+	
+	public void showFooter() {
+		splitLayoutPanel.forceLayout();
+		if(splitLayoutPanel.getWidgetSize(footerPanel) == 0) 
+			splitLayoutPanel.setWidgetSize(footerPanel, 500);
+		splitLayoutPanel.animate(500);
+	}
+	
+	public void toggleFooter() {
+		splitLayoutPanel.forceLayout();
+		if(splitLayoutPanel.getWidgetSize(footerPanel) == 500) 
+			splitLayoutPanel.setWidgetSize(footerPanel, 0);
+		else if(splitLayoutPanel.getWidgetSize(footerPanel) == 0) 
+			splitLayoutPanel.setWidgetSize(footerPanel, 500);
+		splitLayoutPanel.animate(500);
+	}
+
+	public void setFooterPanel(IsWidget widget) {
+		footerPanel.clear();
+		footerPanel.add(widget);
 	}
 	
 }

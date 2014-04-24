@@ -39,7 +39,9 @@ import com.sencha.gxt.widget.core.client.grid.CharactersColumnModel;
 import com.sencha.gxt.widget.core.client.grid.CharactersGridView;
 import com.sencha.gxt.widget.core.client.grid.TaxaGridView;
 
+import edu.arizona.biosemantics.matrixreview.client.TaxonMatrixView;
 import edu.arizona.biosemantics.matrixreview.client.cells.ColorCell;
+import edu.arizona.biosemantics.matrixreview.client.manager.AnalysisManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.AnnotationManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.ControlManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.DataManager;
@@ -53,7 +55,7 @@ public class TaxonCharacterMenu extends Menu {
 	private AnnotationManager annotationManager;
 
 	public TaxonCharacterMenu(final DataManager dataManager, final ViewManager viewManager, final ControlManager controlManager, 
-			final AnnotationManager annotationManager, final CharactersGridView charactersGridView, final TaxaGridView taxaGridView) {
+			final AnnotationManager annotationManager, final CharactersGridView charactersGridView, final AnalysisManager analysisManager, final TaxaGridView taxaGridView) {
 		super();
 		this.annotationManager = annotationManager;
 		
@@ -288,6 +290,16 @@ public class TaxonCharacterMenu extends Menu {
 			public void onSelection(SelectionEvent<Item> event) {
 				Dialog dialog = createColorManagementDialog();
 				dialog.show();
+			}
+		});
+		add(item);
+		
+		add(new HeaderMenuItem("Analysis"));
+		item = new MenuItem("Start");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				analysisManager.analyze();
 			}
 		});
 		add(item);

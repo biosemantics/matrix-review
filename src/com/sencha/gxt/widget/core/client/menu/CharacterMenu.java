@@ -14,6 +14,8 @@ import com.sencha.gxt.widget.core.client.grid.CharactersGridView;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.info.Info;
 
+import edu.arizona.biosemantics.matrixreview.client.TaxonMatrixView;
+import edu.arizona.biosemantics.matrixreview.client.manager.AnalysisManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.AnnotationManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.ControlManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.ControlManager.ControlMode;
@@ -27,7 +29,7 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 public class CharacterMenu extends Menu {
 
 	public CharacterMenu(final DataManager dataManager, final ViewManager viewManager, final ControlManager controlManager,
-			final AnnotationManager annotationManager, final CharactersGridView charactersGridView, final int colIndex) {
+			final AnnotationManager annotationManager, final CharactersGridView charactersGridView, final AnalysisManager analysisManager, final int colIndex) {
 		super();
 		int characters = dataManager.getCharacterCount();
 		final ColumnModel<Taxon> cm = charactersGridView.getColumnModel();
@@ -361,6 +363,16 @@ public class CharacterMenu extends Menu {
 			colorMenu.add(colorItem);
 		}
 		
+		add(item);
+		
+		add(new HeaderMenuItem("Analysis"));
+		item = new MenuItem("Start");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				analysisManager.analyzeColumn(colIndex);
+			}
+		});
 		add(item);
 	}	
 }

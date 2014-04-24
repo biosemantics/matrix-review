@@ -9,6 +9,8 @@ import com.sencha.gxt.core.client.util.ImageHelper;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.RowMenu;
 
+import edu.arizona.biosemantics.matrixreview.client.TaxonMatrixView;
+import edu.arizona.biosemantics.matrixreview.client.manager.AnalysisManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.AnnotationManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.ControlManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.DataManager;
@@ -40,13 +42,15 @@ public class TaxonCell extends MenuExtendedCell<Taxon> {
 	private ViewManager viewManager;
 	private ControlManager controlManager;
 	private AnnotationManager annotationManager;
+	private AnalysisManager analysisManager;
 	
-	public TaxonCell(DataManager dataManager, ViewManager viewManager, ControlManager controlManager, AnnotationManager annotationManager) {
+	public TaxonCell(DataManager dataManager, ViewManager viewManager, ControlManager controlManager, AnnotationManager annotationManager, AnalysisManager analysisManager) {
 		super();
 		this.dataManager = dataManager;
 		this.viewManager = viewManager;
 		this.controlManager = controlManager;
 		this.annotationManager = annotationManager;
+		this.analysisManager = analysisManager;
 	}
 
 	@Override
@@ -89,7 +93,7 @@ public class TaxonCell extends MenuExtendedCell<Taxon> {
 		
 	@Override
 	protected Menu createContextMenu(final int colIndex, final int rowIndex) {
-		final Menu menu = new RowMenu(dataManager, viewManager, controlManager, annotationManager, rowIndex);
+		final Menu menu = new RowMenu(dataManager, viewManager, controlManager, annotationManager, analysisManager, rowIndex);
 		return menu;
 	}
 }
