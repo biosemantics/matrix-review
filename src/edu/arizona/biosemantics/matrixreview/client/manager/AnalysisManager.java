@@ -41,6 +41,7 @@ import com.sencha.gxt.widget.core.client.event.CollapseEvent;
 import com.sencha.gxt.widget.core.client.event.CollapseEvent.CollapseHandler;
 import com.sencha.gxt.widget.core.client.event.ExpandEvent;
 import com.sencha.gxt.widget.core.client.event.ExpandEvent.ExpandHandler;
+import com.sencha.gxt.widget.core.client.form.TextArea;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
@@ -227,6 +228,54 @@ public class AnalysisManager implements DataChangeEventHandler {
 	@Override
 	public void onAddTaxon(AddTaxonEvent addTaxonEvent) {
 		refreshCurrentAnalysis();
+	}
+
+	public void showDescription(int rowIndex) {
+		Taxon taxon = dataManager.getTaxon(rowIndex);
+		String title = "Description: " + taxon.getName();
+		
+		TextArea textArea = new TextArea();
+		textArea.setText(taxon.getDescription());
+		
+		FramedPanel panel = new FramedPanel();
+		panel.getElement().getStyle().setMargin(10, Unit.PX);
+		panel.setCollapsible(true);
+		Menu menu = new Menu();
+		menu.add(new MenuItem("Refresh?"));
+		menu.add(new MenuItem("Axis layout??? Sorting?"));
+		menu.add(new MenuItem("Delte"));
+		panel.setContextMenu(menu);
+		panel.setHeadingText(title);
+		panel.setPixelSize(300, 300);
+		panel.setBodyBorder(true);
+
+		final Resizable resize = new Resizable(panel, Dir.E, Dir.SE, Dir.S);
+		//resize.setMinHeight(400);
+		//resize.setMinWidth(400);
+
+		panel.addExpandHandler(new ExpandHandler() {
+			@Override
+			public void onExpand(ExpandEvent event) {
+				resize.setEnabled(true);
+			}
+		});
+		panel.addCollapseHandler(new CollapseHandler() {
+			@Override
+			public void onCollapse(CollapseEvent event) {
+				resize.setEnabled(false);
+			}
+		});
+
+		Draggable draggablePanel = new Draggable(panel, panel.getHeader());
+		draggablePanel.setUseProxy(false);
+		
+		panel.add(textArea);
+		
+		Container footerPanel = taxonMatrixView.getFooterPanel();
+		draggablePanel.setContainer(footerPanel);
+		
+		taxonMatrixView.showFooter();
+		footerPanel.add(panel);
 	}
 
 }

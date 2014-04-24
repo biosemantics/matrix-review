@@ -183,6 +183,13 @@ public class RowMenu extends Menu {
 				analysisManager.analyzeRow(rowIndex);
 			}
 		});
+		item = new MenuItem("Show description");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				analysisManager.showDescription(rowIndex);
+			}
+		});
 		add(item);
 	}
 	
