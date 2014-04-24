@@ -375,6 +375,27 @@ public class DataManager implements EditHandler, StoreHandlers<Taxon> {
 		return taxon.get(character);
 	}
 	
+	public void setValue(final Taxon taxon, final Character character, final Value value) {
+		store.getRecord(taxon).addChange(new ValueProvider<Taxon, Value>() {
+			@Override
+			public Value getValue(Taxon object) {
+				return object.get(character);
+			}
+			@Override
+			public void setValue(Taxon object, Value value) {
+				object.setValue(character, value);
+			}
+			@Override
+			public String getPath() {
+				return taxon.getName() + "/" + character.toString() + "/" + value.toString();
+			}
+		}, value);
+	}
+	
+	public void setValue(int row, int column, Value value) {
+		this.setValue(this.getTaxon(row), this.getCharacter(column), value);
+	}
+	
 	public String getCoverage(Taxon taxon) {
 		return taxonMatrix.getCoverage(taxon);
 	}
@@ -474,5 +495,7 @@ public class DataManager implements EditHandler, StoreHandlers<Taxon> {
 	public void addValueChangeHandler(ValueChangedEventHandler handler) {
 		eventBus.addHandler(ValueChangedEvent.TYPE, handler);
 	}
+
+
 	
 }

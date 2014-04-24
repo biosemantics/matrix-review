@@ -5,6 +5,9 @@ import java.util.TreeMap;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.editor.client.Editor.Path;
+import com.google.gwt.event.dom.client.DragStartEvent;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -30,6 +33,9 @@ import com.sencha.gxt.data.shared.AllAccessListStore;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
+import com.sencha.gxt.dnd.core.client.DndDragStartEvent;
+import com.sencha.gxt.dnd.core.client.DndDragStartEvent.DndDragStartHandler;
+import com.sencha.gxt.dnd.core.client.DragSource;
 import com.sencha.gxt.fx.client.Draggable;
 import com.sencha.gxt.widget.core.client.FramedPanel;
 import com.sencha.gxt.widget.core.client.Resizable;
@@ -42,6 +48,7 @@ import com.sencha.gxt.widget.core.client.event.CollapseEvent.CollapseHandler;
 import com.sencha.gxt.widget.core.client.event.ExpandEvent;
 import com.sencha.gxt.widget.core.client.event.ExpandEvent.ExpandHandler;
 import com.sencha.gxt.widget.core.client.form.TextArea;
+import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
@@ -141,7 +148,7 @@ public class AnalysisManager implements DataChangeEventHandler {
 		addToFooterPanel(chart, "Numerical Distribution: " + dataManager.getCharacter(col).toString());
 	}
 	
-	public void addToFooterPanel(Widget chart, String title) {
+	public FramedPanel addToFooterPanel(Widget widget, String title) {
 		FramedPanel panel = new FramedPanel();
 		panel.getElement().getStyle().setMargin(10, Unit.PX);
 		panel.setCollapsible(true);
@@ -174,13 +181,14 @@ public class AnalysisManager implements DataChangeEventHandler {
 		Draggable draggablePanel = new Draggable(panel, panel.getHeader());
 		draggablePanel.setUseProxy(false);
 		
-		panel.add(chart);
+		panel.add(widget);
 		
 		Container footerPanel = taxonMatrixView.getFooterPanel();
 		draggablePanel.setContainer(footerPanel);
 		
 		taxonMatrixView.showFooter();
 		footerPanel.add(panel);
+		return panel;
 	}
 		
 	private void showTermFrequencyChart(int col) {
@@ -231,51 +239,43 @@ public class AnalysisManager implements DataChangeEventHandler {
 	}
 
 	public void showDescription(int rowIndex) {
-		Taxon taxon = dataManager.getTaxon(rowIndex);
+		final Taxon taxon = dataManager.getTaxon(rowIndex);
 		String title = "Description: " + taxon.getName();
 		
-		TextArea textArea = new TextArea();
+		final TextArea textArea = new TextArea();
 		textArea.setText(taxon.getDescription());
+		//textArea.setEnabled(false);
+		DragSource source = new DragSource(textArea);
+		source.addDragStartHandler(new DndDragStartHandler() {
+			@Override
+			public void onDragStart(DndDragStartEvent event) {
+				event.setData(textArea.getSelectedText());
+				System.out.println("drag start " + textArea.getSelectedText());
+			}
+		});
 		
-		FramedPanel panel = new FramedPanel();
-		panel.getElement().getStyle().setMargin(10, Unit.PX);
-		panel.setCollapsible(true);
+		FramedPanel panel = this.addToFooterPanel(textArea, title);
+		
 		Menu menu = new Menu();
-		menu.add(new MenuItem("Refresh?"));
-		menu.add(new MenuItem("Axis layout??? Sorting?"));
+		MenuItem item = new MenuItem("Set State");
+		Menu characterMenu = new Menu();
+		for(final Character character : taxonMatrix.getCharacters()) {
+			MenuItem characterItem = new MenuItem(character.toString());
+			characterMenu.add(characterItem);
+			characterItem.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					dataManager.setValue(taxon, character, new Value(textArea.getSelectedText()));
+				}
+			});
+		}
+		item.setSubMenu(characterMenu);
+		menu.add(item);
 		menu.add(new MenuItem("Delte"));
 		panel.setContextMenu(menu);
-		panel.setHeadingText(title);
-		panel.setPixelSize(300, 300);
-		panel.setBodyBorder(true);
-
-		final Resizable resize = new Resizable(panel, Dir.E, Dir.SE, Dir.S);
-		//resize.setMinHeight(400);
-		//resize.setMinWidth(400);
-
-		panel.addExpandHandler(new ExpandHandler() {
-			@Override
-			public void onExpand(ExpandEvent event) {
-				resize.setEnabled(true);
-			}
-		});
-		panel.addCollapseHandler(new CollapseHandler() {
-			@Override
-			public void onCollapse(CollapseEvent event) {
-				resize.setEnabled(false);
-			}
-		});
-
-		Draggable draggablePanel = new Draggable(panel, panel.getHeader());
-		draggablePanel.setUseProxy(false);
-		
-		panel.add(textArea);
-		
-		Container footerPanel = taxonMatrixView.getFooterPanel();
-		draggablePanel.setContainer(footerPanel);
-		
-		taxonMatrixView.showFooter();
-		footerPanel.add(panel);
 	}
+	
+	
+	
 
 }

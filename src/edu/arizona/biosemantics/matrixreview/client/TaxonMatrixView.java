@@ -3,6 +3,8 @@ package edu.arizona.biosemantics.matrixreview.client;
 import java.util.ArrayList;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -23,6 +25,11 @@ import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.data.shared.AllAccessListStore;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
+import com.sencha.gxt.dnd.core.client.DndDropEvent;
+import com.sencha.gxt.dnd.core.client.DndDropEvent.DndDropHandler;
+import com.sencha.gxt.dnd.core.client.DragSource;
+import com.sencha.gxt.dnd.core.client.DropTarget;
+import com.sencha.gxt.dnd.core.client.GridDropTarget;
 import com.sencha.gxt.dnd.core.client.MyGridDragSource;
 import com.sencha.gxt.dnd.core.client.MyGridDropTarget;
 import com.sencha.gxt.dnd.core.client.DND.Feedback;
@@ -52,6 +59,7 @@ import edu.arizona.biosemantics.matrixreview.client.manager.DataManager;
 import edu.arizona.biosemantics.matrixreview.client.manager.ViewManager;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
 public class TaxonMatrixView implements IsWidget {
 	
@@ -135,7 +143,7 @@ public class TaxonMatrixView implements IsWidget {
 		controlManager.addEditHandler(dataManager);
 	}
 	
-	private CharactersGrid createCharactersGrid(ListStore<Taxon> store, DataManager dataManager, ViewManager viewManager, ControlManager controlManager,
+	private CharactersGrid createCharactersGrid(ListStore<Taxon> store, final DataManager dataManager, ViewManager viewManager, ControlManager controlManager,
 			AnnotationManager annotationManager) {
 		CharactersGridView view = new CharactersGridView(dataManager, viewManager, controlManager, annotationManager, analysisManager);
 		view.setShowDirtyCells(false);
@@ -143,12 +151,30 @@ public class TaxonMatrixView implements IsWidget {
 		view.setColumnLines(true);		
 		// don't want this feature, want to encourage horizontal scrollbars
 		// grid.getView().setAutoExpandColumn(nameCol);
-		CharactersGrid grid = new CharactersGrid(store, new CharactersColumnModel(new ArrayList<CharacterColumnConfig>()), view);
+		final CharactersGrid grid = new CharactersGrid(store, new CharactersColumnModel(new ArrayList<CharacterColumnConfig>()), view);
 		grid.setBorders(false);
 		grid.setColumnReordering(true);
 		grid.setStateful(true);
 		grid.setStateId("charactersGrid");
 		QuickTip quickTip = new QuickTip(grid);
+		
+		
+		DropTarget dropTarget = new DropTarget(grid);
+		dropTarget.addDropHandler(new DndDropHandler() {
+			@Override
+			public void onDrop(DndDropEvent event) {
+				if(event.getData() instanceof String) {
+					String value = (String)event.getData();					
+					EventTarget target = event.getDragEndEvent().getNativeEvent().getEventTarget();
+				    Element row = grid.getView().findRow(Element.as(target)).cast();
+				    Element cell = grid.getView().findCell(Element.as(target)).cast();				    
+				    int columnIndex = grid.getView().findCellIndex(cell, null);
+				    int rowIndex = grid.getView().findRowIndex(row);
+				    dataManager.setValue(rowIndex, columnIndex, new Value(value));
+				}
+			}
+		});
+		dropTarget.setFeedback(Feedback.INSERT);
 		return grid;
 	}
 
