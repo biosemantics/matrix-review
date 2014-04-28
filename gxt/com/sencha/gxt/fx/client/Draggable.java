@@ -148,7 +148,8 @@ public class Draggable implements HasDragStartHandlers, HasDragEndHandlers, HasD
 
     preview = new BaseEventPreview() {
       @Override
-      public boolean onPreview(NativePreviewEvent event) {
+      public boolean onPreview(NativePreviewEvent event) {    	  
+    	  System.out.println(event.getTypeInt());
         Event e = event.getNativeEvent().<Event> cast();
         e.preventDefault();
         switch (event.getTypeInt()) {
@@ -161,6 +162,7 @@ public class Draggable implements HasDragStartHandlers, HasDragEndHandlers, HasD
             onMouseMove(e);
             break;
           case Event.ONMOUSEUP:
+        	  System.out.println("stop drag");
             stopDrag(e);
             break;
         }
@@ -594,6 +596,7 @@ public class Draggable implements HasDragStartHandlers, HasDragEndHandlers, HasD
       lastX = left;
       lastY = top;
 
+      System.out.println("draggable");
       DragMoveEvent evt = new DragMoveEvent(dragWidget, startElement, lastX, lastY, event);
       ensureHandlers().fireEventFromSource(evt, this);
 
@@ -669,6 +672,7 @@ public class Draggable implements HasDragStartHandlers, HasDragEndHandlers, HasD
   }
 
   protected void stopDrag(Event event) {
+	  System.out.println("stop drag");
     preview.remove();
     if (dragging) {
       dragging = false;

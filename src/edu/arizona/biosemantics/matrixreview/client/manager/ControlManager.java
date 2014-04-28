@@ -23,6 +23,8 @@ import com.sencha.gxt.widget.core.client.event.BeforeStartEditEvent.BeforeStartE
 import com.sencha.gxt.widget.core.client.event.CancelEditEvent.CancelEditHandler;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent.CompleteEditHandler;
+import com.sencha.gxt.widget.core.client.event.HideEvent;
+import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.event.StartEditEvent.StartEditHandler;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor.DoublePropertyEditor;
@@ -43,6 +45,9 @@ import com.sencha.gxt.widget.core.client.grid.filters.TaxaGridFilters;
 import com.sencha.gxt.widget.core.client.grid.filters.TaxonNameFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.ValueFilter;
 import edu.arizona.biosemantics.matrixreview.client.manager.DataManager.StringValueProvider;
+import edu.arizona.biosemantics.matrixreview.client.manager.control.MyWindow;
+import edu.arizona.biosemantics.matrixreview.client.manager.control.SaveCategoriesEvent;
+import edu.arizona.biosemantics.matrixreview.client.manager.control.SaveCategoriesHandler;
 
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
@@ -148,6 +153,54 @@ public class ControlManager {
 	public void remove(int col) {
 		this.remove(charactersGrid.getColumnModel().getColumn(col));
 	}
+	
+	private void enableEditingCategorical(CharacterColumnConfig characterColumnConfig, final Set<String> states) {
+		final AllAccessListStore<String> comboValues = new AllAccessListStore<String>(new ModelKeyProvider<String>() {
+			@Override
+			public String getKey(String item) {
+				return item;
+			}
+		});
+		List<String> sortValues = new ArrayList<String>(states);
+		Collections.sort(sortValues);
+		comboValues.addAll(sortValues);
+
+		// http://www.sencha.com/forum/showthread.php?196281-GXT-3-rc2-ComboBox-setForceSelection(false)-does-not-work/page2
+		// for ComboBox vs StringComboBox: ComboBox does not allow
+		// "new values" -> StringComboBox is made for this use case
+		// MyStringComboBox editComboBox = new
+		// MyStringComboBox(sortValues);
+		ComboBox<String> editComboBox = new ComboBox<String>(new MyComboBoxCell<String>(comboValues, new LabelProvider<String>() {
+			@Override
+			public String getLabel(String item) {
+				return item;
+			}
+		}));
+		editComboBox.addValidator(new Validator<String>() {
+			@Override
+			public List<EditorError> validate(Editor<String> editor, String value) {
+				List<EditorError> result = new LinkedList<EditorError>();
+				if (!states.contains(value)) {
+					result.add(new DefaultEditorError(editor, "Value entered not part of the character's vocabulary", value));
+				}
+				return result;
+			}
+		});
+		// editComboBox.setAddUserValues(true);
+		// editComboBox.setFinishEditOnEnter(true);
+		//editComboBox.setForceSelection(false);
+		// editComboBox.setAutoValidate(true);
+		// editComboBox.setEditable(true);
+		//editComboBox.setTypeAhead(true);
+		// editComboBox.setAllowBlank(false);
+		// editComboBox.setClearValueOnParseError(false);
+		// editComboBox.setForceSelection(true);
+		editComboBox.setTriggerAction(TriggerAction.ALL); 
+		//upon trigger ("open combo"), a query is constructred that retrievaes all values of the underlying list. 
+		// otherwise upon trigger only the selected value will be queried and displayed in the open box
+		editComboBox.setForceSelection(false);
+		characterEditing.addEditor(characterColumnConfig, new ValueConverter(), editComboBox);
+	}
 
 	public void enableEditing(CharacterColumnConfig characterColumnConfig) {
 		switch (this.getControlMode(characterColumnConfig)) {
@@ -178,55 +231,11 @@ public class ControlManager {
 			break;
 		case CATEGORICAL:
 			ValueConverter converter = new ValueConverter();
-			final Set<String> values = new HashSet<String>();
+			final Set<String> states = new HashSet<String>();
 			for (Taxon taxon : taxonMatrix.getTaxa()) {
-				values.add(converter.convertModelValue(characterColumnConfig.getValueProvider().getValue(taxon)));
+				states.add(converter.convertModelValue(characterColumnConfig.getValueProvider().getValue(taxon)));
 			}
-			final AllAccessListStore<String> comboValues = new AllAccessListStore<String>(new ModelKeyProvider<String>() {
-				@Override
-				public String getKey(String item) {
-					return item;
-				}
-			});
-			List<String> sortValues = new ArrayList<String>(values);
-			Collections.sort(sortValues);
-			comboValues.addAll(sortValues);
-
-			// http://www.sencha.com/forum/showthread.php?196281-GXT-3-rc2-ComboBox-setForceSelection(false)-does-not-work/page2
-			// for ComboBox vs StringComboBox: ComboBox does not allow
-			// "new values" -> StringComboBox is made for this use case
-			// MyStringComboBox editComboBox = new
-			// MyStringComboBox(sortValues);
-			ComboBox<String> editComboBox = new ComboBox<String>(new MyComboBoxCell<String>(comboValues, new LabelProvider<String>() {
-				@Override
-				public String getLabel(String item) {
-					return item;
-				}
-			}));
-			editComboBox.addValidator(new Validator<String>() {
-				@Override
-				public List<EditorError> validate(Editor<String> editor, String value) {
-					List<EditorError> result = new LinkedList<EditorError>();
-					if (!values.contains(value)) {
-						result.add(new DefaultEditorError(editor, "Value entered not part of the character's vocabulary", value));
-					}
-					return result;
-				}
-			});
-			// editComboBox.setAddUserValues(true);
-			// editComboBox.setFinishEditOnEnter(true);
-			//editComboBox.setForceSelection(false);
-			// editComboBox.setAutoValidate(true);
-			// editComboBox.setEditable(true);
-			//editComboBox.setTypeAhead(true);
-			// editComboBox.setAllowBlank(false);
-			// editComboBox.setClearValueOnParseError(false);
-			// editComboBox.setForceSelection(true);
-			editComboBox.setTriggerAction(TriggerAction.ALL); 
-			//upon trigger ("open combo"), a query is constructred that retrievaes all values of the underlying list. 
-			// otherwise upon trigger only the selected value will be queried and displayed in the open box
-			editComboBox.setForceSelection(false);
-			characterEditing.addEditor(characterColumnConfig, new ValueConverter(), editComboBox);
+			this.enableEditingCategorical(characterColumnConfig, states);
 			break;
 		default: // same as OFF
 			characterEditing.addEditor(characterColumnConfig, new ValueConverter(), new TextField());
@@ -309,9 +318,7 @@ public class ControlManager {
 		this.setControlMode(characterColumnConfig, controlMode);
 	}
 	
-	public void setControlMode(CharacterColumnConfig characterColumnConfig, ControlMode controlMode) {
-		this.characterColumnControlMap.put(characterColumnConfig, controlMode);
-		
+	public void setControlMode(final CharacterColumnConfig characterColumnConfig, final ControlMode controlMode) {
 		// setup controlled filtering
 		switch (controlMode) {
 		case CATEGORICAL:
@@ -322,12 +329,6 @@ public class ControlManager {
 				values.add(characterColumnConfig.getValueProvider().getValue(taxon).getValue());
 				//values.add(valueConverter.convertModelValue(characterColumnConfig.getValueProvider().getValue(taxon)));
 			}
-			final AllAccessListStore<String> valueStore = new AllAccessListStore<String>(new ModelKeyProvider<String>() {
-				@Override
-				public String getKey(String item) {
-					return item;
-				}
-			});
 			List<String> sortValues = new ArrayList<String>(values);
 			Collections.sort(sortValues, new Comparator<String>() {
 				@Override
@@ -335,26 +336,51 @@ public class ControlManager {
 					return o1.compareTo(o2);
 				}
 			});
-			valueStore.addAll(sortValues);
-			charactersFilters.removeFilter(characterColumnConfig.getFilter());
 			
-			ListFilter<Taxon, String> listFilter = new ListFilter<Taxon, String>(dataManager.new StringValueProvider(characterColumnConfig), valueStore);
-			charactersFilters.addFilter(listFilter);
+			MyWindow window = new MyWindow(characterColumnConfig.getCharacter(), sortValues);
+			window.show();
+			window.addSaveHandler(new SaveCategoriesHandler() {
+				@Override
+				public void onSaveCategories(SaveCategoriesEvent saveCategoriesEvent) {
+					charactersFilters.removeFilter(characterColumnConfig.getFilter());
+					
+					AllAccessListStore<String> valueStore = new AllAccessListStore<String>(new ModelKeyProvider<String>() {
+						@Override
+						public String getKey(String item) {
+							return item;
+						}
+					});
+					valueStore.addAll(saveCategoriesEvent.getStates());
+					ListFilter<Taxon, String> listFilter = new ListFilter<Taxon, String>(dataManager.new StringValueProvider(characterColumnConfig), valueStore);
+					charactersFilters.addFilter(listFilter);
+					characterColumnControlMap.put(characterColumnConfig, controlMode);
+					
+					// refresh editing
+					enableEditingCategorical(characterColumnConfig, new HashSet<String>(saveCategoriesEvent.getStates()));
+				}
+			});		
 			break;
 		case NUMERICAL:
 			charactersFilters.removeFilter(characterColumnConfig.getFilter());
 			NumericFilter<Taxon, Double> lastFilter = new NumericFilter<Taxon, Double>(dataManager.new NumericValueProvider(characterColumnConfig), new DoublePropertyEditor());
 			charactersFilters.addFilter(lastFilter);
+			characterColumnControlMap.put(characterColumnConfig, controlMode);
+			
+			// refresh editing
+			enableEditing(characterColumnConfig);
 			break;
 		case OFF:
 			charactersFilters.removeFilter(characterColumnConfig.getFilter());
 			StringFilter<Taxon> stringFilter = new StringFilter<Taxon>(dataManager.new StringValueProvider(characterColumnConfig));
 			charactersFilters.addFilter(stringFilter);
+			characterColumnControlMap.put(characterColumnConfig, controlMode);
+			
+			// refresh editing
+			enableEditing(characterColumnConfig);
 			break;
 		}
 		
-		// refresh editing
-		this.enableEditing(characterColumnConfig);
+		
 	}
 	
 	public ControlMode getControlMode(int colIndex) {

@@ -64,20 +64,24 @@ public class DragSource implements HasDndDragStartHandlers, HasDndDragCancelHand
     handler = new DragHandler() {
 
       public void onDragCancel(DragCancelEvent event) {
+    	  System.out.println("source drag cancel");
         onDraggableDragCancel(event);
       }
 
       public void onDragEnd(DragEndEvent event) {
+    	  System.out.println("source drag end");
         onDraggableDragEnd(event);
       }
 
       @Override
       public void onDragMove(DragMoveEvent event) {
+    	  System.out.println("source drag move");
         onDraggableDragMove(event);
       }
 
       @Override
       public void onDragStart(DragStartEvent event) {
+    	  System.out.println("source drag start");
         onDraggableDragStart(event);
       }
 
@@ -257,6 +261,7 @@ public class DragSource implements HasDndDragStartHandlers, HasDndDragCancelHand
   }
 
   private void onDraggableDragMove(DragMoveEvent de) {
+	  System.out.println("onDraggableDragMove");
     Event e = de.getNativeEvent().cast();
     de.setX(e.getClientX() + 12 + XDOM.getBodyScrollLeft());
     de.setY(e.getClientY() + 12 + XDOM.getBodyScrollTop());
