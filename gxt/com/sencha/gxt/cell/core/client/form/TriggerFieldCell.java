@@ -52,7 +52,7 @@ public class TriggerFieldCell<T> extends ValueBaseInputCell<T> {
 
   }
 
-  class MouseDownHandler extends DelayedTask implements NativePreviewHandler {
+  public class MouseDownHandler extends DelayedTask implements NativePreviewHandler {
 
     private final Context context;
     private final XElement parent;

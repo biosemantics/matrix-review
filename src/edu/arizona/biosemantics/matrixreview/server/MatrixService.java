@@ -13,9 +13,11 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import edu.arizona.biosemantics.matrixreview.shared.IMatrixService;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.Organ;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.Value;
+import edu.arizona.biosemantics.matrixreview.shared.model.Taxon.Level;
 
 @SuppressWarnings("serial")
 public class MatrixService extends RemoteServiceServlet implements IMatrixService {
@@ -27,18 +29,20 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 	
 	private TaxonMatrix createSampleMatrix() {
 		List<Character> characters = new LinkedList<Character>();
+		Organ o1 = new Organ("o");
+		Organ o2 = new Organ("o2");
 		Character a = new Character("a");
-		Character b = new Character("b", "o");
-		Character c = new Character("c", "o2");
+		Character b = new Character("b", o1);
+		Character c = new Character("c", o2);
 		characters.add(a);
 		characters.add(b);
 		characters.add(c);
 		TaxonMatrix taxonMatrix = new TaxonMatrix(characters);
 
-		Taxon t1 = new Taxon("t1", "this is the description about t1", taxonMatrix);
-		Taxon t2 = new Taxon("t2", "this is the description about t2", taxonMatrix);
-		Taxon t3 = new Taxon(
-				"t3",
+		Taxon t1 = new Taxon("server1", Level.GENUS, "t1", "author", "2002", "this is the description about t1");
+		Taxon t2 = new Taxon("server2", Level.SPECIES, "t2", "author", "2002",  "this is the description about t2");
+		Taxon t3 = new Taxon("server3", Level.LIFE,
+				"t3", "author", "2002", 
 				"Lorem ipsum dolor sit amet, consectetuer adipiscing elit. "
 						+ "Sed metus nibh, sodales a, porta at, vulputate eget, dui. Pellentesque ut nisl. "
 						+ "Maecenas tortor turpis, interdum non, sodales non, iaculis ac, lacus. Vestibulum auctor, "
@@ -47,12 +51,15 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 						+ "fringilla vel, urna.<br/><br/>Aliquam commodo ullamcorper erat. Nullam vel justo in neque "
 						+ "porttitor laoreet. Aenean lacus dui, consequat eu, adipiscing eget, nonummy non, nisi. "
 						+ "Morbi nunc est, dignissim non, ornare sed, luctus eu, massa. Vivamus eget quam. Vivamus "
-						+ "tincidunt diam nec urna. Curabitur velit.", taxonMatrix);
+						+ "tincidunt diam nec urna. Curabitur velit.");
+		taxonMatrix.setChild(t1, t2);
 
 		
 		taxonMatrix.addTaxon(t1);
 		taxonMatrix.addTaxon(t2);
 		taxonMatrix.addTaxon(t3);
+		
+		taxonMatrix.setValue(t1, a, new Value("some value"));
 		return taxonMatrix;
 	}
 
@@ -74,7 +81,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 			TaxonMatrix taxonMatrix = new TaxonMatrix(characters);
 						
 			for(Element taxonEntry : taxonEntryList) {
-				Taxon taxon = new Taxon(taxonEntry.getAttributeValue("recordID"), "The description", taxonMatrix);
+				Taxon taxon = new Taxon("server" + taxonEntryList.indexOf(taxonEntry), Level.SPECIES, taxonEntry.getAttributeValue("recordID"), "author", "2002", "The description");
 				taxonMatrix.addTaxon(taxon);
 				
 				List<Element> itemsList = taxonEntry.getChildren("Items");

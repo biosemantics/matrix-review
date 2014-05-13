@@ -328,14 +328,14 @@ public class ColumnHeader<M> extends Component {
 
   public class Head extends Component {
 
-    protected int column;
-    protected ColumnConfig<M, ?> config;
+    public int column;
+    public ColumnConfig<M, ?> config;
 
     protected AnchorElement btn;
     protected ImageElement img;
     protected InlineHTML text;
     protected Widget widget;
-    protected int row;
+    public int row;
 
     public Head() {}
     

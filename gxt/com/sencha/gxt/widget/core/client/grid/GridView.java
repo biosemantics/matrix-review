@@ -1891,7 +1891,7 @@ public class GridView<M> {
    * 
    * @param grid the grid
    */
-  protected void init(final Grid<M> grid) {
+  public void init(final Grid<M> grid) {
     this.grid = grid;
     this.cm = grid.getColumnModel();
     selectable = grid.isAllowTextSelection();
@@ -2026,7 +2026,7 @@ public class GridView<M> {
    * Creates the grid view listeners, including {@link StoreHandlers} and {@link ColumnModelHandlers}, and saves
    * references for future use.
    */
-  protected void initListeners() {
+  public void initListeners() {
     listener = new StoreHandlers<M>() {
 
       @Override

@@ -16,7 +16,6 @@ public class MatrixReview implements EntryPoint {
 	
 	@Override
 	public void onModuleLoad() {
-
 		/**
 		 * The current for impl. of basic grid funct.
 		 */
@@ -30,15 +29,14 @@ public class MatrixReview implements EntryPoint {
 
 			@Override
 			public void onSuccess(TaxonMatrix result) {
-				TaxonMatrixView taxonMatrixView = new TaxonMatrixView();
-				taxonMatrixView.init(result);
+				MatrixReviewView view = new MatrixReviewView(result);
 
 				// simulate etc site
 				DockLayoutPanel dock = new DockLayoutPanel(Unit.EM);
 				dock.addNorth(new HTML("header"), 2);
 				HTML footer = new HTML("footer");
 				dock.addSouth(footer, 2);				
-				dock.add(taxonMatrixView.asWidget());
+				dock.add(view.asWidget());
 				RootLayoutPanel.get().add(dock);
 			}
 		});

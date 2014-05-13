@@ -837,7 +837,7 @@ public class TreeStore<M> extends Store<M> {
    * available filters select them or any recursive child.
    */
   @Override
-  protected void applyFilters() {
+public void applyFilters() {
     if (isFiltered()) {
       // Full recursive dfs, from the root nodes
       roots.applyFiltersToChildren();

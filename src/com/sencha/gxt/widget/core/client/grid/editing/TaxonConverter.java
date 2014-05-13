@@ -16,6 +16,7 @@ public class TaxonConverter implements Converter<Taxon, String> {
 	public Taxon convertFieldValue(String object) {
 		return new Taxon(object, taxonMatrix);
 	}
+	
 	@Override
 	public String convertModelValue(Taxon object) {
 		return object.getName();

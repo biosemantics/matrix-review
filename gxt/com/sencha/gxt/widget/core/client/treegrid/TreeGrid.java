@@ -283,7 +283,7 @@ public class TreeGrid<M> extends Grid<M> implements HasBeforeCollapseItemHandler
   private boolean expandOnFilter = true;
   private IconProvider<M> iconProvider;
   private TreeStyle style = new TreeStyle();
-  private TreeAppearance treeAppearance;
+  protected TreeAppearance treeAppearance;
   private ColumnConfig<M, ?> treeColumn;
   private boolean expandOnDoubleClick = true;
 
@@ -834,12 +834,15 @@ public class TreeGrid<M> extends Grid<M> implements HasBeforeCollapseItemHandler
   protected ListStore<M> createListStore() {
     return new ListStore<M>(treeStore.getKeyProvider()) {
       @Override
-      public Record getRecord(M model) {
+      public Record getRecord(M model) { 
+    	  System.out.println("ask get record " + model.toString());
         return treeStore.getRecord(model);
       }
 
       @Override
       public boolean hasRecord(M model) {
+    	  System.out.println("ask for has model " + model.toString());
+    	  System.out.println("result: " + treeStore.hasRecord(model));
         return treeStore.hasRecord(model);
       }
     };
@@ -952,7 +955,6 @@ public class TreeGrid<M> extends Grid<M> implements HasBeforeCollapseItemHandler
   protected void onClick(Event event) {
     EventTarget eventTarget = event.getEventTarget();
     if (Element.is(eventTarget)) {
-
       M m = store.get(getView().findRowIndex(Element.as(eventTarget)));
       if (m != null) {
         TreeNode<M> node = findNode(m);
@@ -1119,7 +1121,7 @@ public class TreeGrid<M> extends Grid<M> implements HasBeforeCollapseItemHandler
     }
   }
 
-  private void doInitialLoad() {
+  protected void doInitialLoad() {
     if (treeStore.getRootItems().size() == 0 && loader != null) {
       loader.load();
     } else {

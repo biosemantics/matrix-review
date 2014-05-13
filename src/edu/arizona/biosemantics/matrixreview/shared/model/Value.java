@@ -8,6 +8,13 @@ public class Value implements Serializable, HasColor, HasComment, HasDirty, Comp
 	private String comment = "";
 	private Color color;
 	private boolean dirty = false;
+	
+	//maintained so it is e.g. possible to traverse from a Value object to all related parts of the model i.e. taxon, taxonmatrix, character.
+	//this is e.g. useful in ValueCell where we want to construct a quicktip that contains information outside of Value.
+	//Context variable could there be used to get col/row id and from those retrieve corresponding taxon/character. However, this design decision has been made
+	//for convenience over memory efficiency. If this should ever become a problem, use Context and other means where necessary.
+	private Taxon taxon;
+	private Character character;
 
 	public Value() { }
 	
@@ -61,6 +68,22 @@ public class Value implements Serializable, HasColor, HasComment, HasDirty, Comp
 
 	protected void setDirty() {
 		dirty = true;
+	}
+
+	protected void setCharacter(Character character) {
+		this.character = character;
+	}
+	
+	protected void setTaxon(Taxon taxon) {
+		this.taxon = taxon;
+	}
+	
+	public Taxon getTaxon() {
+		return taxon;
+	}
+
+	public Character getCharacter() {
+		return character;
 	}
 
 	@Override

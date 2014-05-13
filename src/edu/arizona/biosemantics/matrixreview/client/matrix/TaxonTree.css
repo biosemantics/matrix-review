@@ -1,0 +1,58 @@
+/**
+ * Sencha GXT 3.1.0-beta - Sencha for GWT
+ * Copyright(c) 2007-2014, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+ @eval headerBtn com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/grid3-hd-btn.gif");
+ 
+.over {
+  background-color: #eee;
+}
+
+.drop {
+  background-color: #defadc;
+}
+
+.selected {
+  background-color: #d9e8fb !important;
+}
+
+.headButton {
+  display: none;
+  /*position: absolute;*/
+  width: 14px;
+  background: no-repeat left center;
+  right: 0;
+  top: 0;
+  z-index: 2;
+  cursor: pointer;
+  outline: none;
+}
+
+.headButton {
+  background-color: #c3daf9;
+  background-image: headerBtn;
+  height: auto;
+}
+
+.headOver .headButton,.headMenuOpen .headButton {
+  display: block;
+}
+
+.menu {	
+	display: inline-block;
+	position: absolute;
+	right: 0px;
+}
+
+a.headButton:hover {
+  background-position: -14px center;
+}
+
+.headButton {
+  background-color: #c3daf9;
+  background-image: headerBtn;
+}
+

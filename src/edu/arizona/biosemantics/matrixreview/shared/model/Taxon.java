@@ -3,47 +3,148 @@ package edu.arizona.biosemantics.matrixreview.shared.model;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
-public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComment, HasDirty {
+import com.sencha.gxt.data.shared.TreeStore;
+import com.sencha.gxt.data.shared.TreeStore.TreeNode;
 
-	public String name;
-	private String description = "";
+import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.Color;
+import edu.arizona.biosemantics.matrixreview.shared.model.HasColor;
+import edu.arizona.biosemantics.matrixreview.shared.model.HasComment;
+import edu.arizona.biosemantics.matrixreview.shared.model.HasDirty;
+import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.Value;
+
+public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComment, HasDirty, HasLocked {
+	
+	public static int currentId = 0;
+	
+	public enum Level {
+		LIFE(0), DOMAIN(1), KINGDOM(2), PHYLUM(3), CLASS(4), ORDER(5), FAMILY(6), GENUS(7), SPECIES(8), SUBSPECIES(9), VARIETY(10), 
+		FORM(11), GROUP(12);
+		
+		private int id;
+
+		Level(int id) {
+			this.id = id;
+		}
+		
+		public int getId() {
+			return id;
+		}
+	}
+	
+	/**
+	 * Taxon hierarchy
+	 */
+	private Level level;
+	private Taxon parent;
+	private List<Taxon> children = new LinkedList<Taxon>();
+	
+	/**
+	 * Taxon concept
+	 */
+	private String name;
+	private String author;
+	private String year;
+	
+	/**
+	 * Description
+	 */
+	private String description;
+	
+	/**
+	 * Matrix related
+	 */
+	private String id;
+	private TaxonMatrix taxonMatrix;
 	private Map<Character, Value> values = new HashMap<Character, Value>();
 	private String comment = "";
 	private Color color;
-	private TaxonMatrix taxonMatrix;
 	private boolean dirty = false;
-
+	private boolean locked = false;
+	private boolean hidden = false;
+	
 	public Taxon() { }
 	
-	public Taxon(String name, TaxonMatrix taxonMatrix) {
+	public Taxon(String id, Level level, String name, String author, String year) {
+		this.id = id;
+		this.level = level;
 		this.name = name;
-		this.taxonMatrix = taxonMatrix;
+		this.author = author;
+		this.year = year;
 	}
 	
-	public Taxon(String name, String description, TaxonMatrix taxonMatrix) {
-		this.name = name;
+	public Taxon(String id, Level level, String name, String author, String year, String description) {
+		this(id, level, name, author, year);
 		this.description = description;
-		this.taxonMatrix = taxonMatrix;
 	}
 	
-	public Taxon(String name, String description, Collection<Character> characters, TaxonMatrix taxonMatrix) {
-		this.name = name;
-		this.description = description;
+	public Taxon(String id, Level level, String name, String author, String year, String description, Collection<Character> characters) {
+		this(id, level, name, author, year, description);
 		this.init(characters);
-		this.taxonMatrix = taxonMatrix;
 	}
 	
-	public Taxon(String name, Map<Character, Value> values, TaxonMatrix taxonMatrix) {
-		super();
-		this.name = name;
+	public Taxon(String id, Level level, String name, String author, String year, Map<Character, Value> values) {
+		this(id, level, name, author, year);
 		this.values = values;
-		this.taxonMatrix = taxonMatrix;
+	}
+		
+	protected void addChild(Taxon child) {
+		children.add(child);
 	}
 	
+	protected void addChild(int index, Taxon child) {
+		children.add(index, child);
+	}
+	
+	public List<Taxon> getChildren() {
+		return children;
+	}
+	
+	public Taxon getParent() {
+		return parent;
+	}
+	
+	public boolean hasParent() {
+		return parent != null;
+	}
+	
+	protected void setParent(Taxon parent) {
+		this.parent = parent;
+	}
+	
+	protected void setChildren(List<Taxon> children) {
+		this.children = children;
+	}
+		
 	public String getName() {
+		//by scientific convention
+		if(level.equals(Level.GENUS)) {
+			System.out.println(java.lang.Character.toUpperCase(name.charAt(0)) + name.substring(1));
+			return java.lang.Character.toUpperCase(name.charAt(0)) + name.substring(1);
+		}
 		return name;
+	}
+	
+	public String getFullName() {
+		boolean belowGenus = false;
+		for(Level level : Level.values()) {
+			if(level.equals(Level.GENUS))
+				belowGenus = true;
+			if(level.equals(this.level)) {
+				break;
+			}
+		}
+		if(belowGenus && hasParent()) {
+			return getParent().getFullName() + " " + getName();
+		} else {
+			return getName();
+		}
 	}
 	
 	protected void setName(String name) {
@@ -51,6 +152,8 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 	}
 
 	protected Value put(Character key, Value value) {
+		value.setCharacter(key);
+		value.setTaxon(this);
 		return values.put(key, value);
 	}
 
@@ -69,8 +172,12 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 	}
 
 	protected void addCharacter(Character character) {
-		if(!values.containsKey(character))
-			values.put(character, new Value(""));
+		if(!values.containsKey(character)) {
+			Value value = new Value("");
+			value.setCharacter(character);
+			value.setTaxon(this);
+			values.put(character, value);
+		}
 	}
 
 	public String getDescription() {
@@ -82,7 +189,7 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 	}
 
 	public String toString() {
-		return name + ": " + values.toString();
+		return getName() + ": " + values.toString();
 	}
 
 	@Override
@@ -137,4 +244,59 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 	public void setValue(Character character, Value value) {
 		taxonMatrix.setValue(this, character, value);
 	}
+	
+	//TODO, key really ID in order?
+	public String getId() {
+		return String.valueOf(id);
+	}
+	
+	public boolean isLocked() {
+		return locked;
+	}
+
+	protected void setLocked(boolean locked) {
+		this.locked = locked;
+	}
+	
+	public boolean isHidden() {
+		return hidden;
+	}
+	
+	protected void setHidden(boolean hidden) {
+		this.hidden = hidden;
+	}
+
+	public Level getLevel() {
+		return level;
+	}
+
+	public String getAuthor() {
+		return author;
+	}
+
+	public String getYear() {
+		return year;
+	}
+
+	protected void setAuthor(String author) {
+		this.author = author;
+	}
+	
+	protected void setYear(String year) {
+		this.year = year;
+	}
+
+	protected void setLevel(Level level) {
+		this.level = level;
+	}
+
+	public void removeChild(Taxon taxon) {
+		Iterator<Taxon> it = children.iterator();
+		while(it.hasNext()) {
+			Taxon child = it.next();
+			if(child.equals(taxon)) 
+				it.remove();
+		}
+	}
+		
 }

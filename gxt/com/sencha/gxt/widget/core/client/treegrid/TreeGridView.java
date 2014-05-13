@@ -33,6 +33,8 @@ import com.sencha.gxt.widget.core.client.tree.Tree.Joint;
 import com.sencha.gxt.widget.core.client.tree.Tree.TreeNode;
 import com.sencha.gxt.widget.core.client.tree.TreeView.TreeViewRenderMode;
 
+import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
+
 /**
  * A {@code GridView} subclass that adds tree related view features.
  */
@@ -359,7 +361,7 @@ public class TreeGridView<M> extends GridView<M> {
   }
 
   @Override
-  protected void init(Grid<M> grid) {
+  public void init(Grid<M> grid) {
     tree = (TreeGrid<M>) grid;
     super.init(grid);
   }
@@ -378,4 +380,6 @@ public class TreeGridView<M> extends GridView<M> {
       node.clearElements();
     }
   }
+
+
 }

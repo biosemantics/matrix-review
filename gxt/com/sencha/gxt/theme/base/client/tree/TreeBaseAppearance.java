@@ -79,8 +79,8 @@ public abstract class TreeBaseAppearance implements TreeAppearance {
 
   }
 
-  private final TreeResources resources;
-  private final TreeBaseStyle style;
+  protected final TreeResources resources;
+  protected final TreeBaseStyle style;
 
   protected String indentMarkupStart = "<img src='" + GXT.getBlankImageUrl() + "' style='height: 18px; width: ";
 
@@ -326,7 +326,7 @@ public abstract class TreeBaseAppearance implements TreeAppearance {
     return indentMarkupStart + (indentWidth * level) + indentMarkupEnd;
   }
 
-  private Element getImage(ImageResource ir) {
+  protected Element getImage(ImageResource ir) {
     return AbstractImagePrototype.create(ir).createElement();
   }
 

@@ -80,7 +80,7 @@ public class ViewData {
    * @param curValue the current value
    * @see #getCurrentValue()
    */
-  protected void setCurrentValue(String curValue) {
+  public void setCurrentValue(String curValue) {
     this.curValue = curValue;
   }
 
@@ -90,7 +90,7 @@ public class ViewData {
    * @param lastValue the last value
    * @see #getLastValue()
    */
-  protected void setLastValue(String lastValue) {
+  public void setLastValue(String lastValue) {
     this.lastValue = lastValue;
   }
 
