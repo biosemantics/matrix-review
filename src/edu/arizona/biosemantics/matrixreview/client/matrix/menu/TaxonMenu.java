@@ -215,9 +215,10 @@ public class TaxonMenu extends Menu {
 		    
 		    //if(initialParent != null)
 		   // 	taxaTree.getSelectionModel().select(initialParent, false);
-		    //ScrollPanel scrollPanel = new ScrollPanel(taxaTree);
-		    //scrollPanel.setHeight("200px");
-		    p.add(new FieldLabel(taxaTree, "Parent"), new VerticalLayoutData(1, -1));
+		    ScrollPanel scrollPanel = new ScrollPanel(taxaTree);
+		    scrollPanel.getElement().getStyle().setBackgroundColor("white");
+		    scrollPanel.setHeight("200px");
+		    p.add(new FieldLabel(scrollPanel, "Parent"), new VerticalLayoutData(1, -1));
 		    
 			levelsStore.addAll(Arrays.asList(Level.values()));
 			levelsStore.addFilter(levelFilter);
