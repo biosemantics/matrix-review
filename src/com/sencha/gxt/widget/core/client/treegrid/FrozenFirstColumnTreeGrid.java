@@ -5,11 +5,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.Style.ScrollDirection;
 import com.sencha.gxt.core.client.dom.XDOM;
+import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.data.shared.ListStore;
@@ -131,9 +133,13 @@ public class FrozenFirstColumnTreeGrid<M> extends Widget {
 
 		// add locked column, only 300px wide (in this example, use layouts
 		// to change how this works
-		HorizontalLayoutData lockedColumnLayoutData = new HorizontalLayoutData(200, 1.0);
-		lockedColumnLayoutData.setMargins(new Margins(0, 0, XDOM.getScrollBarWidth(), 0));
-
+		HorizontalLayoutData lockedColumnLayoutData = new HorizontalLayoutData(300, 1.0);
+		
+		//lockedColumnLayoutData.setMargins(new Margins(0, XDOM.getScrollBarWidth(), 0, 0));		
+		//hide scrollers: Note that child is grabbed at index 0. Even though after full blown rendering the index shown in browser may be different
+		//System.out.println(treeGrid.getElement());
+		treeGrid.getElement().getChild(0).<XElement> cast().getStyle().setOverflow(Overflow.HIDDEN);
+		
 		container.add(treeGrid, lockedColumnLayoutData);
 
 		// add non-locked section, taking up all remaining width

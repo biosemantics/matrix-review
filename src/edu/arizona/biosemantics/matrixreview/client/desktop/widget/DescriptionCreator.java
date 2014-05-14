@@ -40,7 +40,6 @@ public class DescriptionCreator extends WidgetCreator {
 			@Override
 			public void onDragStart(DndDragStartEvent event) {
 				event.setData(textArea.getSelectedText());
-				System.out.println("drag start " + textArea.getSelectedText());
 			}
 		});
 		

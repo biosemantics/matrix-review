@@ -31,7 +31,7 @@ public class TaxaColumnConfig extends ColumnConfig<Taxon, Taxon> {
 
 	
 	public TaxaColumnConfig() {
-		super(new TaxonNameValueProvider(), 200, "Taxon Concept / Character");
+		super(new TaxonNameValueProvider(), 300, "Taxon Concept / Character");
 	}
 
 	public Filter<Taxon, ?> getFilter() {

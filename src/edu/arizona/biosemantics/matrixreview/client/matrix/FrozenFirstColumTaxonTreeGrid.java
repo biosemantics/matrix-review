@@ -272,6 +272,7 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 		public CharactersGrid(ListStore<Taxon> listStore,
 				CharactersColumnModel columnModel, CharactersGridView gridView) {
 			super(listStore, columnModel, gridView);
+			this.setColumnReordering(true);
 		}
 		
 		@Override
@@ -360,14 +361,6 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 	public TaxonStore getTaxonStore() {
 		return (TaxonStore)store;
 	}
-
-	public TaxaTreeGrid getTaxaTreeGrid() {
-		return (TaxaTreeGrid)this.treeGrid;
-	}
-
-	public CharactersGrid getCharactersGrid() {
-		return (CharactersGrid)this.grid;
-	}
 	
 	@Override
 	public TaxonStore getTreeStore() {
@@ -385,7 +378,7 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 	}
 	
 	public CharactersColumnModel getColumnModel() {
-		return getCharactersGrid().getColumnModel();
+		return getGrid().getColumnModel();
 	}
 
 	public void updateCharacterGridHeads() {

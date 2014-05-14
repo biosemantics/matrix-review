@@ -231,7 +231,7 @@ public class MatrixView implements IsWidget {
 			eventBus.addHandler(SetValueColorEvent.TYPE, new SetValueColorEvent.SetValueColorEventHandler() {
 				@Override
 				public void onSet(SetValueColorEvent event) {
-					taxonMatrix.setColor(event.getValue(), event.getColor());
+					setValueColor(event.getValue(), event.getColor());
 				}
 			});
 			eventBus.addHandler(SetTaxonColorEvent.TYPE, new SetTaxonColorEvent.SetTaxonColorEventHandler() {
@@ -352,7 +352,8 @@ public class MatrixView implements IsWidget {
 				for(Character character : taxonMatrix.getCharacters())
 					characterColumnConfigs.add(this.createCharacterColumnConfig(character));
 				taxonTreeGrid.init(characterColumnConfigs, new CharactersGridView(eventBus, taxonMatrix));
-				editing = new LockableControlableMatrixEditing(eventBus, taxonTreeGrid.getCharactersGrid(), taxonTreeGrid.getTreeGrid().getListStore());
+				valueCell.setListStore(taxonTreeGrid.getTreeGrid().getListStore());
+				editing = new LockableControlableMatrixEditing(eventBus, taxonTreeGrid.getGrid(), taxonTreeGrid.getTreeGrid().getListStore());
 				initCharacterEditing();
 			}
 		}
@@ -517,6 +518,11 @@ public class MatrixView implements IsWidget {
 		protected void setTaxonColor(Taxon taxon, Color color) {
 			taxonMatrix.setColor(taxon, color);
 			taxonStore.update(taxon);
+		}
+		
+		protected void setValueColor(Value value, Color color) {
+			taxonMatrix.setColor(value, color);
+			taxonStore.fireEvent(new StoreDataChangeEvent<Taxon>());
 		}
 
 		protected void sortCharactersByName(final boolean descending) {
@@ -774,7 +780,7 @@ public class MatrixView implements IsWidget {
 		}
 		
 		private void initCharacterEditing() {
-			for(CharacterColumnConfig config : taxonTreeGrid.getCharactersGrid().getColumnModel().getCharacterColumns()) {
+			for(CharacterColumnConfig config : taxonTreeGrid.getGrid().getColumnModel().getCharacterColumns()) {
 				editing.addEditor(config);
 				EditEventsHandler editEventsHandler = new EditEventsHandler();
 				editing.addBeforeStartEditHandler(editEventsHandler);
@@ -885,7 +891,6 @@ public class MatrixView implements IsWidget {
 		taxaColumnConfig.setCell(new AbstractCell<Taxon>() {
 			@Override
 			public void render(Context context,	Taxon value, SafeHtmlBuilder sb) {
-				System.out.println("<i>" + value.getFullName() + "</i>");
 				sb.append(SafeHtmlUtils.fromTrustedString("<i>" + value.getFullName() + "</i>"));
 			}
 		});

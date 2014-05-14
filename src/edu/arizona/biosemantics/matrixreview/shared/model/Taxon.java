@@ -131,7 +131,6 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 	public String getName() {
 		//by scientific convention
 		if(level.equals(Level.GENUS)) {
-			System.out.println(java.lang.Character.toUpperCase(name.charAt(0)) + name.substring(1));
 			return java.lang.Character.toUpperCase(name.charAt(0)) + name.substring(1);
 		}
 		return name;
@@ -195,7 +194,7 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 	}
 
 	public String toString() {
-		return getName() + ": " + values.toString();
+		return getName();// + ": " + values.toString();
 	}
 
 	@Override

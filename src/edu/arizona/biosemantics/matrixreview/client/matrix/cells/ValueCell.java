@@ -6,8 +6,10 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sencha.gxt.core.client.util.ImageHelper;
+import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 
+import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.ValueMenu;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
@@ -36,6 +38,7 @@ public class ValueCell extends MenuExtendedCell<Value> {
 	protected static Templates templates = GWT.create(Templates.class);
 	private EventBus eventBus;
 	private TaxonMatrix taxonMatrix;
+	private ListStore<Taxon> listStore;
 	
 	public ValueCell(EventBus eventBus, TaxonMatrix taxonMatrix) {
 		this.eventBus = eventBus;
@@ -82,10 +85,14 @@ public class ValueCell extends MenuExtendedCell<Value> {
 	}
 
 	protected Menu createContextMenu(final int colIndex, final int rowIndex) {
-		Taxon taxon = taxonMatrix.getTaxon(rowIndex);
+		Taxon taxon = listStore.get(rowIndex);
 		Character character = taxonMatrix.getCharacter(colIndex);
 		Value value = taxon.get(character);
 		final Menu menu = new ValueMenu(eventBus, taxonMatrix, value, taxon, character);
 		return menu;
+	}
+
+	public void setListStore(ListStore<Taxon> listStore) {
+		this.listStore = listStore;
 	}
 }

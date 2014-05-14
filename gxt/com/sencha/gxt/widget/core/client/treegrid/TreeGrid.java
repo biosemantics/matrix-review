@@ -835,14 +835,11 @@ public class TreeGrid<M> extends Grid<M> implements HasBeforeCollapseItemHandler
     return new ListStore<M>(treeStore.getKeyProvider()) {
       @Override
       public Record getRecord(M model) { 
-    	  System.out.println("ask get record " + model.toString());
         return treeStore.getRecord(model);
       }
 
       @Override
       public boolean hasRecord(M model) {
-    	  System.out.println("ask for has model " + model.toString());
-    	  System.out.println("result: " + treeStore.hasRecord(model));
         return treeStore.hasRecord(model);
       }
     };

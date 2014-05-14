@@ -5,12 +5,19 @@ import java.util.List;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.shared.EventBus;
+import com.sencha.gxt.core.client.dom.AutoScrollSupport;
 import com.sencha.gxt.data.shared.TreeStore;
+import com.sencha.gxt.dnd.core.client.DndDragCancelEvent;
+import com.sencha.gxt.dnd.core.client.DndDragEnterEvent;
+import com.sencha.gxt.dnd.core.client.DndDragLeaveEvent;
 import com.sencha.gxt.dnd.core.client.DndDragMoveEvent;
+import com.sencha.gxt.dnd.core.client.DndDropEvent;
 import com.sencha.gxt.dnd.core.client.Insert;
 import com.sencha.gxt.dnd.core.client.TreeGridDropTarget;
 import com.sencha.gxt.dnd.core.client.DND.Feedback;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import com.sencha.gxt.widget.core.client.container.Container;
+import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 import com.sencha.gxt.widget.core.client.tree.Tree.TreeNode;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGrid;
@@ -30,9 +37,12 @@ public class UpdateModelDropTarget extends TreeGridDropTarget<Taxon> {
 	private TaxonMatrix taxonMatrix;
 	private EventBus eventBus;
 	private ModelMode modelMode = ModelMode.TAXONOMIC_HIERARCHY; 
-
+    private AutoScrollSupport scrollSupport;
+	private TreeGrid<Taxon> tree;
+	
 	public UpdateModelDropTarget(EventBus eventBus, TreeGrid<Taxon> tree, TaxonMatrix taxonMatrix, TaxonStore taxonStore) {
 		super(tree);
+		this.tree = tree;
 		this.eventBus = eventBus;
 		this.taxonMatrix = taxonMatrix;
 		this.taxonStore = taxonStore;
@@ -42,6 +52,43 @@ public class UpdateModelDropTarget extends TreeGridDropTarget<Taxon> {
 		
 		addEventHandlers();
 	}
+	
+    @Override
+    protected void onDragCancelled(DndDragCancelEvent event) {
+        super.onDragCancelled(event);
+        scrollSupport.stop();
+    }
+
+    @Override
+    protected void onDragDrop(DndDropEvent e) {
+        super.onDragDrop(e);
+        scrollSupport.stop();
+    }
+    
+    @Override
+    protected void onDragFail(DndDropEvent event) {
+        super.onDragFail(event);
+        scrollSupport.stop();
+    }
+
+
+    @Override
+    protected void onDragLeave(DndDragLeaveEvent event) {
+        super.onDragLeave(event);
+        scrollSupport.stop();
+    }
+    
+    @Override
+    protected void onDragEnter(DndDragEnterEvent e) {
+        if (scrollSupport == null) {
+            scrollSupport = new AutoScrollSupport(tree.getView().getScroller());
+        } else if (scrollSupport.getScrollElement() == null) {
+            scrollSupport.setScrollElement(tree.getView().getScroller());
+        }
+        scrollSupport.start();
+        super.onDragEnter(e);
+    }
+    
 	
 	private void addEventHandlers() {
 		eventBus.addHandler(ModelModeEvent.TYPE, new ModelModeEvent.ModelModeEventHandler() {
