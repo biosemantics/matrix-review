@@ -308,7 +308,7 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 		super.init(otherColumnConfigs, gridView);
 		
 		UpdateModelDragSource dragSource = new UpdateModelDragSource(super.getTreeGrid());		
-		UpdateModelDropTarget dropTarget = new UpdateModelDropTarget(eventBus, super.getTreeGrid(), taxonMatrix);
+		UpdateModelDropTarget dropTarget = new UpdateModelDropTarget(eventBus, super.getTreeGrid(), taxonMatrix, getTaxonStore());
 		//let event handling take care of "move" behaviour
 		dropTarget.setOperation(Operation.COPY);
 	}

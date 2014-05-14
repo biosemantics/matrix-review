@@ -1,5 +1,8 @@
 package edu.arizona.biosemantics.matrixreview.client.event;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
@@ -15,11 +18,16 @@ public class MoveTaxonFlatEvent extends GwtEvent<MoveTaxonEventHandler> {
 	
 	public static Type<MoveTaxonEventHandler> TYPE = new Type<MoveTaxonEventHandler>();
 	
-	private Taxon taxon;
+	private List<Taxon> taxa = new LinkedList<Taxon>();
 	private Taxon after;
 
 	public MoveTaxonFlatEvent(Taxon taxon, Taxon after) {
-		this.taxon = taxon;
+		this.taxa.add(taxon);
+		this.after = after;
+	}
+	
+	public MoveTaxonFlatEvent(List<Taxon> taxa, Taxon after) {
+		this.taxa = taxa;
 		this.after = after;
 	}
 	
@@ -33,8 +41,8 @@ public class MoveTaxonFlatEvent extends GwtEvent<MoveTaxonEventHandler> {
 		return TYPE;
 	}
 
-	public Taxon getTaxon() {
-		return taxon;
+	public List<Taxon> getTaxa() {
+		return taxa;
 	}
 
 	public Taxon getAfter() {

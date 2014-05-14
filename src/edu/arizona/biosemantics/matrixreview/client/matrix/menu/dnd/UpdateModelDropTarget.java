@@ -15,25 +15,43 @@ import com.sencha.gxt.widget.core.client.tree.Tree;
 import com.sencha.gxt.widget.core.client.tree.Tree.TreeNode;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGrid;
 
+import edu.arizona.biosemantics.matrixreview.client.event.ModelModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxonFlatEvent;
+import edu.arizona.biosemantics.matrixreview.client.matrix.MatrixView.ModelMode;
+import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon.Level;
 
 public class UpdateModelDropTarget extends TreeGridDropTarget<Taxon> {
 
+	private TaxonStore taxonStore;
 	private TaxonMatrix taxonMatrix;
 	private EventBus eventBus;
+	private ModelMode modelMode = ModelMode.TAXONOMIC_HIERARCHY; 
 
-	public UpdateModelDropTarget(EventBus eventBus, TreeGrid<Taxon> tree, TaxonMatrix taxonMatrix) {
+	public UpdateModelDropTarget(EventBus eventBus, TreeGrid<Taxon> tree, TaxonMatrix taxonMatrix, TaxonStore taxonStore) {
 		super(tree);
 		this.eventBus = eventBus;
 		this.taxonMatrix = taxonMatrix;
-		
+		this.taxonStore = taxonStore;
 		setAllowSelfAsSource(true);
 		setAllowDropOnLeaf(true);
+		setFeedback(Feedback.BOTH);
+		
+		addEventHandlers();
 	}
 	
+	private void addEventHandlers() {
+		eventBus.addHandler(ModelModeEvent.TYPE, new ModelModeEvent.ModelModeEventHandler() {
+			@Override
+			public void onMode(ModelModeEvent event) {
+				modelMode = event.getMode();
+			}
+		});
+	}
+
 	@SuppressWarnings("unchecked")
 	protected void appendModel(Taxon p, List<?> items, int index) {
 		if (items.size() == 0)
@@ -57,7 +75,16 @@ public class UpdateModelDropTarget extends TreeGridDropTarget<Taxon> {
 				validDrop = false;
 		
 		if(validDrop) {
-			eventBus.fireEvent(new MoveTaxaEvent(p, index, models));
+			switch(modelMode) {
+			case FLAT:
+				eventBus.fireEvent(new MoveTaxonFlatEvent(models, index == 0 ? null : taxonStore.getChild(index - 1)));
+				break;
+			case TAXONOMIC_HIERARCHY:
+			case CUSTOM_HIERARCHY:
+				eventBus.fireEvent(new MoveTaxaEvent(p, index, models));
+				break;
+			
+			}
 		}
 		
 		/*
@@ -87,61 +114,70 @@ public class UpdateModelDropTarget extends TreeGridDropTarget<Taxon> {
 	
 	  @Override
 	  protected void showFeedback(DndDragMoveEvent event) {
-	    // TODO this might not get the right element
-	    final TreeNode<Taxon> item = getWidget().findNode(
-	        event.getDragMoveEvent().getNativeEvent().getEventTarget().<Element> cast());
-	    if (item == null) {
-	      if (activeItem != null) {
-	        clearStyle(activeItem);
-	      }
-	    }
+		switch (modelMode) {
+		case FLAT:
+			super.showFeedback(event);
+			break;
+		case TAXONOMIC_HIERARCHY:
+		case CUSTOM_HIERARCHY:
+			// TODO this might not get the right element
+		    final TreeNode<Taxon> item = getWidget().findNode(
+		        event.getDragMoveEvent().getNativeEvent().getEventTarget().<Element> cast());
+		    if (item == null) {
+		      if (activeItem != null) {
+		        clearStyle(activeItem);
+		      }
+		    }
 
-	    if (item != null && event.getDropTarget().getWidget() == event.getDragSource().getWidget()) {
-	      @SuppressWarnings("unchecked")
-	      TreeGrid<Taxon> source = (TreeGrid<Taxon>) event.getDragSource().getWidget();
-	      List<Taxon> list = source.getSelectionModel().getSelection();
-	      Taxon overModel = item.getModel();
-	      for (int i = 0; i < list.size(); i++) {
-	        Taxon sel = list.get(i);
-	        
-	        if(!Level.isValidParentChild(overModel.getLevel(), sel.getLevel())) {
-	          Insert.get().hide();
+		    if (item != null && event.getDropTarget().getWidget() == event.getDragSource().getWidget()) {
+		      @SuppressWarnings("unchecked")
+		      TreeGrid<Taxon> source = (TreeGrid<Taxon>) event.getDragSource().getWidget();
+		      List<Taxon> list = source.getSelectionModel().getSelection();
+		      Taxon overModel = item.getModel();
+		      for (int i = 0; i < list.size(); i++) {
+		        Taxon sel = list.get(i);
+		        
+		        if(!Level.isValidParentChild(overModel.getLevel(), sel.getLevel())) {
+		          Insert.get().hide();
+			      event.getStatusProxy().setStatus(false);
+			      return;
+		        }
+		        if (overModel == sel) {
+		          Insert.get().hide();
+		          event.getStatusProxy().setStatus(false);
+		          return;
+		        }
+		        List<Taxon> children = getWidget().getTreeStore().getAllChildren(sel);
+		        if (children.contains(item.getModel())) {
+		          Insert.get().hide();
+		          event.getStatusProxy().setStatus(false);
+		          return;
+		        }
+		      }
+		    }
+
+		    boolean append = feedback == Feedback.APPEND || feedback == Feedback.BOTH;
+		    boolean insert = feedback == Feedback.INSERT || feedback == Feedback.BOTH;
+
+		    if (item == null) {
+		      handleAppend(event, item);
+		    } else if (insert) {
+		      handleInsert(event, item);
+		    } else if ((!getWidget().isLeaf(item.getModel()) || allowDropOnLeaf) && append) {
+		      handleAppend(event, item);
+		    } else {
+		      if (activeItem != null) {
+		        clearStyle(activeItem);
+		      }
+		      status = -1;
+		      activeItem = null;
+		      appendItem = null;
+		      Insert.get().hide();
 		      event.getStatusProxy().setStatus(false);
-		      return;
-	        }
-	        if (overModel == sel) {
-	          Insert.get().hide();
-	          event.getStatusProxy().setStatus(false);
-	          return;
-	        }
-	        List<Taxon> children = getWidget().getTreeStore().getAllChildren(sel);
-	        if (children.contains(item.getModel())) {
-	          Insert.get().hide();
-	          event.getStatusProxy().setStatus(false);
-	          return;
-	        }
-	      }
-	    }
+		    }
+			break;
 
-	    boolean append = feedback == Feedback.APPEND || feedback == Feedback.BOTH;
-	    boolean insert = feedback == Feedback.INSERT || feedback == Feedback.BOTH;
-
-	    if (item == null) {
-	      handleAppend(event, item);
-	    } else if (insert) {
-	      handleInsert(event, item);
-	    } else if ((!getWidget().isLeaf(item.getModel()) || allowDropOnLeaf) && append) {
-	      handleAppend(event, item);
-	    } else {
-	      if (activeItem != null) {
-	        clearStyle(activeItem);
-	      }
-	      status = -1;
-	      activeItem = null;
-	      appendItem = null;
-	      Insert.get().hide();
-	      event.getStatusProxy().setStatus(false);
-	    }
+		}
 	  }
 
 }

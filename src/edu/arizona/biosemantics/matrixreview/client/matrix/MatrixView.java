@@ -146,7 +146,7 @@ public class MatrixView implements IsWidget {
 			eventBus.addHandler(MoveTaxonFlatEvent.TYPE, new MoveTaxonFlatEvent.MoveTaxonEventHandler() {
 				@Override
 				public void onMove(MoveTaxonFlatEvent event) {
-					moveTaxonFlat(event.getTaxon(), event.getAfter());
+					moveTaxonFlat(event.getTaxa(), event.getAfter());
 				}
 			});
 			eventBus.addHandler(MoveTaxaEvent.TYPE, new MoveTaxaEvent.MoveTaxaEventHandler() {
@@ -371,23 +371,23 @@ public class MatrixView implements IsWidget {
 			}
 		}
 
-		protected void moveTaxonFlat(Taxon taxon, Taxon after) {
+		protected void moveTaxonFlat(List<Taxon> taxa, Taxon after) {
 			switch(modelMode) {
 			case FLAT:
-				taxonStore.remove(taxon);
+				for(Taxon taxon : taxa)
+					taxonStore.remove(taxon);
 				if(after == null || taxonStore.getRootItems().indexOf(after) == -1) {
-					taxonStore.insert(0, taxon);
+					taxonStore.insert(0, taxa);
 				} else {
-					taxonStore.insert(taxonStore.getRootItems().indexOf(after) + 1, taxon);
+					taxonStore.insert(taxonStore.getRootItems().indexOf(after) + 1, taxa);
 				}
 				break;
 			case CUSTOM_HIERARCHY:
 			case TAXONOMIC_HIERARCHY:
-				taxonStore.remove(taxon);
-				List<Taxon> taxa = new LinkedList<Taxon>();
-				taxa.add(taxon);
-				if(taxon.hasParent()) {
-					Taxon parent = taxon.getParent();
+				for(Taxon taxon : taxa)
+					taxonStore.remove(taxon);
+				if(!taxa.isEmpty() && taxa.get(0).hasParent()) {
+					Taxon parent = taxa.get(0).getParent();
 					if(after == null) {
 						this.insertToStoreRecursively(parent, 0, taxa);
 					} else {
