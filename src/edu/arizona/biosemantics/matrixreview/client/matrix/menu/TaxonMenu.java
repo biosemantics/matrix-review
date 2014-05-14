@@ -62,7 +62,7 @@ import com.sencha.gxt.widget.core.client.tree.TreeSelectionModel;
 import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockTaxonEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxonFlatEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonColorEvent;
@@ -155,7 +155,7 @@ public class TaxonMenu extends Menu {
 		    fieldSet.add(p);
 
 		    TaxonStore taxonStore = new TaxonStore();
-			for(Taxon t : taxonMatrix.getTaxa()) {
+			for(Taxon t : taxonMatrix.list()) {
 				if(t.hasParent())
 					continue;
 				insertToStoreRecursively(taxonStore, t);
@@ -339,7 +339,6 @@ public class TaxonMenu extends Menu {
 		    save.addSelectHandler(new SelectHandler() {
 				@Override
 				public void onSelect(SelectEvent event) {
-					System.out.println(levelCombo.getValue());
 					eventBus.fireEvent(new ModifyTaxonEvent(taxon, taxaTree.getSelectionModel().getSelectedItem(), 
 							levelCombo.getValue(), nameField.getText(), authorField.getText(), yearField.getText()));
 					TaxonModifyDialog.this.hide();
@@ -495,25 +494,25 @@ public class TaxonMenu extends Menu {
 		
 		switch(modelMode) {
 		case FLAT:
-			if(taxonMatrix.getTaxa().isEmpty())
+			if(taxonMatrix.list().isEmpty())
 				return null;
 			
 			MenuItem subItem = new MenuItem("start");
 			subItem.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					eventBus.fireEvent(new MoveTaxonEvent(taxon, null, null));
+					eventBus.fireEvent(new MoveTaxonFlatEvent(taxon, null));
 				}
 			});
 			moveMenu.add(subItem);
 			
-			for(final Taxon after : taxonMatrix.getTaxa()) {
+			for(final Taxon after : taxonStore.getRootItems()) {
 				if(!after.equals(taxon)) {
 					subItem = new MenuItem(after.getFullName());
 					subItem.addSelectionHandler(new SelectionHandler<Item>() {
 						@Override
 						public void onSelection(SelectionEvent<Item> event) {
-							eventBus.fireEvent(new MoveTaxonEvent(taxon, after, null));
+							eventBus.fireEvent(new MoveTaxonFlatEvent(taxon, after));
 						}
 					});
 					moveMenu.add(subItem);
@@ -526,19 +525,16 @@ public class TaxonMenu extends Menu {
 			subItem.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					eventBus.fireEvent(new MoveTaxonEvent(taxon, null, taxon.getParent()));
+					eventBus.fireEvent(new MoveTaxonFlatEvent(taxon, null));
 				}
 			});
 			moveMenu.add(subItem);
 			
-			Taxon aftersParent = null;
-			Collection<Taxon> moveLocations = taxonStore.getRootItems();
+			List<Taxon> moveLocations = new LinkedList<Taxon>(taxonStore.getRootItems());
 			if(taxon.hasParent()) {
 				moveLocations = taxon.getParent().getChildren();
-				moveLocations.remove(taxon);
-				aftersParent = taxon.getParent();
 			}
-			final Taxon finalAftersParent = aftersParent;
+			moveLocations.remove(taxon);
 			
 			if(moveLocations.isEmpty())
 				return null;
@@ -548,7 +544,7 @@ public class TaxonMenu extends Menu {
 				subItem.addSelectionHandler(new SelectionHandler<Item>() {
 					@Override
 					public void onSelection(SelectionEvent<Item> event) {
-						eventBus.fireEvent(new MoveTaxonEvent(taxon, after, finalAftersParent));
+						eventBus.fireEvent(new MoveTaxonFlatEvent(taxon, after));
 					}
 				});
 				moveMenu.add(subItem);

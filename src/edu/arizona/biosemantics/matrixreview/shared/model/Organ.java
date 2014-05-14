@@ -16,7 +16,7 @@ public class Organ implements Serializable {
 	}
 		
 	public Set<Character> getCharacters() {
-		return characters;
+		return new HashSet<Character>(characters);
 	}
 
 	protected void addCharacter(Character character) {

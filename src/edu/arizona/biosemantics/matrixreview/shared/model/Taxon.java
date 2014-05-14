@@ -24,8 +24,8 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 	public static int currentId = 0;
 	
 	public enum Level {
-		LIFE(0), DOMAIN(1), KINGDOM(2), PHYLUM(3), CLASS(4), ORDER(5), FAMILY(6), GENUS(7), SPECIES(8), SUBSPECIES(9), VARIETY(10), 
-		FORM(11), GROUP(12);
+		LIFE(0), DOMAIN(1), KINGDOM(2), PHYLUM(3), CLASS(4), ORDER(5), FAMILY(6), SUBFAMILY(7), GENUS(8), SPECIES(9), SUBSPECIES(10), VARIETY(11), 
+		FORM(12), GROUP(13);
 		
 		private int id;
 
@@ -35,6 +35,12 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 		
 		public int getId() {
 			return id;
+		}
+		
+		public static boolean isValidParentChild(Level parent, Level child) {
+			int parentLevelId = parent == null? -1 : parent.getId();
+			int childLevelId = child == null? -1 : child.getId();
+			return parentLevelId < childLevelId;
 		}
 	}
 	
@@ -103,7 +109,7 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 	}
 	
 	public List<Taxon> getChildren() {
-		return children;
+		return new LinkedList<Taxon>(children);
 	}
 	
 	public Taxon getParent() {
@@ -290,7 +296,7 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 		this.level = level;
 	}
 
-	public void removeChild(Taxon taxon) {
+	protected void removeChild(Taxon taxon) {
 		Iterator<Taxon> it = children.iterator();
 		while(it.hasNext()) {
 			Taxon child = it.next();

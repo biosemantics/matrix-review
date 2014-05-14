@@ -117,7 +117,7 @@ public class Character implements Serializable, HasColor, HasComment, HasDirty, 
 	
 	public ControlMode determineControlMode() {
 		Set<String> values = new HashSet<String>();
-		for (Taxon taxon : taxonMatrix.getTaxa()) {
+		for (Taxon taxon : taxonMatrix.list()) {
 			values.add(taxon.get(this).getValue());
 		}
 		if (isNumeric(values))

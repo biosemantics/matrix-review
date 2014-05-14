@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.shared.SimpleEventBus;
@@ -18,11 +19,15 @@ import com.sencha.gxt.data.shared.Store.StoreSortInfo;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.data.shared.TreeStore.TreeNode;
 import com.sencha.gxt.data.shared.event.StoreDataChangeEvent;
+import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.event.BeforeStartEditEvent;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent;
 import com.sencha.gxt.widget.core.client.event.BeforeStartEditEvent.BeforeStartEditHandler;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent.CompleteEditHandler;
+import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
+import com.sencha.gxt.widget.core.client.event.DialogHideEvent.DialogHideHandler;
 import com.sencha.gxt.widget.core.client.form.Field;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
@@ -41,7 +46,8 @@ import edu.arizona.biosemantics.matrixreview.client.event.HideCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.HideTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModelModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveCharacterEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxonFlatEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveColorsEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxonEvent;
@@ -114,12 +120,49 @@ public class MatrixView implements IsWidget {
 				@Override
 				public void onAdd(AddTaxonEvent event) {
 					if(event.getParent() == null) {
-						addTaxon(event.getTaxon());
+						addRootTaxon(event.getTaxon());
 					} else {
 						addTaxon(event.getParent(), event.getTaxon());
 					}
 				}
 			});
+			eventBus.addHandler(RemoveTaxonEvent.TYPE, new RemoveTaxonEvent.RemoveTaxonEventHandler() {
+				@Override
+				public void onRemove(final RemoveTaxonEvent event) {
+					removeTaxon(event.getTaxon());
+				}
+			});
+			eventBus.addHandler(ModifyTaxonEvent.TYPE, new ModifyTaxonEvent.ModifyTaxonEventHandler() {
+				@Override
+				public void onModify(ModifyTaxonEvent event) {
+					if(Level.isValidParentChild(event.getParent().getLevel(), event.getLevel()))
+						modifyTaxon(event.getTaxon(), event.getParent(), event.getLevel(), event.getName(), event.getAuthor(), event.getYear());
+					else {
+						AlertMessageBox alertMessageBox = new AlertMessageBox("Modify Taxon", "Unable to modify: Incompatible rank of taxon with parent.");
+						alertMessageBox.show();
+					}
+				}
+			});
+			eventBus.addHandler(MoveTaxonFlatEvent.TYPE, new MoveTaxonFlatEvent.MoveTaxonEventHandler() {
+				@Override
+				public void onMove(MoveTaxonFlatEvent event) {
+					moveTaxonFlat(event.getTaxon(), event.getAfter());
+				}
+			});
+			eventBus.addHandler(MoveTaxaEvent.TYPE, new MoveTaxaEvent.MoveTaxaEventHandler() {
+				@Override
+				public void onMove(MoveTaxaEvent event) {
+					moveTaxaHierarchically(false, event.getParent(), event.getIndex(), event.getTaxa());
+				}
+			});
+			eventBus.addHandler(HideTaxonEvent.TYPE, new HideTaxonEvent.HideCharacterEventHandler() {
+				@Override
+				public void onHide(HideTaxonEvent event) {
+					hideTaxon(event.getTaxon(), event.isHide());
+				}
+			});
+			//---------------------
+			
 			eventBus.addHandler(AddCharacterEvent.TYPE, new AddCharacterEvent.AddCharacterEventHandler() {
 				@Override
 				public void onAdd(AddCharacterEvent event) {
@@ -130,7 +173,7 @@ public class MatrixView implements IsWidget {
 					}
 				}
 			});
-			eventBus.addHandler(LockTaxonEvent.TYPE, new LockTaxonEvent.LockCharacterEventHandler() {
+			eventBus.addHandler(LockTaxonEvent.TYPE, new LockTaxonEvent.LockTaxonEventHandler() {
 				@Override
 				public void onLock(LockTaxonEvent event) {
 					taxonMatrix.setLocked(event.getTaxon(), event.isLock());
@@ -148,12 +191,7 @@ public class MatrixView implements IsWidget {
 					taxonMatrix.setLocked(event.isLock());
 				}
 			});
-			eventBus.addHandler(RemoveTaxonEvent.TYPE, new RemoveTaxonEvent.RemoveTaxonEventHandler() {
-				@Override
-				public void onRemove(RemoveTaxonEvent event) {
-					removeTaxon(event.getTaxon());
-				}
-			});
+
 			eventBus.addHandler(RemoveCharacterEvent.TYPE, new RemoveCharacterEvent.RemoveCharacterEventHandler() {
 				@Override
 				public void onRemove(RemoveCharacterEvent event) {
@@ -166,27 +204,10 @@ public class MatrixView implements IsWidget {
 					modifyCharacter(event.getCharacter(), event.getName(), event.getOrgan());
 				}
 			});
-			eventBus.addHandler(ModifyTaxonEvent.TYPE, new ModifyTaxonEvent.ModifyTaxonEventHandler() {
-				@Override
-				public void onModify(ModifyTaxonEvent event) {
-					if(taxonMatrix.isValidParentChildRelation(event.getTaxon(), event.getParent()))
-						modifyTaxon(event.getTaxon(), event.getParent(), event.getLevel(), event.getName(), event.getAuthor(), event.getYear());
-					else {
-						AlertMessageBox alertMessageBox = new AlertMessageBox("Modify Taxon", "Unable to modify: Incompatible rank of taxon with parent.");
-						alertMessageBox.show();
-					}
-				}
-			});
 			eventBus.addHandler(MoveCharacterEvent.TYPE, new MoveCharacterEvent.MoveCharacterEventHandler() {
 				@Override
 				public void onMove(MoveCharacterEvent event) {
 					moveCharacter(event.getCharacter(), event.getAfter());
-				}
-			});
-			eventBus.addHandler(MoveTaxonEvent.TYPE, new MoveTaxonEvent.MoveTaxonEventHandler() {
-				@Override
-				public void onMove(MoveTaxonEvent event) {
-					moveTaxon(event.getTaxon(), event.getAfter(), event.getAftersParent());
 				}
 			});
 			eventBus.addHandler(SetTaxonCommentEvent.TYPE, new SetTaxonCommentEvent.SetTaxonCommentEventHandler() {
@@ -216,15 +237,13 @@ public class MatrixView implements IsWidget {
 			eventBus.addHandler(SetTaxonColorEvent.TYPE, new SetTaxonColorEvent.SetTaxonColorEventHandler() {
 				@Override
 				public void onSet(SetTaxonColorEvent event) {
-					taxonMatrix.setColor(event.getTaxon(), event.getColor());
-					taxonStore.update(event.getTaxon());
+					setTaxonColor(event.getTaxon(), event.getColor());
 				}
 			});
 			eventBus.addHandler(SetCharacterColorEvent.TYPE, new SetCharacterColorEvent.SetCharacterColorEventHandler() {
 				@Override
 				public void onSet(SetCharacterColorEvent event) {
-					taxonMatrix.setColor(event.getCharacter(), event.getColor());
-					taxonStore.fireEvent(new StoreDataChangeEvent<Taxon>());
+					setCharacterColor(event.getCharacter(), event.getColor());
 				}
 			});
 			eventBus.addHandler(MergeCharactersEvent.TYPE, new MergeCharactersEvent.MergeCharactersEventHandler() {
@@ -242,11 +261,7 @@ public class MatrixView implements IsWidget {
 			eventBus.addHandler(SetValueEvent.TYPE, new SetValueEvent.SetValueEventHandler() {
 				@Override
 				public void onSet(SetValueEvent event) {
-					if(!event.isChangeRecordedInModel()) {
-						Taxon taxon = event.getOldValue().getTaxon();
-						Character character = event.getOldValue().getCharacter();
-						setValue(taxon, character, event.getNewValue());
-					}
+					setValue(event.getOldValue(), event.getNewValue(), event.isChangeRecordedInModel());
 	 			}
 			});
 			eventBus.addHandler(AddColorEvent.TYPE, new AddColorEvent.AddColorEventHandler() {
@@ -260,120 +275,345 @@ public class MatrixView implements IsWidget {
 				public void onRemove(RemoveColorsEvent event) {
 					taxonMatrix.removeColors(event.getColors());
 				}
-			});
+			});			
 			eventBus.addHandler(SortCharactersByNameEvent.TYPE, new SortCharactersByNameEvent.SortCharatersByNameEventHandler() {
 				@Override
 				public void onSort(final SortCharactersByNameEvent event) {
-					Comparator<CharacterColumnConfig> comparator = new Comparator<CharacterColumnConfig>() {
-						@Override
-						public int compare(CharacterColumnConfig o1, CharacterColumnConfig o2) {
-							if (event.isDescending())
-								// first by name then by organ
-								return (o2.getCharacter().getName() + o2.getCharacter().getOrgan()).compareTo(o1.getCharacter().getName() + o1.getCharacter().getOrgan());
-							else
-								return (o1.getCharacter().getName() + o1.getCharacter().getOrgan()).compareTo(o2.getCharacter().getName() + o2.getCharacter().getOrgan());
-						}
-					};
-					sortCharacters(comparator);
+					sortCharactersByName(event.isDescending());
 				}
 			});
 			eventBus.addHandler(SortCharactersByCoverageEvent.TYPE, new SortCharactersByCoverageEvent.SortCharatersByCoverageEventHandler() {
 				@Override
 				public void onSort(final SortCharactersByCoverageEvent event) {
-					Comparator<CharacterColumnConfig> comparator = new Comparator<CharacterColumnConfig>() {
-						@Override
-						public int compare(CharacterColumnConfig o1, CharacterColumnConfig o2) {
-							if (event.isDescending())
-								return taxonMatrix.getCharacterValueCount(o2.getCharacter()) - taxonMatrix.getCharacterValueCount(o1.getCharacter());
-							else
-								return taxonMatrix.getCharacterValueCount(o1.getCharacter()) - taxonMatrix.getCharacterValueCount(o2.getCharacter());
-						}
-					};
-					sortCharacters(comparator);
+					sortCharactersByCoverage(event.isDescending());
 				}
 			});
 			eventBus.addHandler(SortCharactersByOrganEvent.TYPE, new SortCharactersByOrganEvent.SortCharatersByOrganEventHandler() {
 				@Override
 				public void onSort(final SortCharactersByOrganEvent event) {
-					Comparator<CharacterColumnConfig> comparator = new Comparator<CharacterColumnConfig>() {
-						@Override
-						public int compare(CharacterColumnConfig o1, CharacterColumnConfig o2) {
-							if (event.isDescending())
-								// first by organ then by character name
-								return (o2.getCharacter().getOrgan() + o2.getCharacter().getName()).compareTo(o1.getCharacter().getOrgan() + o1.getCharacter().getName());
-							else
-								return (o1.getCharacter().getOrgan() + o1.getCharacter().getName()).compareTo(o2.getCharacter().getOrgan() + o2.getCharacter().getName());
-						}
-					};
-					sortCharacters(comparator);
+					sortCharactersByOrgan(event.isDescending());
 				}
 			});
 			eventBus.addHandler(HideCharacterEvent.TYPE, new HideCharacterEvent.HideCharacterEventHandler() {
 				@Override
 				public void onHide(HideCharacterEvent event) {
-					taxonMatrix.setHidden(event.getCharacter(), event.isHide());
-					List<CharacterColumnConfig> characterColumnConfigs = taxonTreeGrid.getColumnModel().getCharacterColumns();
-					int columnIndex = -1;
-					for(int i=0; i<characterColumnConfigs.size(); i++) {
-						CharacterColumnConfig config = characterColumnConfigs.get(i);
-						if(config.getCharacter().equals(event.getCharacter())) {
-							columnIndex = i;
-							break;
-						}
-					}
-					if(columnIndex != - 1);
-						taxonTreeGrid.getColumnModel().setHidden(columnIndex, event.isHide());
-				}
-			});
-			eventBus.addHandler(HideTaxonEvent.TYPE, new HideTaxonEvent.HideCharacterEventHandler() {
-				@Override
-				public void onHide(HideTaxonEvent event) {
-					taxonMatrix.setHidden(event.getTaxon(), event.isHide());
-					taxonTreeGrid.hide(event.getTaxon(), event.isHide());
+					hideCharacter(event.getCharacter(), event.isHide());
 				}
 			});
 			eventBus.addHandler(SortTaxaByCharacterEvent.TYPE, new SortTaxaByCharacterEvent.SortTaxaByCharacterEventHandler() {
 				@Override
 				public void onSort(SortTaxaByCharacterEvent event) {
-					final Character character = event.getCharacter();
-					taxonStore.clearSortInfo();
-					StoreSortInfo<Taxon> sortInfo = new StoreSortInfo<Taxon>(new Comparator<Taxon>() {
-						@Override
-						public int compare(Taxon o1, Taxon o2) {
-							return o1.get(character).getValue().compareTo(o2.get(character).getValue());
-						}
-					}, event.getSortDirection());
-					taxonStore.addSortInfo(sortInfo);
+					sortTaxaByCharacter(event.getCharacter(), event.getSortDirection());
 				}
 			});
 			eventBus.addHandler(SortTaxaByCoverageEvent.TYPE, new SortTaxaByCoverageEvent.SortTaxaByCoverageEventHandler() {
 				@Override
 				public void onSort(SortTaxaByCoverageEvent event) {
-					taxonStore.clearSortInfo();
-					StoreSortInfo<Taxon> sortInfo = new StoreSortInfo<Taxon>(new Comparator<Taxon>() {
-						@Override
-						public int compare(Taxon o1, Taxon o2) {
-							return taxonMatrix.getTaxonValueCount(o1) - taxonMatrix.getTaxonValueCount(o2);
-						}
-					}, event.getSortDirection());
-					taxonStore.addSortInfo(sortInfo);
+					sortTaxaByCoverage(event.getSortDirection());
 				}
 			});
 			eventBus.addHandler(SortTaxaByNameEvent.TYPE, new SortTaxaByNameEvent.SortTaxaByNameEventHandler() {
 				@Override
 				public void onSort(SortTaxaByNameEvent event) {
-					taxonStore.clearSortInfo();
-					StoreSortInfo<Taxon> sortInfo = new StoreSortInfo<Taxon>(new Comparator<Taxon>() {
-						@Override
-						public int compare(Taxon o1, Taxon o2) {
-							return o1.getFullName().compareTo(o2.getFullName());
-						}
-					}, event.getSortDirection());
-					taxonStore.addSortInfo(sortInfo);
+					sortTaxaByName(event.getSortDirection());
 				}
 			});
 		}
 		
+		protected void load(TaxonMatrix taxonMatrix) {
+			this.taxonMatrix = taxonMatrix;
+			this.valueCell = new ValueCell(eventBus, taxonMatrix);
+			List<Taxon> taxa = taxonMatrix.list();
+			
+			if(taxonTreeGrid.isInitialized())
+				taxonStore.clear();
+			
+			switch(modelMode) {
+				case FLAT:
+					for(Taxon taxon : taxa) {
+						taxonStore.add(taxon);
+					}
+					break;
+				case CUSTOM_HIERARCHY:
+				case TAXONOMIC_HIERARCHY:
+					for(Taxon taxon : taxonMatrix.getRootTaxa()) {
+						insertToStoreRecursively(taxon);
+					}
+					break;
+			}
+
+			if(taxonTreeGrid.isInitialized()) {
+				List<CharacterColumnConfig> characterColumnConfigs = taxonTreeGrid.getColumnModel().getCharacterColumns();
+				for(CharacterColumnConfig characterColumnConfig : characterColumnConfigs)
+					characterColumnConfig.setCell(valueCell);
+				taxonTreeGrid.reconfigure(characterColumnConfigs);
+			} else {
+				List<ColumnConfig<Taxon, ?>> characterColumnConfigs = new ArrayList<ColumnConfig<Taxon, ?>>();
+				for(Character character : taxonMatrix.getCharacters())
+					characterColumnConfigs.add(this.createCharacterColumnConfig(character));
+				taxonTreeGrid.init(characterColumnConfigs, new CharactersGridView(eventBus, taxonMatrix));
+				editing = new LockableControlableMatrixEditing(eventBus, taxonTreeGrid.getCharactersGrid(), taxonTreeGrid.getTreeGrid().getListStore());
+				initCharacterEditing();
+			}
+		}
+		
+		protected void moveTaxaHierarchically(boolean storeOnly, Taxon parent, int index, List<Taxon> taxa) {
+			for(Taxon taxon : taxa)
+				removeFromStoreRecursively(taxon);
+			if (parent == null) {
+				insertToStoreRecursively(index, taxa);
+				if(!storeOnly)
+					taxonMatrix.moveToRootTaxon(index, taxa);
+			} else {
+				insertToStoreRecursively(parent, index, taxa);
+				if(!storeOnly)
+					taxonMatrix.addTaxon(parent, index, taxa);
+			}
+		}
+
+		protected void moveTaxonFlat(Taxon taxon, Taxon after) {
+			switch(modelMode) {
+			case FLAT:
+				taxonStore.remove(taxon);
+				if(after == null || taxonStore.getRootItems().indexOf(after) == -1) {
+					taxonStore.insert(0, taxon);
+				} else {
+					taxonStore.insert(taxonStore.getRootItems().indexOf(after) + 1, taxon);
+				}
+				break;
+			case CUSTOM_HIERARCHY:
+			case TAXONOMIC_HIERARCHY:
+				taxonStore.remove(taxon);
+				List<Taxon> taxa = new LinkedList<Taxon>();
+				taxa.add(taxon);
+				if(taxon.hasParent()) {
+					Taxon parent = taxon.getParent();
+					if(after == null) {
+						this.insertToStoreRecursively(parent, 0, taxa);
+					} else {
+						this.insertToStoreRecursively(parent, parent.getChildren().indexOf(after), taxa);
+					}
+				} else {
+					if(after == null) 
+						this.insertToStoreRecursively(0, taxa);
+					else
+						this.insertToStoreRecursively(taxonStore.getRootItems().indexOf(after) + 1, taxa);
+				}
+				break;
+			}
+		}
+		
+		private void removeFromStoreRecursively(Taxon taxon) {
+			taxonStore.remove(taxon);
+			for(Taxon child : taxon.getChildren()) {
+				taxonStore.remove(child);
+			}
+		}
+		
+		private void insertToStoreRecursively(int index, List<Taxon> taxa) {
+			taxonStore.insert(index, taxa);
+			
+			for(Taxon taxon : taxa) 
+				insertToStoreRecursively(taxon, 0, taxon.getChildren());
+		}
+		
+		private void insertToStoreRecursively(Taxon parent, int index,	List<Taxon> taxa) {
+			taxonStore.insert(parent, index, taxa);
+			
+			for(Taxon taxon : taxa) 
+				insertToStoreRecursively(taxon, 0, taxon.getChildren());
+		}
+		
+		private void  insertToStoreRecursively(Taxon taxon) {
+			if(!taxon.hasParent())
+				taxonStore.add(taxon);
+			else 
+				taxonStore.add(taxon.getParent(), taxon);
+			for(Taxon child : taxon.getChildren())
+				insertToStoreRecursively(child);
+		}
+		
+		protected void modifyTaxon(Taxon taxon, Taxon parent, Level level, String name, String author, String year) {
+			boolean updateStore = false;
+			updateStore = (taxon.getParent() == null && parent != null) || (taxon.getParent() == null || !taxon.getParent().equals(parent));
+			taxonMatrix.modifyTaxon(taxon, level, name, author, year);
+	
+			if(updateStore && modelMode.equals(ModelMode.TAXONOMIC_HIERARCHY)) {
+				List<Taxon> taxa = new LinkedList<Taxon>();
+				taxa.add(taxon);
+				this.moveTaxaHierarchically(true, parent, 0, taxa);
+			}
+		}
+		
+		protected void addRootTaxon(Taxon taxon) {
+			taxonMatrix.addRootTaxon(taxon);
+			taxonStore.add(taxon);
+		}
+		
+		protected void addTaxon(Taxon parent, int index, Taxon taxon) {
+			taxonMatrix.addTaxon(parent, index, taxon);
+			switch(modelMode){
+			case FLAT:
+				taxonStore.add(taxon);
+				break;
+			case TAXONOMIC_HIERARCHY:
+			case CUSTOM_HIERARCHY:
+				taxonStore.insert(parent, index, taxon);
+				break;
+			}
+		}
+		
+		protected void addTaxon(Taxon parent, Taxon taxon) {
+			taxonMatrix.addTaxon(parent, taxon);
+			switch(modelMode){
+			case FLAT:
+				taxonStore.add(taxon);
+				break;
+			case TAXONOMIC_HIERARCHY:
+			case CUSTOM_HIERARCHY:
+				taxonStore.add(parent, taxon);
+				break;
+			}
+		}
+		
+		protected void removeTaxon(final Taxon taxon) {
+			if (!taxon.getChildren().isEmpty()) {
+				String childrenString = "";
+				for (Taxon child : taxon.getChildren()) {
+					childrenString += child.getFullName() + ", ";
+				}
+				childrenString = childrenString.substring(0, childrenString.length() - 2);
+				ConfirmMessageBox box = new ConfirmMessageBox(
+						"Remove Taxon",
+						"Removing the taxon will also remove all of it's descendants: "
+								+ childrenString);
+				box.addDialogHideHandler(new DialogHideHandler() {
+					@Override
+					public void onDialogHide(DialogHideEvent event) {
+						if(event.getHideButton().equals(PredefinedButton.YES)) {
+							removeFromStoreRecursively(taxon);
+							taxonMatrix.removeTaxon(taxon);
+						}
+					}
+					
+				});
+				box.show();
+			}
+		}
+		
+		protected void setValue(Value oldValue, Value newValue, boolean changeRecordedInModel) {
+			if(!changeRecordedInModel) {
+				Taxon taxon = oldValue.getTaxon();
+				Character character = oldValue.getCharacter();
+				setValue(taxon, character, newValue);
+			}
+		}
+
+		protected void setCharacterColor(Character character, Color color) {
+			taxonMatrix.setColor(character, color);
+			taxonStore.fireEvent(new StoreDataChangeEvent<Taxon>());
+		}
+
+		protected void setTaxonColor(Taxon taxon, Color color) {
+			taxonMatrix.setColor(taxon, color);
+			taxonStore.update(taxon);
+		}
+
+		protected void sortCharactersByName(final boolean descending) {
+			Comparator<CharacterColumnConfig> comparator = new Comparator<CharacterColumnConfig>() {
+				@Override
+				public int compare(CharacterColumnConfig o1, CharacterColumnConfig o2) {
+					if (descending)
+						// first by name then by organ
+						return (o2.getCharacter().getName() + o2.getCharacter().getOrgan()).compareTo(o1.getCharacter().getName() + o1.getCharacter().getOrgan());
+					else
+						return (o1.getCharacter().getName() + o1.getCharacter().getOrgan()).compareTo(o2.getCharacter().getName() + o2.getCharacter().getOrgan());
+				}
+			};
+			sortCharacters(comparator);
+		}
+
+		protected void sortCharactersByCoverage(final boolean descending) {
+			Comparator<CharacterColumnConfig> comparator = new Comparator<CharacterColumnConfig>() {
+				@Override
+				public int compare(CharacterColumnConfig o1, CharacterColumnConfig o2) {
+					if (descending)
+						return taxonMatrix.getCharacterValueCount(o2.getCharacter()) - taxonMatrix.getCharacterValueCount(o1.getCharacter());
+					else
+						return taxonMatrix.getCharacterValueCount(o1.getCharacter()) - taxonMatrix.getCharacterValueCount(o2.getCharacter());
+				}
+			};
+			sortCharacters(comparator);
+		}
+
+		protected void sortCharactersByOrgan(final boolean descending) {
+			Comparator<CharacterColumnConfig> comparator = new Comparator<CharacterColumnConfig>() {
+				@Override
+				public int compare(CharacterColumnConfig o1, CharacterColumnConfig o2) {
+					if (descending)
+						// first by organ then by character name
+						return (o2.getCharacter().getOrgan() + o2.getCharacter().getName()).compareTo(o1.getCharacter().getOrgan() + o1.getCharacter().getName());
+					else
+						return (o1.getCharacter().getOrgan() + o1.getCharacter().getName()).compareTo(o2.getCharacter().getOrgan() + o2.getCharacter().getName());
+				}
+			};
+			sortCharacters(comparator);
+		}
+
+		protected void hideTaxon(Taxon taxon, boolean hide) {
+			taxonMatrix.setHidden(taxon, hide);
+			taxonTreeGrid.hide(taxon, hide);
+		}
+
+		protected void hideCharacter(Character character, boolean hide) {
+			taxonMatrix.setHidden(character, hide);
+			List<CharacterColumnConfig> characterColumnConfigs = taxonTreeGrid.getColumnModel().getCharacterColumns();
+			int columnIndex = -1;
+			for(int i=0; i<characterColumnConfigs.size(); i++) {
+				CharacterColumnConfig config = characterColumnConfigs.get(i);
+				if(config.getCharacter().equals(character)) {
+					columnIndex = i;
+					break;
+				}
+			}
+			if(columnIndex != - 1);
+				taxonTreeGrid.getColumnModel().setHidden(columnIndex, hide);
+		}
+
+		protected void sortTaxaByCharacter(final Character character, SortDir sortDirection) {
+			taxonStore.clearSortInfo();
+			StoreSortInfo<Taxon> sortInfo = new StoreSortInfo<Taxon>(new Comparator<Taxon>() {
+				@Override
+				public int compare(Taxon o1, Taxon o2) {
+					return o1.get(character).getValue().compareTo(o2.get(character).getValue());
+				}
+			}, sortDirection);
+			taxonStore.addSortInfo(sortInfo);
+		}
+
+		protected void sortTaxaByCoverage(SortDir sortDirection) {
+			taxonStore.clearSortInfo();
+			StoreSortInfo<Taxon> sortInfo = new StoreSortInfo<Taxon>(new Comparator<Taxon>() {
+				@Override
+				public int compare(Taxon o1, Taxon o2) {
+					return taxonMatrix.getTaxonValueCount(o1) - taxonMatrix.getTaxonValueCount(o2);
+				}
+			}, sortDirection);
+			taxonStore.addSortInfo(sortInfo);
+		}
+
+		protected void sortTaxaByName(SortDir sortDirection) {
+			taxonStore.clearSortInfo();
+			StoreSortInfo<Taxon> sortInfo = new StoreSortInfo<Taxon>(new Comparator<Taxon>() {
+				@Override
+				public int compare(Taxon o1, Taxon o2) {
+					return o1.getFullName().compareTo(o2.getFullName());
+				}
+			}, sortDirection);
+			taxonStore.addSortInfo(sortInfo);
+		}
+
+
 		protected void sortCharacters(Comparator<CharacterColumnConfig> comparator) {
 			List<CharacterColumnConfig> characterColumnConfigs = taxonTreeGrid.getColumnModel().getCharacterColumns();
 			Collections.sort(characterColumnConfigs, comparator);
@@ -390,10 +630,10 @@ public class MatrixView implements IsWidget {
 			editing.setControlMode(character, controlMode);
 		}
 
-		private void mergeCharacters(Character characterA, Character characterB, MergeMode mergeMode) {
+		protected void mergeCharacters(Character characterA, Character characterB, MergeMode mergeMode) {
 			String mergedName = mergeName(characterA.getName(), characterB.getName(), mergeMode);
 			Organ mergedOrgan = mergeOrgan(characterA.getOrgan(), characterB.getOrgan(), mergeMode);
-			for(Taxon taxon : taxonMatrix.getTaxa()) {
+			for(Taxon taxon : taxonMatrix.list()) {
 				Value a = taxon.get(characterA);
 				Value b = taxon.get(characterB);
 				
@@ -499,7 +739,7 @@ public class MatrixView implements IsWidget {
 			}
 		}
 		
-		private void moveCharacter(Character character, Character after) {
+		protected void moveCharacter(Character character, Character after) {
 			taxonMatrix.moveCharacter(character, after);
 			CharacterColumnConfig charactersConfig = null;
 			CharacterColumnConfig afterConfig = null;
@@ -522,60 +762,8 @@ public class MatrixView implements IsWidget {
 			taxonTreeGrid.reconfigure(columns);
 		}
 		
-		private void moveTaxon(Taxon taxon, Taxon after, Taxon aftersParent) {
-			taxonMatrix.moveTaxon(taxon, after, aftersParent);
-			taxonStore.remove(taxon);
-			switch(modelMode) {
-			case FLAT:
-				if(after == null) {
-					taxonStore.insert(0, taxon);
-				} else {
-					taxonStore.insert(taxonStore.getRootItems().indexOf(after) + 1, taxon);
-				}
-				break;
-			case CUSTOM_HIERARCHY:
-			case TAXONOMIC_HIERARCHY:
-				if(aftersParent == null) { 
-					if(after == null) {
-						insertToStoreRecursively(0, taxon);
-					} else {
-						insertToStoreRecursively(taxonStore.getRootItems().indexOf(after) + 1, taxon);
-					}
-				} else {
-					if(after == null) {
-						insertToStoreRecursively(aftersParent, 0, taxon);
-					} else {
-						insertToStoreRecursively(aftersParent, aftersParent.getChildren().indexOf(after) + 1, taxon);
-					}
-				}
-				break;
-			}
-		}
-		
-		private void insertToStoreRecursively(Taxon aftersParent, int index, Taxon taxon) {
-			taxonStore.insert(aftersParent, index, taxon);
-			for(Taxon child : taxon.getChildren())
-				insertToStoreRecursively(child);
-		}
-
-		private void insertToStoreRecursively(int index, Taxon taxon) {
-			taxonStore.insert(index, taxon);
-			for(Taxon child : taxon.getChildren())
-				insertToStoreRecursively(child);
-		}
-		
-		private void  insertToStoreRecursively(Taxon taxon) {
-			if(!taxon.hasParent())
-				taxonStore.add(taxon);
-			else 
-				taxonStore.add(taxon.getParent(), taxon);
-			for(Taxon child : taxon.getChildren())
-				insertToStoreRecursively(child);
-		}
-		
-		public void modifyCharacter(Character character, String name, Organ organ) {
-			taxonMatrix.renameCharacter(character, name);
-			taxonMatrix.setOrgan(character, organ);
+		protected void modifyCharacter(Character character, String name, Organ organ) {
+			taxonMatrix.modifyCharacter(character, name, organ);
 			CharactersColumnModel columnModel = taxonTreeGrid.getColumnModel();
 			for(CharacterColumnConfig config: columnModel.getCharacterColumns()) {
 				if(config.getCharacter().equals(character)) {
@@ -583,65 +771,6 @@ public class MatrixView implements IsWidget {
 				}
 			}
 			taxonTreeGrid.updateCharacterGridHeads();
-		}
-
-		public void modifyTaxon(Taxon taxon, Taxon parent, Level level, String name, String author, String year) {
-			boolean updateStore = false;
-			updateStore = (taxon.getParent() == null && parent != null) || (taxon.getParent() == null || !taxon.getParent().equals(parent));
-			taxonMatrix.modifyTaxon(taxon, parent, level, name, author, year);
-			
-			if(updateStore)
-				switch(modelMode) {
-				case FLAT:
-					break;
-				case TAXONOMIC_HIERARCHY:
-				case CUSTOM_HIERARCHY:
-					taxonStore.remove(taxon);
-					if(parent != null)
-						taxonStore.add(parent, taxon);
-					else
-						taxonStore.add(taxon);
-					break;
-				}
-		}
-		
-		public void load(TaxonMatrix taxonMatrix) {
-			this.taxonMatrix = taxonMatrix;
-			this.valueCell = new ValueCell(eventBus, taxonMatrix);
-			List<Taxon> taxa = taxonMatrix.getTaxa();
-			
-			if(taxonTreeGrid.isInitialized())
-				taxonStore.clear();
-			
-			switch(modelMode) {
-				case FLAT:
-					for(Taxon taxon : taxa) {
-						taxonStore.add(taxon);
-					}
-					break;
-				case CUSTOM_HIERARCHY:
-				case TAXONOMIC_HIERARCHY:
-					for(Taxon taxon : taxa) {
-						if(taxon.hasParent())
-							continue;
-						insertToStoreRecursively(taxon);
-					}
-					break;
-			}
-
-			if(taxonTreeGrid.isInitialized()) {
-				List<CharacterColumnConfig> characterColumnConfigs = taxonTreeGrid.getColumnModel().getCharacterColumns();
-				for(CharacterColumnConfig characterColumnConfig : characterColumnConfigs)
-					characterColumnConfig.setCell(valueCell);
-				taxonTreeGrid.reconfigure(characterColumnConfigs);
-			} else {
-				List<ColumnConfig<Taxon, ?>> characterColumnConfigs = new ArrayList<ColumnConfig<Taxon, ?>>();
-				for(Character character : taxonMatrix.getCharacters())
-					characterColumnConfigs.add(this.createCharacterColumnConfig(character));
-				taxonTreeGrid.init(characterColumnConfigs, new CharactersGridView(eventBus, taxonMatrix));
-				editing = new LockableControlableMatrixEditing(eventBus, taxonTreeGrid.getCharactersGrid(), taxonTreeGrid.getTreeGrid().getListStore());
-				initCharacterEditing();
-			}
 		}
 		
 		private void initCharacterEditing() {
@@ -660,48 +789,12 @@ public class MatrixView implements IsWidget {
 			characterColumnConfig.setCell(valueCell);
 			return characterColumnConfig;
 		}
-
-		public void addTaxon(Taxon taxon) {
-			taxonMatrix.addTaxon(taxon);
-			taxonStore.add(taxon);
-		}
 		
-		public void addTaxon(Taxon parent, int index, Taxon taxon) {
-			taxonMatrix.addChild(parent, index, taxon);
-			switch(modelMode){
-			case FLAT:
-				taxonStore.add(taxon);
-				break;
-			case TAXONOMIC_HIERARCHY:
-			case CUSTOM_HIERARCHY:
-				taxonStore.insert(parent, index, taxon);
-				break;
-			}
-		}
-		
-		public void addTaxon(Taxon parent, Taxon taxon) {
-			taxonMatrix.addChild(parent, taxon);
-			switch(modelMode){
-			case FLAT:
-				taxonStore.add(taxon);
-				break;
-			case TAXONOMIC_HIERARCHY:
-			case CUSTOM_HIERARCHY:
-				taxonStore.add(parent, taxon);
-				break;
-			}
-		}
-		
-		private void removeTaxon(Taxon taxon) {
-			taxonStore.remove(taxon);
-			taxonMatrix.removeTaxon(taxon);
-		}
-		
-		public void addCharacter(Character character) {
+		protected void addCharacter(Character character) {
 			this.addCharacterAfter(taxonMatrix.getCharacterCount() - 1, character);
 		}
 
-		private void removeCharacter(Character character) {
+		protected void removeCharacter(Character character) {
 			taxonMatrix.removeCharacter(character);
 			List<CharacterColumnConfig> columns = new LinkedList<CharacterColumnConfig>(taxonTreeGrid.getColumnModel().getCharacterColumns());
 			Iterator<CharacterColumnConfig> iterator = columns.iterator();
@@ -715,7 +808,7 @@ public class MatrixView implements IsWidget {
 			taxonTreeGrid.reconfigure(columns);
 		}
 		
-		public void addCharacterAfter(int colIndex, Character character) {
+		protected void addCharacterAfter(int colIndex, Character character) {
 			taxonMatrix.addCharacter(colIndex, character);
 			List<CharacterColumnConfig> columns = new LinkedList<CharacterColumnConfig>(taxonTreeGrid.getColumnModel().getCharacterColumns());
 			CharacterColumnConfig columnConfig = createCharacterColumnConfig(character);

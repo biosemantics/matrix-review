@@ -52,12 +52,10 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 						+ "porttitor laoreet. Aenean lacus dui, consequat eu, adipiscing eget, nonummy non, nisi. "
 						+ "Morbi nunc est, dignissim non, ornare sed, luctus eu, massa. Vivamus eget quam. Vivamus "
 						+ "tincidunt diam nec urna. Curabitur velit.");
-		taxonMatrix.setChild(t1, t2);
-
 		
-		taxonMatrix.addTaxon(t1);
-		taxonMatrix.addTaxon(t2);
-		taxonMatrix.addTaxon(t3);
+		taxonMatrix.addRootTaxon(t1);
+		taxonMatrix.addTaxon(t1, t2);
+		taxonMatrix.addRootTaxon(t3);
 		
 		taxonMatrix.setValue(t1, a, new Value("some value"));
 		return taxonMatrix;
@@ -82,7 +80,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 						
 			for(Element taxonEntry : taxonEntryList) {
 				Taxon taxon = new Taxon("server" + taxonEntryList.indexOf(taxonEntry), Level.SPECIES, taxonEntry.getAttributeValue("recordID"), "author", "2002", "The description");
-				taxonMatrix.addTaxon(taxon);
+				taxonMatrix.addRootTaxon(taxon);
 				
 				List<Element> itemsList = taxonEntry.getChildren("Items");
 				for(Element itemsElement : itemsList) {
@@ -94,7 +92,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 					}
 					taxonMatrix.setValue(taxon, characterMap.get(itemsElement.getAttributeValue("name")), new Value(value.substring(0, value.length() - 3)));
 				}
-				taxonMatrix.addTaxon(taxon);
+				taxonMatrix.addRootTaxon(taxon);
 			}
 			return taxonMatrix;
 		} catch(Exception e) {

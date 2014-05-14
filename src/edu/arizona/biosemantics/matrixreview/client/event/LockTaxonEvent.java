@@ -3,17 +3,17 @@ package edu.arizona.biosemantics.matrixreview.client.event;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import edu.arizona.biosemantics.matrixreview.client.event.LockTaxonEvent.LockCharacterEventHandler;
+import edu.arizona.biosemantics.matrixreview.client.event.LockTaxonEvent.LockTaxonEventHandler;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 
-public class LockTaxonEvent extends GwtEvent<LockCharacterEventHandler> {
+public class LockTaxonEvent extends GwtEvent<LockTaxonEventHandler> {
 
-	public interface LockCharacterEventHandler extends EventHandler {
+	public interface LockTaxonEventHandler extends EventHandler {
 		void onLock(LockTaxonEvent event);
 	}
 	
-	public static Type<LockCharacterEventHandler> TYPE = new Type<LockCharacterEventHandler>();
+	public static Type<LockTaxonEventHandler> TYPE = new Type<LockTaxonEventHandler>();
 	private Taxon taxon;
 	private boolean lock;
 	
@@ -23,16 +23,16 @@ public class LockTaxonEvent extends GwtEvent<LockCharacterEventHandler> {
 	}
 	
 	@Override
-	public GwtEvent.Type<LockCharacterEventHandler> getAssociatedType() {
+	public GwtEvent.Type<LockTaxonEventHandler> getAssociatedType() {
 		return TYPE;
 	}
 
 	@Override
-	protected void dispatch(LockCharacterEventHandler handler) {
+	protected void dispatch(LockTaxonEventHandler handler) {
 		handler.onLock(this);
 	}
 
-	public static Type<LockCharacterEventHandler> getTYPE() {
+	public static Type<LockTaxonEventHandler> getTYPE() {
 		return TYPE;
 	}
 

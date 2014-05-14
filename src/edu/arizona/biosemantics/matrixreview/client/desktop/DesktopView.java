@@ -35,7 +35,7 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 		AddTaxonEvent.AddTaxonEventHandler, AnalyzeCharacterEvent.AnalyzeCharacterEventHandler, HideCharacterEvent.HideCharacterEventHandler, 
 		HideTaxonEvent.HideCharacterEventHandler, LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler, LockCharacterEvent.LockCharacterEventHandler,
 		LockMatrixEvent.LockMatrixEventHandler, RemoveColorsEvent.RemoveColorsEventHandler,
-		MergeCharactersEvent.MergeCharactersEventHandler, MoveCharacterEvent.MoveCharacterEventHandler, MoveTaxonEvent.MoveTaxonEventHandler, 
+		MergeCharactersEvent.MergeCharactersEventHandler, MoveCharacterEvent.MoveCharacterEventHandler, MoveTaxonFlatEvent.MoveTaxonEventHandler, 
 		RemoveCharacterEvent.RemoveCharacterEventHandler, RemoveTaxonEvent.RemoveTaxonEventHandler, ModifyCharacterEvent.ModifyCharacterEventHandler, 
 		ModifyTaxonEvent.ModifyTaxonEventHandler, SetCharacterColorEvent.SetCharacterColorEventHandler, SetCharacterCommentEvent.SetCharacterCommentEventHandler, 
 		SetControlModeEvent.SetControlModeEventHandler, SetTaxonColorEvent.SetTaxonColorEventHandler, SetTaxonCommentEvent.SetTaxonCommentEventHandler, 
@@ -44,7 +44,7 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 		SortCharactersByNameEvent.SortCharatersByNameEventHandler, SortCharactersByOrganEvent.SortCharatersByOrganEventHandler, 
 		SortTaxaByCharacterEvent.SortTaxaByCharacterEventHandler, SortTaxaByCoverageEvent.SortTaxaByCoverageEventHandler, 
 		SortTaxaByNameEvent.SortTaxaByNameEventHandler, ToggleDesktopEvent.ToggleDesktopEventHandler, 
-		AnalyzeTaxonEvent.AnalyzeTaxonEventHandler, LockTaxonEvent.LockCharacterEventHandler, 
+		AnalyzeTaxonEvent.AnalyzeTaxonEventHandler, LockTaxonEvent.LockTaxonEventHandler, 
 		ShowDescriptionEvent.ShowDescriptionEventHandler, SetValueCommentEvent.SetValueCommentEventHandler, 
 		SetValueColorEvent.SetValueColorEventHandler, SetValueEvent.SetValueEventHandler, ModelModeEvent.ModelModeEventHandler
 		{
@@ -157,7 +157,7 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 		}
 
 		@Override
-		public void onMove(MoveTaxonEvent event) {
+		public void onMove(MoveTaxonFlatEvent event) {
 			printToConsole(event);
 		}
 
@@ -324,7 +324,7 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 		eventBus.addHandler(LockMatrixEvent.TYPE, handler);
 		eventBus.addHandler(MergeCharactersEvent.TYPE, handler);
 		eventBus.addHandler(MoveCharacterEvent.TYPE, handler);
-		eventBus.addHandler(MoveTaxonEvent.TYPE, handler);
+		eventBus.addHandler(MoveTaxonFlatEvent.TYPE, handler);
 		eventBus.addHandler(RemoveCharacterEvent.TYPE, handler);
 		eventBus.addHandler(RemoveTaxonEvent.TYPE, handler);
 		eventBus.addHandler(RemoveColorsEvent.TYPE, handler);

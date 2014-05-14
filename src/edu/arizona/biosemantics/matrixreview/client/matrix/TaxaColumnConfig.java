@@ -19,7 +19,7 @@ public class TaxaColumnConfig extends ColumnConfig<Taxon, Taxon> {
 
 		@Override
 		public void setValue(Taxon object, Taxon value) {
-			object.getTaxonMatrix().modifyTaxon(object, value.getParent(), value.getLevel(), value.getName(), value.getAuthor(), value.getYear());
+			object.getTaxonMatrix().modifyTaxon(object, value.getLevel(), value.getName(), value.getAuthor(), value.getYear());
 		}
 
 		@Override

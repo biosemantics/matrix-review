@@ -89,7 +89,7 @@ public class NumericalSeriesChartCreator extends WidgetCreator {
 				dataAccess.nameKey());
 
 		double max = 0.0;
-		for (Taxon taxon : taxonMatrix.getTaxa()) {
+		for (Taxon taxon : taxonMatrix.list()) {
 			Value value = taxon.get(character);
 			if (!value.getValue().isEmpty()) {
 				double doubleValue = Double.parseDouble(value.getValue());

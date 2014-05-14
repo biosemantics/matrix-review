@@ -52,7 +52,7 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 	}
 	
 	private void addEventHandlers() {
-		eventBus.addHandler(LockTaxonEvent.TYPE, new LockTaxonEvent.LockCharacterEventHandler() {
+		eventBus.addHandler(LockTaxonEvent.TYPE, new LockTaxonEvent.LockTaxonEventHandler() {
 			@Override
 			public void onLock(LockTaxonEvent event) {
 				if(event.isLock())
@@ -135,7 +135,7 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 			TaxonMatrix taxonMatrix = character.getTaxonMatrix();
 			ValueConverter converter = new ValueConverter();
 			final Set<String> states = new HashSet<String>();
-			for (Taxon taxon : taxonMatrix.getTaxa()) {
+			for (Taxon taxon : taxonMatrix.list()) {
 				states.add(taxon.get(character).getValue());
 			}
 			

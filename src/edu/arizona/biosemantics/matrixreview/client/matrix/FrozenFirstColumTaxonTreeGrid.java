@@ -20,6 +20,8 @@ import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.data.shared.TreeStore;
+import com.sencha.gxt.dnd.core.client.DND.Feedback;
+import com.sencha.gxt.dnd.core.client.DND.Operation;
 import com.sencha.gxt.dnd.core.client.TreeGridDragSource;
 import com.sencha.gxt.widget.core.client.event.BeforeStartEditEvent;
 import com.sencha.gxt.widget.core.client.event.BeforeStartEditEvent.BeforeStartEditHandler;
@@ -306,7 +308,9 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 		super.init(otherColumnConfigs, gridView);
 		
 		UpdateModelDragSource dragSource = new UpdateModelDragSource(super.getTreeGrid());		
-		UpdateModelDropTarget dropTarget = new UpdateModelDropTarget(super.getTreeGrid(), taxonMatrix);
+		UpdateModelDropTarget dropTarget = new UpdateModelDropTarget(eventBus, super.getTreeGrid(), taxonMatrix);
+		//let event handling take care of "move" behaviour
+		dropTarget.setOperation(Operation.COPY);
 	}
 
 	@Override

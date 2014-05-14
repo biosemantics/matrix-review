@@ -70,7 +70,7 @@ public class TreeGridDropTarget<M> extends DropTarget {
   protected int status;
   protected TreeGridDropTargetResources resources = GWT.create(TreeGridDropTargetResources.class);
 
-  private boolean allowDropOnLeaf = false;
+  protected boolean allowDropOnLeaf = false;
   private boolean autoExpand = true, autoScroll = true;
   private int autoExpandDelay = 800;
   private boolean addChildren;

@@ -77,7 +77,7 @@ public class TermFrequencyChartCreator extends WidgetCreator {
 		// draw bar chart for categorical values and free-text
 		// draw curve for numerical values
 		TreeMap<String, Integer> counts = new TreeMap<String, Integer>();
-		for (Taxon taxon : taxonMatrix.getTaxa()) {
+		for (Taxon taxon : taxonMatrix.list()) {
 			Value value = taxon.get(character);
 			if (!counts.containsKey(value.toString()))
 				counts.put(value.toString(), 0);

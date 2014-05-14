@@ -68,15 +68,15 @@ public class TaxonCharacterMenu extends Menu {
 		flat.setGroup("mode");
 		CheckMenuItem hierarchy = new CheckMenuItem("Taxonomy");
 		hierarchy.setGroup("mode");
-		CheckMenuItem custom = new CheckMenuItem("Custom");
-		custom.setGroup("mode");
+		//CheckMenuItem custom = new CheckMenuItem("Custom");
+		//custom.setGroup("mode");
 		menu.add(flat);
 		menu.add(hierarchy);
-		menu.add(custom);
+		//menu.add(custom);
 		switch(modelMode) {
-		case CUSTOM_HIERARCHY:
-			custom.setChecked(true);
-			break;
+		//case CUSTOM_HIERARCHY:
+		//	custom.setChecked(true);
+		//	break;
 		case FLAT:
 			flat.setChecked(true);
 			break;
@@ -98,13 +98,13 @@ public class TaxonCharacterMenu extends Menu {
 				eventBus.fireEvent(new ModelModeEvent(ModelMode.TAXONOMIC_HIERARCHY));
 			}
 		});
-		custom.addSelectionHandler(new SelectionHandler<Item>() {
+		/*custom.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				modelMode = ModelMode.CUSTOM_HIERARCHY;
 				eventBus.fireEvent(new ModelModeEvent(ModelMode.CUSTOM_HIERARCHY));
 			}
-		});
+		});*/
 		return item;
 	}
 
@@ -165,7 +165,7 @@ public class TaxonCharacterMenu extends Menu {
 		
 		switch(modelMode) {
 			case FLAT:
-				for(final Taxon taxon : taxonMatrix.getTaxa()) {
+				for(final Taxon taxon : taxonMatrix.list()) {
 					final CheckMenuItem check = new CheckMenuItem();
 					check.setHideOnClick(false);
 					check.setText(taxon.getFullName());
@@ -181,7 +181,7 @@ public class TaxonCharacterMenu extends Menu {
 				break;
 			case CUSTOM_HIERARCHY:
 			case TAXONOMIC_HIERARCHY:
-				for (final Taxon taxon : taxonMatrix.getTaxa()) {
+				for (final Taxon taxon : taxonMatrix.list()) {
 					if(!taxon.hasParent()) {
 						createHideTaxonMenu(taxon, rowMenu);
 					}
