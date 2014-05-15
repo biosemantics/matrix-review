@@ -135,7 +135,9 @@ public class FrozenFirstColumnTreeGrid<M> extends Widget {
 		// to change how this works
 		HorizontalLayoutData lockedColumnLayoutData = new HorizontalLayoutData(300, 1.0);
 		
-		//lockedColumnLayoutData.setMargins(new Margins(0, XDOM.getScrollBarWidth(), 0, 0));		
+		//margin for bottom to not get off synchronization with right grid when right grid has bottom scrollbar but left grid does not
+		lockedColumnLayoutData.setMargins(new Margins(0, 0, XDOM.getScrollBarWidth(), 0));		
+		
 		//hide scrollers: Note that child is grabbed at index 0. Even though after full blown rendering the index shown in browser may be different
 		//System.out.println(treeGrid.getElement());
 		treeGrid.getElement().getChild(0).<XElement> cast().getStyle().setOverflow(Overflow.HIDDEN);

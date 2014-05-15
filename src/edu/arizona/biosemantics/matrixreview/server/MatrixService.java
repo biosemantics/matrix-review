@@ -63,10 +63,10 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		taxonMatrix.addTaxon(t1, t2);
 		taxonMatrix.addRootTaxon(t3);
 		
-		/*for(int i=4; i<5; i++) {
+		for(int i=4; i<50; i++) {
 			Taxon t4 = new Taxon("server" + i, Level.SPECIES, "t123", "a", "2", "de");
 			taxonMatrix.addRootTaxon(t4);
-		}*/
+		}
 		
 		taxonMatrix.setValue(t1, a, new Value("some value"));
 		return taxonMatrix;
