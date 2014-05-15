@@ -120,25 +120,17 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 		return (CharactersGrid)editableGrid;
 	}
 	
-	public void setControlMode(Character character, ControlMode controlMode) {
-		for(CharacterColumnConfig config: getEditableGrid().getColumnModel().getCharacterColumns()) {
-			if(config.getCharacter().equals(character)) {
-				removeEditor(config);
-				this.addEditor(config, new ValueConverter(), getEditorField(character));
-			}
-		}
+	public void setControlMode(Character character, ControlMode controlMode, List<String> states) {
+		CharacterColumnConfig config = getEditableGrid().getCharacterColumnConfig(character);
+		removeEditor(config);
+		addEditor(config, new ValueConverter(), getEditorField(character, controlMode, states));
 	}
 	
-	private Field<String> getEditorField(Character character) {	
-		switch(character.getControlMode()) {
+	private Field<String> getEditorField(Character character, ControlMode controlMode, final List<String> states) {	
+		switch(controlMode) {
 		case CATEGORICAL:
 			TaxonMatrix taxonMatrix = character.getTaxonMatrix();
-			ValueConverter converter = new ValueConverter();
-			final Set<String> states = new HashSet<String>();
-			for (Taxon taxon : taxonMatrix.list()) {
-				states.add(taxon.get(character).getValue());
-			}
-			
+			ValueConverter converter = new ValueConverter();			
 			final AllAccessListStore<String> comboValues = new AllAccessListStore<String>(new ModelKeyProvider<String>() {
 				@Override
 				public String getKey(String item) {
@@ -211,7 +203,7 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 
 	public void addEditor(CharacterColumnConfig columnConfig) {
 		Character character = columnConfig.getCharacter();
-		addEditor(columnConfig, new ValueConverter(), getEditorField(character));
+		addEditor(columnConfig, new ValueConverter(), getEditorField(character, character.getControlMode(), null));
 	}
 
 }

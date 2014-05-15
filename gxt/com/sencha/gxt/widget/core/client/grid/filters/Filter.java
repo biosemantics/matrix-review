@@ -210,7 +210,7 @@ public abstract class Filter<M, V> implements HasUpdateHandlers, HasActivateHand
    * @return true if if the filter has enough configuration information to be
    *         activated
    */
-  protected boolean isActivatable() {
+  public boolean isActivatable() {
     return true;
   }
 
@@ -222,7 +222,7 @@ public abstract class Filter<M, V> implements HasUpdateHandlers, HasActivateHand
    * @param model the model
    * @return true if valid
    */
-  protected boolean validateModel(M model) {
+  public boolean validateModel(M model) {
     return true;
   }
 

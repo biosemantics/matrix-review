@@ -177,7 +177,7 @@ return Math.abs(modelValue.doubleValue() - filterValue.doubleValue()) < epsilon;
   }
 
   @Override
-  protected boolean validateModel(M model) {
+  public boolean validateModel(M model) {
     boolean isValid = true;
     V modelValue = getValueProvider().getValue(model);
     if (modelValue != null) {

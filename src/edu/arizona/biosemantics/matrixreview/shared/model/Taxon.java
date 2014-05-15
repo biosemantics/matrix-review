@@ -42,6 +42,14 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 			int childLevelId = child == null? -1 : child.getId();
 			return parentLevelId < childLevelId;
 		}
+		
+		public static boolean equalOrBelowGenus(Level level) {
+			return level.getId() >= GENUS.getId();
+		}
+		
+		public static boolean aboveGenus(Level level) {
+			return level.getId() < GENUS.getId();
+		}
 	}
 	
 	/**
@@ -137,15 +145,7 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 	}
 	
 	public String getFullName() {
-		boolean belowGenus = false;
-		for(Level level : Level.values()) {
-			if(level.equals(Level.GENUS))
-				belowGenus = true;
-			if(level.equals(this.level)) {
-				break;
-			}
-		}
-		if(belowGenus && hasParent()) {
+		if(hasParent() && Level.equalOrBelowGenus(getParent().getLevel())) {
 			return getParent().getFullName() + " " + getName();
 		} else {
 			return getName();

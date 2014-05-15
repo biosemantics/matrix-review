@@ -199,7 +199,7 @@ public abstract class AbstractGridFilters<M> implements ComponentPlugin<Grid<M>>
     }
   };
 
-  private Map<String, Filter<M, ?>> filters;
+  public Map<String, Filter<M, ?>> filters;
   private Map<Filter<M, ?>, HandlerRegistration> registrations;
   private GroupingHandlerRegistration columnHandlerRegistration;
 

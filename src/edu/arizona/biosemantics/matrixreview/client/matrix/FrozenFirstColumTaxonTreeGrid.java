@@ -1,5 +1,6 @@
 package edu.arizona.biosemantics.matrixreview.client.matrix;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.gwt.user.client.Event;
+import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.Style.Anchor;
 import com.sencha.gxt.core.client.Style.AnchorAlignment;
 import com.sencha.gxt.core.client.dom.XDOM;
@@ -38,6 +40,7 @@ import com.sencha.gxt.widget.core.client.grid.GridView;
 import com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.MyGridInlineEditing;
+import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.tree.Tree.TreeAppearance;
 import com.sencha.gxt.widget.core.client.tree.Tree.TreeNode;
@@ -55,7 +58,11 @@ import edu.arizona.biosemantics.matrixreview.client.matrix.CharactersGridView.So
 import edu.arizona.biosemantics.matrixreview.client.matrix.MatrixView.ModelMode;
 import edu.arizona.biosemantics.matrixreview.client.matrix.editing.LockableControlableMatrixEditing;
 import edu.arizona.biosemantics.matrixreview.client.matrix.editing.ValueConverter;
+import edu.arizona.biosemantics.matrixreview.client.matrix.filters.CharactersGridFilters;
 import edu.arizona.biosemantics.matrixreview.client.matrix.filters.HideTaxonStoreFilter;
+import edu.arizona.biosemantics.matrixreview.client.matrix.filters.TaxaGridFilters;
+import edu.arizona.biosemantics.matrixreview.client.matrix.filters.TaxonNameFilter;
+import edu.arizona.biosemantics.matrixreview.client.matrix.filters.ValueFilter;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.TaxonMenu;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.TaxonCharacterMenu;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.dnd.UpdateModelDragSource;
@@ -269,6 +276,8 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 	
 	public class CharactersGrid extends Grid<Taxon> {
 
+		private HashMap<Character, CharacterColumnConfig> characterConfigMap;
+
 		public CharactersGrid(ListStore<Taxon> listStore,
 				CharactersColumnModel columnModel, CharactersGridView gridView) {
 			super(listStore, columnModel, gridView);
@@ -283,6 +292,14 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 		@Override 
 		public CharactersGridView getView() {
 			return (CharactersGridView)view;
+		}
+
+		public void setCharacterConfigMap(HashMap<Character, CharacterColumnConfig> characterConfigMap) {
+			this.characterConfigMap = characterConfigMap;
+		}
+		
+		public CharacterColumnConfig getCharacterColumnConfig(Character character) {
+			return characterConfigMap.get(character);
 		}
 		
 	}
@@ -301,12 +318,15 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 	
 	@Override
 	public void init(List<ColumnConfig<Taxon, ?>> otherColumnConfigs, GridView<Taxon> gridView) {
+		HashMap<Character, CharacterColumnConfig> characterConfigMap = new HashMap<Character, CharacterColumnConfig>();
 		for(ColumnConfig<Taxon, ?> config : otherColumnConfigs) {
 			assert config instanceof CharacterColumnConfig;
+			characterConfigMap.put(((CharacterColumnConfig)config).getCharacter(), (CharacterColumnConfig)config);
 		}
 		assert gridView instanceof CharactersGridView;
 		
 		super.init(otherColumnConfigs, gridView);
+		getGrid().setCharacterConfigMap(characterConfigMap);
 		
 		UpdateModelDragSource dragSource = new UpdateModelDragSource(super.getTreeGrid());		
 		UpdateModelDropTarget dropTarget = new UpdateModelDropTarget(eventBus, super.getTreeGrid(), taxonMatrix, getTaxonStore());
@@ -336,9 +356,12 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 	
 	@Override
 	public void reconfigure(List<? extends ColumnConfig<Taxon, ?>> characterColumnConfigs) {
+		HashMap<Character, CharacterColumnConfig> characterConfigMap = new HashMap<Character, CharacterColumnConfig>();
 		for(ColumnConfig<Taxon, ?> config : characterColumnConfigs) {
 			assert config instanceof CharacterColumnConfig;
+			characterConfigMap.put(((CharacterColumnConfig)config).getCharacter(), (CharacterColumnConfig)config);
 		}
+		getGrid().setCharacterConfigMap(characterConfigMap);
 		super.reconfigure(characterColumnConfigs);
 	}
 

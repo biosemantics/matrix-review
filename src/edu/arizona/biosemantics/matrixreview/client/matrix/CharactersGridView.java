@@ -48,7 +48,7 @@ public class CharactersGridView extends GridView<Taxon> {
 
 	@Override
 	protected Menu createContextMenu(final int colIndex) {
-		return new CharacterMenu(eventBus, taxonMatrix, getColumnModel().getColumn(colIndex).getCharacter());
+		return new CharacterMenu(eventBus, (CharactersGrid)grid, taxonMatrix, getColumnModel().getColumn(colIndex).getCharacter());
 	}
 
 	@Override

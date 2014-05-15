@@ -3,35 +3,56 @@ package edu.arizona.biosemantics.matrixreview.client.matrix;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.core.client.ValueProvider;
+import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.data.shared.Store.StoreSortInfo;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.data.shared.TreeStore.TreeNode;
 import com.sencha.gxt.data.shared.event.StoreDataChangeEvent;
+import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
+import com.sencha.gxt.widget.core.client.container.MarginData;
+import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
 import com.sencha.gxt.widget.core.client.event.BeforeStartEditEvent;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent;
 import com.sencha.gxt.widget.core.client.event.BeforeStartEditEvent.BeforeStartEditHandler;
 import com.sencha.gxt.widget.core.client.event.CompleteEditEvent.CompleteEditHandler;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent.DialogHideHandler;
+import com.sencha.gxt.widget.core.client.form.DualListField;
 import com.sencha.gxt.widget.core.client.form.Field;
+import com.sencha.gxt.widget.core.client.form.FieldLabel;
 import com.sencha.gxt.widget.core.client.form.TextField;
+import com.sencha.gxt.widget.core.client.form.DualListField.Mode;
+import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor.DoublePropertyEditor;
+import com.sencha.gxt.widget.core.client.form.validator.EmptyValidator;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.Grid.GridCell;
+import com.sencha.gxt.widget.core.client.grid.filters.ListFilter;
+import com.sencha.gxt.widget.core.client.grid.filters.NumericFilter;
+import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
 
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
@@ -41,6 +62,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.LockMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent.MergeMode;
+import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent.SetCharacterStatesEventHandler;
 import edu.arizona.biosemantics.matrixreview.client.event.AddColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.HideCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.HideTaxonEvent;
@@ -55,6 +77,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonCommentEvent;
@@ -71,6 +94,9 @@ import edu.arizona.biosemantics.matrixreview.client.matrix.CharacterColumnConfig
 import edu.arizona.biosemantics.matrixreview.client.matrix.cells.ValueCell;
 import edu.arizona.biosemantics.matrixreview.client.matrix.editing.LockableControlableMatrixEditing;
 import edu.arizona.biosemantics.matrixreview.client.matrix.editing.ValueConverter;
+import edu.arizona.biosemantics.matrixreview.client.matrix.filters.CharactersGridFilters;
+import edu.arizona.biosemantics.matrixreview.client.matrix.filters.CharactersGridFilters.StringValueProvider;
+import edu.arizona.biosemantics.matrixreview.client.matrix.shared.AllAccessListStore;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.HasControlMode.ControlMode;
@@ -93,10 +119,12 @@ public class MatrixView implements IsWidget {
 	 * @author rodenhausen
 	 */
 	public class ModelControler {
-		
+				
 		private TaxonMatrix taxonMatrix;
 		private ValueCell valueCell;
-		private ModelMode modelMode = ModelMode.TAXONOMIC_HIERARCHY; 
+		private ModelMode modelMode = ModelMode.TAXONOMIC_HIERARCHY;
+		private LockableControlableMatrixEditing editing;
+		private CharactersGridFilters charactersFilters; 
 		
 		public ModelControler() {
 			addEventHandlers();
@@ -255,7 +283,7 @@ public class MatrixView implements IsWidget {
 			eventBus.addHandler(SetControlModeEvent.TYPE, new SetControlModeEvent.SetControlModeEventHandler() {
 				@Override
 				public void onSet(SetControlModeEvent event) {
-					setControlMode(event.getCharacter(), event.getControlMode());
+					setControlMode(event.getCharacter(), event.getControlMode(), event.getStates());
 				}
 			});
 			eventBus.addHandler(SetValueEvent.TYPE, new SetValueEvent.SetValueEventHandler() {
@@ -318,6 +346,12 @@ public class MatrixView implements IsWidget {
 					sortTaxaByName(event.getSortDirection());
 				}
 			});
+			eventBus.addHandler(SetCharacterStatesEvent.TYPE, new SetCharacterStatesEvent.SetCharacterStatesEventHandler() {
+				@Override
+				public void onSet(SetCharacterStatesEvent event) {
+					taxonMatrix.setCharacterStates(event.getCharacter(), event.getStates());
+				}
+			});
 		}
 		
 		protected void load(TaxonMatrix taxonMatrix) {
@@ -355,9 +389,16 @@ public class MatrixView implements IsWidget {
 				valueCell.setListStore(taxonTreeGrid.getTreeGrid().getListStore());
 				editing = new LockableControlableMatrixEditing(eventBus, taxonTreeGrid.getGrid(), taxonTreeGrid.getTreeGrid().getListStore());
 				initCharacterEditing();
+				initCharacterFiltering();
 			}
 		}
 		
+		private void initCharacterFiltering() {
+			// init control and filtering for charactersGrid
+			charactersFilters = new CharactersGridFilters(eventBus, taxonMatrix, taxonTreeGrid.getGrid());
+			charactersFilters.initPlugin(taxonTreeGrid.getGrid());
+		}
+
 		protected void moveTaxaHierarchically(boolean storeOnly, Taxon parent, int index, List<Taxon> taxa) {
 			for(Taxon taxon : taxa)
 				removeFromStoreRecursively(taxon);
@@ -631,9 +672,10 @@ public class MatrixView implements IsWidget {
 			taxonStore.update(taxon);
 		}
 
-		protected void setControlMode(Character character, ControlMode controlMode) {
+		protected void setControlMode(Character character, ControlMode controlMode, List<String> states) {
 			taxonMatrix.setControlMode(character, controlMode);
-			editing.setControlMode(character, controlMode);
+			editing.setControlMode(character, controlMode, states);
+			charactersFilters.setControlMode(character, controlMode, states);
 		}
 
 		protected void mergeCharacters(Character characterA, Character characterB, MergeMode mergeMode) {
@@ -655,7 +697,7 @@ public class MatrixView implements IsWidget {
 			this.modifyCharacter(characterA, mergedName, mergedOrgan);
 			
 			//set control to off and clean up
-			editing.setControlMode(characterA, ControlMode.OFF);
+			editing.setControlMode(characterA, ControlMode.OFF, null);
 			this.removeCharacter(characterB);
 		}
 
@@ -846,7 +888,6 @@ public class MatrixView implements IsWidget {
 	
 	private TaxonStore taxonStore;
 	private FrozenFirstColumTaxonTreeGrid taxonTreeGrid;
-	private LockableControlableMatrixEditing editing;
 	//private TaxonCell taxonCell;
 	private SimpleEventBus eventBus;
 	

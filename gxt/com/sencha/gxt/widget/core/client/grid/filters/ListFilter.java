@@ -98,7 +98,7 @@ public class ListFilter<M, V> extends Filter<M, V> {
   }
 
   @Override
-  protected boolean validateModel(M model) {
+  public boolean validateModel(M model) {
     Object value = getValueProvider().getValue(model);
     List<?> values = (List<?>) getValue();
     return values.size() == 0 || values.contains(value);

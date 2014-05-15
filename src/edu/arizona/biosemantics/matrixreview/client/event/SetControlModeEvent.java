@@ -1,5 +1,7 @@
 package edu.arizona.biosemantics.matrixreview.client.event;
 
+import java.util.List;
+
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
@@ -16,10 +18,17 @@ public class SetControlModeEvent extends GwtEvent<SetControlModeEventHandler> {
 	public static Type<SetControlModeEventHandler> TYPE = new Type<SetControlModeEventHandler>();
 	private Character character;
 	private ControlMode controlMode;
+	private List<String> states;
 	
 	public SetControlModeEvent(Character character, ControlMode controlMode) {
 		this.character = character;
 		this.controlMode = controlMode;
+	}
+	
+	public SetControlModeEvent(Character character, ControlMode controlMode, List<String> states) {
+		this.character = character;
+		this.controlMode = controlMode;
+		this.states = states;
 	}
 	
 	@Override
@@ -43,7 +52,14 @@ public class SetControlModeEvent extends GwtEvent<SetControlModeEventHandler> {
 	public ControlMode getControlMode() {
 		return controlMode;
 	}
+
+	public List<String> getStates() {
+		return states;
+	}
 	
+	public boolean hasStates() {
+		return states != null;
+	}
 	
 	
 }

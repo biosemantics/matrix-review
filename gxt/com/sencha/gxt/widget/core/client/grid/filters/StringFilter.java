@@ -148,7 +148,7 @@ public class StringFilter<M> extends Filter<M, String> {
     updateTask.delay(getUpdateBuffer());
   }
 
-  protected boolean validateModel(M model) {
+  public boolean validateModel(M model) {
     String val = getValueProvider().getValue(model);
     Object value = getValue();
     String v = value == null ? "" : value.toString();

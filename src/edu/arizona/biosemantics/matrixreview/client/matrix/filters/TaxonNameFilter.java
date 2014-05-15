@@ -124,7 +124,7 @@ public class TaxonNameFilter extends Filter<Taxon, Taxon> {
 		return messages;
 	}
 	
-	protected boolean validateModel(Taxon model) {
+	public boolean validateModel(Taxon model) {
 		Taxon taxon = getValueProvider().getValue(model);
 		String val = taxon.getName();
 		Object value = getValue();

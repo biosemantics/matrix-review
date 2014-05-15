@@ -1,22 +1,35 @@
 package edu.arizona.biosemantics.matrixreview.client.matrix.menu;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
+import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.util.Format;
 import com.sencha.gxt.core.client.util.Params;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.messages.client.DefaultMessages;
 import com.sencha.gxt.widget.core.client.Dialog;
+import com.sencha.gxt.widget.core.client.Window;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
 import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
@@ -29,11 +42,15 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
+import com.sencha.gxt.widget.core.client.form.DualListField;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
 import com.sencha.gxt.widget.core.client.form.FieldSet;
 import com.sencha.gxt.widget.core.client.form.Radio;
 import com.sencha.gxt.widget.core.client.form.TextField;
+import com.sencha.gxt.widget.core.client.form.DualListField.Mode;
+import com.sencha.gxt.widget.core.client.form.validator.EmptyValidator;
 import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderAppearance;
+import com.sencha.gxt.widget.core.client.grid.filters.ListFilter;
 import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
 import com.sencha.gxt.widget.core.client.menu.HeaderMenuItem;
@@ -46,14 +63,19 @@ import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent.MergeMode;
+import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent.SetCharacterStatesEventHandler;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCharacterEvent;
+import edu.arizona.biosemantics.matrixreview.client.matrix.CharacterColumnConfig;
+import edu.arizona.biosemantics.matrixreview.client.matrix.FrozenFirstColumTaxonTreeGrid.CharactersGrid;
+import edu.arizona.biosemantics.matrixreview.client.matrix.filters.CharactersGridFilters.StringValueProvider;
 import edu.arizona.biosemantics.matrixreview.client.matrix.form.AllowFreeTextComboBoxCell;
 import edu.arizona.biosemantics.matrixreview.client.matrix.form.ResetOldValueComboBoxCell;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.AllAccessListStore;
@@ -180,16 +202,89 @@ public class CharacterMenu extends Menu {
 	
 	}
 	
+	public class SelectCharacterStatesWindow extends Window {
+		
+		public HandlerRegistration addSetCharacterStatesEventHandler(SetCharacterStatesEventHandler handler) {
+			return addHandler(handler, SetCharacterStatesEvent.TYPE);
+		}
+		
+		public SelectCharacterStatesWindow(final Character character, List<String> states) {
+			this.setMaximizable(true);
+			this.setModal(true);
+			this.setHeadingText("Categorial States");
+			this.setWidth(500);
+			this.setHeight(200);
+
+			VerticalLayoutContainer con = new VerticalLayoutContainer();
+			this.add(con, new MarginData(10));
+			
+			final ListStore<String> fromStates = new ListStore<String>(new ModelKeyProvider<String>() {
+				@Override
+				public String getKey(String item) {
+					return item;
+				}
+			});
+			fromStates.addAll(states);
+			final ListStore<String> toStates = new ListStore<String>(new ModelKeyProvider<String>() {
+				@Override
+				public String getKey(String item) {
+					return item;
+				}
+			});
+			final DualListField<String, String> field = new DualListField<String, String>(
+					fromStates, toStates, new ValueProvider<String, String>() {
+						@Override
+						public String getValue(String object) {
+							return object;
+						}
+
+						@Override
+						public void setValue(String object, String value) {
+							object = value;
+						}
+
+						@Override
+						public String getPath() {
+							return "node";
+						}
+					}, new TextCell());
+			field.addValidator(new EmptyValidator<List<String>>());
+			field.setEnableDnd(true);
+			field.setMode(Mode.INSERT);
+
+			con.add(new FieldLabel(field, "States"), new VerticalLayoutData(-18, -1));
+			
+			Button saveButton = new Button("Save");
+			saveButton.addClickHandler(new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
+					List<String> states = toStates.getAll();
+					if(!states.isEmpty()) {
+						SelectCharacterStatesWindow.this.fireEvent(new SetCharacterStatesEvent(character, toStates.getAll()));
+						SelectCharacterStatesWindow.this.hide();
+					} else {
+						AlertMessageBox alert = new AlertMessageBox("No State selected", "At least one state requried");
+						alert.show();
+					}
+				}
+			});
+			con.add(saveButton);
+		}
+
+	}
+	
 	private ColumnHeaderAppearance columnHeaderAppearance = GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class);
 	//private CharacterColumnConfig columnConfig;
 	//private int characterCount;
 	private TaxonMatrix taxonMatrix;
 	private Character character;
 	private EventBus eventBus;
+	private CharactersGrid grid;
 	
-	public CharacterMenu(final EventBus eventBus, TaxonMatrix taxonMatrix, Character character) {
+	public CharacterMenu(final EventBus eventBus, CharactersGrid grid, TaxonMatrix taxonMatrix, Character character) {
 		super();
 		this.eventBus = eventBus;
+		this.grid = grid;
 		this.taxonMatrix = taxonMatrix;
 		this.character = character;
 		//this.columnConfig = columnModel.getColumn(colIndex);
@@ -342,8 +437,12 @@ public class CharacterMenu extends Menu {
 		automatic.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				ControlMode controlMode = character.determineControlMode();
-				eventBus.fireEvent(new SetControlModeEvent(character, controlMode));
+				final ControlMode controlMode = character.determineControlMode();
+				
+				if(controlMode.equals(ControlMode.CATEGORICAL)) {
+					selectStatesAndFire();
+				} else
+					eventBus.fireEvent(new SetControlModeEvent(character, controlMode));
 			}
 		});
 		numerical.addSelectionHandler(new SelectionHandler<Item>() {
@@ -358,7 +457,7 @@ public class CharacterMenu extends Menu {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				if(!character.getControlMode().equals(ControlMode.CATEGORICAL)) {
-					eventBus.fireEvent(new SetControlModeEvent(character, ControlMode.CATEGORICAL));
+					selectStatesAndFire();
 				}
 			}
 		});
@@ -374,6 +473,31 @@ public class CharacterMenu extends Menu {
 			break;
 		}
 		return controlItem;
+	}
+
+	protected void selectStatesAndFire() {
+		final CharacterColumnConfig characterColumnConfig = grid.getCharacterColumnConfig(character);
+		final Set<String> values = new HashSet<String>();
+		for (Taxon taxon : taxonMatrix.list()) {
+			String value = characterColumnConfig.getValueProvider().getValue(taxon).getValue();
+			if(!value.trim().isEmpty()) 
+				values.add(value);
+		}
+		List<String> sortValues = new ArrayList<String>(values);
+		Collections.sort(sortValues, new Comparator<String>() {
+			@Override
+			public int compare(String o1, String o2) {
+				return o1.compareTo(o2);
+			}
+		});
+		SelectCharacterStatesWindow window = new SelectCharacterStatesWindow(character, sortValues);
+		window.show();
+		window.addSetCharacterStatesEventHandler(new SetCharacterStatesEventHandler() {
+			@Override
+			public void onSet(SetCharacterStatesEvent event) {		
+				eventBus.fireEvent(new SetControlModeEvent(character, ControlMode.CATEGORICAL, event.getStates()));
+			}
+		});
 	}
 
 	private Widget createLockCharacter() {

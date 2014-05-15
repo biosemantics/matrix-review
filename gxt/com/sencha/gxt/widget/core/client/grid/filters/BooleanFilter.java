@@ -132,12 +132,12 @@ public class BooleanFilter<M> extends Filter<M, Boolean> {
   }
 
   @Override
-  protected boolean isActivatable() {
+  public boolean isActivatable() {
     return super.isActivatable();
   }
 
   @Override
-  protected boolean validateModel(M model) {
+  public boolean validateModel(M model) {
     Boolean val = getValueProvider().getValue(model);
     return getValue().equals(val == null ? Boolean.FALSE : val);
   }

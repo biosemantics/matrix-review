@@ -1,7 +1,9 @@
 package edu.arizona.biosemantics.matrixreview.shared.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Character implements Serializable, HasColor, HasComment, HasDirty, HasLocked, HasControlMode {
@@ -19,6 +21,7 @@ public class Character implements Serializable, HasColor, HasComment, HasDirty, 
 	private boolean locked = false;
 	private boolean hidden = false;
 	private ControlMode controlMode = ControlMode.OFF;
+	private List<String> states = null;
 
 	public Character() { }
 	
@@ -113,6 +116,14 @@ public class Character implements Serializable, HasColor, HasComment, HasDirty, 
 	
 	protected void setControlMode(ControlMode controlMode) {
 		this.controlMode = controlMode;
+	}
+	
+	protected void setStates(List<String> states) {
+		this.states = states;
+	}
+	
+	public List<String> getStates() {
+		return new ArrayList<String>(states);
 	}
 	
 	public ControlMode determineControlMode() {

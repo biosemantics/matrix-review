@@ -310,7 +310,7 @@ public class DateFilter<M> extends Filter<M, Date> {
     }
   }
 
-  protected boolean validateModel(M model) {
+  public boolean validateModel(M model) {
     super.validateModel(model);
     Date d = getValueProvider().getValue(model);
 

@@ -125,7 +125,7 @@ public class ValueFilter extends Filter<Taxon, Value> {
 		return messages;
 	}
 	
-	protected boolean validateModel(Taxon model) {
+	public boolean validateModel(Taxon model) {
 		Value value = getValueProvider().getValue(model);
 		String val = value.getValue();
 		Object fieldValue = getValue();

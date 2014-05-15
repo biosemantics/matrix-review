@@ -460,4 +460,8 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 		for(Character character : characters) 
 			this.setLocked(character, value);
 	}
+	
+	public void setCharacterStates(Character character, List<String> states) {
+		character.setStates(states);
+	}
 }
