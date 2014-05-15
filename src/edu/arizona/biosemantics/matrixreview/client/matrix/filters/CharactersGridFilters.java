@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
+import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.messages.client.DefaultMessages;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.container.MarginData;
@@ -48,6 +49,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEven
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent.SetCharacterStatesEventHandler;
 import edu.arizona.biosemantics.matrixreview.client.matrix.CharacterColumnConfig;
 import edu.arizona.biosemantics.matrixreview.client.matrix.FrozenFirstColumTaxonTreeGrid.CharactersGrid;
+import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
 import edu.arizona.biosemantics.matrixreview.client.matrix.editing.ValueConverter;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.AllAccessListStore;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
@@ -114,17 +116,18 @@ public class CharactersGridFilters extends GridFilters<Taxon> {
 	private EventBus eventBus;
 	private TaxonMatrix taxonMatrix;
 	private CharactersGrid charactersGrid;
+	private TaxonStore taxonStore;
 
-	public CharactersGridFilters(EventBus eventBus, TaxonMatrix taxonMatrix, CharactersGrid charactersGrid) {
+	public CharactersGridFilters(EventBus eventBus, TaxonMatrix taxonMatrix, TaxonStore taxonStore, CharactersGrid charactersGrid) {
 		this.eventBus = eventBus; 
 		this.taxonMatrix = taxonMatrix;
+		this.taxonStore = taxonStore;
 		this.charactersGrid = charactersGrid;
 		
 		setLocal(true);
 		for(CharacterColumnConfig characterColumnConfig : charactersGrid.getColumnModel().getCharacterColumns()) {
 			StringFilter<Taxon> stringFilter = new StringFilter<Taxon>(new StringValueProvider(characterColumnConfig));
-			characterColumnConfig.setFilter(stringFilter);
-			addFilter(stringFilter);
+			setFilter(characterColumnConfig, stringFilter);
 		}
 		
 		addEventHandlers();
@@ -137,8 +140,7 @@ public class CharactersGridFilters extends GridFilters<Taxon> {
 			public void onAdd(AddCharacterEvent event) {
 				CharacterColumnConfig characterColumnConfig = charactersGrid.getCharacterColumnConfig(event.getCharacter());
 				StringFilter<Taxon> stringFilter = new StringFilter<Taxon>(new StringValueProvider(characterColumnConfig));
-				characterColumnConfig.setFilter(stringFilter);
-				addFilter(stringFilter);
+				setFilter(characterColumnConfig, stringFilter);
 			}
 		});
 	}
@@ -209,5 +211,11 @@ public class CharactersGridFilters extends GridFilters<Taxon> {
 	private void setFilter(CharacterColumnConfig characterColumnConfig, Filter<Taxon, ?> filter) {
 		characterColumnConfig.setFilter(filter);
 		addFilter(filter);
+	}
+	
+
+	@Override
+	protected Store<Taxon> getStore() {
+		return taxonStore;
 	}
 }

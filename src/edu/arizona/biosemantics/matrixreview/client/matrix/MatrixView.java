@@ -395,7 +395,7 @@ public class MatrixView implements IsWidget {
 		
 		private void initCharacterFiltering() {
 			// init control and filtering for charactersGrid
-			charactersFilters = new CharactersGridFilters(eventBus, taxonMatrix, taxonTreeGrid.getGrid());
+			charactersFilters = new CharactersGridFilters(eventBus, taxonMatrix, taxonStore, taxonTreeGrid.getGrid());
 			charactersFilters.initPlugin(taxonTreeGrid.getGrid());
 		}
 
