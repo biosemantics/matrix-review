@@ -32,6 +32,7 @@ import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.form.DualListField;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
 import com.sencha.gxt.widget.core.client.form.DualListField.Mode;
+import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor.DoublePropertyEditor;
 import com.sencha.gxt.widget.core.client.form.validator.EmptyValidator;
 import com.sencha.gxt.widget.core.client.grid.Grid;
@@ -97,7 +98,7 @@ public class CharactersGridFilters extends GridFilters<Taxon> {
 			try {
 				return Double.valueOf(characterColumnConfig.getValueProvider().getValue(object).getValue());
 			} catch (NumberFormatException e) {
-				return 0.0;
+				return null;
 			}
 		}
 
@@ -110,6 +111,24 @@ public class CharactersGridFilters extends GridFilters<Taxon> {
 		public String getPath() {
 			return characterColumnConfig.getValueProvider().getPath();
 		}
+	}
+	
+	public class RemoveEmptyNumericFilter<M, V extends Number> extends NumericFilter<M, V> {
+
+		public RemoveEmptyNumericFilter(
+				ValueProvider<? super M, V> valueProvider,
+				NumberPropertyEditor<V> propertyEditor) {
+			super(valueProvider, propertyEditor);
+		}
+
+		@Override
+		public boolean validateModel(M model) {
+			V modelValue = getValueProvider().getValue(model);
+			if(modelValue == null)
+				return false;
+			return super.validateModel(model);
+		}
+		
 	}
 		
 	private int insertPositionFilters = 12;
@@ -200,7 +219,7 @@ public class CharactersGridFilters extends GridFilters<Taxon> {
 			setFilter(characterColumnConfig, new ListFilter<Taxon, String>(new StringValueProvider(characterColumnConfig), valueStore));
 			break;
 		case NUMERICAL:
-			setFilter(characterColumnConfig, new NumericFilter<Taxon, Double>(new NumericValueProvider(characterColumnConfig), new DoublePropertyEditor()));
+			setFilter(characterColumnConfig, new RemoveEmptyNumericFilter<Taxon, Double>(new NumericValueProvider(characterColumnConfig), new DoublePropertyEditor()));
 			break;
 		case OFF:
 			setFilter(characterColumnConfig, new StringFilter<Taxon>(new StringValueProvider(characterColumnConfig)));

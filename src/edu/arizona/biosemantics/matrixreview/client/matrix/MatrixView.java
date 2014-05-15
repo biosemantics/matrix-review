@@ -381,6 +381,7 @@ public class MatrixView implements IsWidget {
 				for(CharacterColumnConfig characterColumnConfig : characterColumnConfigs)
 					characterColumnConfig.setCell(valueCell);
 				taxonTreeGrid.reconfigure(characterColumnConfigs);
+				valueCell.setListStore(taxonTreeGrid.getTreeGrid().getListStore());
 			} else {
 				List<ColumnConfig<Taxon, ?>> characterColumnConfigs = new ArrayList<ColumnConfig<Taxon, ?>>();
 				for(Character character : taxonMatrix.getCharacters())

@@ -46,7 +46,7 @@ public class NumericFilter<M, V extends Number> extends Filter<M, V> {
 
   private final NumberPropertyEditor<V> propertyEditor;
   private List<RangeItem> rangeItems = new ArrayList<RangeItem>();
-  private RangeMenu<M, V> rangeMenu;
+  public RangeMenu<M, V> rangeMenu;
   private NumericFilterMessages messages = new DefaultNumericFilterMessages();
   private int width = 125;
 

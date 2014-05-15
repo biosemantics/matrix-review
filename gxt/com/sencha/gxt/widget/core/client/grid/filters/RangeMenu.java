@@ -48,7 +48,11 @@ public class RangeMenu<M, V extends Number> extends Menu {
     }
   }
 
-  protected NumberField<V> lt, gt, eq;
+  public NumberField<V> lt;
+
+public NumberField<V> gt;
+
+public NumberField<V> eq;
 
   private NumericFilter<M, V> filter;
   private List<RangeItem> rangeItems = new ArrayList<RangeItem>();
