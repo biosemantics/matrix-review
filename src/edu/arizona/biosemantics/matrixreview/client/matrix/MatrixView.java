@@ -813,11 +813,8 @@ public class MatrixView implements IsWidget {
 		protected void modifyCharacter(Character character, String name, Organ organ) {
 			taxonMatrix.modifyCharacter(character, name, organ);
 			CharactersColumnModel columnModel = taxonTreeGrid.getColumnModel();
-			for(CharacterColumnConfig config: columnModel.getCharacterColumns()) {
-				if(config.getCharacter().equals(character)) {
-					config.setHeader(SafeHtmlUtils.fromString(character.toString()));
-				}
-			}
+			CharacterColumnConfig config = taxonTreeGrid.getGrid().getCharacterColumnConfig(character);
+			config.setHeader(SafeHtmlUtils.fromString(character.toString()));
 			taxonTreeGrid.updateCharacterGridHeads();
 		}
 		

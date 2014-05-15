@@ -135,13 +135,10 @@ public class CharactersGridFilters extends GridFilters<Taxon> {
 		eventBus.addHandler(AddCharacterEvent.TYPE, new AddCharacterEvent.AddCharacterEventHandler() {
 			@Override
 			public void onAdd(AddCharacterEvent event) {
-				for(CharacterColumnConfig characterColumnConfig : charactersGrid.getColumnModel().getCharacterColumns()) {
-					if(characterColumnConfig.getCharacter().equals(event.getCharacter())) {
-						StringFilter<Taxon> stringFilter = new StringFilter<Taxon>(new StringValueProvider(characterColumnConfig));
-						characterColumnConfig.setFilter(stringFilter);
-						addFilter(stringFilter);
-					}
-				}
+				CharacterColumnConfig characterColumnConfig = charactersGrid.getCharacterColumnConfig(event.getCharacter());
+				StringFilter<Taxon> stringFilter = new StringFilter<Taxon>(new StringValueProvider(characterColumnConfig));
+				characterColumnConfig.setFilter(stringFilter);
+				addFilter(stringFilter);
 			}
 		});
 	}
