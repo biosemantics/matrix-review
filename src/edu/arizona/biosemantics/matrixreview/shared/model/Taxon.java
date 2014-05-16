@@ -224,6 +224,10 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 			value.setColor(color);
 		}
 	}
+	
+	public boolean hasColor() {
+		return color != null;
+	}
 
 	public TaxonMatrix getTaxonMatrix() {
 		return taxonMatrix;

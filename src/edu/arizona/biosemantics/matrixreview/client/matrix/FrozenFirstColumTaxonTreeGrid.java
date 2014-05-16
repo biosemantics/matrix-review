@@ -5,16 +5,16 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.event.shared.GwtEvent.Type;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Event;
-import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.Style.Anchor;
 import com.sencha.gxt.core.client.Style.AnchorAlignment;
 import com.sencha.gxt.core.client.dom.XDOM;
@@ -22,47 +22,29 @@ import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.data.shared.TreeStore;
-import com.sencha.gxt.dnd.core.client.DND.Feedback;
 import com.sencha.gxt.dnd.core.client.DND.Operation;
-import com.sencha.gxt.dnd.core.client.TreeGridDragSource;
-import com.sencha.gxt.widget.core.client.event.BeforeStartEditEvent;
-import com.sencha.gxt.widget.core.client.event.BeforeStartEditEvent.BeforeStartEditHandler;
-import com.sencha.gxt.widget.core.client.event.CompleteEditEvent;
-import com.sencha.gxt.widget.core.client.event.CompleteEditEvent.CompleteEditHandler;
 import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
-import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
-import com.sencha.gxt.widget.core.client.grid.Grid.GridCell;
 import com.sencha.gxt.widget.core.client.grid.GridView;
 import com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance;
-import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
-import com.sencha.gxt.widget.core.client.grid.editing.MyGridInlineEditing;
-import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
 import com.sencha.gxt.widget.core.client.menu.Menu;
+import com.sencha.gxt.widget.core.client.tree.Tree.CheckState;
+import com.sencha.gxt.widget.core.client.tree.Tree.Joint;
 import com.sencha.gxt.widget.core.client.tree.Tree.TreeAppearance;
 import com.sencha.gxt.widget.core.client.tree.Tree.TreeNode;
+import com.sencha.gxt.widget.core.client.tree.TreeView.TreeViewRenderMode;
 import com.sencha.gxt.widget.core.client.treegrid.FrozenFirstColumnTreeGrid;
 import com.sencha.gxt.widget.core.client.treegrid.MaintainListStoreTreeGrid;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGridView;
 
-import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModelModeEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCharacterEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCoverageEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByNameEvent;
-import edu.arizona.biosemantics.matrixreview.client.matrix.CharactersGridView.SortInfo;
 import edu.arizona.biosemantics.matrixreview.client.matrix.MatrixView.ModelMode;
-import edu.arizona.biosemantics.matrixreview.client.matrix.editing.LockableControlableMatrixEditing;
-import edu.arizona.biosemantics.matrixreview.client.matrix.editing.ValueConverter;
-import edu.arizona.biosemantics.matrixreview.client.matrix.filters.CharactersGridFilters;
 import edu.arizona.biosemantics.matrixreview.client.matrix.filters.HideTaxonStoreFilter;
-import edu.arizona.biosemantics.matrixreview.client.matrix.filters.TaxaGridFilters;
-import edu.arizona.biosemantics.matrixreview.client.matrix.filters.TaxonNameFilter;
-import edu.arizona.biosemantics.matrixreview.client.matrix.filters.ValueFilter;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.TaxonMenu;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.TaxonCharacterMenu;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.dnd.UpdateModelDragSource;
@@ -70,7 +52,6 @@ import edu.arizona.biosemantics.matrixreview.client.matrix.menu.dnd.UpdateModelD
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
-import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
 public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Taxon> {
 	
@@ -92,7 +73,6 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 				element = null;
 			}
 			
-
 			public void setMenuElement(Element menuElement) {
 				this.menuElement = menuElement;
 			}
@@ -137,7 +117,7 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 			@Override
 			protected void initHeader() {
 				if (header == null) {
-					header = new TaxaColumnHeader((TaxaTreeGrid)grid, cm);
+					header = new TaxaColumnHeader(eventBus, (TaxaTreeGrid)grid, cm, taxonMatrix);
 				}
 				super.initHeader();
 			}
@@ -170,6 +150,19 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 			@Override
 			public TaxaColumnHeader getHeader() {
 				return (TaxaColumnHeader) header;
+			}
+			
+			@Override
+			public SafeHtml getTemplate(Taxon m, String id, SafeHtml text, ImageResource icon, boolean checkable, Joint joint,
+					int level) {
+				SafeHtmlBuilder sb = new SafeHtmlBuilder();
+				getTree().getTreeAppearance().renderNode(m, sb, id, text, tree.getStyle(), icon, checkable, CheckState.UNCHECKED,
+						joint, level - 1, TreeViewRenderMode.ALL);
+				return sb.toSafeHtml();
+			}
+
+			private TaxaTreeGrid getTree() {
+				return (TaxaTreeGrid)tree;
 			}
 		}
 		

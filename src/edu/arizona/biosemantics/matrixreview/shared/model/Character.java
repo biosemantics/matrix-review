@@ -87,6 +87,10 @@ public class Character implements Serializable, HasColor, HasComment, HasDirty, 
 	protected void setColor(Color color) {
 		this.color = color;
 	}
+	
+	public boolean hasColor() {
+		return color != null;
+	}
 
 	@Override
 	public boolean isDirty() {

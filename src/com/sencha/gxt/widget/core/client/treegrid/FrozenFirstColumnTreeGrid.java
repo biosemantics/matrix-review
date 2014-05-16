@@ -6,8 +6,12 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.dom.client.Style.Overflow;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.Style.ScrollDirection;
 import com.sencha.gxt.core.client.dom.XDOM;
@@ -28,6 +32,7 @@ import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.grid.GridView;
+import com.sencha.gxt.widget.core.client.tips.QuickTip;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGrid;
 
 import edu.arizona.biosemantics.matrixreview.client.matrix.CharacterColumnConfig;
@@ -84,6 +89,8 @@ public class FrozenFirstColumnTreeGrid<M> extends Widget {
 		ColumnModel<M> treeGridColumnModel = createTreeGridColumnModel(treeGridColumns);
 		this.treeGrid = createTreeGrid(store, treeGridColumnModel, treeColumn);
 		this.grid = createGrid(treeGrid.getListStore(), createGridColumnModel(otherColumnConfigs), gridView);
+		QuickTip gridGuickTip = new QuickTip(grid);
+		QuickTip treeGridQuickTip = new QuickTip(treeGrid);
 		
 		this.treeGrid.getSelectionModel().addSelectionHandler(synchronizeSelectionHandler);
 		this.grid.getSelectionModel().addSelectionHandler(synchronizeSelectionHandler);

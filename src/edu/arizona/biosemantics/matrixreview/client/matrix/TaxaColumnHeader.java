@@ -3,6 +3,7 @@ package edu.arizona.biosemantics.matrixreview.client.matrix;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Event;
@@ -13,8 +14,22 @@ import com.sencha.gxt.widget.core.client.grid.ColumnHeader;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance;
 
+import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.RemoveCharacterEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.RemoveColorsEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterColorEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.FrozenFirstColumTaxonTreeGrid.TaxaTreeGrid;
+import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
 
 public class TaxaColumnHeader extends ColumnHeader<Taxon> {
 
@@ -75,15 +90,73 @@ public class TaxaColumnHeader extends ColumnHeader<Taxon> {
 				addStyleName(column.getColumnHeaderClassName());
 			}
 			heads.add(this);
+			
+			addEventHandlers();
+			
+			refresh();
+		}
+		
+		private void addEventHandlers() {
+			eventBus.addHandler(AddTaxonEvent.TYPE, new AddTaxonEvent.AddTaxonEventHandler() {
+				@Override
+				public void onAdd(AddTaxonEvent event) {
+					refresh();
+				}
+			});
+			eventBus.addHandler(RemoveTaxonEvent.TYPE, new RemoveTaxonEvent.RemoveTaxonEventHandler() {
+				@Override
+				public void onRemove(RemoveTaxonEvent event) {
+					refresh();
+				}
+			});
+			eventBus.addHandler(AddCharacterEvent.TYPE, new AddCharacterEvent.AddCharacterEventHandler() {
+				@Override
+				public void onAdd(AddCharacterEvent event) {
+					refresh();
+				}
+			});
+			eventBus.addHandler(RemoveCharacterEvent.TYPE, new RemoveCharacterEvent.RemoveCharacterEventHandler() {
+				@Override
+				public void onRemove(RemoveCharacterEvent event) {
+					refresh();
+				}
+			});
+			eventBus.addHandler(ModifyCharacterEvent.TYPE, new ModifyCharacterEvent.ModifyCharacterEventHandler() {
+				@Override
+				public void onRename(ModifyCharacterEvent event) {
+					refresh();
+				}
+			});
+			eventBus.addHandler(MergeCharactersEvent.TYPE, new MergeCharactersEvent.MergeCharactersEventHandler() {
+				@Override
+				public void onMerge(MergeCharactersEvent event) {
+					refresh();
+				}
+			});
+		}
+
+		public void refresh() {
+			setQuickTipText();
+		}
+		
+		public void setQuickTipText() {
+			getElement().setAttribute("qtip", "The matrix contains " + 
+					taxonMatrix.list().size() + " taxa and " + taxonMatrix.getCharacterCount() + " characters of " +
+					taxonMatrix.getOrgans().size() + " organs");
 		}
 	}
 
-	public TaxaColumnHeader(TaxaTreeGrid container, ColumnModel<Taxon> cm) {
-		this(container, cm, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
+	private TaxonMatrix taxonMatrix;
+	private EventBus eventBus;
+
+	public TaxaColumnHeader(EventBus eventBus, TaxaTreeGrid container, ColumnModel<Taxon> cm, TaxonMatrix taxonMatrix) {
+		this(eventBus, container, cm, taxonMatrix, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
 	}
 
-	public TaxaColumnHeader(TaxaTreeGrid container, ColumnModel<Taxon> cm, ColumnHeaderAppearance appearance) {
+	public TaxaColumnHeader(EventBus eventBus, TaxaTreeGrid container, ColumnModel<Taxon> cm, TaxonMatrix taxonMatrix, ColumnHeaderAppearance appearance) {
 		super(container, cm, appearance);
+		this.eventBus = eventBus;
+		this.taxonMatrix = taxonMatrix;
 	}
 
 

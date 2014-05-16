@@ -241,7 +241,7 @@ public class MatrixView implements IsWidget {
 			eventBus.addHandler(SetTaxonCommentEvent.TYPE, new SetTaxonCommentEvent.SetTaxonCommentEventHandler() {
 				@Override
 				public void onSet(SetTaxonCommentEvent event) {
-					taxonMatrix.setComment(event.getTaxon(), event.getComment());
+					setTaxonComment(event.getTaxon(), event.getComment());
 				}
 			});
 			eventBus.addHandler(SetCharacterCommentEvent.TYPE, new SetCharacterCommentEvent.SetCharacterCommentEventHandler() {
@@ -253,7 +253,7 @@ public class MatrixView implements IsWidget {
 			eventBus.addHandler(SetValueCommentEvent.TYPE, new SetValueCommentEvent.SetValueCommentEventHandler() {
 				@Override
 				public void onSet(SetValueCommentEvent event) {
-					taxonMatrix.setComment(event.getValue(), event.getComment());
+					setValueComment(event.getValue(), event.getComment());
 				}
 			});
 			eventBus.addHandler(SetValueColorEvent.TYPE, new SetValueColorEvent.SetValueColorEventHandler() {
@@ -346,14 +346,18 @@ public class MatrixView implements IsWidget {
 					sortTaxaByName(event.getSortDirection());
 				}
 			});
-			eventBus.addHandler(SetCharacterStatesEvent.TYPE, new SetCharacterStatesEvent.SetCharacterStatesEventHandler() {
-				@Override
-				public void onSet(SetCharacterStatesEvent event) {
-					taxonMatrix.setCharacterStates(event.getCharacter(), event.getStates());
-				}
-			});
 		}
 		
+		protected void setTaxonComment(Taxon taxon, String comment) {
+			taxonMatrix.setComment(taxon, comment);
+			taxonStore.update(taxon);
+		}
+
+		protected void setValueComment(Value value, String comment) {
+			taxonMatrix.setComment(value, comment);
+			taxonStore.update(value.getTaxon());
+		}
+
 		protected void load(TaxonMatrix taxonMatrix) {
 			this.taxonMatrix = taxonMatrix;
 			this.valueCell = new ValueCell(eventBus, taxonMatrix);
@@ -675,6 +679,7 @@ public class MatrixView implements IsWidget {
 
 		protected void setControlMode(Character character, ControlMode controlMode, List<String> states) {
 			taxonMatrix.setControlMode(character, controlMode);
+			taxonMatrix.setCharacterStates(character, states);
 			editing.setControlMode(character, controlMode, states);
 			charactersFilters.setControlMode(character, controlMode, states);
 		}

@@ -32,6 +32,18 @@ import com.sencha.gxt.widget.core.client.grid.ColumnHeader.Head;
 import com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance;
 import com.sencha.gxt.widget.core.client.grid.HeaderGroupConfig;
 
+import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.RemoveColorsEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterColorEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCoverageEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByNameEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.FrozenFirstColumTaxonTreeGrid.CharactersGrid;
@@ -39,6 +51,7 @@ import edu.arizona.biosemantics.matrixreview.client.matrix.dom.HorizontalAutoScr
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
 
 public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 
@@ -122,6 +135,130 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 			}
 
 			heads.add(this);
+			
+			addEventHandlers();
+			
+			refresh();
+		}
+		
+		public CharacterColumnConfig getColumnConfig() {
+			return (CharacterColumnConfig)config;
+		}
+
+		private void addEventHandlers() {
+			eventBus.addHandler(AddTaxonEvent.TYPE, new AddTaxonEvent.AddTaxonEventHandler() {
+				@Override
+				public void onAdd(AddTaxonEvent event) {
+					refresh();
+				}
+			});
+			eventBus.addHandler(RemoveTaxonEvent.TYPE, new RemoveTaxonEvent.RemoveTaxonEventHandler() {
+				@Override
+				public void onRemove(RemoveTaxonEvent event) {
+					refresh();
+				}
+			});
+			eventBus.addHandler(ModifyCharacterEvent.TYPE, new ModifyCharacterEvent.ModifyCharacterEventHandler() {
+				@Override
+				public void onRename(ModifyCharacterEvent event) {
+					if(event.getCharacter().equals(getColumnConfig().getCharacter()))
+						refresh();
+				}
+			});
+			eventBus.addHandler(SetCharacterCommentEvent.TYPE, new SetCharacterCommentEvent.SetCharacterCommentEventHandler() {
+				@Override
+				public void onSet(SetCharacterCommentEvent event) {
+					if(event.getCharacter().equals(getColumnConfig().getCharacter()))
+						refresh();
+				}
+			});
+			eventBus.addHandler(SetCharacterColorEvent.TYPE, new SetCharacterColorEvent.SetCharacterColorEventHandler() {
+				@Override
+				public void onSet(SetCharacterColorEvent event) {
+					if(event.getCharacter().equals(getColumnConfig().getCharacter()))
+						refresh();
+				}
+			});
+			eventBus.addHandler(RemoveColorsEvent.TYPE, new RemoveColorsEvent.RemoveColorsEventHandler() {
+				@Override
+				public void onRemove(RemoveColorsEvent event) {
+					refresh();
+				}
+			});
+			eventBus.addHandler(LockCharacterEvent.TYPE, new LockCharacterEvent.LockCharacterEventHandler() {
+				@Override
+				public void onLock(LockCharacterEvent event) {
+					if(event.getCharacter().equals(getColumnConfig().getCharacter()))
+						refresh();
+				}
+			});
+			eventBus.addHandler(MergeCharactersEvent.TYPE, new MergeCharactersEvent.MergeCharactersEventHandler() {
+				@Override
+				public void onMerge(MergeCharactersEvent event) {
+					if(event.getCharacter().equals(getColumnConfig().getCharacter()))
+						refresh();
+				}
+			});
+			eventBus.addHandler(SetValueEvent.TYPE, new SetValueEvent.SetValueEventHandler() {
+				@Override
+				public void onSet(SetValueEvent event) {
+					if(event.getOldValue().getCharacter().equals(getColumnConfig().getCharacter()))
+						refresh();
+				}
+			});
+			eventBus.addHandler(SetControlModeEvent.TYPE, new SetControlModeEvent.SetControlModeEventHandler() {
+				@Override
+				public void onSet(SetControlModeEvent event) {
+					if(event.getCharacter().equals(getColumnConfig().getCharacter()))
+						refresh();
+				}
+			});
+		}
+		
+		public void refresh() {
+			Character character = getColumnConfig().getCharacter();
+			setText(character.toString());
+			setCoverage(taxonMatrix.getCoverage(character));
+			setCommented(character.isCommented());
+			//setBackgroundColor(character.getColor());
+			setDirty(character.isDirty());
+			setQuickTipText(getQuickTipText(character));
+		}
+
+		private String getQuickTipText(Character character) {
+			String result = "Character " + character.getName();
+			if(character.hasOrgan())
+				result +=  " of Organ " + character.getOrgan() + "<br>"; 
+			else 
+				result += "<br>";
+			result += "Taxon coverage: " + taxonMatrix.getCoverage(character) + "<br>";
+			result += getControlMode(character);
+			if(character.hasColor())
+				result += "Color: " + character.getColor().getUse() + "<br>";
+			if(character.isLocked())
+				result += "Locked<br>";
+			if(character.isDirty()) 
+				result += "Dirty<br>";
+			if(character.isCommented()) 
+				result += "Comment: " + character.getComment();
+			return result;
+		}
+
+		private String getControlMode(Character character) {
+			switch(character.getControlMode()) {
+			case CATEGORICAL:
+				String result = "Control Mode: Categorical<br>States (" + character.getStates().size() + "): <br>";
+				for(String state : character.getStates()) {
+					result += "- " + state + "<br>";
+				}
+				return result;
+			case NUMERICAL:
+				return "Control Mode: Numerical<br>";
+			case OFF:
+				return "";
+			default:
+				return "";
+			}
 		}
 
 		public void setCoverage(String text) {
@@ -349,13 +486,19 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 			}
 		}
 	}
+
+	private EventBus eventBus;
+	private TaxonMatrix taxonMatrix;
 	
-	public CharacterColumnHeader(CharactersGrid container, ColumnModel<Taxon> cm) {
-		this(container, cm, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
+	public CharacterColumnHeader(EventBus eventBus, TaxonMatrix taxonMatrix, CharactersGrid container, CharactersColumnModel cm) {
+		this(eventBus, taxonMatrix, container, cm, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
 	}
 
-	public CharacterColumnHeader(CharactersGrid container, ColumnModel<Taxon> cm, ColumnHeaderAppearance appearance) {
+	public CharacterColumnHeader(EventBus eventBus, TaxonMatrix taxonMatrix, 
+			CharactersGrid container, CharactersColumnModel cm, ColumnHeaderAppearance appearance) {
 		super(container, cm, appearance);
+		this.eventBus = eventBus;
+		this.taxonMatrix = taxonMatrix;
 	}
 
 	@Override
@@ -382,6 +525,17 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 		for (int i = 0; i < heads.size(); i++) {
 			Head h = heads.get(i);
 			h.getElement().removeClassName(asc, desc);
+		}
+	}
+	
+	public CharactersColumnModel getColumnModel() {
+		return (CharactersColumnModel)cm;
+	}
+	
+	public void refreshFromModel() {
+		for(int i=0; i<heads.size(); i++) {
+			CharacterHead head = (CharacterHead)heads.get(i);
+			head.refresh();
 		}
 	}
 }

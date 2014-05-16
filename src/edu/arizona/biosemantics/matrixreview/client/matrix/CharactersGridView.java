@@ -43,6 +43,10 @@ public class CharactersGridView extends GridView<Taxon> {
 		this.taxonMatrix = taxonMatrix;
 		this.columnHeaderStyles = apperance.styles();
 		
+		this.setColumnLines(true);
+		this.setShowDirtyCells(false);
+		this.setStripeRows(true);
+		
 		addEventHandlers();
 	}
 
@@ -230,44 +234,9 @@ public class CharactersGridView extends GridView<Taxon> {
 	@Override
 	protected void initHeader() {
 		if (header == null) {
-			header = new CharacterColumnHeader((CharactersGrid)grid, cm) {
-
-				/*
-				 * @Override protected Menu getContextMenu(int column) { return
-				 * createContextMenu(column); }
-				 */
-
-				/*
-				 * @Override protected void onColumnSplitterMoved(int colIndex,
-				 * int width) { super.onColumnSplitterMoved(colIndex, width);
-				 * MyGridView.this.onColumnSplitterMoved(colIndex, width); }
-				 */
-
-				/*
-				 * @Override protected void onHeaderClick(Event ce, int column)
-				 * { super.onHeaderClick(ce, column);
-				 * MyGridView.this.onHeaderClick(column); }
-				 */
-
-				/*
-				 * @Override protected void onKeyDown(Event ce, int index) {
-				 * ce.stopPropagation(); // auto select on key down if
-				 * (grid.getSelectionModel() instanceof CellSelectionModel<?>) {
-				 * CellSelectionModel<?> csm = (CellSelectionModel<?>) grid
-				 * .getSelectionModel(); csm.selectCell(0, index); } else {
-				 * grid.getSelectionModel().select(0, false); } }
-				 */
-
-			};
+			header = new CharacterColumnHeader(eventBus, taxonMatrix, (CharactersGrid)grid, getColumnModel());
 		}
 		super.initHeader();
-		/*
-		 * header.setMenuFactory(new HeaderContextMenuFactory() {
-		 * 
-		 * @Override public Menu getMenuForColumn(int columnIndex) { return
-		 * createContextMenu(columnIndex); } });
-		 * header.setSplitterWidth(splitterWidth);
-		 */
 	}
 	
 	public class SortInfo {

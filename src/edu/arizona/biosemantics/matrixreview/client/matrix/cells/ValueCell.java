@@ -67,6 +67,9 @@ public class ValueCell extends MenuExtendedCell<Value> {
 			colorHex = "#" + color.getHex();
 			quickTipText += "<br>Colorized: " + color.getUse();
 		}
+		if(value.isDirty()) {
+			quickTipText += "<br>Dirty";
+		}
 		
 		String backgroundImage = "";
 		if(value.isDirty()) {

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -29,14 +30,31 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 	
 	private TaxonMatrix createSampleMatrix() {
 		List<Character> characters = new LinkedList<Character>();
-		Organ o1 = new Organ("o");
-		Organ o2 = new Organ("o2");
-		Character a = new Character("a");
-		Character b = new Character("b", o1);
-		Character c = new Character("c", o2);
-		characters.add(a);
-		characters.add(b);
-		characters.add(c);
+		Organ o1 = new Organ("stem");
+		Organ o2 = new Organ("leaf");
+		Organ o3 = new Organ("head");
+		Character a1 = new Character("length", o1);
+		Character a2 = new Character("shape", o1);
+		Character a3 = new Character("architecture", o1);
+		
+		Character b1 = new Character("width", o2);
+		Character b2 = new Character("shape", o2);
+		Character b3 = new Character("pubescence", o2);
+		
+		Character c1 = new Character("size", o3);
+		Character c2 = new Character("color", o3);
+		Character c3 = new Character("architecture", o3);
+		
+		
+		characters.add(a1);
+		characters.add(a2);
+		characters.add(a3);
+		characters.add(b1);
+		characters.add(b2);
+		characters.add(b3);
+		characters.add(c1);
+		characters.add(c2);
+		characters.add(c3);
 		
 		for(int i=0; i<20; i++) {
 			Character o = new Character("o" + i, o2);
@@ -45,30 +63,46 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		
 		TaxonMatrix taxonMatrix = new TaxonMatrix(characters);
 
-		Taxon t1 = new Taxon("server1", Level.GENUS, "t1", "author", "2002", "this is the description about t1");
-		Taxon t2 = new Taxon("server2", Level.SPECIES, "t2", "author", "2002",  "this is the description about t2");
-		Taxon t3 = new Taxon("server3", Level.LIFE,
-				"t3", "author", "2002", 
-				"Lorem ipsum dolor sit amet, consectetuer adipiscing elit. "
-						+ "Sed metus nibh, sodales a, porta at, vulputate eget, dui. Pellentesque ut nisl. "
-						+ "Maecenas tortor turpis, interdum non, sodales non, iaculis ac, lacus. Vestibulum auctor, "
-						+ "tortor quis iaculis malesuada, libero lectus bibendum purus, sit amet tincidunt quam turpis "
-						+ "vel lacus. In pellentesque nisl non sem. Suspendisse nunc sem, pretium eget, cursus a, "
-						+ "fringilla vel, urna.<br/><br/>Aliquam commodo ullamcorper erat. Nullam vel justo in neque "
-						+ "porttitor laoreet. Aenean lacus dui, consequat eu, adipiscing eget, nonummy non, nisi. "
-						+ "Morbi nunc est, dignissim non, ornare sed, luctus eu, massa. Vivamus eget quam. Vivamus "
-						+ "tincidunt diam nec urna. Curabitur velit.");
-		
-		taxonMatrix.addRootTaxon(t1);
-		taxonMatrix.addTaxon(t1, t2);
-		taxonMatrix.addRootTaxon(t3);
-		
-		for(int i=4; i<50; i++) {
-			Taxon t4 = new Taxon("server" + i, Level.SPECIES, "t123", "a", "2", "de");
-			taxonMatrix.addRootTaxon(t4);
+		for(int i=0; i<10; i++) {
+			Taxon t1 = new Taxon("server" + i * 4 + 1, Level.FAMILY, "rosacea", "author1", "1979", "this is the description about t1");
+			Taxon t2 = new Taxon("server" +  i * 4 + 2, Level.GENUS, "rosa", "author2", "1985",  "this is the description about t2");
+			Taxon t3 = new Taxon("server" +  i * 4 + 3, Level.SPECIES,
+					"example", "author3", "2002", 
+					"Lorem ipsum dolor sit amet, consectetuer adipiscing elit. "
+							+ "Sed metus nibh, sodales a, porta at, vulputate eget, dui. Pellentesque ut nisl. "
+							+ "Maecenas tortor turpis, interdum non, sodales non, iaculis ac, lacus. Vestibulum auctor, "
+							+ "tortor quis iaculis malesuada, libero lectus bibendum purus, sit amet tincidunt quam turpis "
+							+ "vel lacus. In pellentesque nisl non sem. Suspendisse nunc sem, pretium eget, cursus a, "
+							+ "fringilla vel, urna.<br/><br/>Aliquam commodo ullamcorper erat. Nullam vel justo in neque "
+							+ "porttitor laoreet. Aenean lacus dui, consequat eu, adipiscing eget, nonummy non, nisi. "
+							+ "Morbi nunc est, dignissim non, ornare sed, luctus eu, massa. Vivamus eget quam. Vivamus "
+							+ "tincidunt diam nec urna. Curabitur velit.");
+			Taxon t4 = new Taxon("server" +  i * 4 + 4, Level.VARIETY,
+					"prototype", "author4", "2014", 
+					"Lorem ipsum dolor sit amet, consectetuer adipiscing elit. "
+							+ "Sed metus nibh, sodales a, porta at, vulputate eget, dui. Pellentesque ut nisl. "
+							+ "Maecenas tortor turpis, interdum non, sodales non, iaculis ac, lacus. Vestibulum auctor, "
+							+ "tortor quis iaculis malesuada, libero lectus bibendum purus, sit amet tincidunt quam turpis "
+							+ "vel lacus. In pellentesque nisl non sem. Suspendisse nunc sem, pretium eget, cursus a, "
+							+ "fringilla vel, urna.<br/><br/>Aliquam commodo ullamcorper erat. Nullam vel justo in neque "
+							+ "porttitor laoreet. Aenean lacus dui, consequat eu, adipiscing eget, nonummy non, nisi. "
+							+ "Morbi nunc est, dignissim non, ornare sed, luctus eu, massa. Vivamus eget quam. Vivamus "
+							+ "tincidunt diam nec urna. Curabitur velit.");
+			
+			taxonMatrix.addRootTaxon(t1);
+			taxonMatrix.addTaxon(t1, t2);
+			taxonMatrix.addTaxon(t2, t3);
+			taxonMatrix.addTaxon(t2, t4);
+
+			Random random = new Random();
+			taxonMatrix.setValue(t1, b1, new Value(String.valueOf(random.nextInt(50))));
 		}
 		
-		taxonMatrix.setValue(t1, a, new Value("some value"));
+		/*for(int i=5; i<50; i++) {
+			Taxon t5 = new Taxon("server" + i, Level.SPECIES, "t123", "a", "2", "de");
+			taxonMatrix.addRootTaxon(t4);
+		}*/
+		
 		return taxonMatrix;
 	}
 
