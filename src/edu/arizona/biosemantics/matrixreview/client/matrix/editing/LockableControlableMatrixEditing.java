@@ -7,8 +7,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.EditorError;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
@@ -20,7 +25,10 @@ import com.sencha.gxt.widget.core.client.form.Field;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.form.Validator;
 import com.sencha.gxt.widget.core.client.form.error.DefaultEditorError;
+import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderAppearance;
+import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderStyles;
 import com.sencha.gxt.widget.core.client.grid.Grid.GridCell;
+import com.sencha.gxt.widget.core.client.grid.editing.ClicksToEdit;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 
 import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent;
@@ -42,11 +50,17 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 	private ListStore<Taxon> store;
 	private EventBus eventBus;
 	private boolean lockedMatrix = false;
+	private ColumnHeaderStyles columnHeaderStyles;
 	
 	public LockableControlableMatrixEditing(EventBus eventBus, CharactersGrid editableGrid, ListStore<Taxon> store) {
+		this(eventBus, editableGrid, store, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
+	}
+	
+	public LockableControlableMatrixEditing(EventBus eventBus, CharactersGrid editableGrid, ListStore<Taxon> store, ColumnHeaderAppearance columnHeaderAppearance) {
 		super(editableGrid);
 		this.eventBus = eventBus;
 		this.store = store;
+		this.columnHeaderStyles = columnHeaderAppearance.styles();
 		
 		addEventHandlers();
 	}
@@ -204,6 +218,37 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 	public void addEditor(CharacterColumnConfig columnConfig) {
 		Character character = columnConfig.getCharacter();
 		addEditor(columnConfig, new ValueConverter(), getEditorField(character, character.getControlMode(), null));
+	}
+	
+	protected void onClick(final ClickEvent event) {
+		if (clicksToEdit == ClicksToEdit.ONE) {
+			Element clickSource = event.getNativeEvent().getEventTarget().<Element> cast();
+			final GridCell cell = findCell(clickSource);
+			if (cell == null) {
+				return;
+			}
+
+			// EXTGWT-2019 when starting an edit on the same row of an active
+			// edit
+			// the active edit value
+			// is lost as the active cell does not complete the edit
+			// this only happens with TreeGrid, not Grid which could be looked
+			// into
+			if (activeCell != null && activeCell.getRow() == cell.getRow()) {
+				completeEditing();
+			}
+
+			// EXTGWT-3334 Edit is starting and stopping immediately when
+			// leaving another active edit that completes
+			if(!clickSource.getClassName().equals(columnHeaderStyles.headButton())) {
+				Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+					@Override
+					public void execute() {
+						startEditing(cell);
+					}
+				});
+			}
+		}
 	}
 
 }

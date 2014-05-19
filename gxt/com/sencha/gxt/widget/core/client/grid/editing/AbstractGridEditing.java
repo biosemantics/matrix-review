@@ -171,7 +171,7 @@ public abstract class AbstractGridEditing<M> implements GridEditing<M> {
 
   protected Timer monitorTimer;
   protected ToolTip tooltip;
-  private ClicksToEdit clicksToEdit = ClicksToEdit.ONE;
+  protected ClicksToEdit clicksToEdit = ClicksToEdit.ONE;
   private HandlerManager handlerManager;
 
   private boolean errorSummary = true;
