@@ -1,5 +1,6 @@
 package edu.arizona.biosemantics.matrixreview.client.event;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.event.shared.EventHandler;
@@ -33,7 +34,7 @@ public class RemoveColorsEvent extends GwtEvent<RemoveColorsEventHandler> {
 	}
 
 	public Set<Color> getColors() {
-		return colors;
+		return new HashSet<Color>(colors);
 	}
 
 	

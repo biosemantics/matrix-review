@@ -351,7 +351,7 @@ public class TaxonTreeAppearance extends TreeBaseAppearance {
 	}
 	
 	public void onExitMenu(Element menuParent) {
-		Element a = (com.google.gwt.user.client.Element) menuParent.getChild(0);
+		Element a = menuParent;//(com.google.gwt.user.client.Element) menuParent.getChild(0);
 		Element aGrandParent = a.getParentElement().getParentElement();
 		aGrandParent.removeClassName(taxonTreeBaseStyles.headOver());
 		aGrandParent.removeClassName(taxonTreeBaseStyles.headMenuOpen());

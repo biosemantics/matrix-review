@@ -10,6 +10,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -192,8 +193,10 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 					TreeNode<Taxon> node = findNode(taxon);
 					if (node != null) {
 						Element menuEl = ((TaxonTreeGridView)treeGridView).getMenuElement(node);
-						if (menuEl != null && menuEl.isOrHasChild((Element.as(eventTarget)))) {
-							showContextMenu(menuEl, taxon);
+						//after coloring this test somehow fails. Seems like the retrieved menuEl is not the one which contains the eventTarget then
+						//if (menuEl != null && menuEl.isOrHasChild((Element.as(eventTarget)))) {
+						if (menuEl != null && (menuEl.isOrHasChild(Element.as(eventTarget)) || menuEl.getChild(0).toString().equals(Element.as(eventTarget).toString()))) {
+							showContextMenu(Element.as(eventTarget), taxon);
 							return;
 						}
 					}

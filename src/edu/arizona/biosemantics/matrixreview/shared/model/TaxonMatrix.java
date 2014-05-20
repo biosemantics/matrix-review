@@ -444,7 +444,7 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 	}
 
 	public void removeColors(Set<Color> colors) {
-		colors.removeAll(colors);
+		this.colors.removeAll(colors);
 	}
 	
 	public void setLocked(Taxon taxon, boolean locked) {

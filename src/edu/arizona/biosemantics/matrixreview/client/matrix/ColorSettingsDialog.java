@@ -28,6 +28,7 @@ import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.ColorPalette;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Dialog;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData;
 import com.sencha.gxt.widget.core.client.form.TextField;
@@ -107,11 +108,26 @@ public class ColorSettingsDialog extends Dialog {
 		addButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				List<Color> colors = taxonMatrix.getColors();
-				Color color = new Color(textField.getText(), "");
-				colors.add(color);
-				colorsTable.setRowData(colors);
-				eventBus.fireEvent(new AddColorEvent(color));
+				if(textField.validate()) {
+					List<Color> colors = taxonMatrix.getColors();
+					boolean exists = false;
+					for(Color color : colors) {
+						if(color.getHex().equals(textField.getText())) {
+							AlertMessageBox alert = new AlertMessageBox("Duplicate color", "This color exists already");
+							alert.show();
+							exists = true;
+						}
+					}
+					if(!exists) {
+						Color color = new Color(textField.getText(), "");
+						colors.add(color);
+						colorsTable.setRowData(colors);
+						eventBus.fireEvent(new AddColorEvent(color));
+					}
+				} else {
+					AlertMessageBox alert = new AlertMessageBox("Not a valid color", "Can't add invalid color code");
+					alert.show();
+				}
 			}
 		});
 
@@ -174,9 +190,7 @@ public class ColorSettingsDialog extends Dialog {
 					Boolean checked = checkboxCell.getViewData(color);
 					if (checked == null)
 						continue;
-					if (checked)
-						;
-					{
+					if (checked) {
 						toRemove.add(color);
 					}
 				}

@@ -23,7 +23,7 @@ public class MatrixReviewView implements IsWidget {
 	private SplitLayoutPanel splitLayoutPanel;
 	private MatrixView matrixView;
 	private DesktopView desktopView;
-	private int desktopHeight = 500;
+	private int desktopHeight = 300;
 
 	public MatrixReviewView(TaxonMatrix taxonMatrix) {
 		this.taxonMatrix = taxonMatrix;	
@@ -69,7 +69,7 @@ public class MatrixReviewView implements IsWidget {
 
 	protected void showDesktop() {
 		splitLayoutPanel.forceLayout();
-		if(splitLayoutPanel.getWidgetSize(desktopView) == 0) 
+		if(splitLayoutPanel.getWidgetSize(desktopView) < desktopHeight) 
 			splitLayoutPanel.setWidgetSize(desktopView, desktopHeight);
 		splitLayoutPanel.animate(500);
 	}
