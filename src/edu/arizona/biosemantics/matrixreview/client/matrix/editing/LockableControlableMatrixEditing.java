@@ -49,18 +49,19 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 	protected Set<Character> lockedCharacters = new HashSet<Character>();
 	private ListStore<Taxon> store;
 	private EventBus eventBus;
-	private boolean lockedMatrix = false;
 	private ColumnHeaderStyles columnHeaderStyles;
+	private TaxonMatrix taxonMatrix;
 	
-	public LockableControlableMatrixEditing(EventBus eventBus, CharactersGrid editableGrid, ListStore<Taxon> store) {
-		this(eventBus, editableGrid, store, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
+	public LockableControlableMatrixEditing(EventBus eventBus, CharactersGrid editableGrid, ListStore<Taxon> store, TaxonMatrix taxonMatrix) {
+		this(eventBus, editableGrid, store, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class), taxonMatrix);
 	}
 	
-	public LockableControlableMatrixEditing(EventBus eventBus, CharactersGrid editableGrid, ListStore<Taxon> store, ColumnHeaderAppearance columnHeaderAppearance) {
+	public LockableControlableMatrixEditing(EventBus eventBus, CharactersGrid editableGrid, ListStore<Taxon> store, ColumnHeaderAppearance columnHeaderAppearance, TaxonMatrix taxonMatrix) {
 		super(editableGrid);
 		this.eventBus = eventBus;
 		this.store = store;
 		this.columnHeaderStyles = columnHeaderAppearance.styles();
+		this.taxonMatrix = taxonMatrix;
 		
 		addEventHandlers();
 	}
@@ -89,8 +90,10 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 		eventBus.addHandler(LockMatrixEvent.TYPE, new LockMatrixEvent.LockMatrixEventHandler() {
 			@Override
 			public void onLock(LockMatrixEvent event) {
-				lockedMatrix = event.isLock();
-				if(!lockedMatrix) {
+				if(event.isLock()) {
+					lockedTaxa.addAll(taxonMatrix.list());
+					lockedCharacters.addAll(taxonMatrix.getCharacters());
+				} else {
 					lockedTaxa.clear();
 					lockedCharacters.clear();
 				}
@@ -126,7 +129,7 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 	public void startEditing(final GridCell cell) {
 		Taxon taxon = store.get(cell.getRow());
 		CharacterColumnConfig config = ((CharactersGrid)editableGrid).getColumnModel().getColumn(cell.getCol());
-		if(!lockedMatrix && !this.isLockedTaxon(taxon) && !this.isLockedCharacter(config.getCharacter()))
+		if(!this.isLockedTaxon(taxon) && !this.isLockedCharacter(config.getCharacter()))
 			super.startEditing(cell);
 	}
 

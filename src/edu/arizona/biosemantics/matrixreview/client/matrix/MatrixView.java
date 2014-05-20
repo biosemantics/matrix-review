@@ -362,7 +362,7 @@ public class MatrixView implements IsWidget {
 					characterColumnConfigs.add(this.createCharacterColumnConfig(character));
 				taxonTreeGrid.init(characterColumnConfigs, new CharactersGridView(eventBus, taxonMatrix));
 				valueCell.setListStore(taxonTreeGrid.getTreeGrid().getListStore());
-				editing = new LockableControlableMatrixEditing(eventBus, taxonTreeGrid.getGrid(), taxonTreeGrid.getTreeGrid().getListStore());
+				editing = new LockableControlableMatrixEditing(eventBus, taxonTreeGrid.getGrid(), taxonTreeGrid.getTreeGrid().getListStore(), taxonMatrix);
 				initCharacterEditing();
 				initCharacterFiltering();
 			}
