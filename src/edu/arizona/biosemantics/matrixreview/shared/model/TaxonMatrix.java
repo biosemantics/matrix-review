@@ -91,7 +91,7 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 				lockedAllCharacters = false;
 		}
 		
-		return lockedAllTaxa || lockedAllCharacters;
+		return lockedAllTaxa && lockedAllCharacters;
 	}
 
 	@Override
