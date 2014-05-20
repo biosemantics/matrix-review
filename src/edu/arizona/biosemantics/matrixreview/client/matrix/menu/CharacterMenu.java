@@ -132,6 +132,8 @@ public class CharacterMenu extends Menu {
 	
 	public static class CharacterAddDialog extends Dialog {
 		
+		private Character after = null;
+		
 		public CharacterAddDialog(final EventBus eventBus, TaxonMatrix taxonMatrix) {
 			this.setHeadingText("Add Character");
 			CharacterInformationContainer characterInformationContainer = new CharacterInformationContainer(taxonMatrix, "", null);
@@ -149,7 +151,10 @@ public class CharacterMenu extends Menu {
 					if(organComboBox.getValue() == null)
 						selected = new Organ(organComboBox.getText());
 					Character newCharacter = new Character(characterNameField.getText(), selected);
-					eventBus.fireEvent(new AddCharacterEvent(newCharacter));
+					if(after != null)
+						eventBus.fireEvent(new AddCharacterEvent(after, newCharacter));
+					else
+						eventBus.fireEvent(new AddCharacterEvent(newCharacter));
 					CharacterAddDialog.this.hide();
 				}
 		    });
@@ -164,6 +169,9 @@ public class CharacterMenu extends Menu {
 		    addButton(cancel);
 		}
 
+		public void setAfter(Character after) {
+			this.after = after;
+		}
 	}
 
 	
@@ -620,6 +628,7 @@ public class CharacterMenu extends Menu {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				CharacterAddDialog addDialog = new CharacterAddDialog(eventBus, taxonMatrix);
+				addDialog.setAfter(character);
 				addDialog.show();
 			}
 		});

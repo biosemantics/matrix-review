@@ -40,6 +40,9 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 		public static boolean isValidParentChild(Level parent, Level child) {
 			int parentLevelId = parent == null? -1 : parent.getId();
 			int childLevelId = child == null? -1 : child.getId();
+			//special case group allows children of itself as it is the lowest rank
+			if(parent.equals(GROUP) && child.equals(GROUP))
+				return true;
 			return parentLevelId < childLevelId;
 		}
 		
