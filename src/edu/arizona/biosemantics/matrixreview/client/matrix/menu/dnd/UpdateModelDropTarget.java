@@ -184,7 +184,7 @@ public class UpdateModelDropTarget extends TreeGridDropTarget<Taxon> {
 		      for (int i = 0; i < list.size(); i++) {
 		        Taxon sel = list.get(i);
 		        
-		        if(!Level.isValidParentChild(overModel.getLevel(), sel.getLevel())) {
+		        if(!Level.isValidParentChild(overModel == null ? null : overModel.getLevel(), sel.getLevel())) {
 		          Insert.get().hide();
 			      event.getStatusProxy().setStatus(false);
 			      return;

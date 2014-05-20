@@ -3,6 +3,8 @@ package edu.arizona.biosemantics.matrixreview.client.desktop.widget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.editor.client.Editor.Path;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.chart.client.chart.Chart;
 import com.sencha.gxt.chart.client.chart.Legend;
@@ -32,19 +34,24 @@ import com.sencha.gxt.widget.core.client.event.CollapseEvent.CollapseHandler;
 import com.sencha.gxt.widget.core.client.event.ExpandEvent;
 import com.sencha.gxt.widget.core.client.event.ExpandEvent.ExpandHandler;
 
+import edu.arizona.biosemantics.matrixreview.client.desktop.Window;
+import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
-public class NumericalSeriesChartCreator extends WidgetCreator {
+public class NumericalSeriesManager extends AbstractWindowManager {
 
 	public class NameNumerical {
+		private String id;
 		private String name;
 		private double numerical;
 
-		public NameNumerical(String name, double numerical) {
+		public NameNumerical(String id, String name, double numerical) {
 			super();
+			this.id = id;
 			this.name = name;
 			this.numerical = numerical;
 		}
@@ -60,6 +67,10 @@ public class NumericalSeriesChartCreator extends WidgetCreator {
 		public void setNumerical(Double numerical) {
 			this.numerical = numerical;
 		}
+
+		public String getId() {
+			return id;
+		}
 	}
 
 	public interface NameNumericalAccess extends PropertyAccess<NameNumerical> {
@@ -67,8 +78,8 @@ public class NumericalSeriesChartCreator extends WidgetCreator {
 
 		ValueProvider<NameNumerical, String> name();
 
-		@Path("name")
-		ModelKeyProvider<NameNumerical> nameKey();
+		@Path("id")
+		ModelKeyProvider<NameNumerical> id();
 	}
 
 	private static final NameNumericalAccess dataAccess = GWT
@@ -76,17 +87,18 @@ public class NumericalSeriesChartCreator extends WidgetCreator {
 	private TaxonMatrix taxonMatrix;
 	private Character character;
 
-	public NumericalSeriesChartCreator(TaxonMatrix taxonMatrix,
-			Character character) {
+	public NumericalSeriesManager(EventBus eventBus, Window window, Character character, TaxonMatrix taxonMatrix) {
+		super(eventBus, window);
 		this.taxonMatrix = taxonMatrix;
 		this.character = character;
+		init();
 	}
 
 	@Override
-	public Widget create() {
+	public void refreshContent() {
 		// TODO Auto-generated method stub
 		final ListStore<NameNumerical> store = new ListStore<NameNumerical>(
-				dataAccess.nameKey());
+				dataAccess.id());
 
 		double max = 0.0;
 		for (Taxon taxon : taxonMatrix.list()) {
@@ -95,7 +107,7 @@ public class NumericalSeriesChartCreator extends WidgetCreator {
 				double doubleValue = Double.parseDouble(value.getValue());
 				if(doubleValue > max)
 					max = doubleValue;
-				store.add(new NameNumerical(taxon.getFullName(), doubleValue));
+				store.add(new NameNumerical(taxon.getId(), taxon.getFullName(), doubleValue));
 			}
 		}
 
@@ -139,8 +151,34 @@ public class NumericalSeriesChartCreator extends WidgetCreator {
 		series.setMarkerConfig(marker);
 		series.setHighlighting(true);
 		chart.addSeries(series);
+		
+		window.setWidget(chart);
+		window.forceLayout();
+	}
 
-		return chart;
+	@Override
+	protected void addEventHandlers() {
+		eventBus.addHandler(SetValueEvent.TYPE, new SetValueEvent.SetValueEventHandler() {
+			@Override
+			public void onSet(SetValueEvent event) {
+				if(event.getOldValue().getCharacter().equals(character)) {
+					refreshContent();
+				}
+			}
+		});
+		eventBus.addHandler(ModifyCharacterEvent.TYPE, new ModifyCharacterEvent.ModifyCharacterEventHandler() {
+			@Override
+			public void onRename(ModifyCharacterEvent event) {
+				if(event.getCharacter().equals(character)) {
+					refreshTitle();
+				}
+			}
+		});
+	}
+
+	@Override
+	public void refreshTitle() {
+		window.setHeadingText("Numerical Distribution: " + character.toString());
 	}
 
 }

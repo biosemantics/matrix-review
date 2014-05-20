@@ -5,6 +5,7 @@ import java.util.TreeMap;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.editor.client.Editor.Path;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.chart.client.chart.Chart;
@@ -27,12 +28,15 @@ import com.sencha.gxt.widget.core.client.event.ExpandEvent;
 import com.sencha.gxt.widget.core.client.event.CollapseEvent.CollapseHandler;
 import com.sencha.gxt.widget.core.client.event.ExpandEvent.ExpandHandler;
 
+import edu.arizona.biosemantics.matrixreview.client.desktop.Window;
+import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
-public class TermFrequencyChartCreator extends WidgetCreator {
+public class TermFrequencyManager extends AbstractWindowManager {
 
 	public class NameFrequency {
 		private String name;
@@ -67,13 +71,15 @@ public class TermFrequencyChartCreator extends WidgetCreator {
 	private TaxonMatrix taxonMatrix;
 	private Character character;
 
-	public TermFrequencyChartCreator(TaxonMatrix taxonMatrix, Character character) {
+	public TermFrequencyManager(EventBus eventBus, Window window, TaxonMatrix taxonMatrix, Character character) {
+		super(eventBus, window);
 		this.taxonMatrix = taxonMatrix;
 		this.character = character;
+		init();
 	}
 
 	@Override
-	public Widget create() {
+	public void refreshContent() {
 		// draw bar chart for categorical values and free-text
 		// draw curve for numerical values
 		TreeMap<String, Integer> counts = new TreeMap<String, Integer>();
@@ -126,7 +132,36 @@ public class TermFrequencyChartCreator extends WidgetCreator {
 		chart.addSeries(bar);
 		chart.setAnimated(true);
 
-		return chart;
+		window.setWidget(chart);
+		window.forceLayout();
+		//window.fireEvent(event)
+		//window.hide();
+		//window.show();
+	}
+
+	@Override
+	protected void addEventHandlers() {
+		eventBus.addHandler(SetValueEvent.TYPE, new SetValueEvent.SetValueEventHandler() {
+			@Override
+			public void onSet(SetValueEvent event) {
+				if(event.getOldValue().getCharacter().equals(character)) {
+					refreshContent();
+				}
+			}
+		});
+		eventBus.addHandler(ModifyCharacterEvent.TYPE, new ModifyCharacterEvent.ModifyCharacterEventHandler() {
+			@Override
+			public void onRename(ModifyCharacterEvent event) {
+				if(event.getCharacter().equals(character)) {
+					refreshTitle();
+				}
+			}
+		});
+	}
+
+	@Override
+	public void refreshTitle() {
+		window.setHeadingText("State Frequency: " + character.toString());
 	}
 
 }

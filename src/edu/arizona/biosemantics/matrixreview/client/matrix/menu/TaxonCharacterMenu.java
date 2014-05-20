@@ -109,7 +109,7 @@ public class TaxonCharacterMenu extends Menu {
 	}
 
 	private MenuItem createAnalysisStart() {
-		MenuItem item = new MenuItem("Start");
+		MenuItem item = new MenuItem("Show Desktop");
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {

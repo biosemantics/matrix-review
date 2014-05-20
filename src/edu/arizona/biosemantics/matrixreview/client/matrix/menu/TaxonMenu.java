@@ -387,7 +387,7 @@ public class TaxonMenu extends Menu {
 		add(createColorize());
 		add(new HeaderMenuItem("Analysis"));
 		add(createShowDescription());
-		add(createAnalysis());	
+		//add(createAnalysis());	
 	}
 	
 	@Override

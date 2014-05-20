@@ -267,7 +267,7 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 	}
 	
 	public void addTaxon(Taxon parent, int index, Taxon child) {
-		if(!Level.isValidParentChild(parent.getLevel(), child.getLevel())) {
+		if(!Level.isValidParentChild(parent == null ? null : parent.getLevel(), child.getLevel())) {
 			throw new IllegalArgumentException("Invalid levels");
 		}
 		
@@ -283,7 +283,7 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 	
 	public void addTaxon(Taxon parent, int index, List<Taxon> children) {
 		for(Taxon child : children)
-			if(!Level.isValidParentChild(parent.getLevel(), child.getLevel())) {
+			if(!Level.isValidParentChild(parent == null ? null : parent.getLevel(), child.getLevel())) {
 				throw new IllegalArgumentException("Invalid levels");
 			}
 		
@@ -298,7 +298,8 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 	public void removeTaxon(Taxon taxon) {
 		//either should remove if it was contained
 		this.rootTaxa.remove(taxon);
-		taxon.getParent().removeChild(taxon);
+		if(taxon.hasParent())
+			taxon.getParent().removeChild(taxon);
 		
 		cleanupTaxon(taxon);
 	}

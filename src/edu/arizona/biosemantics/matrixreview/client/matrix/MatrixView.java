@@ -132,7 +132,7 @@ public class MatrixView implements IsWidget {
 			eventBus.addHandler(ModifyTaxonEvent.TYPE, new ModifyTaxonEvent.ModifyTaxonEventHandler() {
 				@Override
 				public void onModify(ModifyTaxonEvent event) {
-					if(Level.isValidParentChild(event.getParent().getLevel(), event.getLevel()))
+					if(Level.isValidParentChild(event.getParent() == null ? null : event.getParent().getLevel(), event.getLevel()))
 						modifyTaxon(event.getTaxon(), event.getParent(), event.getLevel(), event.getName(), event.getAuthor(), event.getYear());
 					else {
 						AlertMessageBox alertMessageBox = new AlertMessageBox("Modify Taxon", "Unable to modify: Incompatible rank of taxon with parent.");
@@ -794,9 +794,9 @@ public class MatrixView implements IsWidget {
 		}
 		
 		private void initCharacterEditing() {
+			EditEventsHandler editEventsHandler = new EditEventsHandler();
 			for(CharacterColumnConfig config : taxonTreeGrid.getGrid().getColumnModel().getCharacterColumns()) {
 				editing.addEditor(config);
-				EditEventsHandler editEventsHandler = new EditEventsHandler();
 				editing.addBeforeStartEditHandler(editEventsHandler);
 				editing.addCompleteEditHandler(editEventsHandler);
 			}
@@ -840,20 +840,29 @@ public class MatrixView implements IsWidget {
 	
 	public class EditEventsHandler implements CompleteEditHandler<Taxon>, BeforeStartEditHandler<Taxon> {
 		private Value oldValue;
+		//underlying GXT implementation fires CompleteEditEvent multiple times for some reason
+		private boolean fired = true;
 		@Override
 		public void onCompleteEdit(CompleteEditEvent<Taxon> event) {
-			GridCell cell = event.getEditCell();
-			Taxon taxon = taxonTreeGrid.getTreeGrid().getListStore().get(cell.getRow());
-			ColumnConfig<Taxon, Value> config = taxonTreeGrid.getColumnModel().getColumn(cell.getCol());
-			Value value = config.getValueProvider().getValue(taxon);
-			eventBus.fireEvent(new SetValueEvent(oldValue, value, true));
+			if(!fired) {
+				GridCell cell = event.getEditCell();
+				Taxon taxon = taxonTreeGrid.getTreeGrid().getListStore().get(cell.getRow());
+				ColumnConfig<Taxon, Value> config = taxonTreeGrid.getColumnModel().getColumn(cell.getCol());
+				Value value = config.getValueProvider().getValue(taxon);
+				eventBus.fireEvent(new SetValueEvent(oldValue, value, true));
+				fired = true;
+				oldValue = null;
+			}
 		}
 		@Override
 		public void onBeforeStartEdit(BeforeStartEditEvent<Taxon> event) {
-			GridCell cell = event.getEditCell();
-			Taxon taxon = taxonTreeGrid.getTreeGrid().getListStore().get(cell.getRow());
-			ColumnConfig<Taxon, Value> config = taxonTreeGrid.getColumnModel().getColumn(cell.getCol());
-			oldValue = config.getValueProvider().getValue(taxon);
+			if(fired) {
+				GridCell cell = event.getEditCell();
+				Taxon taxon = taxonTreeGrid.getTreeGrid().getListStore().get(cell.getRow());
+				ColumnConfig<Taxon, Value> config = taxonTreeGrid.getColumnModel().getColumn(cell.getCol());
+				oldValue = config.getValueProvider().getValue(taxon);
+				fired = false;
+			}
 		}
 		
 	}
