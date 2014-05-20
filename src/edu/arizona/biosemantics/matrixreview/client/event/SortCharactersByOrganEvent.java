@@ -2,6 +2,7 @@ package edu.arizona.biosemantics.matrixreview.client.event;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
+import com.sencha.gxt.data.shared.SortDir;
 
 import edu.arizona.biosemantics.matrixreview.client.event.SortCharactersByOrganEvent.SortCharatersByOrganEventHandler;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
@@ -14,10 +15,10 @@ public class SortCharactersByOrganEvent extends GwtEvent<SortCharatersByOrganEve
 	
 	public static Type<SortCharatersByOrganEventHandler> TYPE = new Type<SortCharatersByOrganEventHandler>();
 	
-	private boolean descending;
+	private SortDir sortDir;
 	
-	public SortCharactersByOrganEvent(boolean descending) {
-		this.descending = descending;
+	public SortCharactersByOrganEvent(SortDir sortDir) {
+		this.sortDir = sortDir;
 	}
 
 	@Override
@@ -34,10 +35,9 @@ public class SortCharactersByOrganEvent extends GwtEvent<SortCharatersByOrganEve
 		return TYPE;
 	}
 
-	public boolean isDescending() {
-		return descending;
-	}
-	
+	public SortDir getSortDir() {
+		return sortDir;
+	}	
 	
 	
 }

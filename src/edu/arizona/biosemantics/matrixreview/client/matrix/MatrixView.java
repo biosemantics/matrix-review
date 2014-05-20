@@ -11,6 +11,7 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.thirdparty.guava.common.collect.ComparisonChain;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.data.shared.SortDir;
@@ -276,19 +277,19 @@ public class MatrixView implements IsWidget {
 			eventBus.addHandler(SortCharactersByNameEvent.TYPE, new SortCharactersByNameEvent.SortCharatersByNameEventHandler() {
 				@Override
 				public void onSort(final SortCharactersByNameEvent event) {
-					sortCharactersByName(event.isDescending());
+					sortCharactersByName(event.getSortDir().equals(SortDir.DESC));
 				}
 			});
 			eventBus.addHandler(SortCharactersByCoverageEvent.TYPE, new SortCharactersByCoverageEvent.SortCharatersByCoverageEventHandler() {
 				@Override
 				public void onSort(final SortCharactersByCoverageEvent event) {
-					sortCharactersByCoverage(event.isDescending());
+					sortCharactersByCoverage(event.getSortDir().equals(SortDir.DESC));
 				}
 			});
 			eventBus.addHandler(SortCharactersByOrganEvent.TYPE, new SortCharactersByOrganEvent.SortCharatersByOrganEventHandler() {
 				@Override
 				public void onSort(final SortCharactersByOrganEvent event) {
-					sortCharactersByOrgan(event.isDescending());
+					sortCharactersByOrgan(event.getSortDir().equals(SortDir.DESC));
 				}
 			});
 			eventBus.addHandler(HideCharacterEvent.TYPE, new HideCharacterEvent.HideCharacterEventHandler() {
@@ -545,10 +546,14 @@ public class MatrixView implements IsWidget {
 				@Override
 				public int compare(CharacterColumnConfig o1, CharacterColumnConfig o2) {
 					if (descending)
-						// first by name then by organ
-						return (o2.getCharacter().getName() + o2.getCharacter().getOrgan()).compareTo(o1.getCharacter().getName() + o1.getCharacter().getOrgan());
+						return doCompare(o1, o2);
 					else
-						return (o1.getCharacter().getName() + o1.getCharacter().getOrgan()).compareTo(o2.getCharacter().getName() + o2.getCharacter().getOrgan());
+						return doCompare(o2, o1);
+				}
+
+				// first by name then by organ
+				private int doCompare(CharacterColumnConfig o1,	CharacterColumnConfig o2) {
+					return (o2.getCharacter().getName() + o2.getCharacter().getOrgan()).compareTo(o1.getCharacter().getName() + o1.getCharacter().getOrgan());
 				}
 			};
 			sortCharacters(comparator);
@@ -558,10 +563,22 @@ public class MatrixView implements IsWidget {
 			Comparator<CharacterColumnConfig> comparator = new Comparator<CharacterColumnConfig>() {
 				@Override
 				public int compare(CharacterColumnConfig o1, CharacterColumnConfig o2) {
-					if (descending)
-						return taxonMatrix.getCharacterValueCount(o2.getCharacter()) - taxonMatrix.getCharacterValueCount(o1.getCharacter());
-					else
-						return taxonMatrix.getCharacterValueCount(o1.getCharacter()) - taxonMatrix.getCharacterValueCount(o2.getCharacter());
+					if (descending) {
+						int diff =  doCompare(o2, o1);
+						if(diff == 0)
+							diff = (o1.getCharacter().getOrgan() + o1.getCharacter().getName()).compareTo(o2.getCharacter().getOrgan() + o2.getCharacter().getName());
+						return diff;
+					} else {
+						int diff =  doCompare(o1, o2);
+						if(diff == 0)
+							diff = (o1.getCharacter().getOrgan() + o1.getCharacter().getName()).compareTo(o2.getCharacter().getOrgan() + o2.getCharacter().getName());
+						return diff;
+					}
+				}
+
+				//first by coverage, then by name 
+				private int doCompare(CharacterColumnConfig o1, CharacterColumnConfig o2) {
+					return taxonMatrix.getCharacterValueCount(o1.getCharacter()) - taxonMatrix.getCharacterValueCount(o2.getCharacter());
 				}
 			};
 			sortCharacters(comparator);
@@ -572,10 +589,14 @@ public class MatrixView implements IsWidget {
 				@Override
 				public int compare(CharacterColumnConfig o1, CharacterColumnConfig o2) {
 					if (descending)
-						// first by organ then by character name
-						return (o2.getCharacter().getOrgan() + o2.getCharacter().getName()).compareTo(o1.getCharacter().getOrgan() + o1.getCharacter().getName());
+						return doCompare(o1, o2);
 					else
-						return (o1.getCharacter().getOrgan() + o1.getCharacter().getName()).compareTo(o2.getCharacter().getOrgan() + o2.getCharacter().getName());
+						return doCompare(o2, o1);
+				}
+
+				// first by organ then by character name
+				private int doCompare(CharacterColumnConfig o1, CharacterColumnConfig o2) {
+					return (o2.getCharacter().getOrgan() + o2.getCharacter().getName()).compareTo(o1.getCharacter().getOrgan() + o1.getCharacter().getName());
 				}
 			};
 			sortCharacters(comparator);
@@ -606,7 +627,10 @@ public class MatrixView implements IsWidget {
 			StoreSortInfo<Taxon> sortInfo = new StoreSortInfo<Taxon>(new Comparator<Taxon>() {
 				@Override
 				public int compare(Taxon o1, Taxon o2) {
-					return o1.get(character).getValue().compareTo(o2.get(character).getValue());
+					int diff = o1.get(character).getValue().compareTo(o2.get(character).getValue());
+					if(diff == 0)
+						diff = o1.getFullName().compareTo(o2.getFullName());
+					return diff;
 				}
 			}, sortDirection);
 			taxonStore.addSortInfo(sortInfo);
@@ -617,7 +641,11 @@ public class MatrixView implements IsWidget {
 			StoreSortInfo<Taxon> sortInfo = new StoreSortInfo<Taxon>(new Comparator<Taxon>() {
 				@Override
 				public int compare(Taxon o1, Taxon o2) {
-					return taxonMatrix.getTaxonValueCount(o1) - taxonMatrix.getTaxonValueCount(o2);
+					//first by coverage, then by name 
+					int diff = taxonMatrix.getTaxonValueCount(o1) - taxonMatrix.getTaxonValueCount(o2);
+					if(diff == 0)
+						diff = o1.getFullName().compareTo(o2.getFullName());
+					return diff;
 				}
 			}, sortDirection);
 			taxonStore.addSortInfo(sortInfo);

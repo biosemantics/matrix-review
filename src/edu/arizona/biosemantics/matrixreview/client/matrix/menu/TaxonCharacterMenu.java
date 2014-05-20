@@ -251,37 +251,37 @@ public class TaxonCharacterMenu extends Menu {
 		coverageSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				eventBus.fireEvent(new SortCharactersByCoverageEvent(true));
+				eventBus.fireEvent(new SortCharactersByCoverageEvent(SortDir.ASC));
 			}
 		});
 		coverageSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				eventBus.fireEvent(new SortCharactersByCoverageEvent(false));
+				eventBus.fireEvent(new SortCharactersByCoverageEvent(SortDir.DESC));
 			}
 		});
 		nameSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				eventBus.fireEvent(new SortCharactersByNameEvent(true));
+				eventBus.fireEvent(new SortCharactersByNameEvent(SortDir.ASC));
 			}
 		});
 		nameSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				eventBus.fireEvent(new SortCharactersByNameEvent(false));
+				eventBus.fireEvent(new SortCharactersByNameEvent(SortDir.DESC));
 			}
 		});
 		organSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				eventBus.fireEvent(new SortCharactersByOrganEvent(true));
+				eventBus.fireEvent(new SortCharactersByOrganEvent(SortDir.ASC));
 			}
 		});
 		organSortDesc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				eventBus.fireEvent(new SortCharactersByOrganEvent(true));
+				eventBus.fireEvent(new SortCharactersByOrganEvent(SortDir.DESC));
 			}
 		});
 		return item;

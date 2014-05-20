@@ -2,6 +2,7 @@ package edu.arizona.biosemantics.matrixreview.client.event;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
+import com.sencha.gxt.data.shared.SortDir;
 
 import edu.arizona.biosemantics.matrixreview.client.event.SortCharactersByCoverageEvent.SortCharatersByCoverageEventHandler;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
@@ -14,10 +15,10 @@ public class SortCharactersByCoverageEvent extends GwtEvent<SortCharatersByCover
 	
 	public static Type<SortCharatersByCoverageEventHandler> TYPE = new Type<SortCharatersByCoverageEventHandler>();
 	
-	private boolean descending;
+	private SortDir sortDir;
 	
-	public SortCharactersByCoverageEvent(boolean descending) {
-		this.descending = descending;
+	public SortCharactersByCoverageEvent(SortDir sortDir) {
+		this.sortDir = sortDir;
 	}
 
 	@Override
@@ -30,13 +31,9 @@ public class SortCharactersByCoverageEvent extends GwtEvent<SortCharatersByCover
 		handler.onSort(this);
 	}
 
-	public static Type<SortCharatersByCoverageEventHandler> getTYPE() {
-		return TYPE;
-	}
-
-	public boolean isDescending() {
-		return descending;
-	}
+	public SortDir getSortDir() {
+		return sortDir;
+	}	
 	
 	
 	
