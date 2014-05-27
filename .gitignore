@@ -5,9 +5,10 @@
 *.war
 *.ear
 
+/target
+
+
 .classpath
 .project
 .settings/*
-bin
-war/WEB-INF/classes
-/gwt-unitCache
+gwt-unitCache/*
