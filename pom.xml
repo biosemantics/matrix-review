@@ -159,25 +159,6 @@
 			</plugin>
 		</plugins>
 	</build>
-	
-
-	<!-- <build>
-		<sourceDirectory>gxt</sourceDirectory>
-		<resources>
-			<resource>
-				<directory>gxt</directory>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
-			</resource>
-			<resource>
-				<directory>src</directory>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
-			</resource>
-		</resources>
-	</build> -->
 
 	<distributionManagement>
 		<repository>
