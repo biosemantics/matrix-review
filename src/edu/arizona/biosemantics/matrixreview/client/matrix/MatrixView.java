@@ -378,14 +378,15 @@ public class MatrixView implements IsWidget {
 			for(Taxon taxon : taxa)
 				removeFromStoreRecursively(taxon);
 			if (parent == null) {
-				insertToStoreRecursively(index, taxa);
 				if(!storeOnly)
 					taxonMatrix.moveToRootTaxon(index, taxa);
+				index = insertToStoreRecursively(index, taxa);
 			} else {
-				insertToStoreRecursively(parent, index, taxa);
 				if(!storeOnly)
 					taxonMatrix.addTaxon(parent, index, taxa);
+				index = insertToStoreRecursively(parent, index, taxa);
 			}
+			//System.out.println(taxonMatrix.list().toString());
 		}
 
 		protected void moveTaxonFlat(List<Taxon> taxa, Taxon after) {
@@ -427,18 +428,26 @@ public class MatrixView implements IsWidget {
 			}
 		}
 		
-		private void insertToStoreRecursively(int index, List<Taxon> taxa) {
+		private int insertToStoreRecursively(int index, List<Taxon> taxa) {
+			// drag and drop can sometime provides index that is out of bounds of stores underlying list
+			while(taxonStore.getRootCount() < index) 
+				index--;
 			taxonStore.insert(index, taxa);
 			
 			for(Taxon taxon : taxa) 
 				insertToStoreRecursively(taxon, 0, taxon.getChildren());
+			return index;
 		}
 		
-		private void insertToStoreRecursively(Taxon parent, int index,	List<Taxon> taxa) {
+		private int insertToStoreRecursively(Taxon parent, int index,	List<Taxon> taxa) {
+			// drag and drop can sometime provides index that is out of bounds of stores underlying list
+			while(taxonStore.getChildCount(parent) < index) 
+				index--;
 			taxonStore.insert(parent, index, taxa);
 			
 			for(Taxon taxon : taxa) 
 				insertToStoreRecursively(taxon, 0, taxon.getChildren());
+			return index;
 		}
 		
 		private void  insertToStoreRecursively(Taxon taxon) {
