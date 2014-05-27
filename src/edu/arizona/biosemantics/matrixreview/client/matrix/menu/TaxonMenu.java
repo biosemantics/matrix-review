@@ -31,6 +31,7 @@ import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.data.shared.Store.StoreFilter;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.Dialog;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
 import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
@@ -298,6 +299,22 @@ public class TaxonMenu extends Menu {
 		    add.addSelectHandler(new SelectHandler() {
 				@Override
 				public void onSelect(SelectEvent event) {
+					if(!nameField.validate()) {
+						AlertMessageBox alert = new AlertMessageBox("Name empty", "A name is required");
+						alert.show();
+						return;
+					}
+					if(!authorField.validate()) {
+						AlertMessageBox alert = new AlertMessageBox("Author empty", "An author is required");
+						alert.show();
+						return;
+					}
+					if(!yearField.validate()) {
+						AlertMessageBox alert = new AlertMessageBox("Year empty", "A year is required");
+						alert.show();
+						return;
+					}
+					
 					Taxon newTaxon = new Taxon(String.valueOf(Taxon.currentId++), 
 							levelCombo.getValue(), nameField.getText(), authorField.getText(), yearField.getText());
 					eventBus.fireEvent(new AddTaxonEvent(newTaxon, taxaTree.getSelectionModel().getSelectedItem()));
@@ -340,6 +357,21 @@ public class TaxonMenu extends Menu {
 		    save.addSelectHandler(new SelectHandler() {
 				@Override
 				public void onSelect(SelectEvent event) {
+					if(!nameField.validate()) {
+						AlertMessageBox alert = new AlertMessageBox("Name empty", "A name is required");
+						alert.show();
+						return;
+					}
+					if(!authorField.validate()) {
+						AlertMessageBox alert = new AlertMessageBox("Author empty", "An author is required");
+						alert.show();
+						return;
+					}
+					if(!yearField.validate()) {
+						AlertMessageBox alert = new AlertMessageBox("Year empty", "A year is required");
+						alert.show();
+						return;
+					}
 					eventBus.fireEvent(new ModifyTaxonEvent(taxon, taxaTree.getSelectionModel().getSelectedItem(), 
 							levelCombo.getValue(), nameField.getText(), authorField.getText(), yearField.getText()));
 					TaxonModifyDialog.this.hide();

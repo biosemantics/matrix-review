@@ -29,7 +29,9 @@ import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.messages.client.DefaultMessages;
 import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.Window;
+import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
 import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
@@ -37,8 +39,10 @@ import com.sencha.gxt.widget.core.client.container.MarginData;
 import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
+import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.event.DialogHideEvent.DialogHideHandler;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
@@ -115,7 +119,7 @@ public class CharacterMenu extends Menu {
 		    p.add(new FieldLabel(organComboBox, "Organ"), new VerticalLayoutData(1, -1));
 		 
 		    characterNameField = new TextField();
-		    characterNameField.setText(initialName);
+		    characterNameField.setValue(initialName);
 		    characterNameField.setAllowBlank(false);
 		    p.add(new FieldLabel(characterNameField, "Character Name"), new VerticalLayoutData(1, -1));
 		}
@@ -147,9 +151,13 @@ public class CharacterMenu extends Menu {
 		    add.addSelectHandler(new SelectHandler() {
 				@Override
 				public void onSelect(SelectEvent event) {
+					if(!characterNameField.validate()) {
+						AlertMessageBox alert = new AlertMessageBox("Character Name", "A character name is required");
+						alert.show();
+						return;
+					}
+					
 					Organ selected = organComboBox.getValue();
-					if(organComboBox.getValue() == null)
-						selected = new Organ(organComboBox.getText());
 					Character newCharacter = new Character(characterNameField.getText(), selected);
 					if(after != null)
 						eventBus.fireEvent(new AddCharacterEvent(after, newCharacter));
@@ -190,9 +198,12 @@ public class CharacterMenu extends Menu {
 		    save.addSelectHandler(new SelectHandler() {
 				@Override
 				public void onSelect(SelectEvent event) {
+					if(!characterNameField.validate()) {
+						AlertMessageBox alert = new AlertMessageBox("Character Name", "A character name is required");
+						alert.show();
+						return;
+					}
 					Organ selected = organComboBox.getValue();
-					if(organComboBox.getValue() == null)
-						selected = new Organ(organComboBox.getText());
 					eventBus.fireEvent(new ModifyCharacterEvent(character, characterNameField.getText(), selected));
 					CharacterModifyDialog.this.hide();
 				}
@@ -582,8 +593,20 @@ public class CharacterMenu extends Menu {
 					modeMenu.add(modeItem);
 					modeItem.addSelectionHandler(new SelectionHandler<Item>() {
 						@Override
-						public void onSelection(SelectionEvent<Item> event) {
-							eventBus.fireEvent(new MergeCharactersEvent(character, target, mergeMode));
+						public void onSelection(SelectionEvent<Item> event) {							
+							ConfirmMessageBox box = new ConfirmMessageBox(
+									"Control Mode",
+									"Merging will turn off the control mode of the new column");
+							box.addDialogHideHandler(new DialogHideHandler() {
+								@Override
+								public void onDialogHide(DialogHideEvent event) {
+									if(event.getHideButton().equals(PredefinedButton.YES)) {
+										eventBus.fireEvent(new MergeCharactersEvent(character, target, mergeMode));
+									}
+								}
+								
+							});
+							box.show();
 						}
 					});
 				}

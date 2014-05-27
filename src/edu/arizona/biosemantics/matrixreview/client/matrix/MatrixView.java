@@ -857,7 +857,7 @@ public class MatrixView implements IsWidget {
 		}
 		
 		protected void addCharacterAfter(int colIndex, Character character) {
-			taxonMatrix.addCharacter(colIndex, character);
+			taxonMatrix.addCharacter(colIndex + 1, character);
 			List<CharacterColumnConfig> columns = new LinkedList<CharacterColumnConfig>(taxonTreeGrid.getColumnModel().getCharacterColumns());
 			CharacterColumnConfig columnConfig = createCharacterColumnConfig(character);
 			columns.add(colIndex + 1, columnConfig);
