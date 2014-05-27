@@ -95,6 +95,18 @@ public class UpdateModelDropTarget extends TreeGridDropTarget<Taxon> {
 			@Override
 			public void onMode(ModelModeEvent event) {
 				modelMode = event.getMode();
+				
+				switch(modelMode) {
+				case FLAT:
+					setFeedback(Feedback.INSERT);
+					break;
+				case CUSTOM_HIERARCHY:
+				case TAXONOMIC_HIERARCHY:
+					setFeedback(Feedback.BOTH);
+					break;
+				default:
+					break;
+				}
 			}
 		});
 	}
