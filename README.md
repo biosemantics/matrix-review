@@ -1,9 +1,6 @@
 matrixReview
 ============
 
-etc-site
-============
-
 Contribution
 ----------
 
