@@ -1,7 +1,12 @@
 package edu.arizona.biosemantics.matrixreview.client;
 
 import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.layout.client.Layout.AnimationCallback;
+import com.google.gwt.user.client.ui.AnimatedLayout;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.ProvidesResize;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -13,7 +18,7 @@ import edu.arizona.biosemantics.matrixreview.client.matrix.MatrixView;
 import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
 
-public class MatrixReviewView implements IsWidget {
+public class MatrixReviewView extends Composite implements /*implements IsWidget, */RequiresResize, ProvidesResize, AnimatedLayout {
 
 	private TaxonMatrix taxonMatrix;
 	private TaxonStore taxonStore;
@@ -27,9 +32,11 @@ public class MatrixReviewView implements IsWidget {
 
 	public MatrixReviewView(TaxonMatrix taxonMatrix) {
 		this.taxonMatrix = taxonMatrix;	
+		
+		this.initWidget(init());
 	}
 	
-	public Widget asWidget() {
+	public Widget init() {
 		eventBus = new SimpleEventBus();
 		matrixView = new MatrixView(eventBus, taxonMatrix);
 		desktopView = new DesktopView(eventBus, taxonMatrix);
@@ -81,6 +88,26 @@ public class MatrixReviewView implements IsWidget {
 		else if(splitLayoutPanel.getWidgetSize(desktopView) == 0) 
 			splitLayoutPanel.setWidgetSize(desktopView, desktopHeight);
 		splitLayoutPanel.animate(500);
+	}
+
+	@Override
+	public void onResize() {
+		splitLayoutPanel.onResize();
+	}
+
+	@Override
+	public void animate(int duration) {
+		splitLayoutPanel.animate(duration);
+	}
+
+	@Override
+	public void animate(int duration, AnimationCallback callback) {
+		splitLayoutPanel.animate(duration, callback);
+	}
+
+	@Override
+	public void forceLayout() {
+		splitLayoutPanel.forceLayout();
 	}
 	
 }
