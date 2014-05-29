@@ -21,4 +21,4 @@ and
 com.google.gwt.dev.DevMode
 
 #### Arguments
--remoteUI "${gwt_remote_ui_server_port}:${unique_id}" -startupUrl Matrix_review.html -logLevel INFO -port auto -codeServerPort auto -war **full_path_to_your_git_dir**\matrix-reviewTreeGridScratch\target\matrix-review-0.0.1-SNAPSHOT edu.arizona.biosemantics.matrixreview.Matrix_review
+-remoteUI "${gwt_remote_ui_server_port}:${unique_id}" -startupUrl Matrix_review.html -logLevel INFO -port auto -codeServerPort auto -war **full_path_to_your_git_dir**\matrix-review\target\matrix-review-0.0.1-SNAPSHOT edu.arizona.biosemantics.matrixreview.Matrix_review
