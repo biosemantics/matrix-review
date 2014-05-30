@@ -24,8 +24,22 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 	public static int currentId = 0;
 	
 	public enum Level {
-		LIFE(0), DOMAIN(1), KINGDOM(2), PHYLUM(3), CLASS(4), ORDER(5), FAMILY(6), SUBFAMILY(7), GENUS(8), SPECIES(9), SUBSPECIES(10), VARIETY(11), 
-		FORM(12), GROUP(13);
+		LIFE(0), 
+		SUPERDOMAIN(1), DOMAIN(1), SUBDOMAIN(2), 
+		SUPERKINGDOM(3), KINGDOM(4), SUBKINGDOM(5), 
+		SUPERPHYLUM(6), PHYLUM(7), SUBPHYLUM(8),
+		SUPERCLASS(9), CLASS(10), SUBCLASS(11),
+		SUPERORDER(12), ORDER(13), SUBORDER(14),
+		SUPERFAMILY(15), FAMILY(16), SUBFAMILY(17),
+		SUPERTRIBE(18), TRIBE(19), SUBTRIBE(20),
+		SUPERGENUS(21), GENUS(22), SUBGENUS(23),
+		SUPERSECTION(24), SECTION(25), SUBSECTION(26),
+		SUPERSERIES(27), SERIES(28), SUBSERIES(29), 
+		SUPERSPECIES(30), SPECIES(31), SUBSPECIES(32),
+		SUPERVARIETY(33), VARIETY(34), SUBVARIETAS(35),
+		SUPERFORMA(36), FORMA(37), SUBFORMA(38),
+		SUPERGROUP(39), GROUP(40), SUBGROUP(41),
+		UNRANKED(42);
 		
 		private int id;
 
@@ -41,7 +55,7 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 			int parentLevelId = parent == null? -1 : parent.getId();
 			int childLevelId = child == null? -1 : child.getId();
 			//special case group allows children of itself as it is the lowest rank
-			if(parent != null && child != null && parent.equals(GROUP) && child.equals(GROUP))
+			if(parent != null && child != null && parent.equals(UNRANKED) && child.equals(UNRANKED))
 				return true;
 			return parentLevelId < childLevelId;
 		}
