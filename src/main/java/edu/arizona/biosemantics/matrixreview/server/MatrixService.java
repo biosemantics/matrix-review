@@ -29,7 +29,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 	}
 	
 	private TaxonMatrix createSampleMatrix() {
-		List<Character> characters = new LinkedList<Character>();
+		/*List<Character> characters = new LinkedList<Character>();
 		Organ o1 = new Organ("stem");
 		Organ o2 = new Organ("leaf");
 		Organ o3 = new Organ("head");
@@ -103,7 +103,8 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 			taxonMatrix.addRootTaxon(t4);
 		}*/
 		
-		return taxonMatrix;
+		return null;
+		//return taxonMatrix;
 	}
 
 	private TaxonMatrix readButterflyTaxonMatrix() {		

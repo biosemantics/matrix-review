@@ -32,7 +32,7 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Taxon.Level;
  */
 public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 
-	public class TaxaList extends ArrayList<Taxon> {
+	public class TaxaList extends ArrayList<Taxon> implements Serializable {
 		
 		public TaxaList() {
 			for(Taxon taxon : rootTaxa) {

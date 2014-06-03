@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.data.shared.TreeStore.TreeNode;
 
@@ -21,9 +22,9 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
 public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComment, HasDirty, HasLocked {
 	
-	public static int currentId = 0;
+	public static int currentId = 0;	
 	
-	public enum Level {
+	public enum Level implements Serializable  {
 		LIFE(0), 
 		SUPERDOMAIN(1), DOMAIN(1), SUBDOMAIN(2), 
 		SUPERKINGDOM(3), KINGDOM(4), SUBKINGDOM(5), 
@@ -42,7 +43,9 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 		UNRANKED(42);
 		
 		private int id;
-
+		
+		Level() { }
+	
 		Level(int id) {
 			this.id = id;
 		}
@@ -50,6 +53,7 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 		public int getId() {
 			return id;
 		}
+		
 		
 		public static boolean isValidParentChild(Level parent, Level child) {
 			int parentLevelId = parent == null? -1 : parent.getId();
