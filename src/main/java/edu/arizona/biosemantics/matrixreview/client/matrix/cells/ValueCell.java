@@ -28,7 +28,7 @@ public class ValueCell extends MenuExtendedCell<Value> {
 				"background: no-repeat 0 0;" +
 				"background-image:{6};" +
 				"background-color:{5};" +
-				"\">{3}<a href=\"#\" class=\"{2}\" style=\"height: 22px;\"></a>" +
+				"\">{3}<a class=\"{2}\" style=\"height: 22px;\"></a>" +
 				"</div>" +
 				"</div>")
 		SafeHtml cell(String grandParentStyleClass, String parentStyleClass,

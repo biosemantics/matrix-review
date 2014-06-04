@@ -28,7 +28,7 @@ public abstract class MenuExtendedCell<C> extends AbstractCell<C> {
 	interface Templates extends SafeHtmlTemplates {
 		@SafeHtmlTemplates.Template("<div class=\"{0}\" qtip=\"{4}\">" +
 				"<div class=\"{1}\" style=\"width: calc(100% - 9px); height:14px\">{3}" +
-				"<a href=\"#\" class=\"{2}\" style=\"height: 22px;\"></a>" +
+				"<a class=\"{2}\" style=\"height: 22px;\"></a>" +
 				"</div>" +
 				"</div>")
 		SafeHtml cell(String grandParentStyleClass, String parentStyleClass,
@@ -117,7 +117,8 @@ public abstract class MenuExtendedCell<C> extends AbstractCell<C> {
 	public void showMenu(final Element parent, final int column, final int row) {
 		Menu menu = createContextMenu(column, row);
 		if (menu != null) {
-			menu.setId("cell" + column + "." + row + "-menu");
+			//menu.setId("cell" + column + "." + row + "-menu");
+			//menu.setStateful(false);
 			menu.addHideHandler(new HideHandler() {
 				@Override
 				public void onHide(HideEvent event) {

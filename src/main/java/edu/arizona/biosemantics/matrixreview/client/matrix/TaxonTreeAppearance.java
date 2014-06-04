@@ -185,7 +185,7 @@ public class TaxonTreeAppearance extends TreeBaseAppearance {
 			
 			//sb.appendHtmlConstant("<div class=\"" + taxonTreeBaseStyles.menu() + " " + parentStyleClass + "\">");
 			sb.appendHtmlConstant("<div class=\"" + taxonTreeBaseStyles.menu() + "\">");
-			sb.appendHtmlConstant("<a href=\"#\""  
+			sb.appendHtmlConstant("<a"  
 					+ "class=\"" + taxonTreeBaseStyles.headButton() + "\" "
 					+ "style=\"height: 22px; right:0px;\"></a>");
 			sb.appendHtmlConstant("</div>");
@@ -309,7 +309,7 @@ public class TaxonTreeAppearance extends TreeBaseAppearance {
 			
 			//sb.appendHtmlConstant("<div class=\"" + taxonTreeBaseStyles.menu() + " " + parentStyleClass + "\">");
 			sb.appendHtmlConstant("<div class=\"" + taxonTreeBaseStyles.menu() + "\">");
-			sb.appendHtmlConstant("<a href=\"#\""  
+			sb.appendHtmlConstant("<a"  
 					+ "class=\"" + taxonTreeBaseStyles.headButton() + "\" "
 					+ "style=\"height: 22px; right:0px;\"></a>");
 			sb.appendHtmlConstant("</div>");
