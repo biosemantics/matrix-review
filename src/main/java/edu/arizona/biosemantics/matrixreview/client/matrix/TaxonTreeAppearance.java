@@ -117,7 +117,7 @@ public class TaxonTreeAppearance extends TreeBaseAppearance {
 		
 		SpanElement coverage = Document.get().createSpanElement();
 		//coverage.setInnerText(dataManager.getCoverage(((CharacterColumnConfig) column).getCharacter()));
-		coverage.setAttribute("style", "position:absolute;right:0px;background-color:#279446;width:35px;");
+		coverage.setAttribute("style", "position:absolute;right:0px;background-color:#a8d04d;width:35px;");
 		coverage.setInnerText(taxon.getTaxonMatrix().getCoverage(taxon));
 		sb.appendHtmlConstant(coverage.getString());
 		

@@ -82,7 +82,7 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 			if (column instanceof CharacterColumnConfig) {
 				coverage = Document.get().createSpanElement();
 				//coverage.setInnerText(dataManager.getCoverage(((CharacterColumnConfig) column).getCharacter()));
-				coverage.setAttribute("style", "position:absolute;right:0px;background-color:#279446;width:35px;");
+				coverage.setAttribute("style", "position:absolute;right:0px;background-color:#a8d04d;width:35px;");
 				getElement().appendChild(coverage);
 			}
 
