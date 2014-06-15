@@ -3,6 +3,7 @@ package edu.arizona.biosemantics.matrixreview.shared.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -21,7 +22,7 @@ public class Character implements Serializable, HasColor, HasComment, HasDirty, 
 	private boolean locked = false;
 	private boolean hidden = false;
 	private ControlMode controlMode = ControlMode.OFF;
-	private List<String> states = null;
+	private ArrayList<String> states = null;
 
 	public Character() { }
 	
@@ -122,7 +123,7 @@ public class Character implements Serializable, HasColor, HasComment, HasDirty, 
 		this.controlMode = controlMode;
 	}
 	
-	protected void setStates(List<String> states) {
+	protected void setStates(ArrayList<String> states) {
 		this.states = states;
 	}
 	

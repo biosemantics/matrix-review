@@ -463,6 +463,6 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 	}
 	
 	public void setCharacterStates(Character character, List<String> states) {
-		character.setStates(states);
+		character.setStates(new ArrayList<String>(states));
 	}
 }
