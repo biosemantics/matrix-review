@@ -7,14 +7,18 @@ import com.google.gwt.dom.client.Element;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.core.client.GXTLogConfiguration;
 import com.sencha.gxt.core.client.dom.XElement;
+import com.sencha.gxt.data.shared.Converter;
 import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.event.ParseErrorEvent;
 
 public class AllowFreeTextComboBoxCell<T> extends ComboBoxCell<T> {
 
-	public AllowFreeTextComboBoxCell(ListStore<T> store, LabelProvider<? super T> labelProvider) {
+	private Converter<T, String> converter;
+
+	public AllowFreeTextComboBoxCell(ListStore<T> store, LabelProvider<? super T> labelProvider, Converter<T, String> converter) {
 		super(store, labelProvider);
+		this.converter = converter;
 	}
 	
 	@Override
@@ -94,6 +98,22 @@ public class AllowFreeTextComboBoxCell<T> extends ComboBoxCell<T> {
 
 		// not calling super as GWT code does input.blur() which breaks
 		// navigation between fields
+	}
+	
+	@Override
+	protected T getByValue(String value) {
+		T result = super.getByValue(value);
+		if(result == null)
+			return this.converter.convertFieldValue(value);
+		int count = store.size();
+		for (int i = 0; i < count; i++) {
+			T item = store.get(i);
+			String v = getRenderedValue(item);
+			if (v != null && v.equals(value)) {
+				return item;
+			}
+		}
+		return null;
 	}
 
 }

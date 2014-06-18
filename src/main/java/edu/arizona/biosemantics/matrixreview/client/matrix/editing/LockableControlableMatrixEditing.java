@@ -220,7 +220,7 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 
 	public void addEditor(CharacterColumnConfig columnConfig) {
 		Character character = columnConfig.getCharacter();
-		addEditor(columnConfig, new ValueConverter(), getEditorField(character, character.getControlMode(), null));
+		addEditor(columnConfig, new ValueConverter(), getEditorField(character, character.getControlMode(), character.getStates()));
 	}
 	
 	protected void onClick(final ClickEvent event) {

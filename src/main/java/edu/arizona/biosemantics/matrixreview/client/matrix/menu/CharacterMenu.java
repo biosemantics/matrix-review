@@ -61,6 +61,7 @@ import com.sencha.gxt.widget.core.client.menu.HeaderMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
+import com.sencha.gxt.data.shared.Converter;
 
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeCharacterEvent;
@@ -111,7 +112,19 @@ public class CharacterMenu extends Menu {
 		    AllAccessListStore<Organ> store = new AllAccessListStore<Organ>(organProperties.key());
 		    Set<Organ> organs = taxonMatrix.getOrgans();
 		    store.addAll(organs);
-		    organComboBox = new ComboBox<Organ>(new AllowFreeTextComboBoxCell<Organ>(store, organProperties.nameLabel()));
+		    organComboBox = new ComboBox<Organ>(new AllowFreeTextComboBoxCell<Organ>(store, organProperties.nameLabel(), 
+		    		new Converter<Organ, String>() {
+						@Override
+						public Organ convertFieldValue(String name) {
+							return new Organ(name);
+						}
+
+						@Override
+						public String convertModelValue(Organ organ) {
+							return organ.getName();
+						}
+		    }));
+		    
 		    organComboBox.setAllowBlank(true);
 		    organComboBox.setForceSelection(false);
 		    organComboBox.setTriggerAction(TriggerAction.ALL);

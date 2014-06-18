@@ -21,7 +21,7 @@ public class Character implements Serializable, HasColor, HasComment, HasDirty, 
 	private boolean locked = false;
 	private boolean hidden = false;
 	private ControlMode controlMode = ControlMode.OFF;
-	private List<String> states = null;
+	private List<String> states = new ArrayList<String>();
 
 	public Character() { }
 	
