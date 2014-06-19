@@ -27,7 +27,7 @@ public class TextFieldChangeHandler implements ValueChangeHandler<String>, Befor
 		String newValue = event.getValue();
 		TextField textField = (TextField)event.getSource();
 		if(!validator.validate(null, newValue).isEmpty()) {
-			textField.setText(backupValue);
+			textField.setValue(backupValue);
 		}
 	}
 

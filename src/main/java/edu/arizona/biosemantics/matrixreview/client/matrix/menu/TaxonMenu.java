@@ -229,17 +229,17 @@ public class TaxonMenu extends Menu {
 		    p.add(new FieldLabel(levelComboBox, "Level"), new VerticalLayoutData(1, -1));
 		 
 		    nameField = new TextField();
-		    nameField.setText(taxon == null ? "" : taxon.getName());
+		    nameField.setValue(taxon == null ? "" : taxon.getName());
 		    nameField.setAllowBlank(false);
 		    p.add(new FieldLabel(nameField, "Taxon Name"), new VerticalLayoutData(1, -1));
 		 
 		    authorField = new TextField();
-		    authorField.setText(taxon == null ? "" : taxon.getAuthor());
+		    authorField.setValue(taxon == null ? "" : taxon.getAuthor());
 		    authorField.setAllowBlank(false);
 		    p.add(new FieldLabel(authorField, "Author of Publication"), new VerticalLayoutData(1, -1));
 		 
 		    yearField = new TextField();
-		    yearField.setText(taxon == null ? "" : taxon.getYear());
+		    yearField.setValue(taxon == null ? "" : taxon.getYear());
 		    yearField.setAllowBlank(false);
 		    p.add(new FieldLabel(yearField, "Year of Publication"), new VerticalLayoutData(1, -1));
 		}
