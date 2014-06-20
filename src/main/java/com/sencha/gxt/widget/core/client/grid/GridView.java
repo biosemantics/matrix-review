@@ -2701,7 +2701,7 @@ public class GridView<M> {
    * 
    * @param state the state as returned from a previous call to {@link #getScrollState()}.
    */
-  protected void restoreScroll(Point state) {
+  public void restoreScroll(Point state) {
     if (state.getY() < scroller.getWidth(false)) {
       scroller.setScrollLeft(state.getX());
     }

@@ -38,6 +38,8 @@ import edu.arizona.biosemantics.matrixreview.client.event.LockTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent.MergeMode;
 import edu.arizona.biosemantics.matrixreview.client.event.AddColorEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.CollapseTaxaEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.ExpandTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.HideCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.HideTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModelModeEvent;
@@ -316,6 +318,26 @@ public class MatrixView implements IsWidget {
 					sortTaxaByName(event.getSortDirection());
 				}
 			});
+			eventBus.addHandler(CollapseTaxaEvent.TYPE, new CollapseTaxaEvent.CollapseTaxaEventHandler() {
+				@Override
+				public void onCollapse(CollapseTaxaEvent event) {
+					collapseTaxa(event.getTaxa());
+				}
+			});
+			eventBus.addHandler(ExpandTaxaEvent.TYPE, new ExpandTaxaEvent.ExpandTaxaEventHandler() {
+				@Override
+				public void onExpand(ExpandTaxaEvent event) {
+					expandTaxa(event.getTaxa());
+				}
+			});
+		}
+		
+		private void collapseTaxa(List<Taxon> taxa) {
+			taxonTreeGrid.setCollapsed(taxa);
+		}
+		
+		private void expandTaxa(List<Taxon> taxa) {
+			taxonTreeGrid.setExpanded(taxa);
 		}
 		
 		protected void setTaxonComment(Taxon taxon, String comment) {
@@ -547,7 +569,9 @@ public class MatrixView implements IsWidget {
 
 		protected void setCharacterColor(Character character, Color color) {
 			taxonMatrix.setColor(character, color);
-			taxonStore.fireEvent(new StoreDataChangeEvent<Taxon>());
+			for(Taxon visibleTaxon : taxonStore.getAll()) 
+				taxonStore.update(visibleTaxon);
+			//taxonStore.fireEvent(new StoreDataChangeEvent<Taxon>());
 		}
 
 		protected void setTaxonColor(Taxon taxon, Color color) {
@@ -557,7 +581,8 @@ public class MatrixView implements IsWidget {
 		
 		protected void setValueColor(Value value, Color color) {
 			taxonMatrix.setColor(value, color);
-			taxonStore.fireEvent(new StoreDataChangeEvent<Taxon>());
+			taxonStore.update(value.getTaxon());
+			//taxonStore.fireEvent(new StoreDataChangeEvent<Taxon>());
 		}
 
 		protected void sortCharactersByName(final boolean descending) {

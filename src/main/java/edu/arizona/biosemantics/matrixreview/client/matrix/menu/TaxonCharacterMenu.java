@@ -15,6 +15,8 @@ import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
+import edu.arizona.biosemantics.matrixreview.client.event.CollapseTaxaEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.ExpandTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.HideCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.HideTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockMatrixEvent;
@@ -54,12 +56,16 @@ public class TaxonCharacterMenu extends Menu {
 		add(createSortCharacters());
 		add(createHideTaxa());
 		add(createHideCharacters());
+		if(modelMode.equals(ModelMode.TAXONOMIC_HIERARCHY)) {
+			add(createCollapseAll());
+			add(createExpandAll());
+		}
 		add(new HeaderMenuItem("Annotation"));
 		add(createColorSettings());
 		add(new HeaderMenuItem("Analysis"));
 		add(createAnalysisStart());
 	}
-	
+
 	private Widget createModelMode() {
 		MenuItem item = new MenuItem("Taxon Concept Presentation");
 		Menu menu = new Menu();
@@ -105,6 +111,28 @@ public class TaxonCharacterMenu extends Menu {
 				eventBus.fireEvent(new ModelModeEvent(ModelMode.CUSTOM_HIERARCHY));
 			}
 		});*/
+		return item;
+	}
+	
+	private Widget createExpandAll() {
+		MenuItem item = new MenuItem("Expand All");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				eventBus.fireEvent(new ExpandTaxaEvent(treeStore.getAll()));
+			}
+		});
+		return item;
+	}
+
+	private Widget createCollapseAll() {
+		MenuItem item = new MenuItem("Collapse All");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				eventBus.fireEvent(new CollapseTaxaEvent(treeStore.getAll()));
+			}
+		});
 		return item;
 	}
 

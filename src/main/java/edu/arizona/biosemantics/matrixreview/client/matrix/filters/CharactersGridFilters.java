@@ -24,6 +24,10 @@ import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.container.MarginData;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
+import com.sencha.gxt.widget.core.client.event.ActivateEvent;
+import com.sencha.gxt.widget.core.client.event.ActivateEvent.ActivateHandler;
+import com.sencha.gxt.widget.core.client.event.BeforeFilterEvent;
+import com.sencha.gxt.widget.core.client.event.BeforeFilterEvent.BeforeFilterHandler;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent;
 import com.sencha.gxt.widget.core.client.event.CheckChangeEvent.CheckChangeHandler;
 import com.sencha.gxt.widget.core.client.event.HeaderContextMenuEvent;
@@ -52,6 +56,7 @@ import edu.arizona.biosemantics.matrixreview.client.matrix.CharacterColumnConfig
 import edu.arizona.biosemantics.matrixreview.client.matrix.FrozenFirstColumTaxonTreeGrid.CharactersGrid;
 import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
 import edu.arizona.biosemantics.matrixreview.client.matrix.editing.ValueConverter;
+import edu.arizona.biosemantics.matrixreview.client.matrix.menu.CharacterMenu;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.AllAccessListStore;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
@@ -167,28 +172,25 @@ public class CharactersGridFilters extends GridFilters<Taxon> {
 	protected void onContextMenu(HeaderContextMenuEvent event) {
 		int column = event.getColumnIndex();
 		
-		if (checkFilterItem == null) {
-			checkFilterItem = new CheckMenuItem(DefaultMessages.getMessages()
-					.gridFilters_filterText());
-			checkFilterItem
-					.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
-
-						@Override
-						public void onCheckChange(
-								CheckChangeEvent<CheckMenuItem> event) {
-							CharactersGridFilters.this.onCheckChange(event);
-						}
-					});
-		}
-
-		checkFilterItem.setData("index", column);
-		
-		
 		Filter<Taxon, ?> f = getFilter(grid.getColumnModel().getColumn(column).getValueProvider().getPath());
 		
 		if (f != null) {
-			Menu filterMenu = f.getMenu();
-			Menu menu = event.getMenu();
+			final Menu filterMenu = f.getMenu();
+			final CharacterMenu menu = (CharacterMenu)event.getMenu();
+			
+			if (checkFilterItem == null) {
+				checkFilterItem = new CheckMenuItem(DefaultMessages.getMessages()
+						.gridFilters_filterText());
+				checkFilterItem
+						.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
+							@Override
+							public void onCheckChange(CheckChangeEvent<CheckMenuItem> event) {
+								CharactersGridFilters.this.onCheckChange(event);
+							}
+						});
+			}
+
+			checkFilterItem.setData("index", column);
 			checkFilterItem.setChecked(f.isActive(), true);
 			checkFilterItem.setSubMenu(filterMenu);
 			for(int i=0; i<menu.getWidgetCount(); i++) {
@@ -228,6 +230,7 @@ public class CharactersGridFilters extends GridFilters<Taxon> {
 	}
 	
 	private void setFilter(CharacterColumnConfig characterColumnConfig, Filter<Taxon, ?> filter) {
+		filter.addBeforeFilterHandler(charactersGrid.getView().getScrollStateMaintainer());
 		characterColumnConfig.setFilter(filter);
 		addFilter(filter);
 	}

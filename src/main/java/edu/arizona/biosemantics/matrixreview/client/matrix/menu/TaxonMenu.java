@@ -62,6 +62,8 @@ import com.sencha.gxt.widget.core.client.tree.TreeSelectionModel;
 
 import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.CollapseTaxaEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.ExpandTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxonFlatEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxonEvent;
@@ -69,6 +71,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.ModifyTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonCommentEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowDescriptionEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.ShowDesktopEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.MatrixView.ModelMode;
 import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.AllAccessListStore;
@@ -414,6 +417,10 @@ public class TaxonMenu extends Menu {
 		add(createMoveTaxon());
 		add(createLockTaxon());
 		add(new HeaderMenuItem("View"));
+		if(modelMode.equals(ModelMode.TAXONOMIC_HIERARCHY)) {
+			add(createCollapseAll());
+			add(createExpandAll());
+		}
 		add(new HeaderMenuItem("Annotation"));
 		add(createComment());
 		add(createColorize());
@@ -426,6 +433,28 @@ public class TaxonMenu extends Menu {
 	public void add(Widget child) {
 		if(child != null)
 			super.add(child);
+	}
+	
+	private Widget createExpandAll() {
+		MenuItem item = new MenuItem("Expand All");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				eventBus.fireEvent(new ExpandTaxaEvent(taxon));
+			}
+		});
+		return item;
+	}
+
+	private Widget createCollapseAll() {
+		MenuItem item = new MenuItem("Collapse All");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				eventBus.fireEvent(new CollapseTaxaEvent(taxon));
+			}
+		});
+		return item;
 	}
 	
 	private MenuItem createAnalysis() {

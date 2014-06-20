@@ -22,7 +22,10 @@ import com.sencha.gxt.core.client.dom.XDOM;
 import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.SortDir;
+import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.data.shared.TreeStore;
+import com.sencha.gxt.data.shared.event.StoreFilterEvent;
+import com.sencha.gxt.data.shared.event.StoreFilterEvent.StoreFilterHandler;
 import com.sencha.gxt.dnd.core.client.DND.Operation;
 import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
@@ -175,6 +178,8 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 				GWT.<TreeAppearance> create(TaxonTreeAppearance.class));
 			this.setView(new TaxonTreeGridView(eventBus));
 			this.taxonStore = store;
+			this.setAutoExpand(true);
+			this.setExpandOnFilter(true);
 			
 			eventBus.addHandler(ModelModeEvent.TYPE, new ModelModeEvent.ModelModeEventHandler() {
 				@Override
@@ -274,10 +279,11 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 
 		private HashMap<Character, CharacterColumnConfig> characterConfigMap;
 
-		public CharactersGrid(ListStore<Taxon> listStore,
-				CharactersColumnModel columnModel, CharactersGridView gridView) {
+		public CharactersGrid(TreeStore<Taxon> treeStore, ListStore<Taxon> listStore,
+				CharactersColumnModel columnModel, final CharactersGridView gridView) {
 			super(listStore, columnModel, gridView);
 			this.setColumnReordering(true);
+			treeStore.addStoreFilterHandler(gridView.getScrollStateMaintainer());			
 		}
 		
 		@Override
@@ -371,10 +377,10 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 	}
 
 	@Override
-	protected CharactersGrid createGrid(ListStore<Taxon> listStore, ColumnModel<Taxon> columnModel, GridView<Taxon> gridView) {
+	protected CharactersGrid createGrid(TreeStore<Taxon> treeStore, ListStore<Taxon> listStore, ColumnModel<Taxon> columnModel, GridView<Taxon> gridView) {
 		assert gridView instanceof CharactersGridView;
 		assert columnModel instanceof CharactersColumnModel;
-		return new CharactersGrid(listStore, (CharactersColumnModel)columnModel, (CharactersGridView)gridView);
+		return new CharactersGrid(treeStore, listStore, (CharactersColumnModel)columnModel, (CharactersGridView)gridView);
 	}
 	
 	public TaxonStore getTaxonStore() {
@@ -412,6 +418,16 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 		//force filter refresh
 		store.setEnableFilters(true);
 		store.applyFilters();
+	}
+
+	public void setCollapsed(List<Taxon> taxa) {
+		for(Taxon taxon : taxa)
+			this.treeGrid.setExpanded(taxon, false, true);
+	}
+
+	public void setExpanded(List<Taxon> taxa) {
+		for(Taxon taxon : taxa)
+			this.treeGrid.setExpanded(taxon, true, true);
 	}
 	
 }

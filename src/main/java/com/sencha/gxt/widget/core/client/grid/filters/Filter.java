@@ -16,8 +16,11 @@ import com.sencha.gxt.data.shared.loader.FilterConfig;
 import com.sencha.gxt.data.shared.loader.FilterConfigBean;
 import com.sencha.gxt.data.shared.loader.FilterHandler;
 import com.sencha.gxt.widget.core.client.event.ActivateEvent;
+import com.sencha.gxt.widget.core.client.event.BeforeFilterEvent;
 import com.sencha.gxt.widget.core.client.event.ActivateEvent.ActivateHandler;
 import com.sencha.gxt.widget.core.client.event.ActivateEvent.HasActivateHandlers;
+import com.sencha.gxt.widget.core.client.event.BeforeFilterEvent.BeforeFilterHandler;
+import com.sencha.gxt.widget.core.client.event.BeforeFilterEvent.HasBeforeFilterHandlers;
 import com.sencha.gxt.widget.core.client.event.DeactivateEvent;
 import com.sencha.gxt.widget.core.client.event.DeactivateEvent.DeactivateHandler;
 import com.sencha.gxt.widget.core.client.event.DeactivateEvent.HasDeactivateHandlers;
@@ -48,7 +51,7 @@ import com.sencha.gxt.widget.core.client.menu.Menu;
  * @param <V> the filter type
  */
 public abstract class Filter<M, V> implements HasUpdateHandlers, HasActivateHandlers<Filter<M, ?>>,
-    HasDeactivateHandlers<Filter<M, ?>> {
+    HasDeactivateHandlers<Filter<M, ?>>, HasBeforeFilterHandlers<Filter<M, ?>> {
 
   protected Menu menu;
 
@@ -70,6 +73,11 @@ public abstract class Filter<M, V> implements HasUpdateHandlers, HasActivateHand
     this.valueProvider = valueProvider;
 
     menu = new Menu();
+  }
+  
+  @Override
+  public HandlerRegistration addBeforeFilterHandler(BeforeFilterHandler<Filter<M, ?>> handler) {
+	  return ensureHandlers().addHandler(BeforeFilterEvent.getType(), handler);
   }
 
   @Override
@@ -152,7 +160,8 @@ public abstract class Filter<M, V> implements HasUpdateHandlers, HasActivateHand
    * @param suppressEvent true to prevent events from being fired
    */
   public void setActive(boolean active, boolean suppressEvent) {
-    active = active && isActivatable();
+    ensureHandlers().fireEventFromSource(new BeforeFilterEvent(this), this);
+	  active = active && isActivatable();
     if (this.active != active) {
       this.active = active;
       if (!suppressEvent) {

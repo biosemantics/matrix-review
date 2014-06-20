@@ -15,6 +15,8 @@ import edu.arizona.biosemantics.matrixreview.client.event.AddColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.CollapseTaxaEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.ExpandTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.HideCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.HideTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
@@ -70,7 +72,8 @@ public class ConsoleManager extends AbstractWindowManager {
 		SortTaxaByNameEvent.SortTaxaByNameEventHandler, ToggleDesktopEvent.ToggleDesktopEventHandler, 
 		AnalyzeTaxonEvent.AnalyzeTaxonEventHandler, LockTaxonEvent.LockTaxonEventHandler, 
 		ShowDescriptionEvent.ShowDescriptionEventHandler, SetValueCommentEvent.SetValueCommentEventHandler, 
-		SetValueColorEvent.SetValueColorEventHandler, SetValueEvent.SetValueEventHandler, ModelModeEvent.ModelModeEventHandler
+		SetValueColorEvent.SetValueColorEventHandler, SetValueEvent.SetValueEventHandler, ModelModeEvent.ModelModeEventHandler,
+		CollapseTaxaEvent.CollapseTaxaEventHandler, ExpandTaxaEvent.ExpandTaxaEventHandler
 		{
 		
 		public ConsoleEventsHandler() {
@@ -117,6 +120,8 @@ public class ConsoleManager extends AbstractWindowManager {
 			eventBus.addHandler(ShowDescriptionEvent.TYPE, this);	
 			eventBus.addHandler(SetValueEvent.TYPE, this);
 			eventBus.addHandler(ModelModeEvent.TYPE, this);
+			eventBus.addHandler(CollapseTaxaEvent.TYPE, this);
+			eventBus.addHandler(ExpandTaxaEvent.TYPE, this);
 		}
 
 		@Override
@@ -323,6 +328,16 @@ public class ConsoleManager extends AbstractWindowManager {
 	
 		@Override
 		public void onMode(ModelModeEvent event) {
+			printToConsole(event);
+		}
+
+		@Override
+		public void onExpand(ExpandTaxaEvent event) {
+			printToConsole(event);
+		}
+
+		@Override
+		public void onCollapse(CollapseTaxaEvent event) {
 			printToConsole(event);
 		}
 		

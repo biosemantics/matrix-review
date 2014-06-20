@@ -88,7 +88,7 @@ public class FrozenFirstColumnTreeGrid<M> extends Widget {
 		treeGridColumns.add(treeColumn);
 		ColumnModel<M> treeGridColumnModel = createTreeGridColumnModel(treeGridColumns);
 		this.treeGrid = createTreeGrid(store, treeGridColumnModel, treeColumn);
-		this.grid = createGrid(treeGrid.getListStore(), createGridColumnModel(otherColumnConfigs), gridView);
+		this.grid = createGrid(store, treeGrid.getListStore(), createGridColumnModel(otherColumnConfigs), gridView);
 		QuickTip gridGuickTip = new QuickTip(grid);
 		QuickTip treeGridQuickTip = new QuickTip(treeGrid);
 		
@@ -115,7 +115,7 @@ public class FrozenFirstColumnTreeGrid<M> extends Widget {
 		return new MaintainListStoreTreeGrid<M>(store, treeGridColumnModel, treeColumn);
 	}
 
-	protected Grid<M> createGrid(ListStore<M> listStore, ColumnModel<M> columnModel, GridView<M> gridView) {
+	protected Grid<M> createGrid(TreeStore<M> treeStore, ListStore<M> listStore, ColumnModel<M> columnModel, GridView<M> gridView) {
 		return new Grid<M>(listStore, columnModel, gridView);
 	}
 

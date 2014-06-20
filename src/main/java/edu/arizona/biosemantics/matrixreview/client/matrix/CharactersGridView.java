@@ -9,8 +9,11 @@ import com.google.gwt.safecss.shared.SafeStylesUtils;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sencha.gxt.core.client.GXT;
+import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.SortDir;
+import com.sencha.gxt.data.shared.event.StoreFilterEvent;
+import com.sencha.gxt.data.shared.event.StoreFilterEvent.StoreFilterHandler;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnData;
 import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderAppearance;
@@ -23,6 +26,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCharacterEve
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCoverageEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByNameEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.FrozenFirstColumTaxonTreeGrid.CharactersGrid;
+import edu.arizona.biosemantics.matrixreview.client.matrix.filters.ScrollStateMaintainer;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.CharacterMenu;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
@@ -33,6 +37,8 @@ public class CharactersGridView extends GridView<Taxon> {
 	private ColumnHeaderStyles columnHeaderStyles;
 	private EventBus eventBus;
 	private TaxonMatrix taxonMatrix;
+	
+	private ScrollStateMaintainer<Taxon> scrollStateMaintainer = new ScrollStateMaintainer<Taxon>(this);
 
 	public CharactersGridView(EventBus eventBus, TaxonMatrix taxonMatrix) {
 		this(eventBus, taxonMatrix, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
@@ -52,7 +58,8 @@ public class CharactersGridView extends GridView<Taxon> {
 
 	@Override
 	protected Menu createContextMenu(final int colIndex) {
-		return new CharacterMenu(eventBus, (CharactersGrid)grid, taxonMatrix, getColumnModel().getColumn(colIndex).getCharacter());
+		CharacterMenu menu = new CharacterMenu(eventBus, (CharactersGrid)grid, taxonMatrix, getColumnModel().getColumn(colIndex).getCharacter());
+		return menu;
 	}
 
 	@Override
@@ -301,6 +308,10 @@ public class CharactersGridView extends GridView<Taxon> {
 	@Override
 	public CharactersColumnModel getColumnModel() {
 		return (CharactersColumnModel)cm;
+	}
+
+	public ScrollStateMaintainer getScrollStateMaintainer() {
+		return scrollStateMaintainer;
 	}
 
 }
