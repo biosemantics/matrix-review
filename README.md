@@ -1,4 +1,4 @@
-matrixReview
+matrix-review
 ============
 
 Contribution
