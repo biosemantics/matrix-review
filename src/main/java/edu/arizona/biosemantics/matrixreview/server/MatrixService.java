@@ -1,5 +1,7 @@
 package edu.arizona.biosemantics.matrixreview.server;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +14,9 @@ import org.jdom2.input.SAXBuilder;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
+import edu.arizona.biosemantics.matrixreview.client.matrix.shared.MatrixVersion;
+import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleMatrixVersion;
+import edu.arizona.biosemantics.matrixreview.client.matrix.shared.VersionInfo;
 import edu.arizona.biosemantics.matrixreview.shared.IMatrixService;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Organ;
@@ -29,7 +34,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 	}
 	
 	private TaxonMatrix createSampleMatrix() {
-		/*List<Character> characters = new LinkedList<Character>();
+		List<Character> characters = new LinkedList<Character>();
 		Organ o1 = new Organ("stem");
 		Organ o2 = new Organ("leaf");
 		Organ o3 = new Organ("head");
@@ -56,7 +61,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		characters.add(c2);
 		characters.add(c3);
 		
-		for(int i=0; i<20; i++) {
+		for(int i=0; i<4; i++) {
 			Character o = new Character("o" + i, o2);
 			characters.add(o);
 		}
@@ -101,10 +106,10 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		/*for(int i=5; i<50; i++) {
 			Taxon t5 = new Taxon("server" + i, Level.SPECIES, "t123", "a", "2", "de");
 			taxonMatrix.addRootTaxon(t4);
-		}*/
+		}
 		
-		return null;
-		//return taxonMatrix;
+		return null;*/
+		return taxonMatrix;
 	}
 
 	private TaxonMatrix readButterflyTaxonMatrix() {		
@@ -147,4 +152,50 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		return null;
 	}
 
+	
+	@Override
+	public boolean commitCurrentVersion(TaxonMatrix matrix) {
+		try {
+			return VersionDAO.getInstance().commitCurrentVersion(matrix);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	@Override
+	public boolean commitNewVersion(TaxonMatrix matrix, String author, String comment){
+		try {
+			return VersionDAO.getInstance().commitNewVersion(matrix, author, comment);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	@Override
+	public List<VersionInfo> getAvailableVersions() {	
+		try {
+			return VersionDAO.getInstance().getAvailableVersions();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	//TODO: error checking, send back error response if fail.
+	@Override
+	public MatrixVersion getVersion(String versionID){
+		try {
+			return VersionDAO.getInstance().getVersion(versionID);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	@Override
+	public List<SimpleMatrixVersion> getVersions(List<String> versionIDs){
+		return VersionDAO.getInstance().getVersions(versionIDs);
+	}
 }

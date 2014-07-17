@@ -15,6 +15,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.AddColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.AutosaveEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.CollapseTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ExpandTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.HideCharacterEvent;
@@ -73,7 +74,7 @@ public class ConsoleManager extends AbstractWindowManager {
 		AnalyzeTaxonEvent.AnalyzeTaxonEventHandler, LockTaxonEvent.LockTaxonEventHandler, 
 		ShowDescriptionEvent.ShowDescriptionEventHandler, SetValueCommentEvent.SetValueCommentEventHandler, 
 		SetValueColorEvent.SetValueColorEventHandler, SetValueEvent.SetValueEventHandler, ModelModeEvent.ModelModeEventHandler,
-		CollapseTaxaEvent.CollapseTaxaEventHandler, ExpandTaxaEvent.ExpandTaxaEventHandler
+		CollapseTaxaEvent.CollapseTaxaEventHandler, ExpandTaxaEvent.ExpandTaxaEventHandler, AutosaveEvent.AutosaveEventHandler
 		{
 		
 		public ConsoleEventsHandler() {
@@ -122,6 +123,7 @@ public class ConsoleManager extends AbstractWindowManager {
 			eventBus.addHandler(ModelModeEvent.TYPE, this);
 			eventBus.addHandler(CollapseTaxaEvent.TYPE, this);
 			eventBus.addHandler(ExpandTaxaEvent.TYPE, this);
+			eventBus.addHandler(AutosaveEvent.TYPE, this);
 		}
 
 		@Override
@@ -338,6 +340,11 @@ public class ConsoleManager extends AbstractWindowManager {
 
 		@Override
 		public void onCollapse(CollapseTaxaEvent event) {
+			printToConsole(event);
+		}
+
+		@Override
+		public void onAutosave(AutosaveEvent event) {
 			printToConsole(event);
 		}
 		
