@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sencha.gxt.data.shared.TreeStore;
@@ -328,5 +329,11 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 				it.remove();
 		}
 	}
-		
+	
+	@Override
+	public boolean equals(Object o){
+		if (o instanceof Taxon)
+			return this.id.equals(((Taxon)o).getId());
+		return false;
+	}
 }

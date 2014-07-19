@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.MatrixVersion;
+import edu.arizona.biosemantics.matrixreview.client.matrix.shared.VersionInfo;
 import edu.arizona.biosemantics.matrixreview.shared.IMatrixService;
 import edu.arizona.biosemantics.matrixreview.shared.IMatrixServiceAsync;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
@@ -44,7 +45,8 @@ public class MatrixReview implements EntryPoint {
 		});
 		
 		// TaxonMatrix taxonMatrix = createSampleMatrix();
-		/*matrixService.getMatrix(new AsyncCallback<TaxonMatrix>() {
+		/*IMatrixServiceAsync matrixService = GWT.create(IMatrixService.class);
+		matrixService.getMatrix(new AsyncCallback<TaxonMatrix>() {
 			@Override
 			public void onFailure(Throwable caught) {
 				caught.printStackTrace();
@@ -52,7 +54,7 @@ public class MatrixReview implements EntryPoint {
 
 			@Override
 			public void onSuccess(TaxonMatrix result) {
-				MatrixReviewView view = new MatrixReviewView(result);
+				MatrixReviewView view = new MatrixReviewView(new MatrixVersion(result, new VersionInfo("0", "sample", "Original File")));
 
 				// simulate etc site
 				DockLayoutPanel dock = new DockLayoutPanel(Unit.EM);

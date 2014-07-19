@@ -10,6 +10,7 @@ public class Character implements Serializable, HasColor, HasComment, HasDirty, 
 
 	private String name = "";
 	private Organ organ;
+	private String id;
 	
 	/**
 	 * Matrix related
@@ -27,11 +28,13 @@ public class Character implements Serializable, HasColor, HasComment, HasDirty, 
 	
 	public Character(String name) {
 		this.name = name;
+		this.id = name; //TODO: may come up with something better later to use for id
 	}
 	
 	public Character(String name, Organ organ) {
 		this.name = name;
 		this.organ = organ;
+		this.id = name+organ.getName(); //TODO: may come up with something better later to use for id
 	}
 	
 	public TaxonMatrix getTaxonMatrix() {
@@ -48,6 +51,14 @@ public class Character implements Serializable, HasColor, HasComment, HasDirty, 
 
 	protected void setName(String name) {
 		this.name = name;
+	}
+	
+	public String getId() {
+		return id;
+	}
+	
+	protected void setId(String id) {
+		this.id = id;
 	}
 	
 	public Organ getOrgan() {
@@ -167,4 +178,15 @@ public class Character implements Serializable, HasColor, HasComment, HasDirty, 
 		this.hidden = hidden;
 	}
 	
+	@Override
+	public boolean equals(Object o){
+		if (o instanceof Character)
+			return this.id.equals(((Character)o).getId());
+		return false;
+	}
+	
+	@Override
+	public int hashCode(){
+		return id.hashCode();
+	}
 }

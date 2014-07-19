@@ -121,6 +121,14 @@ public class SimpleTaxonMatrix implements Serializable {
 		return list().get(index);
 	}
 	
+	public Taxon getTaxonById(String id){
+		for (Taxon t: list()){
+			if (t.getId().equals(id))
+				return t;
+		}
+		return null;
+	}
+	
 	public Character getCharacter(int index) {
 		return characters.get(index);
 	}
