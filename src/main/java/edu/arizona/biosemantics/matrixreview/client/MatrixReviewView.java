@@ -267,15 +267,25 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 	}
 	
 	private void showCompareVersionsDialog(List <SimpleMatrixVersion> oldVersions){
-		MatrixCompareView view = new MatrixCompareView(oldVersions, currentVersion);
+		final MatrixCompareView view = new MatrixCompareView(oldVersions, currentVersion);
 		
 		final Dialog dialog = new Dialog();
 		dialog.setPredefinedButtons(PredefinedButton.CANCEL, PredefinedButton.OK);
 		dialog.setHeadingText("Compare Versions");
-		dialog.setWidth(800);
+		dialog.setWidth(900);
 		dialog.setHeight(500);
 		dialog.add(view.asWidget());
 		dialog.setHideOnButtonClick(true);
+		dialog.addDialogHideHandler(new DialogHideHandler(){
+			@Override
+			public void onDialogHide(DialogHideEvent event) {
+				if (event.getHideButton() == PredefinedButton.OK){
+					currentVersion = view.getModifiedVersion();
+					matrixView.loadMatrix(currentVersion.getTaxonMatrix());
+					forceLayout();
+				}
+			}	
+		});
 		dialog.show();
 	}
 

@@ -2,6 +2,7 @@ package edu.arizona.biosemantics.matrixreview.shared.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -61,6 +62,25 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 			character.setTaxonMatrix(this);
 	}
 	
+	public TaxonMatrix(TaxonMatrix copyFrom) {
+		//root taxa
+		for (Taxon root: copyFrom.getRootTaxa()){
+			rootTaxa.add(new Taxon(root));
+		}
+		//characters
+		for (Character character: copyFrom.characters)
+			this.characters.add(character);
+		//colors
+		for (Color color: copyFrom.colors)
+			this.colors.add(color);
+		//changes
+		for (Change change: copyFrom.changes)
+			this.changes.add(change);
+		//taxoncharacterchages
+		this.taxonCharacterChanges.putAll(copyFrom.taxonCharacterChanges);
+		
+	}
+
 	public List<Taxon> getRootTaxa() {
 		return new LinkedList<Taxon>(rootTaxa);
 	}
@@ -472,5 +492,14 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 	
 	public void setCharacterStates(Character character, List<String> states) {
 		character.setStates(new ArrayList<String>(states));
+	}
+	
+	public Character getCharacterById(String id) {
+		for (Character character: characters){
+			if (character.getId().equals(id)){
+				return character;
+			}
+		}
+		return null;
 	}
 }

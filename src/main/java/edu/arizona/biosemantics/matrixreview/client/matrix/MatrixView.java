@@ -483,10 +483,14 @@ public class MatrixView implements IsWidget {
 		}
 		
 		private void  insertToStoreRecursively(Taxon taxon) {
-			if(!taxon.hasParent())
-				taxonStore.add(taxon);
-			else 
-				taxonStore.add(taxon.getParent(), taxon);
+			try{
+				if(!taxon.hasParent())
+					taxonStore.add(taxon);
+				else 
+					taxonStore.add(taxon.getParent(), taxon);
+			} catch (Exception e){
+				e.printStackTrace();
+			}
 			for(Taxon child : taxon.getChildren())
 				insertToStoreRecursively(child);
 		}
@@ -1002,5 +1006,15 @@ public class MatrixView implements IsWidget {
 	
 	public TaxonStore getTaxonStore() {
 		return taxonStore;
+	}
+
+	public void loadMatrix(TaxonMatrix copyFrom) {
+		/*for (int i = 0; i < copyFrom.getTaxaCount(); i++){
+			for (int j = 0; j < copyFrom.getCharacterCount(); j++){
+				Value newValue = copyFrom.getTaxon(i).get(copyFrom.getCharacter(j));
+				modelControler.setValue(copyFrom.getTaxon(i), copyFrom.getCharacter(j), newValue);
+			}
+		}*/
+		modelControler.load(copyFrom);
 	}
 }

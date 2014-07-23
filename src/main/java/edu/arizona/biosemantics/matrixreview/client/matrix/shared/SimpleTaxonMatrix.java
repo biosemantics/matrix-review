@@ -200,5 +200,14 @@ public class SimpleTaxonMatrix implements Serializable {
 		Value value = taxon.get(character);
 		return value != null && value.getValue() != null && !value.getValue().trim().isEmpty();
 	}
+
+	public Character getCharacterById(String id) {
+		for (Character character: characters){
+			if (character.getId().equals(id)){
+				return character;
+			}
+		}
+		return null;
+	}
 }
 

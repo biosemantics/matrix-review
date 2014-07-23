@@ -25,6 +25,11 @@ public class MatrixVersion implements Serializable {
 		this.metadata = metadata;
 	}
 	
+	public MatrixVersion(MatrixVersion copyFrom){
+		metadata = new VersionInfo(copyFrom.getVersionInfo());
+		taxonMatrix = new TaxonMatrix(copyFrom.getTaxonMatrix());
+	}
+	
 	public TaxonMatrix getTaxonMatrix() {
 		return taxonMatrix;
 	}

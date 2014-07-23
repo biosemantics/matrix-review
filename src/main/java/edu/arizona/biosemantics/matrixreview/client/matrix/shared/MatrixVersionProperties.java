@@ -8,19 +8,19 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
-public class SimpleMatrixVersionProperties implements PropertyAccess<Taxon>{
-		private SimpleMatrixVersion version;
+public class MatrixVersionProperties implements PropertyAccess<Taxon>{
+		private MatrixVersion version;
 		
-		public SimpleMatrixVersionProperties(SimpleMatrixVersion version){
+		public MatrixVersionProperties(MatrixVersion version){
 			this.version = version;
 		}
 		
 		public ValueProvider<Taxon, String> valueOfCharacter(final Character character){
 			return new ValueProvider<Taxon, String>(){
-
+				
 				@Override
 				public String getValue(Taxon taxon) {
-					Taxon t = version.getMatrix().getTaxonById(taxon.getId());
+					Taxon t = version.getTaxonMatrix().getTaxonById(taxon.getId());
 					if (t == null)
 						return "---";
 					Value result = t.get(character);
@@ -44,7 +44,7 @@ public class SimpleMatrixVersionProperties implements PropertyAccess<Taxon>{
 				@Override
 				public String getValue(CharacterTreeNode node) {
 					if (node.getData() instanceof Character){ //if this node is a character node (rather than an organ node)
-						Taxon t = version.getMatrix().getTaxonById(taxon.getId());
+						Taxon t = version.getTaxonMatrix().getTaxonById(taxon.getId());
 						Character c = (Character)node.getData();
 						if (t == null)
 							return "---";

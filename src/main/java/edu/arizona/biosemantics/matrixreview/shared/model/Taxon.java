@@ -130,6 +130,22 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 		this.values = values;
 	}
 		
+	public Taxon(Taxon copyFrom) {
+		this.id = copyFrom.getId();
+		this.level = copyFrom.getLevel();
+		this.name = copyFrom.getName();
+		this.author = copyFrom.getAuthor();
+		this.year = copyFrom.getYear();
+		this.description = copyFrom.getDescription();
+		this.values = new HashMap<Character, Value>();
+		this.values.putAll(copyFrom.values);
+		for (Taxon taxon: copyFrom.children)
+			this.children.add(new Taxon(taxon));
+		this.parent = copyFrom.parent;
+		this.taxonMatrix = copyFrom.taxonMatrix;
+		this.comment = copyFrom.comment;
+	}
+
 	protected void addChild(Taxon child) {
 		children.add(child);
 	}

@@ -187,6 +187,8 @@ public class Character implements Serializable, HasColor, HasComment, HasDirty, 
 	
 	@Override
 	public int hashCode(){
-		return id.hashCode();
+		if (id != null)
+			return id.hashCode();
+		return -1;
 	}
 }

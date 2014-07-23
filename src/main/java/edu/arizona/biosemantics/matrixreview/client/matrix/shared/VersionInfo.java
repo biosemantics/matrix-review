@@ -28,6 +28,13 @@ public class VersionInfo implements Serializable {
 		this.created = new Date();
 	}
 	
+	public VersionInfo(VersionInfo copyFrom) {
+		this.versionID = copyFrom.getVersionID();
+		this.author = copyFrom.getAuthor();
+		this.comment = copyFrom.getComment();
+		this.created = copyFrom.getCreated();
+	}
+
 	public String getVersionID() {
 		return versionID;
 	}

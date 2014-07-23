@@ -63,13 +63,15 @@ public class MatrixCompareView extends Composite {
 	
 	//Model
 	private List<SimpleMatrixVersion> oldVersions;
+	private MatrixVersion currentVersionSave; //this is only changed on the user clicking 'ok'.
 	private MatrixVersion currentVersion;
 	private CompareMode compareMode;
 	private EventBus eventBus;
 	
 	private TaxonStore taxonStore;
-	private TreeStore<Character> characterStore;
+	private TreeStore<CharacterTreeNode> characterStore;
 	private Character selectedCharacter;
+	private Taxon selectedTaxon;
 	
 	//UI 
 	private SimpleContainer content;
@@ -80,14 +82,13 @@ public class MatrixCompareView extends Composite {
 	
 	private ContentPanel southPanel;
 	private ContentPanel westPanel;
-	private SimpleContainer centerContent;
+	private ContentPanel centerContent;
 	
 	public MatrixCompareView(List<SimpleMatrixVersion> old, MatrixVersion current){
 		this.oldVersions = old;
-		this.currentVersion = current;
+		this.currentVersionSave = current;
+		this.currentVersion = new MatrixVersion(current);
 		this.eventBus = new SimpleEventBus();
-		
-		TaxonMatrix currentMatrix = currentVersion.getTaxonMatrix();
 		
 		content = GWT.create(SimpleContainer.class);
 		
@@ -97,79 +98,22 @@ public class MatrixCompareView extends Composite {
 		northContent.add(compareModeLabel);
 		northContent.add(changeCompareModeButton);
 		
-		centerContent = new SimpleContainer();
-		
+		centerContent = new ContentPanel();
+		centerContent.setHeaderVisible(false);
 		
 		
 		selectedCharacter = oldVersions.get(0).getMatrix().getCharacter(0);
+		selectedTaxon = oldVersions.get(0).getMatrix().getTaxon(0);
 		
 		
 		
 		createTaxonStore();
 		createCharacterStore();
 		
-			
-
-		//West panel
-		
-		//Create character picker. 
-		//generate list of all characters across these versions. 
-		List<Character> allCharacters = new ArrayList<Character>();
-		for (SimpleMatrixVersion version: oldVersions){
-			SimpleTaxonMatrix matrix = version.getMatrix();
-			for (int i = 0; i < matrix.getCharacterCount(); i++){
-				Character c = matrix.getCharacter(i);
-				if (!allCharacters.contains(c)){
-					allCharacters.add(c);
-				}
-			}
-		}
-		for (int i = 0; i < currentMatrix.getCharacterCount(); i++){
-			Character c = currentMatrix.getCharacter(i);
-			if (!allCharacters.contains(c)){
-				allCharacters.add(c);
-			}
-		}
-		
-		
-		
-		//PropertyAccess<Character> characterProperties = ;
-		
-		ListStore<Character> characterStore = new ListStore<Character>(new PropertyAccess<Character>() {
-			  ModelKeyProvider<Character> name(){
-				  return new ModelKeyProvider<Character>(){
-					@Override
-					public String getKey(Character character) {
-						return character.getId();
-					}
-				  };
-			  }
-		}.name());
-		characterStore.addAll(allCharacters);
-		
-		ComboBox<Character> characterPicker = new ComboBox<Character>(characterStore, new PropertyAccess<Character>() {
-			  LabelProvider<Character> name(){
-				  return new LabelProvider<Character>(){
-					@Override
-					public String getLabel(Character item) {
-						return item.toString();
-					}
-				  };
-			  }
-		}.name());
-		characterPicker.setForceSelection(true);
-		characterPicker.setTriggerAction(TriggerAction.ALL);
-		characterPicker.addSelectionHandler(new SelectionHandler<Character>(){
-			@Override
-			public void onSelection(SelectionEvent<Character> event) {
-				eventBus.fireEvent(new ChangeComparingSelectionEvent(event.getSelectedItem()));
-			}
-		});
 		
 		westPanel = new ContentPanel();
-		westPanel.add(characterPicker.asWidget());
+		westPanel.setHeaderVisible(false);
 		
-		//
 		final BorderLayoutContainer container = new BorderLayoutContainer();
 		
 		BorderLayoutData westData = new BorderLayoutData(150);
@@ -177,71 +121,79 @@ public class MatrixCompareView extends Composite {
 		westData.setSplit(true);
 		westData.setCollapseMini(true);
 		
-		MarginData centerData = new MarginData();
-		
 		container.setNorthWidget(northContent);
 		container.setWestWidget(westPanel, westData);
-		container.setCenterWidget(centerContent, centerData);
+		container.setCenterWidget(centerContent, new MarginData());
 		
 		content.add(container);
 		container.setBorders(true);
 		
 		addEventHandlers();
-		updateCompareMode(CompareMode.BY_CHARACTER);
+		updateCompareMode(CompareMode.BY_TAXON);
 	}
 	
 	private void createTaxonStore(){
 		TaxonMatrix currentMatrix = currentVersion.getTaxonMatrix();
 		//Create store and populate with taxon list.
 		taxonStore = new TaxonStore(); //this extends TreeStore<Taxon>. Awesome!
-		//taxonStore.add(getAllUsedTaxons());
 		for (Taxon root: currentMatrix.getRootTaxa()){
-			System.out.println("Adding " + root);
 			taxonStore.add(root);
 			addTaxonChildrenToStore(root);
 		}
 	}
 	private void addTaxonChildrenToStore(Taxon root){
 		for (Taxon child: root.getChildren()){
-			System.out.println(" Adding " + child);
 			taxonStore.add(root, child);
 			addTaxonChildrenToStore(child);
 		}
 	}
 	private void createCharacterStore(){ 
-		/*TODO: working on making a TreeGrid of characters, organized by organs.*/
 		TaxonMatrix currentMatrix = currentVersion.getTaxonMatrix();
-		CharacterProperties properties = GWT.create(CharacterProperties.class);
-		characterStore = new TreeStore<Character>(properties.key());
-		for (Organ organ: currentMatrix.getOrgans()){
-			Iterator <Character> iterator = organ.getCharacters().iterator();
-			while (iterator.hasNext()){
-				//characterStore.add(, iterator.next());
+		
+		CharacterTreeNodeProperties properties = new CharacterTreeNodeProperties();
+		
+		characterStore = new TreeStore<CharacterTreeNode>(properties.key());
+		
+		for (Character character: currentMatrix.getCharacters()){
+			CharacterTreeNode characterNode = new CharacterTreeNode(character);
+			if (character.hasOrgan()){
+				CharacterTreeNode organNode = new CharacterTreeNode(character.getOrgan());
+				if (characterStore.findModel(organNode) == null){
+					characterStore.add(organNode);
+				}
+				characterStore.add(organNode, characterNode); //add this character underneath the <organ name> folder.
+			} else{
+				characterStore.add(characterNode);
 			}
 		}
-		System.out.println("character store length: " + characterStore.getAll().size());
 	}
 	
-	private interface CharacterProperties extends PropertyAccess<Character>{
+	interface CharacterProperties extends PropertyAccess<Character>{
 		  ModelKeyProvider<Character> key();
 		  LabelProvider<Character> nameLabel();
 		  ValueProvider<Character, String> name();
 	}
 	
-	
-	
 	private void updateCompareMode(CompareMode mode){
 		this.compareMode = mode;
+		westPanel.clear();
 		centerContent.clear();
 		if (this.compareMode == CompareMode.BY_TAXON){
-			centerContent.add(new CompareByTaxonGrid());
+			TaxonTreeGrid taxonGrid = TaxonTreeGrid.createNew(eventBus,  taxonStore);
+			westPanel.add(taxonGrid.asWidget());
+			CompareByTaxonGrid compareByTaxonGrid = new CompareByTaxonGrid(eventBus, characterStore, oldVersions, currentVersion, selectedTaxon);
+			centerContent.add(compareByTaxonGrid.asWidget());
 			compareModeLabel.setText("Currently comparing by taxon.");
 			changeCompareModeButton.setText("View by character");
 		} else{
-			centerContent.add(new CompareByCharacterGrid(eventBus, taxonStore, oldVersions, selectedCharacter));
+			CharacterTreeGrid characterGrid = CharacterTreeGrid.createNew(eventBus, characterStore);
+			westPanel.add(characterGrid.asWidget());
+			CompareByCharacterGrid compareByCharacterGrid = new CompareByCharacterGrid(eventBus, taxonStore, oldVersions, currentVersion, selectedCharacter);
+			centerContent.add(compareByCharacterGrid.asWidget());
 			compareModeLabel.setText("Currently comparing by character.");
 			changeCompareModeButton.setText("View by taxon");
 		}
+		content.forceLayout();
 	}
 	
 	private List<Taxon> getAllUsedTaxons(){
@@ -271,8 +223,13 @@ public class MatrixCompareView extends Composite {
 		eventBus.addHandler(ChangeComparingSelectionEvent.TYPE, new ChangeComparingSelectionEvent.ChangeComparingSelectionEventHandler(){
 			@Override
 			public void onChange(ChangeComparingSelectionEvent event) {
-				Character newCharacter = (Character)event.getSelection();
-				selectedCharacter = newCharacter;
+				if (event.getSelection() instanceof Character){
+					Character newCharacter = (Character)event.getSelection();
+					selectedCharacter = newCharacter;
+				} else if (event.getSelection() instanceof Taxon){
+					Taxon newTaxon = (Taxon)event.getSelection();
+					selectedTaxon = newTaxon;
+				}
 			}
 		});
 		
@@ -289,5 +246,9 @@ public class MatrixCompareView extends Composite {
 	
 	public Widget asWidget(){
 		return content.asWidget();
+	}
+
+	public MatrixVersion getModifiedVersion() {
+		return currentVersion; 
 	}
 }
