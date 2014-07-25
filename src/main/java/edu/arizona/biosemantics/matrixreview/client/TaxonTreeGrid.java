@@ -11,13 +11,19 @@ import com.sencha.gxt.core.client.Style.SelectionMode;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
+import com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance;
 import com.sencha.gxt.widget.core.client.treegrid.MaintainListStoreTreeGrid;
-import com.sencha.gxt.widget.core.client.treegrid.TreeGrid;
 
 import edu.arizona.biosemantics.matrixreview.client.event.ChangeComparingSelectionEvent;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.client.matrix.ControllerGridAppearance;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonProperties;
+
+/**
+ * A single-column TreeGrid that shows a hierarchy of Taxons.
+ * 
+ * @author Andrew Stockton
+ */
 
 public class TaxonTreeGrid extends MaintainListStoreTreeGrid<Taxon>{
 	
@@ -25,18 +31,28 @@ public class TaxonTreeGrid extends MaintainListStoreTreeGrid<Taxon>{
 		super(treeStore, model, column);
 	}
 	
-	public static TaxonTreeGrid createNew(final EventBus eventBus, TreeStore<Taxon> store){
+	private TaxonTreeGrid(TreeStore<Taxon> treeStore, ColumnModel<Taxon> model, ColumnConfig<Taxon, String> column, GridAppearance app, ControllerGridAppearance treeApp){
+		super(treeStore, model, column, app, treeApp);
+	}
+	
+	public static TaxonTreeGrid createNew(final EventBus eventBus, TreeStore<Taxon> store, boolean useHeaderStyle){
 		final TaxonProperties taxonProperties = GWT.create(TaxonProperties.class);
 		ColumnConfig<Taxon, String> column = new ColumnConfig<Taxon, String>(taxonProperties.fullName(), 200);
 		column.setHeader("Taxon Concept / Character");
+		column.setMenuDisabled(true);
 		
 		List<ColumnConfig<Taxon, ?>> columns = new ArrayList<ColumnConfig<Taxon, ?>>();
 		columns.add(column);
 		ColumnModel<Taxon> columnModel = new ColumnModel<Taxon>(columns);
 		
-		TaxonTreeGrid grid = new TaxonTreeGrid(store, columnModel, column);
+		TaxonTreeGrid grid;
+		if (useHeaderStyle){
+			GridAppearance ga = GWT.<GridAppearance> create(GridAppearance.class);
+			ControllerGridAppearance cga = GWT.<ControllerGridAppearance> create(ControllerGridAppearance.class);
+			grid = new TaxonTreeGrid(store, columnModel, column, ga, cga);
+		} else
+			grid = new TaxonTreeGrid(store, columnModel, column);
 		
-		//TODO: check for tree store with 0 elements.
 		grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		
 		grid.getSelectionModel().addSelectionHandler(new SelectionHandler<Taxon>(){

@@ -1,127 +1,113 @@
 package edu.arizona.biosemantics.matrixreview.client;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.editor.client.Editor.Path;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
+import com.google.gwt.widget.client.TextButton;
 import com.sencha.gxt.core.client.ValueProvider;
+import com.sencha.gxt.core.client.util.Margins;
+import com.sencha.gxt.core.client.util.Padding;
 import com.sencha.gxt.data.shared.LabelProvider;
-import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
-import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutData;
+import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutPack;
+import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer.HBoxLayoutAlign;
 import com.sencha.gxt.widget.core.client.container.MarginData;
 import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData;
-import com.sencha.gxt.widget.core.client.form.ComboBox;
-import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
-import com.sencha.gxt.widget.core.client.grid.ColumnModel;
-import com.sencha.gxt.widget.core.client.treegrid.FrozenFirstColumnTreeGrid;
-import com.sencha.gxt.widget.core.client.treegrid.TreeGrid;
 
 import edu.arizona.biosemantics.matrixreview.client.event.ChangeComparingSelectionEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.ToggleCompareModeEvent;
-import edu.arizona.biosemantics.matrixreview.client.matrix.CharactersGridView;
-import edu.arizona.biosemantics.matrixreview.client.matrix.FrozenFirstColumTaxonTreeGrid;
-import edu.arizona.biosemantics.matrixreview.client.matrix.TaxaColumnConfig;
 import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.MatrixVersion;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleMatrixVersion;
-import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleMatrixVersionProperties;
-import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleTaxonMatrix;
-import edu.arizona.biosemantics.matrixreview.shared.model.Color;
-import edu.arizona.biosemantics.matrixreview.shared.model.Organ;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonProperties;
-import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+
+/**
+ * A window that holds a comparison grid and a selection grid. 
+ * 
+ * There are two compare modes: 
+ * - BY_TAXON, where Taxon is the constant category and the selection grid shows a 
+ * Character/Version graph,
+ * - BY_CHARACTER where Character is the constant category and the selection grid shows a 
+ * Taxon/Version graph. 
+ * 
+ * @author Andrew Stockton
+ *
+ */
 
 public class MatrixCompareView extends Composite {
 	private static enum CompareMode {BY_TAXON, BY_CHARACTER};
 	
-	//Model
-	private List<SimpleMatrixVersion> oldVersions;
-	private MatrixVersion currentVersionSave; //this is only changed on the user clicking 'ok'.
-	private MatrixVersion currentVersion;
-	private CompareMode compareMode;
 	private EventBus eventBus;
+	private CompareMode compareMode;
+	
+	private List<SimpleMatrixVersion> oldVersions;
+	private MatrixVersion currentVersion;
 	
 	private TaxonStore taxonStore;
 	private TreeStore<CharacterTreeNode> characterStore;
-	private Character selectedCharacter;
-	private Taxon selectedTaxon;
 	
-	//UI 
 	private SimpleContainer content;
 	
-	private HorizontalLayoutContainer northContent;
+	private HBoxLayoutContainer northContent;
 	private Label compareModeLabel;
-	private Button changeCompareModeButton;
-	
-	private ContentPanel southPanel;
+	private TextButton changeCompareModeButton;
+
 	private ContentPanel westPanel;
 	private ContentPanel centerContent;
 	
 	public MatrixCompareView(List<SimpleMatrixVersion> old, MatrixVersion current){
 		this.oldVersions = old;
-		this.currentVersionSave = current;
 		this.currentVersion = new MatrixVersion(current);
 		this.eventBus = new SimpleEventBus();
 		
 		content = GWT.create(SimpleContainer.class);
 		
-		northContent = new HorizontalLayoutContainer();
 		compareModeLabel = new Label();
-		changeCompareModeButton = new Button();
-		northContent.add(compareModeLabel);
-		northContent.add(changeCompareModeButton);
+		changeCompareModeButton = new TextButton();
+		northContent = new HBoxLayoutContainer();
+		northContent.setPadding(new Padding(5));
+		northContent.setHBoxLayoutAlign(HBoxLayoutAlign.MIDDLE);
+		northContent.setPack(BoxLayoutPack.END);
+		BoxLayoutData layoutData = new BoxLayoutData(new Margins(0, 5, 0, 0));
+		northContent.add(compareModeLabel, layoutData);
+		northContent.add(changeCompareModeButton, layoutData);
 		
 		centerContent = new ContentPanel();
 		centerContent.setHeaderVisible(false);
 		
-		
-		selectedCharacter = oldVersions.get(0).getMatrix().getCharacter(0);
-		selectedTaxon = oldVersions.get(0).getMatrix().getTaxon(0);
-		
-		
-		
-		createTaxonStore();
+
+		createTaxonStore(); //TODO: these need to get all taxons and characters used in all versions, not just the current version. 
 		createCharacterStore();
-		
 		
 		westPanel = new ContentPanel();
 		westPanel.setHeaderVisible(false);
 		
 		final BorderLayoutContainer container = new BorderLayoutContainer();
 		
+		BorderLayoutData northData = new BorderLayoutData(40);
+		
 		BorderLayoutData westData = new BorderLayoutData(150);
 		westData.setCollapsible(true);
 		westData.setSplit(true);
 		westData.setCollapseMini(true);
 		
-		container.setNorthWidget(northContent);
+		container.setNorthWidget(northContent, northData);
 		container.setWestWidget(westPanel, westData);
 		container.setCenterWidget(centerContent, new MarginData());
 		
@@ -147,6 +133,7 @@ public class MatrixCompareView extends Composite {
 			addTaxonChildrenToStore(child);
 		}
 	}
+	
 	private void createCharacterStore(){ 
 		TaxonMatrix currentMatrix = currentVersion.getTaxonMatrix();
 		
@@ -168,70 +155,36 @@ public class MatrixCompareView extends Composite {
 		}
 	}
 	
-	interface CharacterProperties extends PropertyAccess<Character>{
-		  ModelKeyProvider<Character> key();
-		  LabelProvider<Character> nameLabel();
-		  ValueProvider<Character, String> name();
-	}
-	
+	/**
+	 * Clears west and center content and reloads it. 
+	 * @param mode
+	 */
 	private void updateCompareMode(CompareMode mode){
 		this.compareMode = mode;
 		westPanel.clear();
 		centerContent.clear();
+		
 		if (this.compareMode == CompareMode.BY_TAXON){
-			TaxonTreeGrid taxonGrid = TaxonTreeGrid.createNew(eventBus,  taxonStore);
+			TaxonTreeGrid taxonGrid = TaxonTreeGrid.createNew(eventBus,  taxonStore, false);
 			westPanel.add(taxonGrid.asWidget());
-			CompareByTaxonGrid compareByTaxonGrid = new CompareByTaxonGrid(eventBus, characterStore, oldVersions, currentVersion, selectedTaxon);
-			centerContent.add(compareByTaxonGrid.asWidget());
+			CompareByTaxonGrid compareByTaxonGrid = new CompareByTaxonGrid(eventBus, oldVersions, currentVersion, getPreselectedTaxon(), characterStore);
+			centerContent.add(compareByTaxonGrid);
 			compareModeLabel.setText("Currently comparing by taxon.");
 			changeCompareModeButton.setText("View by character");
+			
 		} else{
-			CharacterTreeGrid characterGrid = CharacterTreeGrid.createNew(eventBus, characterStore);
+			CharacterTreeGrid characterGrid = CharacterTreeGrid.createNew(eventBus, characterStore, false);
 			westPanel.add(characterGrid.asWidget());
-			CompareByCharacterGrid compareByCharacterGrid = new CompareByCharacterGrid(eventBus, taxonStore, oldVersions, currentVersion, selectedCharacter);
-			centerContent.add(compareByCharacterGrid.asWidget());
+			CompareByCharacterGrid compareByCharacterGrid = new CompareByCharacterGrid(eventBus, oldVersions, currentVersion, getPreselectedCharacter(), taxonStore);
+			centerContent.add(compareByCharacterGrid);
 			compareModeLabel.setText("Currently comparing by character.");
 			changeCompareModeButton.setText("View by taxon");
 		}
+		
 		content.forceLayout();
 	}
-	
-	private List<Taxon> getAllUsedTaxons(){
-		TaxonMatrix currentMatrix = currentVersion.getTaxonMatrix();
-		//Make a list of all taxons that exist within these versions.
-		List<Taxon> allTaxons = new ArrayList<Taxon>();
-		for (SimpleMatrixVersion version: oldVersions){
-			SimpleTaxonMatrix matrix = version.getMatrix();
-			for (int i = 0; i < matrix.getTaxaCount(); i++){
-				Taxon t = matrix.getTaxon(i);
-				if (!allTaxons.contains(t)){
-					allTaxons.add(t);
-				}
-			}
-		}
-		for (int i = 0; i < currentMatrix.getTaxaCount(); i++){
-			Taxon t = currentMatrix.getTaxon(i);
-			if (!allTaxons.contains(t)){
-				allTaxons.add(t);
-			}
-		}
-		return allTaxons;
-	}
-	
-	
+
 	private void addEventHandlers(){
-		eventBus.addHandler(ChangeComparingSelectionEvent.TYPE, new ChangeComparingSelectionEvent.ChangeComparingSelectionEventHandler(){
-			@Override
-			public void onChange(ChangeComparingSelectionEvent event) {
-				if (event.getSelection() instanceof Character){
-					Character newCharacter = (Character)event.getSelection();
-					selectedCharacter = newCharacter;
-				} else if (event.getSelection() instanceof Taxon){
-					Taxon newTaxon = (Taxon)event.getSelection();
-					selectedTaxon = newTaxon;
-				}
-			}
-		});
 		
 		changeCompareModeButton.addClickHandler(new ClickHandler(){
 			@Override
@@ -242,6 +195,22 @@ public class MatrixCompareView extends Composite {
 					updateCompareMode(CompareMode.BY_CHARACTER);
 			}
 		});
+	}
+	
+	private Taxon getPreselectedTaxon() {
+		return oldVersions.get(0).getMatrix().getTaxon(0);
+	}
+
+	private CharacterTreeNode getPreselectedCharacter() {
+		CharacterTreeNode selectedCharacterNode = null;
+		for (CharacterTreeNode node: characterStore.getAll()){
+			if (node.getData() instanceof Character){
+				selectedCharacterNode = node;
+				System.out.println("Selected node:" + selectedCharacterNode.getData());
+				break;
+			}
+		}
+		return selectedCharacterNode;
 	}
 	
 	public Widget asWidget(){

@@ -5,6 +5,13 @@ import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 
+/**
+ * Holds either a Character or an Organ. Used as the data type for a TreeStore of characters
+ * to allow both characters and organs to exist in the same store. 
+ * 
+ * @author Andrew Stockton
+ */
+
 public class CharacterTreeNode {
 	private Object data;
 	
