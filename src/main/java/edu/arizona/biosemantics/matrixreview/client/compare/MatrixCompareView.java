@@ -1,4 +1,4 @@
-package edu.arizona.biosemantics.matrixreview.client;
+package edu.arizona.biosemantics.matrixreview.client.compare;
 
 import java.util.List;
 
@@ -11,15 +11,10 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.widget.client.TextButton;
-import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.Padding;
-import com.sencha.gxt.data.shared.LabelProvider;
-import com.sencha.gxt.data.shared.ModelKeyProvider;
-import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
-import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutData;
 import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutPack;
@@ -29,13 +24,14 @@ import com.sencha.gxt.widget.core.client.container.MarginData;
 import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData;
 
-import edu.arizona.biosemantics.matrixreview.client.event.ChangeComparingSelectionEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.MatrixVersion;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleMatrixVersion;
+import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleTaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.TaxonPropertiesByLocation;
 
 /**
  * A window that holds a comparison grid and a selection grid. 
@@ -43,7 +39,7 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Character;
  * There are two compare modes: 
  * - BY_TAXON, where Taxon is the constant category and the selection grid shows a 
  * Character/Version graph,
- * - BY_CHARACTER where Character is the constant category and the selection grid shows a 
+ * - BY_CHARACTER, where Character is the constant category and the selection grid shows a 
  * Taxon/Version graph. 
  * 
  * @author Andrew Stockton
@@ -121,16 +117,32 @@ public class MatrixCompareView extends Composite {
 	private void createTaxonStore(){
 		TaxonMatrix currentMatrix = currentVersion.getTaxonMatrix();
 		//Create store and populate with taxon list.
-		taxonStore = new TaxonStore(); //this extends TreeStore<Taxon>. Awesome!
+		final TaxonPropertiesByLocation taxonProperties = new TaxonPropertiesByLocation();
+		taxonStore = new TaxonStore(taxonProperties); 
 		for (Taxon root: currentMatrix.getRootTaxa()){
-			taxonStore.add(root);
-			addTaxonChildrenToStore(root);
+			addTaxonAndChildrenToStore(root, null, 0);
+		}
+		for (SimpleMatrixVersion version: oldVersions){
+			SimpleTaxonMatrix matrix = version.getMatrix();
+			for (Taxon root: matrix.getRootTaxa()){
+				addTaxonAndChildrenToStore(root, null, 0);
+			}
 		}
 	}
-	private void addTaxonChildrenToStore(Taxon root){
-		for (Taxon child: root.getChildren()){
-			taxonStore.add(root, child);
-			addTaxonChildrenToStore(child);
+	private void addTaxonAndChildrenToStore(Taxon taxon, Taxon parent, int depth){
+		/*for (int i = 0; i < depth; i++)
+			System.out.print("  ");
+		System.out.print("Try to add " + taxon.getId() + " " + taxon.getFullName() + ", parent " + parent + ": ");*/
+		if (taxonStore.findModel(taxon) == null){
+			if (parent == null)
+				taxonStore.add(taxon);
+			else
+				taxonStore.add(parent, taxon);
+			//System.out.println("ADDED.");
+		}else
+			//System.out.println("ALREADY EXISTS.");
+		for (Taxon child: taxon.getChildren()){
+			addTaxonAndChildrenToStore(child, taxon, depth+1);
 		}
 	}
 	
@@ -142,7 +154,17 @@ public class MatrixCompareView extends Composite {
 		characterStore = new TreeStore<CharacterTreeNode>(properties.key());
 		
 		for (Character character: currentMatrix.getCharacters()){
-			CharacterTreeNode characterNode = new CharacterTreeNode(character);
+			addCharacterToStore(character);
+		}
+		for (SimpleMatrixVersion version: oldVersions){
+			for (Character character: version.getMatrix().getCharacters()){
+				addCharacterToStore(character);
+			}
+		}
+	}
+	private void addCharacterToStore(Character character){
+		CharacterTreeNode characterNode = new CharacterTreeNode(character);
+		if (characterStore.findModel(characterNode) == null){
 			if (character.hasOrgan()){
 				CharacterTreeNode organNode = new CharacterTreeNode(character.getOrgan());
 				if (characterStore.findModel(organNode) == null){
@@ -206,7 +228,6 @@ public class MatrixCompareView extends Composite {
 		for (CharacterTreeNode node: characterStore.getAll()){
 			if (node.getData() instanceof Character){
 				selectedCharacterNode = node;
-				System.out.println("Selected node:" + selectedCharacterNode.getData());
 				break;
 			}
 		}
@@ -220,4 +241,5 @@ public class MatrixCompareView extends Composite {
 	public MatrixVersion getModifiedVersion() {
 		return currentVersion; 
 	}
+
 }

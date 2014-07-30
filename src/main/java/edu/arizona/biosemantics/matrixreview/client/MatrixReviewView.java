@@ -40,6 +40,7 @@ import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 
+import edu.arizona.biosemantics.matrixreview.client.compare.MatrixCompareView;
 import edu.arizona.biosemantics.matrixreview.client.desktop.DesktopView;
 import edu.arizona.biosemantics.matrixreview.client.event.AutosaveEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;

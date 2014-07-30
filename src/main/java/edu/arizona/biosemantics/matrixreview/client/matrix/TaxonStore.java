@@ -45,6 +45,10 @@ public class TaxonStore extends TreeStore<Taxon> {
 		super(taxonProperties.key());
 	}
 	
+	public TaxonStore(TaxonProperties properties){
+		super(properties.key());
+	}
+	
 	public void enableFilters(boolean value) {
 		this.filtersEnabled = value;
 	}
