@@ -76,8 +76,10 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 		//changes
 		for (Change change: copyFrom.changes)
 			this.changes.add(change);
-		//taxoncharacterchages
-		this.taxonCharacterChanges.putAll(copyFrom.taxonCharacterChanges);
+		//taxoncharacterchanges
+		for (Taxon taxon: list()){
+			initTaxon(taxon);
+		}
 		
 	}
 

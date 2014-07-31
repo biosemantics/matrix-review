@@ -25,6 +25,10 @@ import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutD
 import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer.HBoxLayoutAlign;
 import com.sencha.gxt.widget.core.client.event.BodyScrollEvent;
 import com.sencha.gxt.widget.core.client.event.BodyScrollEvent.BodyScrollHandler;
+import com.sencha.gxt.widget.core.client.event.CellClickEvent;
+import com.sencha.gxt.widget.core.client.event.CellClickEvent.CellClickHandler;
+import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent;
+import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent.CellDoubleClickHandler;
 import com.sencha.gxt.widget.core.client.form.Field;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.form.ValueBaseField;
@@ -42,6 +46,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.CompareViewValueChange
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.MatrixVersion;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleMatrixVersion;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleTaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
 /**
  * The ComparisonGrid class is a widget used for comparing data values across multiple versions. 
@@ -231,7 +236,7 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 
 	protected abstract MaintainListStoreTreeGrid<C> createControllerGrid();
 	
-	private Grid<C> createOldVersionsGrid(MaintainListStoreTreeGrid<C> controlColumn, List<SimpleMatrixVersion> oldVersions){
+	private Grid<C> createOldVersionsGrid(MaintainListStoreTreeGrid<C> controlColumn, final List<SimpleMatrixVersion> oldVersions){
 		List<ColumnConfig<C, String>> columnConfigs = new ArrayList<ColumnConfig<C, String>>();
 		
 		// create a column for each old matrix version.
@@ -249,11 +254,27 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 		
 		ColumnModel<C> columnModel = new ColumnModel<C>(columns);
 		
-		Grid<C> grid = new Grid<C>(controlColumn.getListStore(), columnModel, new GridView<C>(new VersionsGridAppearance()){
+		final Grid<C> grid = new Grid<C>(controlColumn.getListStore(), columnModel, new GridView<C>(new VersionsGridAppearance()){
 			@Override
 		    protected int getScrollAdjust() { //this removes the extra space on the right meant to hold the scrollbar.
 		        return 0;
 		    }
+		});
+		grid.addCellDoubleClickHandler(new CellDoubleClickHandler(){
+			@Override
+			public void onCellClick(CellDoubleClickEvent event) {
+				int versionIndex = event.getCellIndex();
+				
+				ListStore<C> store = grid.getStore();
+				C item = store.get(event.getRowIndex());
+				
+				Value value = getValue(oldVersions.get(versionIndex), selectedConstant, item);
+				if (value != null){
+					System.out.println("Got the value: " + value.getValue());
+					changeMatrixValue(item, value.getValue(), true);
+					eventBus.fireEvent(new CompareViewValueChangedEvent());
+				}
+			}
 		});
 		
 		CellSelectionModel<C> selectionModel = new CellSelectionModel<C>();
@@ -269,6 +290,8 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 		return grid;
 	}
 	
+	protected abstract Value getValue(SimpleMatrixVersion simpleMatrixVersion, T selectedConstant2, C item);
+
 	private Grid<C> createCurrentVersionGrid(MaintainListStoreTreeGrid<C> controlColumn, MatrixVersion currentVersion){
 		ColumnConfig<C, String> column = new ColumnConfig<C, String>(getVersionValueProvider(currentVersion));
 		column.setHeader("Current");
@@ -304,7 +327,7 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 	
 	protected abstract ValueProvider<C, String> getSimpleVersionValueProvider(SimpleMatrixVersion version);
 	protected abstract ValueProvider<C, String> getVersionValueProvider(MatrixVersion version);
-	protected abstract void changeMatrixValue(C node, String value);
+	protected abstract void changeMatrixValue(C node, String value, boolean allowEditMovedTaxon);
 	
 	public boolean getMarkChangedCells(){
 		return markChangedCells;
@@ -381,7 +404,7 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 				Field<O> field = getEditor(columnModel.getColumn(activeCell.getCol()));
 				String value = (String)((ValueBaseField<O>) field).getCurrentValue();
 				
-				changeMatrixValue(node, value);
+				changeMatrixValue(node, value, false);
 				eventBus.fireEvent(new CompareViewValueChangedEvent());
 			}
 		}

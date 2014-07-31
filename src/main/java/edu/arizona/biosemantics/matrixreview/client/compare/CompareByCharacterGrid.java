@@ -131,7 +131,7 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 	}
 
 	@Override
-	protected void changeMatrixValue(Taxon taxon, String value) {
+	protected void changeMatrixValue(Taxon taxon, String value, boolean allowEditMovedTaxon) {
 		Character selectedCharacter = (Character)selectedConstant.getData(); //selectedSubject is guaranteed to have a Character and not an Organ. See overridden updateSelectedSubject method.
 		TaxonMatrix matrix = currentVersion.getTaxonMatrix();
 		
@@ -139,7 +139,7 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 		Taxon t = matrix.getTaxonById(taxon.getId()); 
 		if (t == null)
 			return;
-		if (t.getParent() != null && taxon.getParent() != null && !t.getParent().getId().equals(taxon.getParent().getId()))
+		if (!allowEditMovedTaxon && t.getParent() != null && taxon.getParent() != null && !t.getParent().getId().equals(taxon.getParent().getId()))
 			return; //this taxon exists but has been moved - do not allow edit from this 'old' location. 
 		Character c = matrix.getCharacterById(selectedCharacter.getId());
 		if (c == null)
@@ -147,4 +147,18 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 		matrix.setValue(t, c, new Value(value));
 	}
 	
+	@Override
+	protected Value getValue(SimpleMatrixVersion version, CharacterTreeNode selectedNode, Taxon taxon) {
+		//make sure that this taxon and character exist in the current version.
+		Taxon t = version.getMatrix().getTaxonById(taxon.getId()); 
+		if (t == null)
+			return null;
+		if (t.getParent() != null && taxon.getParent() != null && !t.getParent().getId().equals(taxon.getParent().getId()))
+			return null; //this taxon exists but has been moved. 
+		if (selectedNode.getData() instanceof Character){
+			Character c = version.getMatrix().getCharacterById(((Character)selectedNode.getData()).getId());
+			return t.get(c);
+		}
+		return null;
+	}
 }
