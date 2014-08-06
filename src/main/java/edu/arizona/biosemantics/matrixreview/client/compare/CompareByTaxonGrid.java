@@ -17,6 +17,7 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Value;
+import edu.arizona.biosemantics.matrixreview.shared.model.HasControlMode.ControlMode;
 
 /**
  * A widget that shows a Character/Version graph, using Taxon as the selected constant. 
@@ -104,6 +105,12 @@ public class CompareByTaxonGrid extends ComparisonGrid<Taxon, CharacterTreeNode>
 				return; //this taxon exists but has been moved - do not allow edit from this 'old' location. 
 			Character c = matrix.getCharacterById(selectedCharacter.getId());
 			if (c == null)
+				return;
+			
+			ControlMode controlMode = c.getControlMode();
+			if (controlMode == ControlMode.NUMERICAL && (value == null || !value.matches("[0-9]*")))
+				return;
+			if (controlMode == ControlMode.CATEGORICAL && !c.getStates().contains(value))
 				return;
 			
 			matrix.setValue(t, c, new Value(value));

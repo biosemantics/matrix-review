@@ -1,10 +1,15 @@
 package edu.arizona.biosemantics.matrixreview.client.compare;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.google.gwt.event.shared.EventBus;
+import com.sencha.gxt.core.client.Style.SelectionMode;
 import com.sencha.gxt.core.client.ValueProvider;
+import com.sencha.gxt.widget.core.client.event.CellClickEvent;
+import com.sencha.gxt.widget.core.client.event.CellClickEvent.CellClickHandler;
+import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.treegrid.MaintainListStoreTreeGrid;
 
 import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
@@ -14,6 +19,7 @@ import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleMatrixVe
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleMatrixVersionProperties;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleTaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.HasControlMode.ControlMode;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonPropertiesByLocation;
@@ -34,7 +40,37 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 		this.taxonStore = store;
 		this.init();
 	}
+	
+	@Override
+	protected void addEventHandlers(){
+		super.addEventHandlers();
+		
+		eventBus.addHandler(CellClickEvent.getType(), new CellClickHandler(){
+			@Override
+			public void onCellClick(CellClickEvent event) {
+				List<Taxon> instancesOfSameTaxon = new ArrayList<Taxon>();
+				for (Taxon taxon: taxonStore.getAll()){
+					if (taxon.getId().equals(selectedRow.getId())){
+						instancesOfSameTaxon.add(taxon);
+					}
+				}
+				controllerGrid.getSelectionModel().select(false, selectedRow);
+				oldVersionsGrid.getSelectionModel().select(false, selectedRow);
+				for (Taxon t: instancesOfSameTaxon){
+					controllerGrid.getSelectionModel().select(true, t);
+					oldVersionsGrid.getSelectionModel().select(true, t);
+				}
+			}
+		});
+	}
 
+	@Override
+	protected Grid<Taxon> createOldVersionsGrid(MaintainListStoreTreeGrid<Taxon> controlColumn, List<SimpleMatrixVersion> oldVersions){
+		Grid<Taxon> grid = super.createOldVersionsGrid(controlColumn, oldVersions);
+		grid.getSelectionModel().setSelectionMode(SelectionMode.SIMPLE);
+		return grid;
+	}
+	
 	@Override
 	protected void setHeading(CharacterTreeNode subject) {
 		this.setHeadingText("Viewing Character: " + subject.getData());
@@ -144,6 +180,13 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 		Character c = matrix.getCharacterById(selectedCharacter.getId());
 		if (c == null)
 			return;
+		
+		ControlMode controlMode = c.getControlMode();
+		if (controlMode == ControlMode.NUMERICAL && (value == null || !value.matches("[0-9]*")))
+			return;
+		if (controlMode == ControlMode.CATEGORICAL && !c.getStates().contains(value))
+			return;
+		
 		matrix.setValue(t, c, new Value(value));
 	}
 	

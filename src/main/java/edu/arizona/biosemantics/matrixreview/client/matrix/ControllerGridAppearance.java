@@ -10,21 +10,22 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.sencha.gxt.core.client.GXT;
 import com.sencha.gxt.theme.base.client.tree.TreeBaseAppearance;
-import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderAppearance;
-import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderStyles;
 import com.sencha.gxt.widget.core.client.tree.TreeStyle;
 import com.sencha.gxt.widget.core.client.tree.Tree.CheckState;
 import com.sencha.gxt.widget.core.client.tree.Tree.Joint;
 import com.sencha.gxt.widget.core.client.tree.TreeView.TreeViewRenderMode;
 
+import edu.arizona.biosemantics.matrixreview.client.compare.ComparisonGridCell.CustomGridResources;
+import edu.arizona.biosemantics.matrixreview.client.compare.ComparisonGridCell.CustomGridResources.CustomGridStyle;
 import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonTreeAppearance.BlueTreeResources;
 
 public class ControllerGridAppearance extends TreeBaseAppearance{
-	private ColumnHeaderStyles columnHeaderStyles;
+	CustomGridStyle styles = GWT.<CustomGridResources>create(CustomGridResources.class).css();
+	//private ColumnHeaderStyles columnHeaderStyles;
 	
 	public ControllerGridAppearance() {
 		super((TreeResources) GWT.create(BlueTreeResources.class));
-		this.columnHeaderStyles = GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class).styles();
+		//this.columnHeaderStyles = GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class).styles();
 	}
 	
 	@Override
@@ -32,15 +33,15 @@ public class ControllerGridAppearance extends TreeBaseAppearance{
 			TreeStyle ts, ImageResource icon, boolean checkable,
 			CheckState checked, Joint joint, int level,
 			TreeViewRenderMode renderMode) {
-		String grandParentStyleClass = columnHeaderStyles.header() + " " + columnHeaderStyles.head();
+		//String grandParentStyleClass = columnHeaderStyles.header() + " " + columnHeaderStyles.head();
 		//String parentStyleClass = columnHeaderStyles.headInner();
 
 		if (renderMode == TreeViewRenderMode.ALL
 				|| renderMode == TreeViewRenderMode.BUFFER_WRAP) {
 			sb.appendHtmlConstant("<div id=\"" + SafeHtmlUtils.htmlEscape(id)
-					+ "\" class=\"" + style.node() + "\">");
+					+ "\">");
 			
-			sb.appendHtmlConstant("<div class=\"" + style.element() + " " + grandParentStyleClass + "\">");
+			sb.appendHtmlConstant("<div class=\"" + styles.blocked() + "\">");
 			/*background: transparent no-repeat 0 0;*/
 		}
 		
@@ -109,7 +110,6 @@ public class ControllerGridAppearance extends TreeBaseAppearance{
 
 		if (renderMode == TreeViewRenderMode.ALL
 				|| renderMode == TreeViewRenderMode.BUFFER_WRAP) {
-			sb.appendHtmlConstant("</div>");
 			sb.appendHtmlConstant("</div>");
 			sb.appendHtmlConstant("</div>");
 		}

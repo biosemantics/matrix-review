@@ -3,18 +3,19 @@ package edu.arizona.biosemantics.matrixreview.client.compare;
 import java.util.List;
 
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.widget.client.TextButton;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.Padding;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutData;
 import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutPack;
@@ -23,6 +24,11 @@ import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer.HBoxLayou
 import com.sencha.gxt.widget.core.client.container.MarginData;
 import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData;
+import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
+import com.sencha.gxt.widget.core.client.event.ViewReadyEvent;
+import com.sencha.gxt.widget.core.client.event.ViewReadyEvent.ViewReadyHandler;
+import com.sencha.gxt.widget.core.client.form.CheckBox;
 
 import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.MatrixVersion;
@@ -63,9 +69,15 @@ public class MatrixCompareView extends Composite {
 	private HBoxLayoutContainer northContent;
 	private Label compareModeLabel;
 	private TextButton changeCompareModeButton;
+	private CheckBox markChangedValuesCheckBox;
 
 	private ContentPanel westPanel;
 	private ContentPanel centerContent;
+	
+	private TaxonTreeGrid taxonGrid;
+	private CompareByTaxonGrid compareByTaxonGrid;
+	private CharacterTreeGrid characterGrid;
+	private CompareByCharacterGrid compareByCharacterGrid;
 	
 	public MatrixCompareView(List<SimpleMatrixVersion> old, MatrixVersion current){
 		this.oldVersions = old;
@@ -76,18 +88,40 @@ public class MatrixCompareView extends Composite {
 		
 		compareModeLabel = new Label();
 		changeCompareModeButton = new TextButton();
+		markChangedValuesCheckBox = new CheckBox();
+		markChangedValuesCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				//toggle 'mark changed values'.
+				if (compareByTaxonGrid != null){
+					boolean markCells = !compareByTaxonGrid.getMarkChangedCells();
+					compareByTaxonGrid.setMarkChangedCells(markCells);
+					if (compareMode == CompareMode.BY_TAXON)
+						compareByTaxonGrid.refresh();
+				}
+				if (compareByCharacterGrid != null){
+					boolean markCells = !compareByCharacterGrid.getMarkChangedCells();
+					compareByCharacterGrid.setMarkChangedCells(markCells);
+					if (compareMode == CompareMode.BY_CHARACTER)
+						compareByCharacterGrid.refresh();
+				}
+			}
+		});
+		markChangedValuesCheckBox.setValue(true);
 		northContent = new HBoxLayoutContainer();
 		northContent.setPadding(new Padding(5));
 		northContent.setHBoxLayoutAlign(HBoxLayoutAlign.MIDDLE);
-		northContent.setPack(BoxLayoutPack.END);
-		BoxLayoutData layoutData = new BoxLayoutData(new Margins(0, 5, 0, 0));
-		northContent.add(compareModeLabel, layoutData);
+		//northContent.setPack(BoxLayoutPack.END);
+		BoxLayoutData layoutData = new BoxLayoutData(new Margins(0, 0, 0, 5));
+		northContent.add(compareModeLabel, new BoxLayoutData(new Margins(0, 0, 0, 10)));
 		northContent.add(changeCompareModeButton, layoutData);
+		northContent.add(markChangedValuesCheckBox, new BoxLayoutData(new Margins(0, 0, 0, 70)));
+		northContent.add(new Label("Mark changed cells"), new BoxLayoutData(new Margins(0, 0, 0, 0)));
+		
 		
 		centerContent = new ContentPanel();
 		centerContent.setHeaderVisible(false);
 		
-
 		createTaxonStore(); //TODO: these need to get all taxons and characters used in all versions, not just the current version. 
 		createCharacterStore();
 		
@@ -139,8 +173,11 @@ public class MatrixCompareView extends Composite {
 			else
 				taxonStore.add(parent, taxon);
 			//System.out.println("ADDED.");
-		}else
+		}
+		else{
 			//System.out.println("ALREADY EXISTS.");
+		}
+			
 		for (Taxon child: taxon.getChildren()){
 			addTaxonAndChildrenToStore(child, taxon, depth+1);
 		}
@@ -185,32 +222,75 @@ public class MatrixCompareView extends Composite {
 		this.compareMode = mode;
 		westPanel.clear();
 		centerContent.clear();
+		eventBus = new SimpleEventBus();
+		
 		
 		if (this.compareMode == CompareMode.BY_TAXON){
-			TaxonTreeGrid taxonGrid = TaxonTreeGrid.createNew(eventBus,  taxonStore, false);
+			final Taxon preselectedNode = getPreselectedTaxon();
+			if (taxonGrid == null){
+				taxonGrid = TaxonTreeGrid.createNew(eventBus,  taxonStore, false);				
+				taxonGrid.addViewReadyHandler(new ViewReadyHandler(){
+					@Override
+					public void onViewReady(ViewReadyEvent event) {
+						//Expand all parent nodes of the selected one. 
+						Taxon parent = preselectedNode.getParent();
+						if (parent != null){
+							taxonGrid.setExpanded(parent, true);
+						}
+						taxonGrid.getSelectionModel().select(false, preselectedNode);
+					}
+				});
+			}
+			if (compareByTaxonGrid == null){
+				compareByTaxonGrid = new CompareByTaxonGrid(eventBus, oldVersions, currentVersion, preselectedNode, characterStore);
+				compareByTaxonGrid.setMarkChangedCells(markChangedValuesCheckBox.getValue());
+			}
+			
+			
 			westPanel.add(taxonGrid.asWidget());
-			CompareByTaxonGrid compareByTaxonGrid = new CompareByTaxonGrid(eventBus, oldVersions, currentVersion, getPreselectedTaxon(), characterStore);
 			centerContent.add(compareByTaxonGrid);
+			compareByTaxonGrid.refresh();
 			compareModeLabel.setText("Currently comparing by taxon.");
-			changeCompareModeButton.setText("View by character");
+			changeCompareModeButton.setText("View by Character");
 			
 		} else{
-			CharacterTreeGrid characterGrid = CharacterTreeGrid.createNew(eventBus, characterStore, false);
+			final CharacterTreeNode preselectedNode = getPreselectedCharacter();
+			if (characterGrid == null){
+				characterGrid = CharacterTreeGrid.createNew(eventBus, characterStore, false);
+				characterGrid.addViewReadyHandler(new ViewReadyHandler(){
+					@Override
+					public void onViewReady(ViewReadyEvent event) {
+						//Expand all parent nodes of the selected one. 
+						if (preselectedNode.getData() instanceof Character){
+							Character character = (Character)preselectedNode.getData();
+							if (character.hasOrgan()){
+								CharacterTreeNode organNode = new CharacterTreeNode(character.getOrgan());
+								characterGrid.setExpanded(organNode, true);
+							}
+						}
+						characterGrid.getSelectionModel().select(false, preselectedNode);
+					}
+				});
+			}
+			if (compareByCharacterGrid == null){
+				compareByCharacterGrid = new CompareByCharacterGrid(eventBus, oldVersions, currentVersion, preselectedNode, taxonStore);
+				compareByCharacterGrid.setMarkChangedCells(markChangedValuesCheckBox.getValue());
+			}
+			
 			westPanel.add(characterGrid.asWidget());
-			CompareByCharacterGrid compareByCharacterGrid = new CompareByCharacterGrid(eventBus, oldVersions, currentVersion, getPreselectedCharacter(), taxonStore);
 			centerContent.add(compareByCharacterGrid);
+			compareByCharacterGrid.refresh();
 			compareModeLabel.setText("Currently comparing by character.");
-			changeCompareModeButton.setText("View by taxon");
+			changeCompareModeButton.setText("View by Taxon");
 		}
 		
 		content.forceLayout();
 	}
 
 	private void addEventHandlers(){
-		
-		changeCompareModeButton.addClickHandler(new ClickHandler(){
+		changeCompareModeButton.addSelectHandler(new SelectHandler(){
 			@Override
-			public void onClick(ClickEvent event) {
+			public void onSelect(SelectEvent event) {
 				if (compareMode == CompareMode.BY_CHARACTER)
 					updateCompareMode(CompareMode.BY_TAXON);
 				else
@@ -241,5 +321,4 @@ public class MatrixCompareView extends Composite {
 	public MatrixVersion getModifiedVersion() {
 		return currentVersion; 
 	}
-
 }

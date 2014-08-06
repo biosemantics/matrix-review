@@ -1,24 +1,22 @@
 package edu.arizona.biosemantics.matrixreview.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.layout.client.Layout.AnimationCallback;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AnimatedLayout;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -26,28 +24,46 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.Style.SelectionMode;
+import com.sencha.gxt.core.client.ValueProvider;
+import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.SortDir;
+import com.sencha.gxt.data.shared.Store.StoreSortInfo;
 import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.box.MessageBox;
-import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
-import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
+import com.sencha.gxt.widget.core.client.button.TextButton;
+import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData;
+import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutData;
+import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutPack;
+import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer.HBoxLayoutAlign;
+import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.MarginData;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent.DialogHideHandler;
+import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
+import com.sencha.gxt.widget.core.client.event.ViewReadyEvent;
+import com.sencha.gxt.widget.core.client.event.ViewReadyEvent.ViewReadyHandler;
 import com.sencha.gxt.widget.core.client.grid.CheckBoxSelectionModel;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
+import com.sencha.gxt.widget.core.client.tips.QuickTip;
 
 import edu.arizona.biosemantics.matrixreview.client.compare.MatrixCompareView;
 import edu.arizona.biosemantics.matrixreview.client.desktop.DesktopView;
 import edu.arizona.biosemantics.matrixreview.client.event.AutosaveEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.CommitNewVersionEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowDesktopEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ToggleDesktopEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.MatrixView;
 import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
+import edu.arizona.biosemantics.matrixreview.client.matrix.menu.VersionInfoDialog;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.MatrixVersion;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleMatrixVersion;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.VersionInfo;
@@ -69,10 +85,14 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 	private DesktopView desktopView;
 	private int desktopHeight = 300;
 	
-	private Button loadVersionButton;
-	private Button compareVersionsButton;
-	private Button saveNewVersionButton;
+	private HBoxLayoutContainer northContent;
+	private TextButton loadVersionButton;
+	private TextButton compareVersionsButton;
+	private TextButton saveNewVersionButton;
 	private Label autosaveLabel;
+	
+	private final DateTimeFormat selectVersionDateFormat = DateTimeFormat.getFormat("EEE, MMM d, yyyy  hh:mm aaa");
+	private final DateTimeFormat autosaveDateFormat = DateTimeFormat.getFormat("h:mm aaa");
 	
 	private ListStore<VersionInfo> listStore;
 	private Grid<VersionInfo> grid;
@@ -89,18 +109,7 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 		Timer autosaveTimer = new Timer(){
 			@Override
 			public void run(){
-				matrixService.commitCurrentVersion(currentVersion.getTaxonMatrix(), new AsyncCallback<Boolean>(){
-					@Override
-					public void onFailure(Throwable caught){
-						caught.printStackTrace();
-					}
-					
-					@Override
-					public void onSuccess(Boolean result){
-						if (result == true) //autosave was successful. 
-							eventBus.fireEvent(new AutosaveEvent());
-					}
-				});
+				saveCurrentVersion();
 			}
 		};
 		autosaveTimer.scheduleRepeating(autosaveIntervalMillis);
@@ -113,35 +122,33 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 		//modelManager = new StoreModelManager(eventBus, matrixView, desktopView);
 		eventBus.fireEvent(new LoadTaxonMatrixEvent(currentVersion.getTaxonMatrix()));
 		
-		Label mostRecentVersionLabel = new Label("Last saved version: " );
-		compareVersionsButton = new Button("View/Compare Versions");
-		loadVersionButton = new Button("Load Version...");
-		saveNewVersionButton = new Button("Save as New Version");
-		
-		HorizontalPanel upperPanel = new HorizontalPanel();
-		
-		upperPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-		upperPanel.getElement().getStyle().setWidth(80, Unit.PCT);
-		upperPanel.add(mostRecentVersionLabel);
-		upperPanel.add(loadVersionButton);
-		upperPanel.add(compareVersionsButton);
-		
+		compareVersionsButton = new TextButton("View/Compare Versions");
+		loadVersionButton = new TextButton("Load Version...");
+		saveNewVersionButton = new TextButton("Save New Version");
 		autosaveLabel = new Label();
+		autosaveLabel.getElement().getStyle().setColor("#A8A8A8");
+		autosaveLabel.getElement().getStyle().setFontSize(9, Unit.PT);
 		
-		HorizontalPanel lowerPanel = new HorizontalPanel();
-		lowerPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-		lowerPanel.getElement().getStyle().setWidth(80, Unit.PCT);
-		lowerPanel.add(autosaveLabel);
-		lowerPanel.add(saveNewVersionButton);
+		northContent = new HBoxLayoutContainer();
+		northContent.setPack(BoxLayoutPack.END);
+		northContent.setHBoxLayoutAlign(HBoxLayoutAlign.MIDDLE);
+		northContent.add(autosaveLabel, new BoxLayoutData(new Margins(0, 20, 0, 0)));
+		northContent.add(saveNewVersionButton, new BoxLayoutData(new Margins(0, 10, 0, 0)));
+		northContent.add(loadVersionButton, new BoxLayoutData(new Margins(0, 30, 0, 0)));
+		northContent.add(compareVersionsButton, new BoxLayoutData(new Margins(0, 40, 0, 0)));
+
+		final BorderLayoutContainer container = new BorderLayoutContainer();
+		container.getElement().getStyle().setBackgroundColor("white");
 		
-		DockLayoutPanel matrixPanel = new DockLayoutPanel(Unit.EM);
-		matrixPanel.addNorth(upperPanel, 2.5);
-		matrixPanel.addSouth(lowerPanel, 2.5);
-		matrixPanel.add(matrixView);
+		BorderLayoutData northData = new BorderLayoutData(40);
+		
+		container.setNorthWidget(northContent, northData);
+		container.setCenterWidget(matrixView, new MarginData());
 		
 		splitLayoutPanel = new SplitLayoutPanel();
 		splitLayoutPanel.addSouth(desktopView, 0);
-		splitLayoutPanel.add(matrixPanel);
+		splitLayoutPanel.add(container);
+		
 		
 		
 		addEventHandlers();
@@ -153,12 +160,27 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 		});*/
 		
 		// Set up 'Select Version' dialog grid
-		//TODO: add tooltips in case value is cut off.
-		//TODO: Make it so that the most recent version appears at the top. 
 		VersionInfoProperties gridProperties = GWT.create(VersionInfoProperties.class);
-		ColumnConfig<VersionInfo, Date> createdCol = new ColumnConfig<VersionInfo, Date>(gridProperties.created(), 175, "Created");
+		ColumnConfig<VersionInfo, String> createdCol = new ColumnConfig<VersionInfo, String>(new ValueProvider<VersionInfo, String>(){
+			@Override
+			public String getValue(VersionInfo info) {
+				return selectVersionDateFormat.format(info.getCreated());
+			}
+			public void setValue(VersionInfo object, String value) {}
+			public String getPath() {return "";}
+			
+		}, 175, "Created");
 		ColumnConfig<VersionInfo, String> authorCol = new ColumnConfig<VersionInfo, String>(gridProperties.author(), 125, "Author");
 		ColumnConfig<VersionInfo, String> commentCol = new ColumnConfig<VersionInfo, String>(gridProperties.comment(), 450, "Comment");
+		commentCol.setCell(new AbstractCell<String>(){
+			@Override
+			public void render(com.google.gwt.cell.client.Cell.Context context,
+					String value, SafeHtmlBuilder sb) {
+				sb.appendHtmlConstant("<div qtip=\"" + value + "\">" + value);
+				sb.appendHtmlConstant("</div>");
+			}
+		});
+		
 		IdentityValueProvider<VersionInfo> identity = new IdentityValueProvider<VersionInfo>();
 		CheckBoxSelectionModel<VersionInfo> selectionModel = new CheckBoxSelectionModel<VersionInfo>(identity);
 		
@@ -173,6 +195,7 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 		
 		grid = new Grid<VersionInfo>(listStore, model);
 		grid.setSelectionModel(selectionModel);
+		new QuickTip(grid); //register a quick tip manager with this grid.
 		
 
 		return splitLayoutPanel;
@@ -194,15 +217,41 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 		eventBus.addHandler(AutosaveEvent.TYPE, new AutosaveEvent.AutosaveEventHandler() {
 			@Override
 			public void onAutosave(AutosaveEvent event) {
-				autosaveLabel.setText("Autosaved at " + (new Date()) + ".");
+				autosaveLabel.setText("Autosaved at " + autosaveDateFormat.format(new Date()) + ".");
+				northContent.forceLayout();
 			}
 		});
 		
-		compareVersionsButton.addClickHandler(new CompareVersionsHandler());
+		eventBus.addHandler(CommitNewVersionEvent.TYPE, new CommitNewVersionEvent.CommitNewVersionEventHandler() {
+			@Override
+			public void onCommitRequest(CommitNewVersionEvent event) {
+				System.out.println("Committing new version.");
+				//make server request to commit new version.
+				matrixService.commitNewVersion(currentVersion.getTaxonMatrix(), event.getAuthor(), event.getComment(), new AsyncCallback<Boolean>(){
+					@Override
+					public void onFailure(Throwable caught) {
+						caught.printStackTrace();
+					}
+						@Override
+					public void onSuccess(Boolean result) {
+						if (result == true){
+							MessageBox alert = new MessageBox("Save Successful", "Your new version was created successfully.");
+							alert.show();
+						} else {
+							AlertMessageBox alert = new AlertMessageBox("Error", "Your new version was not saved. Please try again later.");
+							alert.show();
+						}
+					}
+				});
+				
+			}
+		});
 		
-		loadVersionButton.addClickHandler(new LoadVersionHandler());
+		compareVersionsButton.addSelectHandler(new CompareVersionsHandler());
 		
-		saveNewVersionButton.addClickHandler(new SaveNewVersionHandler());
+		loadVersionButton.addSelectHandler(new LoadVersionHandler());
+		
+		saveNewVersionButton.addSelectHandler(new SaveNewVersionHandler());
 	}
 	
 	/**
@@ -216,22 +265,38 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 	private void showSelectVersionsDialog(List<VersionInfo> availableVersions, SelectionMode selectionMode, final SelectVersionsListener listener){
 		listStore.clear();
 		listStore.addAll(availableVersions);
+		VersionInfoProperties props = GWT.create(VersionInfoProperties.class);
+		listStore.addSortInfo(new StoreSortInfo<VersionInfo>(props.created(), SortDir.DESC));
 		grid.getSelectionModel().setSelectionMode(selectionMode);
+		grid.getSelectionModel().selectAll();
 		
-		MessageBox box = new MessageBox("Select Version(s)");
+		final MessageBox box = new MessageBox("Select Version(s)");
 		box.add(new Label("Available versions: "));
 		box.add(grid);
-		box.setPredefinedButtons(PredefinedButton.CANCEL, PredefinedButton.OK);
+		box.setPredefinedButtons(PredefinedButton.OK, PredefinedButton.CANCEL);
 		box.setHideOnButtonClick(true);
 		box.addDialogHideHandler(new DialogHideHandler() {
 			@Override
 			public void onDialogHide(DialogHideEvent event){
 				if (event.getHideButton().equals(PredefinedButton.OK)){
 					List<VersionInfo> selectedVersions = grid.getSelectionModel().getSelectedItems();
+					//sort list by date, otherwise columns will be in the order that the user selected them.
+					Collections.sort(selectedVersions, new Comparator<VersionInfo>(){
+						@Override
+						public int compare(VersionInfo a, VersionInfo b) {
+							return a.getCreated().compareTo(b.getCreated());
+						}
+					});
 					listener.onSelect(selectedVersions);
 				} else { //Cancel button was clicked.
 					listener.onSelect(null);
 				}
+			}
+		});
+		grid.addViewReadyHandler(new ViewReadyHandler(){
+			@Override
+			public void onViewReady(ViewReadyEvent event) {
+				box.center();
 			}
 		});
 		box.show();
@@ -253,7 +318,10 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 		/*currentVersion = newVersion;
 		/eventBus.fireEvent(new LoadTaxonMatrixEvent(currentVersion.getTaxonMatrix()));*/
 		
-		matrixService.commitCurrentVersion(newVersion.getTaxonMatrix(), new AsyncCallback<Boolean>(){
+		currentVersion = newVersion;
+		matrixView.loadMatrix(newVersion.getTaxonMatrix());
+		
+		/*matrixService.commitCurrentVersion(newVersion.getTaxonMatrix(), new AsyncCallback<Boolean>(){
 			@Override
 			public void onFailure(Throwable caught){
 				caught.printStackTrace();
@@ -264,14 +332,15 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 				if (result == true)
 					Window.Location.reload();
 			}
-		});
+		});*/
 	}
 	
 	private void showCompareVersionsDialog(List <SimpleMatrixVersion> oldVersions){
 		final MatrixCompareView view = new MatrixCompareView(oldVersions, currentVersion);
 		
 		final Dialog dialog = new Dialog();
-		dialog.setPredefinedButtons(PredefinedButton.CANCEL, PredefinedButton.OK);
+		dialog.setModal(true);
+		dialog.setPredefinedButtons(PredefinedButton.OK, PredefinedButton.CANCEL);
 		dialog.setHeadingText("Compare Versions");
 		dialog.setWidth(900);
 		dialog.setHeight(500);
@@ -333,10 +402,10 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 	 *	3) Get a list of the selected associated SimpleMatrixVersions from the server
 	 *	4) Create a MatrixCompareView with the received SimpleMatrixVersions and display it. 
 	 */
-	private class CompareVersionsHandler implements ClickHandler {
+	private class CompareVersionsHandler implements SelectHandler {
 		@Override
-		public void onClick(ClickEvent event) {
-			System.out.println("Compare Versions button pressed!");
+		public void onSelect(SelectEvent event) {
+			saveCurrentVersion();
 			matrixService.getAvailableVersions(new AsyncCallback<List<VersionInfo>>(){
 				@Override
 				public void onFailure(Throwable caught) {
@@ -382,48 +451,12 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 	 * 	3) Send Commit request to server
 	 * 	4) Show success or failure. 
 	 */
-	private class SaveNewVersionHandler implements ClickHandler {
+	private class SaveNewVersionHandler implements SelectHandler {
 		@Override
-		public void onClick(ClickEvent event) {
-			
-			final PromptMessageBox authorBox = new PromptMessageBox("Version Info", "Please specify an author for this version: ");
-			authorBox.addDialogHideHandler(new DialogHideHandler() {
-				@Override
-				public void onDialogHide(DialogHideEvent event) {
-					final String author = authorBox.getValue();
-					if (event.getHideButton().equals(PredefinedButton.OK) && author != null){
-						
-						final MultiLinePromptMessageBox commentBox = new MultiLinePromptMessageBox("Version Info", "Please include a comment about this version: ");
-						commentBox.addDialogHideHandler(new DialogHideHandler() {
-							@Override
-							public void onDialogHide(DialogHideEvent event) {
-								final String comment = commentBox.getValue();
-								if (event.getHideButton().equals(PredefinedButton.OK) && comment != null){
-									//make server request to commit new version.
-									matrixService.commitNewVersion(currentVersion.getTaxonMatrix(), author, comment, new AsyncCallback<Boolean>(){
-										@Override
-										public void onFailure(Throwable caught) {
-											caught.printStackTrace();
-										}
-											@Override
-										public void onSuccess(Boolean result) {
-											if (result == true){
-												MessageBox alert = new MessageBox("Save Successful", "Your new version was created successfully.");
-												alert.show();
-											} else {
-												AlertMessageBox alert = new AlertMessageBox("Error", "Your new version was not saved. Please try again later.");
-												alert.show();
-											}
-										}
-									});
-								}
-							}
-						});
-						commentBox.show();
-					}
-				}
-			});
-			authorBox.show();
+		public void onSelect(SelectEvent event) {
+			saveCurrentVersion();
+			VersionInfoDialog dialog = new VersionInfoDialog(eventBus);
+			dialog.show();
 		}
 	}
 	
@@ -431,13 +464,12 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 	 * On 'Load version' click: 
 	 *	1) Get list of available versions from server
 	 *	2) Show dialog to let user select a version.
-	 *	3) TODO: Ask user to comfirm the loss of any current changes.
+	 *	3) TODO: Ask user to confirm the loss of any current changes.
 	 *	4) Call loadVersion with the selected version. 
 	 */
-	private class LoadVersionHandler implements ClickHandler {
+	private class LoadVersionHandler implements SelectHandler {
 		@Override
-		public void onClick(ClickEvent event) {
-			System.out.println("Load Version button pressed!");
+		public void onSelect(SelectEvent event) {
 			matrixService.getAvailableVersions(new AsyncCallback<List<VersionInfo>>(){
 				@Override
 				public void onFailure(Throwable caught) {
@@ -450,21 +482,28 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 						@Override
 						public void onSelect(List<VersionInfo> selectedVersions){
 							if (selectedVersions != null && selectedVersions.size() > 0){
-								VersionInfo selected = selectedVersions.get(0);
+								final VersionInfo selected = selectedVersions.get(0);
 								
-								//TODO: add confirm message. ("Any changes that have not been committed will be lost.")
-								
-								matrixService.getVersion(selected.getVersionID(), new AsyncCallback<MatrixVersion>(){
+								ConfirmMessageBox confirmBox = new ConfirmMessageBox("Confirm Load", "Any changes that have not been saved will be lost. Do you want to continue?");
+								confirmBox.addDialogHideHandler(new DialogHideHandler(){
 									@Override
-									public void onFailure(Throwable caught){
-										caught.printStackTrace();
-									}
-									
-									@Override
-									public void onSuccess(MatrixVersion newVersion){
-										loadVersion(newVersion);
+									public void onDialogHide(DialogHideEvent event) {
+										if (event.getHideButton() == PredefinedButton.YES){
+											matrixService.getVersion(selected.getVersionID(), new AsyncCallback<MatrixVersion>(){
+												@Override
+												public void onFailure(Throwable caught){
+													caught.printStackTrace();
+												}
+												
+												@Override
+												public void onSuccess(MatrixVersion newVersion){
+													loadVersion(newVersion);
+												}
+											});
+										}
 									}
 								});
+								confirmBox.show();
 							}
 						}
 					}); //end showSelectVersionsDialog
@@ -472,5 +511,20 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 				}
 			}); //end matrixService.getAvailableVersions
 		}
+	}
+	
+	private void saveCurrentVersion(){
+		matrixService.commitCurrentVersion(currentVersion.getTaxonMatrix(), new AsyncCallback<Boolean>(){
+			@Override
+			public void onFailure(Throwable caught){
+				caught.printStackTrace();
+			}
+			
+			@Override
+			public void onSuccess(Boolean result){
+				if (result == true) //autosave was successful. 
+					eventBus.fireEvent(new AutosaveEvent());
+			}
+		});
 	}
 }

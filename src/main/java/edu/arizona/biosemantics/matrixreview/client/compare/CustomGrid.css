@@ -9,7 +9,7 @@
 @eval commented com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/red.gif");
 @eval dirtyCommented com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/black_red.gif");
 @eval invalidLine com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/invalid_line.gif");
-
+@eval blockedSelectedImg com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/grid3-hrow-over.gif");
 
 @external x-treegrid x-treegrid-column;
 
@@ -86,10 +86,6 @@
   text-overflow: ellipsis;
 }
 
-.cellInnerMargins {
-  margin: 4px 3px 3px 5px;
-}
-
 .noPadding/*.cellInner*/ {
   padding: 0;
   height: 100%;
@@ -154,6 +150,7 @@
   border-style: dotted;
 }
 
+
 .rowWrap .cell, .rowWrap .cellInner {
   border: none; 
 }
@@ -167,26 +164,39 @@
   position: relative;
 }
 
-.blocked {
-  white-space: nowrap;
-  height: 22px;
+
+.cellInnerMargins {
+  margin: 4px 3px 3px 5px;
 }
 
 .movedCell {
-	background-color: #d4d4e4 !important;
+	background-color: #cacada !important;
+	border-color: #cacada !important;
+}
+
+.movedCellShowValue {
+	background-color: #cacada !important;
+	color: #6A6A72;
+	border-color: #cacada !important;
+}
+
+.cellHeight {
 	height: 22px;
 }
 
 .changedCell {
 	background-color: #fdfdc6;
-	height: 18px;
-	min-width:50px;
 }
 
-.row .grid-cellSelected .changedCell {
-  background-color: #E3EEE3 !important;
+.row .grid-cellSelected .changedCell{
+  background-color: #DBE6DA !important;
   color: #000;
 }
+
+.grid-rowSelected .cell .changedCell{
+  background-color: #EEF3DE !important;
+}
+
 
 .footer .cell {
   background: none; 
@@ -195,3 +205,39 @@
 .x-treegrid .x-treegrid-column .cellInner {
   padding: 0 !important;
 }
+
+
+
+
+.blocked {
+  background: repeat-x 0 bottom;
+  cursor: default;
+  zoom: 1;
+  padding: 0px 0 0 0;
+  background-color: #F9F9F9;
+}
+
+@sprite .blocked {
+  background-color: #f9f9f9;
+  gwt-image: 'columnHeader';
+  height: 22px;
+  background-position: bottom;
+}
+
+@if user.agent ie6  {
+  .blocked {
+    position: relative;
+  } 
+}
+
+
+/*.grid-rowSelected .cell .blocked {
+  background: transparent repeat-x 0 bottom;
+  background-image: blockedSelectedImg;
+  height: 22px;
+  background-position: bottom;
+  cursor: default;
+  zoom: 1;
+  padding: 0px 0 0 0;
+  background-color: #F9F9F9;
+}*/

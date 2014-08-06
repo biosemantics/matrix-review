@@ -270,13 +270,10 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 	}
 	
 	public void moveToRootTaxon(int index, List<Taxon> taxa) {
-		System.err.print("Doing a move to root. ");
 		for(Taxon taxon : taxa) {
-			System.out.println("Old parent: " + taxon.getParent());
 			if(taxon.getParent() != null)
 				taxon.getParent().removeChild(taxon);
 			taxon.setParent(null);
-			System.out.println("New parent: " + null);
 		}
 		this.addRootTaxon(index, taxa);
 	}
@@ -304,8 +301,6 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 			throw new IllegalArgumentException("Invalid levels");
 		}
 		
-		System.err.println(child + ". Parent: " + child.getParent());
-		
 		initTaxon(child);
 			
 		if(child.getParent() != null)
@@ -315,7 +310,6 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 		if(parent != null)
 			parent.addChild(index, child);
 		
-		System.err.println(child + ". New parent: " + child.getParent());
 	}
 	
 	public void addTaxon(Taxon parent, int index, List<Taxon> children) {

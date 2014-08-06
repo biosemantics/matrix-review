@@ -4,6 +4,7 @@ import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 
 import edu.arizona.biosemantics.matrixreview.client.compare.CharacterTreeNode;
+import edu.arizona.biosemantics.matrixreview.client.compare.ComparisonGridCell;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.Value;
@@ -22,12 +23,12 @@ public class MatrixVersionProperties implements PropertyAccess<Taxon>{
 				public String getValue(Taxon taxon) {
 					Taxon t = version.getTaxonMatrix().getTaxonById(taxon.getId());
 					if (t == null)
-						return "<empty>";
+						return ComparisonGridCell.CELL_BLOCKED;
 					if (t.getParent() != null && taxon.getParent() != null && !t.getParent().getId().equals(taxon.getParent().getId()))
-						return "<moved>";
+						return ComparisonGridCell.CELL_MOVED;
 					Value result = t.get(character);
 					if (result == null)
-						return "<empty>";
+						return ComparisonGridCell.CELL_BLOCKED;
 					return result.getValue();
 				}
 
@@ -49,15 +50,15 @@ public class MatrixVersionProperties implements PropertyAccess<Taxon>{
 						Taxon t = version.getTaxonMatrix().getTaxonById(taxon.getId());
 						Character c = (Character)node.getData();
 						if (t == null)
-							return "<empty>";
+							return ComparisonGridCell.CELL_BLOCKED;
 						if (t.getParent() != null && taxon.getParent() != null && !t.getParent().getId().equals(taxon.getParent().getId()))
-							return "<moved>";
+							return ComparisonGridCell.CELL_MOVED;
 						Value result = t.get(c);
 						if (result == null)
-							return "<empty>";
+							return ComparisonGridCell.CELL_BLOCKED;
 						return result.getValue();
 					} else { //this is an organ node - there is no value. 
-						return "<empty>";
+						return ComparisonGridCell.CELL_BLOCKED;
 					}					
 				}
 

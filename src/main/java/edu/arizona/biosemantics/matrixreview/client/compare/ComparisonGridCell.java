@@ -4,16 +4,26 @@ import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.resources.client.CssResource.Import;
+import com.google.gwt.resources.client.ImageResource.ImageOptions;
+import com.google.gwt.resources.client.ImageResource.RepeatStyle;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderAppearance;
-import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderStyles;
+import com.sencha.gxt.theme.base.client.grid.GridBaseAppearance.GridResources;
+import com.sencha.gxt.theme.base.client.grid.GridBaseAppearance.GridStyle;
+//import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderAppearance;
+//import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderStyles;
+import com.sencha.gxt.widget.core.client.grid.GridView.GridStateStyles;
 
-import edu.arizona.biosemantics.matrixreview.client.compare.ComparisonGrid.CustomGridResources;
-import edu.arizona.biosemantics.matrixreview.client.compare.ComparisonGrid.CustomGridResources.CustomGridStyle;
+import edu.arizona.biosemantics.matrixreview.client.compare.ComparisonGridCell.CustomGridResources.CustomGridStyle;
 
 public class ComparisonGridCell extends AbstractCell<String> {
 	CustomGridStyle styles = GWT.<CustomGridResources>create(CustomGridResources.class).css();
-	ColumnHeaderStyles columnHeaderStyles = GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class).styles();
+	//ColumnHeaderStyles columnHeaderStyles = GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class).styles();
+	
+	public static final String CELL_BLOCKED = "[blocked]";
+	public static final String CELL_MOVED = "[moved]";
+	public static final String CELL_MOVED_SHOW_VALUE = "[movedshowvalue]";
 	
 	private ComparisonGrid<?, ?> parent;
 	private List<CellIdentifier> changedCells;
@@ -35,21 +45,60 @@ public class ComparisonGridCell extends AbstractCell<String> {
 		if (value.equals("")){ //TODO: is there a better way to ensure that the row size does not shrink down for rows with only empty cells?
 			value = "&nbsp;";
 		}
-		String headerStyleClass = columnHeaderStyles.header() + " " + columnHeaderStyles.head();
-		if (value.equals("<empty>"))
-			sb.appendHtmlConstant("<div class=\"" + styles.blocked() + " " + headerStyleClass + "\"></div>");
-		else if (value.equals("<moved>"))
-			sb.appendHtmlConstant("<div class=\"" + styles.movedCell() + " " + "\"></div>");
-		else{ 	
-			if (parent.getMarkChangedCells() && cellChanged){
-				sb.appendHtmlConstant("<div class=\"" + styles.changedCell()+ "\">");
+		//String headerStyleClass = columnHeaderStyles.header() + " " + columnHeaderStyles.head();
+		
+		if (value.equals(CELL_BLOCKED)){
+			sb.appendHtmlConstant("<div class=\"" + styles.blocked() + "\"></div>");
+		} else if (value.equals(CELL_MOVED)){
+			sb.appendHtmlConstant("<div class=\"" + styles.cellHeight() + " " + styles.movedCell() + "\">");
+		
+		} else if (value.startsWith(CELL_MOVED_SHOW_VALUE)){
+			
+			String rest = value.substring(CELL_MOVED_SHOW_VALUE.length());
+			String parent = "";
+			if (rest.startsWith("[parent:")){
+				parent = rest.substring(8, rest.indexOf("]"));
+				rest = rest.substring(rest.indexOf("]")+1);
 			}
 			
-			sb.appendHtmlConstant("<div class=\"" + styles.cellInnerMargins() + "\">" + value + "</div>");
-			
-			if (parent.getMarkChangedCells() && cellChanged){
-				sb.appendHtmlConstant("</div>");
+			if (rest.equals("")){ //TODO: is there a better way to ensure that the row size does not shrink down for rows with only empty cells?
+				rest = "&nbsp;";
 			}
+			
+			//TODO: error check parent, show "root" instead of null
+			String qTip = "<b>Moved</b>" + (parent.length() > 0 ? " to taxon: " + parent : "");
+			sb.appendHtmlConstant("<div class=\"" + styles.cellHeight() + " "  + styles.movedCellShowValue() + "\" qtip=\"" + qTip + "\">");
+			sb.appendHtmlConstant(rest);
+			sb.appendHtmlConstant("</div>");
+			
+		} else{ 	
+			String htmlConstant = "<div class=\"" + styles.cellHeight();
+			if (parent.getMarkChangedCells() && cellChanged){
+				htmlConstant += " " + styles.changedCell();
+			}
+			htmlConstant += "\">";
+			
+			sb.appendHtmlConstant(htmlConstant);
+			sb.appendHtmlConstant(value);
+			
+			sb.appendHtmlConstant("</div>");
+		}
+	}
+	public interface CustomGridResources extends GridResources{
+		@ImageOptions(repeatStyle = RepeatStyle.Horizontal, preventInlining = true)
+	    ImageResource columnHeader();
+		
+		@Import(GridStateStyles.class)
+		@Source("CustomGrid.css")
+	    CustomGridStyle css();
+		
+		interface CustomGridStyle extends GridStyle{
+			public String blocked();
+			public String cellInnerMargins();
+			public String movedCellShowValue();
+			public String movedCell();
+			public String changedCell();
+			public String cellHeight();
 		}
 	}
 }

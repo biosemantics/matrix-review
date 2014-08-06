@@ -7,7 +7,8 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.resources.client.CssResource.Import;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.sencha.gxt.core.client.Style.ScrollDirection;
 import com.sencha.gxt.core.client.Style.SelectionMode;
 import com.sencha.gxt.core.client.ValueProvider;
@@ -16,36 +17,37 @@ import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.theme.base.client.grid.GridBaseAppearance;
-import com.sencha.gxt.theme.base.client.grid.GridBaseAppearance.GridResources;
-import com.sencha.gxt.theme.base.client.grid.GridBaseAppearance.GridStyle;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutData;
 import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer.HBoxLayoutAlign;
 import com.sencha.gxt.widget.core.client.event.BodyScrollEvent;
+import com.sencha.gxt.widget.core.client.event.ViewReadyEvent;
 import com.sencha.gxt.widget.core.client.event.BodyScrollEvent.BodyScrollHandler;
 import com.sencha.gxt.widget.core.client.event.CellClickEvent;
 import com.sencha.gxt.widget.core.client.event.CellClickEvent.CellClickHandler;
 import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent;
 import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent.CellDoubleClickHandler;
+import com.sencha.gxt.widget.core.client.event.ViewReadyEvent.ViewReadyHandler;
 import com.sencha.gxt.widget.core.client.form.Field;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.form.ValueBaseField;
-import com.sencha.gxt.widget.core.client.grid.CellSelectionModel;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.grid.GridView;
-import com.sencha.gxt.widget.core.client.grid.GridView.GridStateStyles;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
+import com.sencha.gxt.widget.core.client.tips.QuickTip;
 import com.sencha.gxt.widget.core.client.treegrid.MaintainListStoreTreeGrid;
 
+import edu.arizona.biosemantics.matrixreview.client.compare.ComparisonGridCell.CustomGridResources;
 import edu.arizona.biosemantics.matrixreview.client.event.ChangeComparingSelectionEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.CompareViewValueChangedEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.MatrixVersion;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleMatrixVersion;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleTaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.client.matrix.shared.VersionInfo;
 import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
 /**
@@ -80,9 +82,9 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 public abstract class ComparisonGrid<T, C> extends ContentPanel{
 	protected EventBus eventBus;
 	
-	private MaintainListStoreTreeGrid<C> controllerGrid; //contains the store of elements.
+	protected MaintainListStoreTreeGrid<C> controllerGrid; //contains the store of elements.
 	protected Grid<C> oldVersionsGrid; //grid displaying 1 column per version. 
-	private Grid<C> currentVersionGrid; //editable 1-column grid showing the values of the current version.
+	protected Grid<C> currentVersionGrid; //editable 1-column grid showing the values of the current version.
 	
 	private List<SimpleMatrixVersion> oldVersions;
 	protected MatrixVersion currentVersion;
@@ -94,9 +96,17 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 	private SimpleContainer oldVersionsContent;
 	private SimpleContainer currentVersionContent;
 	
-	private boolean markChangedCells = true;
+	private boolean markChangedCells;
 	
-	protected T selectedConstant; 
+	protected T selectedConstant;
+	protected C selectedRow;
+	
+	private Margins controllerMargins;
+	private Margins oldVersionsMargins;
+	private Margins currentVersionMargins;
+	
+	private static int COLUMN_WIDTH = 100;
+
 	
 	public ComparisonGrid(EventBus eventBus, List<SimpleMatrixVersion> oldVersions, MatrixVersion currentVersion, T selectedConstant){
 		this.eventBus = eventBus;
@@ -117,15 +127,31 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 	}
 
 	/**
-	 * Sets up the controller grid and the layout. 
+	 * Sets up the layout. 
 	 */
 	public void init(){
 		controllerGrid = createControllerGrid();
 		controllerGrid.getElement().getChild(0).<XElement> cast().getStyle().setOverflowY(Overflow.HIDDEN); //remove vertical scrollbar.
-		controllerGrid.getSelectionModel().setLocked(true); //don't allow selections on the controller.
+		controllerGrid.getSelectionModel().setSelectionMode(SelectionMode.SIMPLE);
+	//	controllerGrid.getSelectionModel().setLocked(true); //don't allow selections on the controller.
 		controllerGrid.getView().setSortingEnabled(false);
 		controllerGrid.getView().setColumnLines(true);
 		controllerGrid.getView().setStripeRows(true);
+		controllerGrid.addCellClickHandler(new CellClickHandler(){
+			@Override
+			public void onCellClick(CellClickEvent event) {
+				ListStore<C> store = controllerGrid.getStore();
+				C item = store.get(event.getRowIndex());
+				selectedRow = item;
+				eventBus.fireEvent(event);
+			}	
+		});
+		controllerGrid.addViewReadyHandler(new ViewReadyHandler(){
+			@Override
+			public void onViewReady(ViewReadyEvent event) {
+				controllerGrid.expandAll();
+			}
+		});
 		
 		
 		controllerGridContent = new SimpleContainer();
@@ -139,12 +165,14 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 		
 		content = new HBoxLayoutContainer();
 		content.setHBoxLayoutAlign(HBoxLayoutAlign.STRETCH);
-		Margins margins = new Margins(0, 0, XDOM.getScrollBarWidth()-1, 0);
-		BoxLayoutData flex = new BoxLayoutData(new Margins(0, 0, 0, 0));
+		controllerMargins = new Margins(0, 0, 0, 0);
+		oldVersionsMargins = new Margins(0, 0, 0, 0);
+		currentVersionMargins = new Margins(0, 0, XDOM.getScrollBarWidth()-1, 0);
+		BoxLayoutData flex = new BoxLayoutData(oldVersionsMargins);
 		flex.setFlex(1);
-		content.add(controllerGridContent, new BoxLayoutData(new Margins(0, 0, 0, 0)));
+		content.add(controllerGridContent, new BoxLayoutData(controllerMargins));
 		content.add(oldVersionsContent, flex);
-		content.add(currentVersionContent, new BoxLayoutData(margins));
+		content.add(currentVersionContent, new BoxLayoutData(currentVersionMargins));
 		
 		this.add(content);
 		
@@ -154,7 +182,7 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 		addEventHandlers();
 	}
 
-	private void addEventHandlers(){
+	protected void addEventHandlers(){
 		/**
 		 * ChangeComparingSelectionEvent
 		 * Fired when the selected constant has been changed and the grids should be reloaded 
@@ -236,14 +264,22 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 
 	protected abstract MaintainListStoreTreeGrid<C> createControllerGrid();
 	
-	private Grid<C> createOldVersionsGrid(MaintainListStoreTreeGrid<C> controlColumn, final List<SimpleMatrixVersion> oldVersions){
+	protected Grid<C> createOldVersionsGrid(MaintainListStoreTreeGrid<C> controlColumn, final List<SimpleMatrixVersion> oldVersions){
 		List<ColumnConfig<C, String>> columnConfigs = new ArrayList<ColumnConfig<C, String>>();
+		
+		DateTimeFormat headingDateFormat = DateTimeFormat.getFormat("d MMM hh:mm aaa");
+		DateTimeFormat tooltipDateFormat = DateTimeFormat.getFormat("EEE, MMM d, yyyy  hh:mm aaa");
 		
 		// create a column for each old matrix version.
 		for (int i = 0; i < oldVersions.size(); i++){
 			SimpleMatrixVersion version = oldVersions.get(i);
-			ColumnConfig<C, String> column = new ColumnConfig<C, String>(getSimpleVersionValueProvider(version));
-			column.setHeader(version.getVersionInfo().getCreated().toString());
+			ColumnConfig<C, String> column = new ColumnConfig<C, String>(getSimpleVersionValueProvider(version), COLUMN_WIDTH);
+			VersionInfo info = version.getVersionInfo();
+			column.setHeader(headingDateFormat.format(info.getCreated()));
+			String tooltip = "<b>" + tooltipDateFormat.format(info.getCreated()) + "</b><br><br>"
+					+ "<b>author: </b>" + info.getAuthor() + "<br>"
+					+ "<b>comment: </b>" + info.getComment();
+			column.setToolTip(SafeHtmlUtils.fromTrustedString(tooltip));
 			column.setMenuDisabled(true);
 			column.setCell(new ComparisonGridCell(this, changedCells.get(i)));
 			columnConfigs.add(column);
@@ -259,6 +295,20 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 		    protected int getScrollAdjust() { //this removes the extra space on the right meant to hold the scrollbar.
 		        return 0;
 		    }
+			/*
+			@Override
+			protected void calculateVBar(boolean force){
+				this.vbar = true;
+			}*/
+		});
+		grid.addCellClickHandler(new CellClickHandler(){
+			@Override
+			public void onCellClick(CellClickEvent event) {
+				ListStore<C> store = grid.getStore();
+				C item = store.get(event.getRowIndex());
+				selectedRow = item;
+				eventBus.fireEvent(event);
+			}	
 		});
 		grid.addCellDoubleClickHandler(new CellDoubleClickHandler(){
 			@Override
@@ -270,19 +320,19 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 				
 				Value value = getValue(oldVersions.get(versionIndex), selectedConstant, item);
 				if (value != null){
-					System.out.println("Got the value: " + value.getValue());
 					changeMatrixValue(item, value.getValue(), true);
 					eventBus.fireEvent(new CompareViewValueChangedEvent());
-				}
+				} 
 			}
 		});
+		new QuickTip(grid); //register a quick tip manager with this grid.
 		
-		CellSelectionModel<C> selectionModel = new CellSelectionModel<C>();
-		selectionModel.setSelectionMode(SelectionMode.MULTI);
-		grid.setSelectionModel(selectionModel);
-		grid.getElement().getChild(0).<XElement> cast().getStyle().setOverflowY(Overflow.HIDDEN); //hide vertical scroll bar. 
-
+		grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+		grid.getElement().getChild(0).<XElement> cast().getStyle().setOverflowY(Overflow.HIDDEN); //hide vertical scroll bar.
+		
+		
 		grid.getView().setAutoExpandColumn(columns.get(columns.size()-1));
+		grid.getView().setAutoExpandMin(COLUMN_WIDTH);
 		grid.getView().setSortingEnabled(false);
 		grid.getView().setColumnLines(true);
 		grid.getView().setStripeRows(true);
@@ -292,7 +342,7 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 	
 	protected abstract Value getValue(SimpleMatrixVersion simpleMatrixVersion, T selectedConstant2, C item);
 
-	private Grid<C> createCurrentVersionGrid(MaintainListStoreTreeGrid<C> controlColumn, MatrixVersion currentVersion){
+	protected Grid<C> createCurrentVersionGrid(MaintainListStoreTreeGrid<C> controlColumn, MatrixVersion currentVersion){
 		ColumnConfig<C, String> column = new ColumnConfig<C, String>(getVersionValueProvider(currentVersion));
 		column.setHeader("Current");
 		column.setMenuDisabled(true);
@@ -317,7 +367,7 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 		
 		//hide scrollers: Note that child is grabbed at index 0. Even though after full blown rendering the index shown in browser may be different
 		grid.getElement().getChild(0).<XElement> cast().getStyle().setOverflowX(Overflow.HIDDEN);
-		
+		grid.getSelectionModel().setLocked(true);
 		grid.getView().setSortingEnabled(false);
 		grid.getView().setColumnLines(true);
 		grid.getView().setStripeRows(true);
@@ -347,13 +397,13 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 		currentVersionChangedCells.addAll(getChangedCells(oldVersions.get(oldVersions.size()-1), current));
 	}
 	
-	/*public boolean isCellChanged(int columnIndex, Object key){
-		CellIdentifier cell = new CellIdentifier(selectedConstant, columnIndex, key);
-		return changedCells.contains(cell);
-	}*/
-	
 	public T getSelectedConstant(){
 		return selectedConstant;
+	}
+	
+	public void refresh(){
+		oldVersionsGrid.getView().refresh(true);
+		currentVersionGrid.getView().refresh(true);
 	}
 	
 	/**
@@ -367,19 +417,6 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 			//this.columnHeaderStyles = GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class).styles();
 		}
 		//TODO: make this render a cell as 'greyed out' (header style?) if there is no data for that cell. 
-	}
-	
-	public interface CustomGridResources extends GridResources{
-		@Import(GridStateStyles.class)
-		@Source("CustomGrid.css")
-	    CustomGridStyle css();
-		
-		interface CustomGridStyle extends GridStyle{
-			public String blocked();
-			public String cellInnerMargins();
-			public String movedCell();
-			public String changedCell();
-		}
 	}
 	
 	/**
@@ -445,7 +482,7 @@ class CellIdentifier{
 			if (other.getSelectedConstant().equals(this.selectedConstant) && other.getKey().equals(this.key))
 					return true;
 		}catch(Exception e){ 
-			return false; 
+			return false;
 		}
 		return false;
 	}

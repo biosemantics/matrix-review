@@ -1009,12 +1009,7 @@ public class MatrixView implements IsWidget {
 	}
 
 	public void loadMatrix(TaxonMatrix copyFrom) {
-		/*for (int i = 0; i < copyFrom.getTaxaCount(); i++){
-			for (int j = 0; j < copyFrom.getCharacterCount(); j++){
-				Value newValue = copyFrom.getTaxon(i).get(copyFrom.getCharacter(j));
-				modelControler.setValue(copyFrom.getTaxon(i), copyFrom.getCharacter(j), newValue);
-			}
-		}*/
 		modelControler.load(copyFrom);
+		modelControler.expandTaxa(copyFrom.list());
 	}
 }
