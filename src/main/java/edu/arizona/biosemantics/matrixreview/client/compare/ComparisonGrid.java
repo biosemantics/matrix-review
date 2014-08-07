@@ -295,11 +295,6 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 		    protected int getScrollAdjust() { //this removes the extra space on the right meant to hold the scrollbar.
 		        return 0;
 		    }
-			/*
-			@Override
-			protected void calculateVBar(boolean force){
-				this.vbar = true;
-			}*/
 		});
 		grid.addCellClickHandler(new CellClickHandler(){
 			@Override
@@ -410,13 +405,9 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 	 * Uses custom css so that the height of the grid rows matches the height of the controller. 
 	 */
 	public class VersionsGridAppearance extends GridBaseAppearance{
-		//private ColumnHeaderStyles columnHeaderStyles;
-		
 		public VersionsGridAppearance() {
 			super(GWT.<CustomGridResources>create(CustomGridResources.class));
-			//this.columnHeaderStyles = GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class).styles();
 		}
-		//TODO: make this render a cell as 'greyed out' (header style?) if there is no data for that cell. 
 	}
 	
 	/**

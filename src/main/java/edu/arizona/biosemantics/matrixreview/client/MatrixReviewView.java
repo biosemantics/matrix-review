@@ -29,6 +29,7 @@ import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.data.shared.Store.StoreSortInfo;
+import com.sencha.gxt.theme.base.client.grid.GridBaseAppearance;
 import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
@@ -52,9 +53,12 @@ import com.sencha.gxt.widget.core.client.grid.CheckBoxSelectionModel;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
+import com.sencha.gxt.widget.core.client.grid.GridView;
 import com.sencha.gxt.widget.core.client.tips.QuickTip;
 
 import edu.arizona.biosemantics.matrixreview.client.compare.MatrixCompareView;
+import edu.arizona.biosemantics.matrixreview.client.compare.ComparisonGrid.VersionsGridAppearance;
+import edu.arizona.biosemantics.matrixreview.client.compare.ComparisonGridCell.CustomGridResources;
 import edu.arizona.biosemantics.matrixreview.client.desktop.DesktopView;
 import edu.arizona.biosemantics.matrixreview.client.event.AutosaveEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.CommitNewVersionEvent;
@@ -78,7 +82,7 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 	
 	private SimpleEventBus eventBus;
 	
-	private static final int autosaveIntervalMillis = 60000;
+	private static final int autosaveIntervalMillis = 120000;
 	
 	private SplitLayoutPanel splitLayoutPanel;
 	private MatrixView matrixView;
@@ -193,7 +197,12 @@ public class MatrixReviewView extends Composite implements /*implements IsWidget
 		
 		listStore = new ListStore<VersionInfo>(gridProperties.key());
 		
-		grid = new Grid<VersionInfo>(listStore, model);
+		grid = new Grid<VersionInfo>(listStore, model, new GridView<VersionInfo>(){
+			@Override
+		    protected int getScrollAdjust() { //this removes the extra space on the right meant to hold the scrollbar.
+		        return 0;
+		    }
+		});
 		grid.setSelectionModel(selectionModel);
 		new QuickTip(grid); //register a quick tip manager with this grid.
 		

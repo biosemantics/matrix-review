@@ -54,16 +54,6 @@ public class CharacterTreeGrid extends MaintainListStoreTreeGrid<CharacterTreeNo
 		
 		grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		
-		grid.getSelectionModel().addSelectionHandler(new SelectionHandler<CharacterTreeNode>(){
-			@Override
-			public void onSelection(SelectionEvent<CharacterTreeNode> event) {
-				CharacterTreeNode nodeSelected = event.getSelectedItem();
-				if (nodeSelected.getData() instanceof Character){
-					eventBus.fireEvent(new ChangeComparingSelectionEvent(nodeSelected));
-				}
-			}
-		});
-		
 		return grid;
 	}
 }

@@ -56,14 +56,6 @@ public class TaxonTreeGrid extends MaintainListStoreTreeGrid<Taxon>{
 		
 		grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		
-		grid.getSelectionModel().addSelectionHandler(new SelectionHandler<Taxon>(){
-			@Override
-			public void onSelection(SelectionEvent<Taxon> event) {
-				Taxon taxonSelected = event.getSelectedItem();
-				eventBus.fireEvent(new ChangeComparingSelectionEvent(taxonSelected));
-			}
-		});
-		
 		return grid;
 	}
 }

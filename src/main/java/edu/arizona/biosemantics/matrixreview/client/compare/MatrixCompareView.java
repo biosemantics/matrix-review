@@ -3,6 +3,8 @@ package edu.arizona.biosemantics.matrixreview.client.compare;
 import java.util.List;
 
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
@@ -30,6 +32,7 @@ import com.sencha.gxt.widget.core.client.event.ViewReadyEvent;
 import com.sencha.gxt.widget.core.client.event.ViewReadyEvent.ViewReadyHandler;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 
+import edu.arizona.biosemantics.matrixreview.client.event.ChangeComparingSelectionEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.MatrixVersion;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleMatrixVersion;
@@ -240,6 +243,13 @@ public class MatrixCompareView extends Composite {
 						taxonGrid.getSelectionModel().select(false, preselectedNode);
 					}
 				});
+				taxonGrid.getSelectionModel().addSelectionHandler(new SelectionHandler<Taxon>(){
+					@Override
+					public void onSelection(SelectionEvent<Taxon> event) {
+						Taxon taxonSelected = event.getSelectedItem();
+						eventBus.fireEvent(new ChangeComparingSelectionEvent(taxonSelected));
+					}
+				});
 			}
 			if (compareByTaxonGrid == null){
 				compareByTaxonGrid = new CompareByTaxonGrid(eventBus, oldVersions, currentVersion, preselectedNode, characterStore);
@@ -269,6 +279,15 @@ public class MatrixCompareView extends Composite {
 							}
 						}
 						characterGrid.getSelectionModel().select(false, preselectedNode);
+					}
+				});
+				characterGrid.getSelectionModel().addSelectionHandler(new SelectionHandler<CharacterTreeNode>(){
+					@Override
+					public void onSelection(SelectionEvent<CharacterTreeNode> event) {
+						CharacterTreeNode nodeSelected = event.getSelectedItem();
+						if (nodeSelected.getData() instanceof Character){
+							eventBus.fireEvent(new ChangeComparingSelectionEvent(nodeSelected));
+						}
 					}
 				});
 			}
