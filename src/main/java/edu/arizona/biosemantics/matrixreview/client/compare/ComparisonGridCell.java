@@ -39,6 +39,11 @@ public class ComparisonGridCell extends AbstractCell<String> {
 		
 		Object key = context.getKey();
 		
+		/**TODO: 
+		 * Find out what is triggering all these NullPointerExceptions in getToolTip. It seems that
+		 * sometimes the key in the cell is null? (Verify.)
+		 */
+		//System.out.println("Parent " + parent.getClass() + " has constant: " + parent.getSelectedConstant());
 		CellIdentifier cell = new CellIdentifier(parent.getSelectedConstant(), key);
 		boolean cellChanged = changedCells.contains(cell);
 		
@@ -46,6 +51,8 @@ public class ComparisonGridCell extends AbstractCell<String> {
 			value = "&nbsp;";
 		}
 		//String headerStyleClass = columnHeaderStyles.header() + " " + columnHeaderStyles.head();
+		
+		String qTip = parent.getQuickTip(cell, context.getColumn());
 		
 		if (value.equals(CELL_BLOCKED)){
 			sb.appendHtmlConstant("<div class=\"" + styles.blocked() + "\"></div>");
@@ -55,9 +62,9 @@ public class ComparisonGridCell extends AbstractCell<String> {
 		} else if (value.startsWith(CELL_MOVED_SHOW_VALUE)){
 			
 			String rest = value.substring(CELL_MOVED_SHOW_VALUE.length());
-			String parent = "";
+			String parentT = "";
 			if (rest.startsWith("[parent:")){
-				parent = rest.substring(8, rest.indexOf("]"));
+				parentT = rest.substring(8, rest.indexOf("]"));
 				rest = rest.substring(rest.indexOf("]")+1);
 			}
 			
@@ -66,7 +73,8 @@ public class ComparisonGridCell extends AbstractCell<String> {
 			}
 			
 			//TODO: error check parent, show "root" instead of null
-			String qTip = "<b>Moved</b>" + (parent.length() > 0 ? " to taxon: " + parent : "");
+			qTip = "<b>Moved</b>" + (parentT.length() > 0 ? " to taxon: " + parentT : "") + "<br><br>" + qTip;
+			
 			sb.appendHtmlConstant("<div class=\"" + styles.cellHeight() + " "  + styles.movedCellShowValue() + "\" qtip=\"" + qTip + "\">");
 			sb.appendHtmlConstant(rest);
 			sb.appendHtmlConstant("</div>");
@@ -76,7 +84,7 @@ public class ComparisonGridCell extends AbstractCell<String> {
 			if (parent.getMarkChangedCells() && cellChanged){
 				htmlConstant += " " + styles.changedCell();
 			}
-			htmlConstant += "\">";
+			htmlConstant += "\" qtip=\"" + qTip + "\">";
 			
 			sb.appendHtmlConstant(htmlConstant);
 			sb.appendHtmlConstant(value);

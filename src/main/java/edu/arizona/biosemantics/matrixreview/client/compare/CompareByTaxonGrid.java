@@ -8,6 +8,7 @@ import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.treegrid.MaintainListStoreTreeGrid;
 
+import edu.arizona.biosemantics.matrixreview.client.event.ChangeComparingSelectionEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.MatrixVersion;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.MatrixVersionProperties;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleMatrixVersion;
@@ -29,10 +30,29 @@ public class CompareByTaxonGrid extends ComparisonGrid<Taxon, CharacterTreeNode>
 
 	private TreeStore<CharacterTreeNode> characterStore;
 	
-	public CompareByTaxonGrid(EventBus eventBus, List<SimpleMatrixVersion> oldVersions, MatrixVersion currentVersion, Taxon selectedSubject, TreeStore<CharacterTreeNode> store) {
-		super(eventBus, oldVersions, currentVersion, selectedSubject);
+	public CompareByTaxonGrid(EventBus eventBus, List<SimpleMatrixVersion> oldVersions, MatrixVersion currentVersion, Taxon selectedConstant, TreeStore<CharacterTreeNode> store) {
+		super(eventBus, oldVersions, currentVersion, selectedConstant);
 		this.characterStore = store;
 		this.init();
+	}
+	
+	@Override
+	protected void addEventHandlers(){
+		super.addEventHandlers();
+		
+		/**
+		 * ChangeComparingSelectionEvent
+		 * Fired when the selected constant has been changed and the grids should be reloaded 
+		 * using the new value. 
+		 */
+		eventBus.addHandler(ChangeComparingSelectionEvent.TYPE, new ChangeComparingSelectionEvent.ChangeComparingSelectionEventHandler() {
+			@Override
+			public void onChange(ChangeComparingSelectionEvent event) {
+				if (event.getSelection() instanceof Taxon){
+					updateSelectedConstant((Taxon)event.getSelection());
+				}
+			}
+		});
 	}
 
 	@Override
@@ -130,6 +150,58 @@ public class CompareByTaxonGrid extends ComparisonGrid<Taxon, CharacterTreeNode>
 			return t.get(c);
 		}
 		return null;
+	}
+
+	@Override
+	public String getQuickTip(CellIdentifier cell, int versionIndex) {
+		try{
+			SimpleMatrixVersion version = oldVersions.get(versionIndex);
+			if (cell.getSelectedConstant() instanceof CharacterTreeNode){
+				//System.out.println("Weird things are happening: " + cell.getKey() + ", " + ((CharacterTreeNode)cell.getSelectedConstant()).getData());
+				return "errer";
+			}
+			Taxon selectedTaxon = (Taxon)cell.getSelectedConstant();
+			CharacterTreeNode node = characterStore.findModelWithKey((String)cell.getKey());
+			if (!(node.getData() instanceof Character)){
+				return "";
+			}
+			Character character = (Character)node.getData();
+			
+			Taxon versionTaxon = version.getMatrix().getTaxonById(selectedTaxon.getId());
+			Character versionCharacter = version.getMatrix().getCharacterById(character.getId());
+			
+			if (versionTaxon == null || versionCharacter == null) //either this taxon or this character did not exist in this version.
+				return "";
+			
+			Taxon currentVersionTaxon = currentVersion.getTaxonMatrix().getTaxonById(selectedTaxon.getId());
+			Character currentVersionCharacter = currentVersion.getTaxonMatrix().getCharacterById(character.getId());
+			
+			String tip = "";
+			tip += "<b><i>Taxon:</i> " + (currentVersionTaxon == null ? versionTaxon.getName() : currentVersionTaxon.getName()) + "</b>";
+			if (currentVersionTaxon != null && !versionTaxon.getName().equals(currentVersionTaxon.getName())){ //name was changed since this version.
+				tip += "&nbsp;(formerly <i>" + versionTaxon.getName() + "</i>)";
+			}
+			tip += "<br>";
+			tip += "<i>Author: </i>" + versionTaxon.getAuthor() + "<br>";
+			tip += "<i>Year: </i>" + versionTaxon.getYear() + "<br>";
+			tip += "<i>Description: </i>" + versionTaxon.getDescription() + "<br>";
+			tip += "<i>Comment: </i>" + versionTaxon.getComment() + "<br>";
+			tip += "<br>";
+			
+			tip += "<b><i>Character:</i> " + (currentVersionCharacter == null ? versionCharacter.toString() : currentVersionCharacter.toString()) + "</b>";
+			if (currentVersionCharacter != null && !versionCharacter.toString().equals(currentVersionCharacter.toString())){ //name was changed since this version.
+				tip += " (formerly <i>" + versionCharacter.toString() + "</i>)";
+			}
+			tip += "<br>";
+			tip += "<i>Comment: </i>" + versionCharacter.getComment();
+			tip += "<br>&nbsp;";
+			
+			return tip;
+			
+		} catch(Exception e){
+			e.printStackTrace();
+			return "Error getting quick tip.";
+		}
 	}
 }
 	

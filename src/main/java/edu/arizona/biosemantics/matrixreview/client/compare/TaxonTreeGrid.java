@@ -16,6 +16,7 @@ import com.sencha.gxt.widget.core.client.treegrid.MaintainListStoreTreeGrid;
 
 import edu.arizona.biosemantics.matrixreview.client.event.ChangeComparingSelectionEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.ControllerGridAppearance;
+import edu.arizona.biosemantics.matrixreview.client.matrix.shared.MatrixVersion;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonProperties;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonPropertiesByLocation;
@@ -36,9 +37,9 @@ public class TaxonTreeGrid extends MaintainListStoreTreeGrid<Taxon>{
 		super(treeStore, model, column, app, treeApp);
 	}
 	
-	public static TaxonTreeGrid createNew(final EventBus eventBus, TreeStore<Taxon> store, boolean useHeaderStyle){
-		final TaxonPropertiesByLocation taxonProperties = new TaxonPropertiesByLocation();
-		ColumnConfig<Taxon, String> column = new ColumnConfig<Taxon, String>(taxonProperties.fullName(), 200);
+	public static TaxonTreeGrid createNew(final EventBus eventBus, TreeStore<Taxon> store, boolean useHeaderStyle, MatrixVersion currentVersion){
+		final TaxonPropertiesByLocation taxonProperties = new TaxonPropertiesByLocation(currentVersion);
+		ColumnConfig<Taxon, String> column = new ColumnConfig<Taxon, String>(taxonProperties.currentTaxonName(), 200);
 		column.setHeader("Taxon Concept / Character");
 		column.setMenuDisabled(true);
 		

@@ -64,7 +64,7 @@ public class MatrixCompareView extends Composite {
 	private List<SimpleMatrixVersion> oldVersions;
 	private MatrixVersion currentVersion;
 	
-	private TaxonStore taxonStore;
+	private TreeStore<Taxon> taxonStore;
 	private TreeStore<CharacterTreeNode> characterStore;
 	
 	private SimpleContainer content;
@@ -154,8 +154,8 @@ public class MatrixCompareView extends Composite {
 	private void createTaxonStore(){
 		TaxonMatrix currentMatrix = currentVersion.getTaxonMatrix();
 		//Create store and populate with taxon list.
-		final TaxonPropertiesByLocation taxonProperties = new TaxonPropertiesByLocation();
-		taxonStore = new TaxonStore(taxonProperties); 
+		final TaxonPropertiesByLocation taxonProperties = new TaxonPropertiesByLocation(currentVersion);
+		taxonStore = new TreeStore<Taxon>(taxonProperties.key()); 
 		for (Taxon root: currentMatrix.getRootTaxa()){
 			addTaxonAndChildrenToStore(root, null, 0);
 		}
@@ -225,13 +225,11 @@ public class MatrixCompareView extends Composite {
 		this.compareMode = mode;
 		westPanel.clear();
 		centerContent.clear();
-		eventBus = new SimpleEventBus();
-		
 		
 		if (this.compareMode == CompareMode.BY_TAXON){
 			final Taxon preselectedNode = getPreselectedTaxon();
 			if (taxonGrid == null){
-				taxonGrid = TaxonTreeGrid.createNew(eventBus,  taxonStore, false);				
+				taxonGrid = TaxonTreeGrid.createNew(eventBus,  taxonStore, false, currentVersion);				
 				taxonGrid.addViewReadyHandler(new ViewReadyHandler(){
 					@Override
 					public void onViewReady(ViewReadyEvent event) {
@@ -259,6 +257,7 @@ public class MatrixCompareView extends Composite {
 			
 			westPanel.add(taxonGrid.asWidget());
 			centerContent.add(compareByTaxonGrid);
+			//compareByTaxonGrid.updateSelectedConstant(taxonGrid.getSelectionModel().getSelectedItem());
 			compareByTaxonGrid.refresh();
 			compareModeLabel.setText("Currently comparing by taxon.");
 			changeCompareModeButton.setText("View by Character");
@@ -298,6 +297,7 @@ public class MatrixCompareView extends Composite {
 			
 			westPanel.add(characterGrid.asWidget());
 			centerContent.add(compareByCharacterGrid);
+			//compareByCharacterGrid.updateSelectedConstant(characterGrid.getSelectionModel().getSelectedItem());
 			compareByCharacterGrid.refresh();
 			compareModeLabel.setText("Currently comparing by character.");
 			changeCompareModeButton.setText("View by Taxon");
@@ -319,7 +319,8 @@ public class MatrixCompareView extends Composite {
 	}
 	
 	private Taxon getPreselectedTaxon() {
-		return oldVersions.get(0).getMatrix().getTaxon(0);
+		Taxon taxon = taxonStore.getAll().get(0);
+		return taxon;
 	}
 
 	private CharacterTreeNode getPreselectedCharacter() {

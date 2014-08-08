@@ -7,11 +7,13 @@ import java.util.List;
 import com.google.gwt.event.shared.EventBus;
 import com.sencha.gxt.core.client.Style.SelectionMode;
 import com.sencha.gxt.core.client.ValueProvider;
+import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.event.CellClickEvent;
 import com.sencha.gxt.widget.core.client.event.CellClickEvent.CellClickHandler;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.treegrid.MaintainListStoreTreeGrid;
 
+import edu.arizona.biosemantics.matrixreview.client.event.ChangeComparingSelectionEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.MatrixVersion;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.MatrixVersionProperties;
@@ -33,11 +35,11 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
 public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Taxon>{
 
-	private TaxonStore taxonStore;
+	private TreeStore<Taxon> taxonStore;
 	
-	public CompareByCharacterGrid(EventBus eventBus, List<SimpleMatrixVersion> oldVersions, MatrixVersion currentVersion, CharacterTreeNode selectedSubject, TaxonStore store) {
-		super(eventBus, oldVersions, currentVersion, selectedSubject);
-		this.taxonStore = store;
+	public CompareByCharacterGrid(EventBus eventBus, List<SimpleMatrixVersion> oldVersions, MatrixVersion currentVersion, CharacterTreeNode selectedConstant, TreeStore<Taxon> taxonStore2) {
+		super(eventBus, oldVersions, currentVersion, selectedConstant);
+		this.taxonStore = taxonStore2;
 		this.init();
 	}
 	
@@ -45,7 +47,7 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 	protected void addEventHandlers(){
 		super.addEventHandlers();
 		
-		eventBus.addHandler(CellClickEvent.getType(), new CellClickHandler(){
+		/*eventBus.addHandler(CellClickEvent.getType(), new CellClickHandler(){
 			@Override
 			public void onCellClick(CellClickEvent event) {
 				List<Taxon> instancesOfSameTaxon = new ArrayList<Taxon>();
@@ -61,13 +63,27 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 					oldVersionsGrid.getSelectionModel().select(true, t);
 				}
 			}
+		});*/
+		
+		/**
+		 * ChangeComparingSelectionEvent
+		 * Fired when the selected constant has been changed and the grids should be reloaded 
+		 * using the new value. 
+		 */
+		eventBus.addHandler(ChangeComparingSelectionEvent.TYPE, new ChangeComparingSelectionEvent.ChangeComparingSelectionEventHandler() {
+			@Override
+			public void onChange(ChangeComparingSelectionEvent event) {
+				if (event.getSelection() instanceof CharacterTreeNode){
+					updateSelectedConstant((CharacterTreeNode)event.getSelection());
+				}
+			}
 		});
 	}
 
 	@Override
 	protected Grid<Taxon> createOldVersionsGrid(MaintainListStoreTreeGrid<Taxon> controlColumn, List<SimpleMatrixVersion> oldVersions){
 		Grid<Taxon> grid = super.createOldVersionsGrid(controlColumn, oldVersions);
-		grid.getSelectionModel().setSelectionMode(SelectionMode.SIMPLE);
+		grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		return grid;
 	}
 	
@@ -78,7 +94,7 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 
 	@Override
 	protected MaintainListStoreTreeGrid<Taxon> createControllerGrid() {
-		return TaxonTreeGrid.createNew(this.eventBus, this.taxonStore, true);
+		return TaxonTreeGrid.createNew(this.eventBus, this.taxonStore, true, currentVersion);
 	}
 	
 	/**
@@ -154,7 +170,7 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 					
 					//compare value from version1 and value from version2. If they differ, set the version 2 cell to changed.
 					if (!value1.getValue().equals(value2.getValue())){
-						TaxonPropertiesByLocation props = new TaxonPropertiesByLocation();
+						TaxonPropertiesByLocation props = new TaxonPropertiesByLocation(currentVersion);
 						String key = props.key().getKey(taxon2);
 						changedCells.add(new CellIdentifier(new CharacterTreeNode(character2), key));
 						//System.out.println("Added a changed cell: character " + selectedConstant.getData() + " at column " + (i+1) + " with key " + key);
@@ -203,5 +219,45 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 			return t.get(c);
 		}
 		return null;
+	}
+
+	@Override
+	public String getQuickTip(CellIdentifier cell, int versionIndex) {
+		try{
+			SimpleMatrixVersion version = oldVersions.get(versionIndex);
+			Taxon taxon = taxonStore.findModelWithKey((String)cell.getKey());
+			Character selectedCharacter = (Character)((CharacterTreeNode)cell.getSelectedConstant()).getData();
+			
+			Taxon versionTaxon = version.getMatrix().getTaxonById(taxon.getId());
+			Character versionCharacter = version.getMatrix().getCharacterById(selectedCharacter.getId());
+			
+			Taxon currentVersionTaxon = currentVersion.getTaxonMatrix().getTaxonById(taxon.getId());
+			Character currentVersionCharacter = currentVersion.getTaxonMatrix().getCharacterById(selectedCharacter.getId());
+			
+			String tip = "";
+			tip += "<b><i>Taxon:</i> " + (currentVersionTaxon == null ? versionTaxon.getName() : currentVersionTaxon.getName()) + "</b>";
+			if (currentVersionTaxon != null && !versionTaxon.getName().equals(currentVersionTaxon.getName())){ //name was changed since this version.
+				tip += "&nbsp;(formerly <i>" + versionTaxon.getName() + "</i>)";
+			}
+			tip += "<br>";
+			tip += "<i>Author: </i>" + versionTaxon.getAuthor() + "<br>";
+			tip += "<i>Year: </i>" + versionTaxon.getYear() + "<br>";
+			tip += "<i>Description: </i>" + versionTaxon.getDescription() + "<br>";
+			tip += "<i>Comment: </i>" + versionTaxon.getComment() + "<br>";
+			tip += "<br>";
+			
+			tip += "<b><i>Character:</i> " + (currentVersionCharacter == null ? versionCharacter.toString() : currentVersionCharacter.toString()) + "</b>";
+			if (currentVersionCharacter != null && !versionCharacter.toString().equals(currentVersionCharacter.toString())){ //name was changed since this version.
+				tip += " (formerly <i>" + versionCharacter.toString() + "</i>)";
+			}
+			tip += "<br>";
+			tip += "<i>Comment: </i>" + versionCharacter.getComment();
+			tip += "<br>&nbsp;";
+			
+			return tip;
+			
+		} catch(Exception e){
+			return "Error getting quick tip.";
+		}
 	}
 }

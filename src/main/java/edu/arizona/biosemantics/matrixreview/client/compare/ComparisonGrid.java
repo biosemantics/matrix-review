@@ -86,7 +86,7 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 	protected Grid<C> oldVersionsGrid; //grid displaying 1 column per version. 
 	protected Grid<C> currentVersionGrid; //editable 1-column grid showing the values of the current version.
 	
-	private List<SimpleMatrixVersion> oldVersions;
+	protected List<SimpleMatrixVersion> oldVersions;
 	protected MatrixVersion currentVersion;
 	private List<List<CellIdentifier>> changedCells;
 	private List<CellIdentifier> currentVersionChangedCells;
@@ -99,7 +99,7 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 	private boolean markChangedCells;
 	
 	protected T selectedConstant;
-	protected C selectedRow;
+	//protected C selectedRow;
 	
 	private Margins controllerMargins;
 	private Margins oldVersionsMargins;
@@ -137,7 +137,7 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 		controllerGrid.getView().setSortingEnabled(false);
 		controllerGrid.getView().setColumnLines(true);
 		controllerGrid.getView().setStripeRows(true);
-		controllerGrid.addCellClickHandler(new CellClickHandler(){
+		/*controllerGrid.addCellClickHandler(new CellClickHandler(){
 			@Override
 			public void onCellClick(CellClickEvent event) {
 				ListStore<C> store = controllerGrid.getStore();
@@ -145,7 +145,7 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 				selectedRow = item;
 				eventBus.fireEvent(event);
 			}	
-		});
+		});*/
 		controllerGrid.addViewReadyHandler(new ViewReadyHandler(){
 			@Override
 			public void onViewReady(ViewReadyEvent event) {
@@ -183,23 +183,6 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 	}
 
 	protected void addEventHandlers(){
-		/**
-		 * ChangeComparingSelectionEvent
-		 * Fired when the selected constant has been changed and the grids should be reloaded 
-		 * using the new value. 
-		 */
-		eventBus.addHandler(ChangeComparingSelectionEvent.TYPE, new ChangeComparingSelectionEvent.ChangeComparingSelectionEventHandler() {
-			@Override
-			public void onChange(ChangeComparingSelectionEvent event) {
-				try{
-					@SuppressWarnings("unchecked")
-					T selection = (T)event.getSelection(); //assume that the new value is of type T. If not, it is ignored. 
-					updateSelectedConstant(selection);
-					reloadGrids();
-				}catch(Exception e){}
-			}
-		});
-		
 		/**
 		 * CompareViewValueChangedEvent
 		 * A value in the current version matrix has changed and the view should be refreshed. 
@@ -243,6 +226,7 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 	protected void updateSelectedConstant(T constant){
 		selectedConstant = constant;
 		setHeading(constant);
+		reloadGrids();
 	}
 	
 	/**
@@ -296,7 +280,7 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 		        return 0;
 		    }
 		});
-		grid.addCellClickHandler(new CellClickHandler(){
+		/*grid.addCellClickHandler(new CellClickHandler(){
 			@Override
 			public void onCellClick(CellClickEvent event) {
 				ListStore<C> store = grid.getStore();
@@ -304,7 +288,7 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 				selectedRow = item;
 				eventBus.fireEvent(event);
 			}	
-		});
+		});*/
 		grid.addCellDoubleClickHandler(new CellDoubleClickHandler(){
 			@Override
 			public void onCellClick(CellDoubleClickEvent event) {
@@ -438,6 +422,8 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 		}
 		
 	}
+
+	public abstract String getQuickTip(CellIdentifier cell, int versionIndex);
 }
 
 class CellIdentifier{
@@ -451,11 +437,9 @@ class CellIdentifier{
 	}
 	
 	public Object getSelectedConstant(){
+		if (selectedConstant == null)
+			System.out.println("Wohoooo.");
 		return selectedConstant;
-	}
-	
-	public void setSelectedConsant(Object selectedConstant){
-		this.selectedConstant = selectedConstant;
 	}
 
 	public Object getKey() {
