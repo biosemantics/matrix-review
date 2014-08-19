@@ -13,6 +13,7 @@ import java.util.Set;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
@@ -185,7 +186,8 @@ public class TaxonMenu extends Menu {
 		    //taxaTree.getSelectionModel().setSelectionMode(SelectionMode.SIMPLE);
 			taxaTree.setSelectionModel(new TreeSelectionModel<Taxon>() {
 				@Override
-				protected void onMouseDown(NativeEvent e) {
+				protected void onMouseDown(MouseDownEvent mde) {
+					/*				    
 					XEvent xe = e.<XEvent> cast();
 					Element target = e.getEventTarget().cast();
 					TreeNode<Taxon> node = tree.findNode(target);
@@ -212,7 +214,8 @@ public class TaxonMenu extends Menu {
 			        	doSingleSelect(sel, false);
 			        }
 					
-					mouseDown = false;
+					mouseDown = false;*/
+					super.onMouseDown(mde);
 				}
 			});
 			taxaTree.getSelectionModel().addSelectionChangedHandler(levelFilter);
@@ -517,7 +520,7 @@ public class TaxonMenu extends Menu {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox("Comment", "");
-				box.setValue(taxon.getComment());
+				box.getTextArea().setValue(taxon.getComment());
 				box.addHideHandler(new HideHandler() {
 					@Override
 					public void onHide(HideEvent event) {

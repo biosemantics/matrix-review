@@ -84,7 +84,7 @@ public class ValueMenu extends Menu {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox("Comment", "");
-				box.setValue(value.getComment());
+				box.getTextArea().setValue(value.getComment());
 				box.addHideHandler(new HideHandler() {
 					@Override
 					public void onHide(HideEvent event) {

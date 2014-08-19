@@ -12,7 +12,6 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 public class TaxaColumnModel extends ColumnModel<Taxon> {
 
 	public TaxaColumnModel(List<TaxaColumnConfig> columnConfigs) {
-		super();
 		List<ColumnConfig<Taxon, ?>> list = new ArrayList<ColumnConfig<Taxon, ?>>(columnConfigs);
 		this.configs = Collections.unmodifiableList(list);
 	}

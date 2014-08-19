@@ -395,7 +395,7 @@ public class CharacterMenu extends Menu {
 			public void onSelection(SelectionEvent<Item> event) {
 				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox(
 						"Comment", "");
-				box.setValue(character.getComment());
+				box.getTextArea().setValue(character.getComment());
 				box.addHideHandler(new HideHandler() {
 					@Override
 					public void onHide(HideEvent event) {

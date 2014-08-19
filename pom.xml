@@ -30,36 +30,14 @@
 
 	<dependencies>
 	    <dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-servlet</artifactId>
-			<version>${gwtVersion}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-dev</artifactId>
-			<version>${gwtVersion}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-user</artifactId>
-			<version>${gwtVersion}</version>
-			<scope>provided</scope>
+		  <groupId>edu.arizona.biosemantics</groupId>
+		  <artifactId>gxt</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sencha.gxt</groupId>
 			<artifactId>gxt-chart</artifactId>
-			<version>3.1.0-beta</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sencha.gxt</groupId>
-			<artifactId>gxt-legacy</artifactId>
-			<version>3.1.0-beta</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sencha.gxt</groupId>
-			<artifactId>gxt-theme-neptune</artifactId>
-			<version>3.1.0-beta</version>
+			<version>3.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jdom</groupId>
