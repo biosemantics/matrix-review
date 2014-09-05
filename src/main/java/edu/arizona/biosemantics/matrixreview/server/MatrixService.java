@@ -99,6 +99,43 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 			taxonMatrix.setValue(t2, b1, new Value(String.valueOf(random.nextInt(50))));
 			taxonMatrix.setValue(t3, b1, new Value(String.valueOf(random.nextInt(50))));
 			taxonMatrix.setValue(t4, b1, new Value(String.valueOf(random.nextInt(50))));
+			
+			taxonMatrix.setValue(t1, b2, new Value(String.valueOf(random.nextInt(50))));
+			taxonMatrix.setValue(t2, b2, new Value(String.valueOf(random.nextInt(50))));
+			taxonMatrix.setValue(t3, b2, new Value(String.valueOf(random.nextInt(50))));
+			taxonMatrix.setValue(t4, b2, new Value(String.valueOf(random.nextInt(50))));
+
+			taxonMatrix.setValue(t1, a1, new Value(String.valueOf(random.nextInt(50))));
+			taxonMatrix.setValue(t2, a1, new Value(String.valueOf(random.nextInt(50))));
+			taxonMatrix.setValue(t3, a1, new Value(String.valueOf(random.nextInt(50))));
+			taxonMatrix.setValue(t4, a1, new Value(String.valueOf(random.nextInt(50))));
+			
+			taxonMatrix.setValue(t1, a2, new Value("oblong"));
+			taxonMatrix.setValue(t2, a2, new Value("oblong"));
+			taxonMatrix.setValue(t3, a2, new Value("squarish"));
+			taxonMatrix.setValue(t4, a2, new Value("Squarish"));
+			
+			taxonMatrix.setValue(t1, a3, new Value(String.valueOf(random.nextInt(50))));
+			taxonMatrix.setValue(t2, a3, new Value(String.valueOf(random.nextInt(50))));
+			taxonMatrix.setValue(t3, a3, new Value(String.valueOf(random.nextInt(50))));
+			taxonMatrix.setValue(t4, a3, new Value(String.valueOf(random.nextInt(50))));
+			
+			taxonMatrix.setValue(t1, a1, new Value(String.valueOf(random.nextInt(50))));
+			taxonMatrix.setValue(t2, a1, new Value(String.valueOf(random.nextInt(50))));
+			taxonMatrix.setValue(t3, a1, new Value(String.valueOf(random.nextInt(50))));
+			taxonMatrix.setValue(t4, a1, new Value(String.valueOf(random.nextInt(50))));
+			
+			taxonMatrix.setValue(t1, c1, new Value("big"));
+			taxonMatrix.setValue(t2, c1, new Value("2mm"));
+			taxonMatrix.setValue(t3, c1, new Value("4 - 6 cm"));
+			taxonMatrix.setValue(t4, c1, new Value("longer than wide"));
+			
+			taxonMatrix.setValue(t1, c2, new Value("red"));
+			taxonMatrix.setValue(t2, c2, new Value("redish"));
+			
+			taxonMatrix.setValue(t3, c3, new Value("wide"));
+			taxonMatrix.setValue(t4, c3, new Value("spreading"));
+			
 		}
 		
 		/*for(int i=5; i<50; i++) {
