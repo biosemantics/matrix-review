@@ -1,7 +1,13 @@
 package edu.arizona.biosemantics.matrixreview.client;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -13,6 +19,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sencha.gxt.data.shared.TreeStore;
+import com.sencha.gxt.data.shared.TreeStore.TreeNode;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
@@ -34,6 +41,9 @@ import com.sencha.gxt.widget.core.client.tree.Tree;
 import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaDownEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaUpEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.TaxonMenu;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.TaxonMenu.TaxonModifyDialog;
@@ -57,6 +67,9 @@ public class ManageTaxaView extends ContentPanel {
 	public ManageTaxaView(EventBus eventBus, boolean navigation) {
 		this.eventBus = eventBus;
 		tree = createTree(matrix);
+		
+		this.setTitle("Taxa Management");
+		this.setHeadingText("Taxa Management");this.setHeadingText("Taxa Management");this.setHeadingText("Taxa Management");
 		
 		FieldSet taxaFieldSet = new FieldSet();
 		//taxonFieldSet.setCollapsible(true);
@@ -129,6 +142,77 @@ public class ManageTaxaView extends ContentPanel {
 				store.update(taxon);
 			}
 		});
+		eventBus.addHandler(MoveTaxaUpEvent.TYPE, new MoveTaxaUpEvent.MoveTaxaUpEventHandler() {
+			@Override
+			public void onMove(MoveTaxaUpEvent event) {
+				move(event.getTaxa(), true);
+			}
+		});
+		eventBus.addHandler(MoveTaxaDownEvent.TYPE, new MoveTaxaDownEvent.MoveTaxaDownEventHandler() {
+			@Override
+			public void onMove(MoveTaxaDownEvent event) {
+				move(event.getTaxa(), false);
+			}
+		});
+	}
+
+	protected void move(List<Taxon> taxa, boolean up) {
+		Map<Taxon, Set<Taxon>> parentChildrenToMove = new HashMap<Taxon, Set<Taxon>>();
+		for(Taxon taxon : taxa) {
+			Taxon parent = taxon.getParent();
+			if(!parentChildrenToMove.containsKey(parent)) {
+				parentChildrenToMove.put(parent, new HashSet<Taxon>());
+			}
+			parentChildrenToMove.get(parent).add(taxon);
+		}
+		
+		for(final Taxon parent : parentChildrenToMove.keySet()) {
+			Set<Taxon> toMove = parentChildrenToMove.get(parent);
+			
+			List<Taxon> storeChildren = null;
+			if(parent == null)
+				storeChildren = store.getRootItems();
+			else
+				storeChildren = store.getChildren(parent);
+			final List<Taxon> newStoreChildren =  new LinkedList<Taxon>(storeChildren);
+			
+			if(storeChildren.size() > 1) {
+				if(up) {
+					for(int i=1; i<newStoreChildren.size(); i++) {
+						Taxon previousStoreChild = newStoreChildren.get(i-1);
+						Taxon storeChild = newStoreChildren.get(i);
+						if(toMove.contains(storeChild) && !toMove.contains(previousStoreChild)) {
+							Collections.swap(newStoreChildren, i, i-1);
+						}
+					}
+				} else {
+					for(int i=newStoreChildren.size() - 2; i>=0; i--) {
+						Taxon nextStoreChild = newStoreChildren.get(i+1);
+						Taxon storeChild = newStoreChildren.get(i);
+						if(toMove.contains(storeChild) && !toMove.contains(nextStoreChild)) {
+							Collections.swap(newStoreChildren, i, i+1);
+						}
+					}
+				}
+	
+				List<TreeNode<Taxon>> subtrees = new LinkedList<TreeNode<Taxon>>();
+				for(Taxon storeChild : newStoreChildren) {
+					subtrees.add(store.getSubTree(storeChild));
+				}
+				
+				//non-root
+				if(parent != null) {
+					store.removeChildren(parent);
+					store.addSubTree(parent, 0, subtrees);
+					tree.setExpanded(parent, true, true);
+				} else {
+					store.clear();
+					store.addSubTree(0, subtrees);
+					tree.expandAll();
+				}
+			}
+		}
+		tree.getSelectionModel().setSelection(taxa);
 	}
 
 	private IsWidget createTaxaButtonBar() {
@@ -158,7 +242,6 @@ public class ManageTaxaView extends ContentPanel {
 					modifyDialog.selectParent(selected.getParent());
 			}
 		});
-		taxaButtonBar.add(addButton);
 		TextButton removeButton = new TextButton("Remove");
 		removeButton.addSelectHandler(new SelectHandler() {
 			@Override
@@ -191,9 +274,28 @@ public class ManageTaxaView extends ContentPanel {
 				}
 			}
 		});
+		TextButton upButton = new TextButton("Move Up");
+		upButton.addSelectHandler(new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				List<Taxon> selected = tree.getSelectionModel().getSelectedItems();
+				eventBus.fireEvent(new MoveTaxaUpEvent(selected));
+			}
+		});
+		TextButton downButton = new TextButton("Move Down");
+		downButton.addSelectHandler(new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				List<Taxon> selected = tree.getSelectionModel().getSelectedItems();
+				eventBus.fireEvent(new MoveTaxaDownEvent(selected));
+			}
+		});
+		
 		taxaButtonBar.add(addButton);
 		taxaButtonBar.add(modifyButton);
 		taxaButtonBar.add(removeButton);
+		taxaButtonBar.add(upButton);
+		taxaButtonBar.add(downButton);
 		return taxaButtonBar;
 	}
 

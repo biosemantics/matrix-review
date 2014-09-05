@@ -22,11 +22,13 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Label;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.TreeStore;
+import com.sencha.gxt.data.shared.TreeStore.TreeNode;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
@@ -49,9 +51,16 @@ import com.sencha.gxt.widget.core.client.form.FieldSet;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyOrganEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveCharactersDownEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveCharactersUpEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveOrgansDownEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveOrgansUpEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaDownEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaUpEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent;
@@ -93,6 +102,9 @@ public class ManageCharactersView extends ContentPanel {
 	public ManageCharactersView(EventBus eventBus, boolean navigation) {
 		this.eventBus = eventBus;
 		this.tree = createTree(matrix);
+		
+		this.setTitle("Character Management");
+		this.setHeadingText("Character Management");
 
 		FieldSet charactersFieldSet = new FieldSet();
 		// taxonFieldSet.setCollapsible(true);
@@ -181,6 +193,106 @@ public class ManageCharactersView extends ContentPanel {
 						modifyOrgan(event.getOldOrgan(), event.getNewName());
 					}
 				});
+		eventBus.addHandler(MoveCharactersDownEvent.TYPE, new MoveCharactersDownEvent.MoveCharacterDownEventHandler() {
+			@Override
+			public void onMove(MoveCharactersDownEvent event) {
+				move(getCharacterNodes(event.getCharacters()), false);
+			}
+		});
+		eventBus.addHandler(MoveCharactersUpEvent.TYPE, new MoveCharactersUpEvent.MoveCharactersUpEventHandler() {
+			@Override
+			public void onMove(MoveCharactersUpEvent event) {
+				move(getCharacterNodes(event.getCharacters()), true);
+			}
+		});
+		eventBus.addHandler(MoveOrgansDownEvent.TYPE, new MoveOrgansDownEvent.MoveOrgansDownEventHandler() {
+			@Override
+			public void onMove(MoveOrgansDownEvent event) {
+				
+				move(getOrganNodes(event.getOrgans()), false);
+			}
+		});
+		eventBus.addHandler(MoveOrgansUpEvent.TYPE, new MoveOrgansUpEvent.MoveOrgansUpEventHandler() {
+			@Override
+			public void onMove(MoveOrgansUpEvent event) {
+				move(getOrganNodes(event.getOrgans()), true);
+			}
+		});
+	}
+	
+	protected List<OrganCharacterNode> getOrganNodes(List<Organ> organs) {
+		List<OrganCharacterNode> result = new LinkedList<OrganCharacterNode>();
+		for(Organ organ : organs) {
+			result.add(organNodes.get(organ));
+		}
+		return result;
+	}
+
+	protected List<OrganCharacterNode> getCharacterNodes(List<Character> characters) {
+		List<OrganCharacterNode> result = new LinkedList<OrganCharacterNode>();
+		for(Character character : characters) {
+			result.add(characterNodes.get(character));
+		}
+		return result;
+	}
+
+	protected void move(List<OrganCharacterNode> organCharacterNodes, boolean up) {
+		Map<OrganCharacterNode, Set<OrganCharacterNode>> parentChildrenToMove = new HashMap<OrganCharacterNode, Set<OrganCharacterNode>>();
+		for(OrganCharacterNode node : organCharacterNodes) {
+			OrganCharacterNode parent = store.getParent(node);
+			if(!parentChildrenToMove.containsKey(parent)) {
+				parentChildrenToMove.put(parent, new HashSet<OrganCharacterNode>());
+			}
+			parentChildrenToMove.get(parent).add(node);
+		}
+		
+		for(final OrganCharacterNode parent : parentChildrenToMove.keySet()) {
+			Set<OrganCharacterNode> toMove = parentChildrenToMove.get(parent);
+			
+			List<OrganCharacterNode> storeChildren = null;
+			if(parent == null)
+				storeChildren = store.getRootItems();
+			else
+				storeChildren = store.getChildren(parent);
+			final List<OrganCharacterNode> newStoreChildren = new LinkedList<OrganCharacterNode>(storeChildren);
+			
+			if(storeChildren.size() > 1) {
+				if(up) {
+					for(int i=1; i<newStoreChildren.size(); i++) {
+						OrganCharacterNode previousStoreChild = newStoreChildren.get(i-1);
+						OrganCharacterNode storeChild = newStoreChildren.get(i);
+						if(toMove.contains(storeChild) && !toMove.contains(previousStoreChild)) {
+							Collections.swap(newStoreChildren, i, i-1);
+						}
+					}
+				} else {
+					for(int i=newStoreChildren.size() - 2; i>=0; i--) {
+						OrganCharacterNode nextStoreChild = newStoreChildren.get(i+1);
+						OrganCharacterNode storeChild = newStoreChildren.get(i);
+						if(toMove.contains(storeChild) && !toMove.contains(nextStoreChild)) {
+							Collections.swap(newStoreChildren, i, i+1);
+						}
+					}
+				}
+	
+				List<TreeNode<OrganCharacterNode>> subtrees = new LinkedList<TreeNode<OrganCharacterNode>>();
+				for(OrganCharacterNode storeChild : newStoreChildren) {
+					subtrees.add(store.getSubTree(storeChild));
+				}
+				
+				//non-root
+				if(parent != null) {
+					store.removeChildren(parent);
+					store.addSubTree(parent, 0, subtrees);
+					tree.setExpanded(parent, true, true);
+				} else {
+					store.clear();
+					store.addSubTree(0, subtrees);
+					tree.expandAll();
+				}
+			}
+		}
+		tree.getSelectionModel().setSelection(organCharacterNodes);
 	}
 
 	protected void removeCharacter(Collection<Character> characters) {
@@ -328,11 +440,11 @@ public class ManageCharactersView extends ContentPanel {
 			}
 		});
 
-		ListStore<ControlMode> store = new ListStore<ControlMode>(
+		ListStore<ControlMode> controlModeStore = new ListStore<ControlMode>(
 				controlModeProperties.key());
 		for (ControlMode mode : ControlMode.values())
-			store.add(mode);
-		controlCombo = new ComboBox<ControlMode>(store,
+			controlModeStore.add(mode);
+		controlCombo = new ComboBox<ControlMode>(controlModeStore,
 				controlModeProperties.name());
 		controlCombo.setForceSelection(true);
 		controlCombo.setTriggerAction(TriggerAction.ALL);
@@ -364,23 +476,74 @@ public class ManageCharactersView extends ContentPanel {
 				}
 			}
 		});
+		
+		TextButton upButton = new TextButton("Move Up");
+		upButton.addSelectHandler(new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				List<OrganCharacterNode> selected = tree.getSelectionModel().getSelectedItems();
+				List<Character> characters = new LinkedList<Character>();
+				for(OrganCharacterNode node : selected) {
+					if(node instanceof CharacterNode) {
+						characters.add(((CharacterNode)node).getCharacter());
+					}
+				}
+				List<Organ> organs = new LinkedList<Organ>();
+				for(OrganCharacterNode node : selected) {
+					if(node instanceof OrganNode) {
+						organs.add(((OrganNode)node).getOrgan());
+					}
+				}
+				eventBus.fireEvent(new MoveCharactersUpEvent(characters));
+				eventBus.fireEvent(new MoveOrgansUpEvent(organs));
+			}
+		});
+		TextButton downButton = new TextButton("Move Down");
+		downButton.addSelectHandler(new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				List<OrganCharacterNode> selected = tree.getSelectionModel().getSelectedItems();
+				List<Character> characters = new LinkedList<Character>();
+				for(OrganCharacterNode node : selected) {
+					if(node instanceof CharacterNode) {
+						characters.add(((CharacterNode)node).getCharacter());
+					}
+				}
+				List<Organ> organs = new LinkedList<Organ>();
+				for(OrganCharacterNode node : selected) {
+					if(node instanceof OrganNode) {
+						organs.add(((OrganNode)node).getOrgan());
+					}
+				}
+				eventBus.fireEvent(new MoveCharactersDownEvent(characters));
+				eventBus.fireEvent(new MoveOrgansDownEvent(organs));
+			}
+		});
 
-		/*
-		 * TextButton controlButton = new TextButton("Control Mode");
-		 * controlButton.addSelectHandler(new SelectHandler() {
-		 * 
-		 * @Override public void onSelect(SelectEvent event) {
-		 * OrganCharacterNode selected =
-		 * tree.getSelectionModel().getSelectedItem(); if(selected instanceof
-		 * CharacterNode) {
-		 * 
-		 * } } }); charactersButtonBar.add(addButton);
-		 */
+	
+		TextButton analyzeButton = new TextButton("Analyze");
+		analyzeButton.addSelectHandler(new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				List<OrganCharacterNode> selection = tree.getSelectionModel().getSelectedItems();
+				for(OrganCharacterNode node : selection) {
+					if(node instanceof CharacterNode)
+						eventBus.fireEvent(new AnalyzeCharacterEvent(((CharacterNode)node).getCharacter()));
+					if(node instanceof OrganNode)
+						for(OrganCharacterNode characterNode : store.getChildren(node))
+							eventBus.fireEvent(new AnalyzeCharacterEvent(((CharacterNode)characterNode).getCharacter()));
+				}
+			}
+		});		 
 
 		charactersButtonBar.add(addButton);
 		charactersButtonBar.add(modifyButton);
 		charactersButtonBar.add(removeButton);
+		charactersButtonBar.add(upButton);
+		charactersButtonBar.add(downButton);
+		charactersButtonBar.add(new Label("Control Mode"));
 		charactersButtonBar.add(controlCombo);
+		charactersButtonBar.add(analyzeButton);	
 		return charactersButtonBar;
 	}
 

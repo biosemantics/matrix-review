@@ -54,7 +54,27 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 		}
 
 		private void addEventHandlers() {
-			subMatrixBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+			fullMatrixBus.addHandler(AnalyzeCharacterEvent.TYPE, new AnalyzeCharacterEvent.AnalyzeCharacterEventHandler() {
+				@Override
+				public void onAnalyze(AnalyzeCharacterEvent event) {
+					Character character = event.getCharacter();
+					switch(character.getControlMode()) {
+					case CATEGORICAL:
+						showTermFrequencyChart(character);
+						break;
+					case NUMERICAL:
+						showNumericalDistribution(character);
+						break;
+					case OFF:
+						showTermFrequencyChart(character);
+						break;
+					default:
+						break;
+					}
+				}
+			});
+			//or take matrix from subMatrixBus here?
+			fullMatrixBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
 				@Override
 				public void onLoad(LoadTaxonMatrixEvent event) {
 					taxonMatrix = event.getTaxonMatrix();
