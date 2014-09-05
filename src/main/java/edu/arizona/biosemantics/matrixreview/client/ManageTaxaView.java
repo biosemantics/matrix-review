@@ -18,6 +18,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.data.shared.TreeStore.TreeNode;
 import com.sencha.gxt.widget.core.client.ContentPanel;
@@ -25,6 +26,7 @@ import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.button.ButtonBar;
 import com.sencha.gxt.widget.core.client.button.TextButton;
+import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutPack;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData;
@@ -79,7 +81,10 @@ public class ManageTaxaView extends ContentPanel {
 		FieldSet infoFieldSet = new FieldSet();
 		//taxonFieldSet.setCollapsible(true);
 		infoFieldSet.setHeadingText("Taxon Details");
-		infoFieldSet.setWidget(infoHtml);
+		FlowLayoutContainer flowInfoHtml = new FlowLayoutContainer();
+		flowInfoHtml.add(infoHtml);
+		flowInfoHtml.getScrollSupport().setScrollMode(ScrollMode.AUTO);
+		infoFieldSet.setWidget(flowInfoHtml);
 		
 		HorizontalLayoutContainer horizontalLayoutContainer = new HorizontalLayoutContainer();
 		horizontalLayoutContainer.add(taxaFieldSet, new HorizontalLayoutData(0.5, 1.0));

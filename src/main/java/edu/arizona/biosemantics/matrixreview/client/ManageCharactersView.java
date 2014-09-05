@@ -25,6 +25,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
 import com.sencha.gxt.core.client.IdentityValueProvider;
+import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.TreeStore;
@@ -34,6 +35,7 @@ import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
 import com.sencha.gxt.widget.core.client.button.ButtonBar;
 import com.sencha.gxt.widget.core.client.button.TextButton;
+import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
@@ -114,7 +116,10 @@ public class ManageCharactersView extends ContentPanel {
 		FieldSet infoFieldSet = new FieldSet();
 		// taxonFieldSet.setCollapsible(true);
 		infoFieldSet.setHeadingText("Character Details");
-		infoFieldSet.setWidget(infoHtml);
+		FlowLayoutContainer flowInfoHtml = new FlowLayoutContainer();
+		flowInfoHtml.add(infoHtml);
+		flowInfoHtml.getScrollSupport().setScrollMode(ScrollMode.AUTO);
+		infoFieldSet.setWidget(flowInfoHtml);
 
 		FieldSet valuesFieldSet = new FieldSet();
 		// taxonFieldSet.setCollapsible(true);
@@ -730,6 +735,16 @@ public class ManageCharactersView extends ContentPanel {
 				result.add(((CharacterNode) node).getCharacter());
 			if (node instanceof OrganNode)
 				result.addAll(((OrganNode) node).getOrgan().getCharacters());
+		}
+		return result;
+	}
+
+	public List<Organ> getSelectedOrgans() {
+		List<Organ> result = new LinkedList<Organ>();
+		for (OrganCharacterNode node : tree.getSelectionModel().getSelectedItems()) {
+			if(node instanceof OrganNode) {
+				result.add(((OrganNode)node).getOrgan());
+			}
 		}
 		return result;
 	}
