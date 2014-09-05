@@ -234,7 +234,7 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 		this.rootTaxa.add(index, taxon);
 	}
 	
-	public void addRootTaxon(int index, List<Taxon> taxa) {
+	public void addRootTaxa(int index, List<Taxon> taxa) {
 		for(Taxon taxon : taxa) 
 			this.addRootTaxon(index++, taxon);
 	}
@@ -245,7 +245,7 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 				taxon.getParent().removeChild(taxon);
 			taxon.setParent(null);
 		}
-		this.addRootTaxon(index, taxa);
+		this.addRootTaxa(index, taxa);
 	}
 	
 	private void initTaxon(Taxon taxon) {
@@ -264,6 +264,10 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 	
 	public void addRootTaxon(Taxon taxon) {
 		this.addRootTaxon(rootTaxa.size(), taxon);
+	}
+	
+	public void addRootTaxa(List<Taxon> taxa) {
+		this.addRootTaxa(rootTaxa.size(), taxa);
 	}
 	
 	public void addTaxon(Taxon parent, int index, Taxon child) {
@@ -302,6 +306,13 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 			taxon.getParent().removeChild(taxon);
 		
 		cleanupTaxon(taxon);
+	}
+	
+	public void modifyCharacter(Character character, String name, Organ organ) {
+		character.setOrgan(organ);
+		character.setName(name);
+		//only set dirty based on character value changes for the character. not the character organ itself
+		//character.setDirty();
 	}
 
 	public void modifyTaxon(Taxon taxon, Level level, String name, String author, String year) {
@@ -347,15 +358,7 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 			taxonCharacterChanges.get(taxon).remove(character);
 		}
 	}
-	
-
-	public void modifyCharacter(Character character, String name, Organ organ) {
-		character.setOrgan(organ);
-		character.setName(name);
-		//only set dirty based on character value changes for the character. not the character organ itself
-		//character.setDirty();
-	}
-	
+		
 	public void moveCharacter(Character character, Character after) {
 		this.characters.remove(character);
 		if(after == null)
@@ -431,12 +434,14 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 		return value != null && value.getValue() != null && !value.getValue().trim().isEmpty();
 	}
 	
-	public void setHidden(Character character, boolean hidden) {
-		character.setHidden(hidden);
+	public void setHiddenCharacters(Set<Character> characters, boolean hidden) {
+		for(Character character : characters)
+			character.setHidden(hidden);
 	}
 	
-	public void setHidden(Taxon taxon, boolean hidden) {
-		taxon.setHidden(hidden);
+	public void setHiddenTaxa(Set<Taxon> taxa, boolean hidden) {
+		for(Taxon taxon : taxa) 
+			taxon.setHidden(hidden);
 	}
 	
 	public void addColor(Color color) {
@@ -465,4 +470,17 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 	public void setCharacterStates(Character character, List<String> states) {
 		character.setStates(new ArrayList<String>(states));
 	}
+
+	public void clear() {
+		this.characters.clear();
+		this.rootTaxa.clear();
+		this.changes.clear();
+		this.taxonCharacterChanges.clear();
+		this.colors.clear();
+	}
+
+	public void modifyOrgan(Organ organ, String newName) {
+		organ.setName(newName);
+	}
+
 }

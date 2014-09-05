@@ -6,6 +6,9 @@ import java.util.Set;
 
 public class Organ implements Serializable {
 
+	private static int ID = 0;
+	
+	private int id = ID++;
 	private String name;
 	private Set<Character> characters = new HashSet<Character>();
 
@@ -31,9 +34,40 @@ public class Organ implements Serializable {
 		return name;
 	}
 	
+	protected void setName(String name) {
+		this.name = name;
+	}
+	
 	@Override
 	public String toString() {
 		return name;
 	}
-	
+
+	public int getId() {
+		return id;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + id;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Organ other = (Organ) obj;
+		if (id != other.id)
+			return false;
+		return true;
+	}
+		
 }
+

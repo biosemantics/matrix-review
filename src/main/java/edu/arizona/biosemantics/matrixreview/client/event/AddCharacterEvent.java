@@ -5,6 +5,7 @@ import com.google.gwt.event.shared.GwtEvent;
 
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent.AddCharacterEventHandler;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.Organ;
 
 public class AddCharacterEvent extends GwtEvent<AddCharacterEventHandler> implements PrintableEvent {
 
@@ -13,14 +14,13 @@ public class AddCharacterEvent extends GwtEvent<AddCharacterEventHandler> implem
 	}
 	
 	public static Type<AddCharacterEventHandler> TYPE = new Type<AddCharacterEventHandler>();
+	private Organ organ;
 	private Character after;
 	private Character character;
 	
-	public AddCharacterEvent(Character character) {
-		this.character = character;
-	}
-	
-	public AddCharacterEvent(Character after, Character character) {
+
+	public AddCharacterEvent(Organ organ, Character after, Character character) {
+		this.organ = organ;
 		this.after = after;
 		this.character = character;
 	}
@@ -41,6 +41,10 @@ public class AddCharacterEvent extends GwtEvent<AddCharacterEventHandler> implem
 
 	public Character getCharacter() {
 		return character;
+	}
+	
+	public Organ getOrgan() {
+		return organ;
 	}
 
 	@Override

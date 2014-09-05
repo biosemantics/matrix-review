@@ -69,6 +69,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent.MergeMode;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent.SetCharacterStatesEventHandler;
+import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveCharacterEvent;
@@ -151,9 +152,9 @@ public class CharacterMenu extends Menu {
 		
 		private Character after = null;
 		
-		public CharacterAddDialog(final EventBus eventBus, TaxonMatrix taxonMatrix) {
+		public CharacterAddDialog(final EventBus eventBus, TaxonMatrix taxonMatrix, Organ initialOrgan) {
 			this.setHeadingText("Add Character");
-			CharacterInformationContainer characterInformationContainer = new CharacterInformationContainer(taxonMatrix, "", null);
+			CharacterInformationContainer characterInformationContainer = new CharacterInformationContainer(taxonMatrix, "", initialOrgan);
 		    this.add(characterInformationContainer);
 		 
 		    final ComboBox<Organ> organComboBox = characterInformationContainer.getOrganComboBox();
@@ -172,10 +173,7 @@ public class CharacterMenu extends Menu {
 					
 					Organ selected = organComboBox.getValue();
 					Character newCharacter = new Character(characterNameField.getText(), selected);
-					if(after != null)
-						eventBus.fireEvent(new AddCharacterEvent(after, newCharacter));
-					else
-						eventBus.fireEvent(new AddCharacterEvent(newCharacter));
+					eventBus.fireEvent(new AddCharacterEvent(selected, after, newCharacter));
 					CharacterAddDialog.this.hide();
 				}
 		    });
@@ -234,7 +232,7 @@ public class CharacterMenu extends Menu {
 	
 	}
 	
-	public class SelectCharacterStatesWindow extends Window {
+	public static class SelectCharacterStatesWindow extends Window {
 		
 		public HandlerRegistration addSetCharacterStatesEventHandler(SetCharacterStatesEventHandler handler) {
 			return addHandler(handler, SetCharacterStatesEvent.TYPE);
@@ -663,7 +661,7 @@ public class CharacterMenu extends Menu {
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				CharacterAddDialog addDialog = new CharacterAddDialog(eventBus, taxonMatrix);
+				CharacterAddDialog addDialog = new CharacterAddDialog(eventBus, taxonMatrix, null);
 				addDialog.setAfter(character);
 				addDialog.show();
 			}

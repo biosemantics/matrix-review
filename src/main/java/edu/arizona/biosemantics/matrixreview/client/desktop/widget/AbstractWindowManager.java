@@ -13,11 +13,11 @@ import edu.arizona.biosemantics.matrixreview.client.desktop.Window;
 public abstract class AbstractWindowManager implements WindowManager {
 	
 	protected Menu contextMenu = null;
-	protected EventBus eventBus;
+	protected EventBus subMatrixEventBus;
 	protected Window window;
 	
-	public AbstractWindowManager(EventBus eventBus, Window window) {
-		this.eventBus = eventBus;
+	public AbstractWindowManager(EventBus subMatrixEventBus, Window window) {
+		this.subMatrixEventBus = subMatrixEventBus;
 		this.window = window;		
 		addEventHandlers();
 	}

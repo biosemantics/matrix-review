@@ -18,7 +18,7 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import edu.arizona.biosemantics.matrixreview.client.event.CollapseTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ExpandTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.HideCharacterEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.HideTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.HideTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModelModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowDesktopEvent;
@@ -31,19 +31,20 @@ import edu.arizona.biosemantics.matrixreview.client.matrix.ColorSettingsDialog;
 import edu.arizona.biosemantics.matrixreview.client.matrix.MatrixView.ModelMode;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.CharacterMenu.CharacterAddDialog;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.Organ;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
 
 public class TaxonCharacterMenu extends Menu {
 
 	private EventBus eventBus;
-	private TaxonMatrix taxonMatrix;
 	private ModelMode modelMode;
 	private TreeStore<Taxon> treeStore;
+	private TaxonMatrix taxonMatrix;
 
 	public TaxonCharacterMenu(final EventBus eventBus, TaxonMatrix taxonMatrix, ModelMode modelMode, TreeStore<Taxon> treeStore) {
-		this.eventBus = eventBus;
 		this.taxonMatrix = taxonMatrix;
+		this.eventBus = eventBus;
 		this.modelMode = modelMode;
 		this.treeStore = treeStore;
 		
@@ -166,19 +167,38 @@ public class TaxonCharacterMenu extends Menu {
 		//columns.setData("gxt-columns", "true");
 		
 		final Menu columnMenu = new Menu();
-		for (final Character character : taxonMatrix.getCharacters()) {
-			final CheckMenuItem check = new CheckMenuItem();
-			check.setHideOnClick(false);
-			check.setText(character.toString());
-			check.setChecked(!character.isHidden());
-			check.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
+		for(final Organ organ : taxonMatrix.getOrgans()) {
+			final CheckMenuItem organItem = new CheckMenuItem(organ.getName());
+			organItem.setHideOnClick(false);
+			organItem.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
 				@Override
 				public void onCheckChange(CheckChangeEvent<CheckMenuItem> event) {
-					eventBus.fireEvent(new HideCharacterEvent(character, !check.isChecked()));
+					for( Character character : organ.getCharacters()) {
+						eventBus.fireEvent(new HideCharacterEvent(character, !organItem.isChecked()));
+					}
 				}
 			});
-			columnMenu.add(check);
+			columnMenu.add(organItem);
+			Menu organMenu = new Menu();
+			organItem.setSubMenu(organMenu);
+			boolean allCharactersHidden = true;
+			for(final Character character : organ.getCharacters()) {
+				final CheckMenuItem check = new CheckMenuItem();
+				check.setHideOnClick(false);
+				check.setText(character.toString());
+				check.setChecked(!character.isHidden());
+				allCharactersHidden &= character.isHidden();
+				check.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
+					@Override
+					public void onCheckChange(CheckChangeEvent<CheckMenuItem> event) {
+						eventBus.fireEvent(new HideCharacterEvent(character, !check.isChecked()));
+					}
+				});
+				organMenu.add(check);
+			}
+			organItem.setChecked(!allCharactersHidden);
 		}
+		
 		columns.setSubMenu(columnMenu);
 		return columns;
 	}
@@ -201,7 +221,7 @@ public class TaxonCharacterMenu extends Menu {
 					check.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
 						@Override
 						public void onCheckChange(CheckChangeEvent<CheckMenuItem> event) {
-							eventBus.fireEvent(new HideTaxonEvent(taxon, !check.isChecked()));
+							eventBus.fireEvent(new HideTaxaEvent(taxon, !check.isChecked()));
 						}
 					});
 					rowMenu.add(check);
@@ -243,7 +263,7 @@ public class TaxonCharacterMenu extends Menu {
 					check.setSubMenu(subMenu);
 					menu.setActiveItem(check, true);
 				}
-				eventBus.fireEvent(new HideTaxonEvent(taxon, !check.isChecked()));
+				eventBus.fireEvent(new HideTaxaEvent(taxon, !check.isChecked()));
 			}
 		});
 		
@@ -539,7 +559,7 @@ public class TaxonCharacterMenu extends Menu {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				for (int i = 0; i < 1; i++) {
-					CharacterAddDialog addDialog = new CharacterAddDialog(eventBus, taxonMatrix);
+					CharacterAddDialog addDialog = new CharacterAddDialog(eventBus, taxonMatrix, null);
 					addDialog.show();
 					//eventBus.fireEvent(new AddCharacterEvent(new Character("character" + i, new Organ("organ" + i))));
 				}

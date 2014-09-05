@@ -1,11 +1,13 @@
 package edu.arizona.biosemantics.matrixreview.client.matrix;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.shared.SimpleEventBus;
@@ -31,6 +33,7 @@ import com.sencha.gxt.widget.core.client.grid.Grid.GridCell;
 
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.HideTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockMatrixEvent;
@@ -41,14 +44,13 @@ import edu.arizona.biosemantics.matrixreview.client.event.AddColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.CollapseTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ExpandTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.HideCharacterEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.HideTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModelModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxonFlatEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveColorsEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterColorEvent;
@@ -93,9 +95,10 @@ public class MatrixView implements IsWidget {
 	public class ModelControler {
 				
 		private TaxonMatrix taxonMatrix;
-		private ValueCell valueCell;
+		private ValueCell valueCell = new ValueCell(eventBus);
 		private ModelMode modelMode = ModelMode.TAXONOMIC_HIERARCHY;
 		private LockableControlableMatrixEditing editing;
+		private EditEventsHandler editEventsHandler;
 		private CharactersGridFilters charactersFilters; 
 		
 		public ModelControler() {
@@ -107,14 +110,14 @@ public class MatrixView implements IsWidget {
 				@Override
 				public void onMode(ModelModeEvent event) {
 					modelMode = event.getMode();
-					load(taxonMatrix);
+					//load(taxonMatrix);
 				}
 			});
 			eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
 				@Override
 				public void onLoad(LoadTaxonMatrixEvent loadTaxonMatrixEvent) {
 					load(loadTaxonMatrixEvent.getTaxonMatrix());
-				} 
+				}
 			});
 			eventBus.addHandler(AddTaxonEvent.TYPE, new AddTaxonEvent.AddTaxonEventHandler() {
 				@Override
@@ -126,10 +129,10 @@ public class MatrixView implements IsWidget {
 					}
 				}
 			});
-			eventBus.addHandler(RemoveTaxonEvent.TYPE, new RemoveTaxonEvent.RemoveTaxonEventHandler() {
+			eventBus.addHandler(RemoveTaxaEvent.TYPE, new RemoveTaxaEvent.RemoveTaxonEventHandler() {
 				@Override
-				public void onRemove(final RemoveTaxonEvent event) {
-					removeTaxon(event.getTaxon());
+				public void onRemove(final RemoveTaxaEvent event) {
+					removeTaxon(event.getTaxa());
 				}
 			});
 			eventBus.addHandler(ModifyTaxonEvent.TYPE, new ModifyTaxonEvent.ModifyTaxonEventHandler() {
@@ -155,10 +158,10 @@ public class MatrixView implements IsWidget {
 					moveTaxaHierarchically(false, event.getParent(), event.getIndex(), event.getTaxa());
 				}
 			});
-			eventBus.addHandler(HideTaxonEvent.TYPE, new HideTaxonEvent.HideCharacterEventHandler() {
+			eventBus.addHandler(HideTaxaEvent.TYPE, new HideTaxaEvent.HideCharacterEventHandler() {
 				@Override
-				public void onHide(HideTaxonEvent event) {
-					hideTaxon(event.getTaxon(), event.isHide());
+				public void onHide(HideTaxaEvent event) {
+					hideTaxa(event.getTaxa(), event.isHide());
 				}
 			});
 			//---------------------
@@ -195,13 +198,13 @@ public class MatrixView implements IsWidget {
 			eventBus.addHandler(RemoveCharacterEvent.TYPE, new RemoveCharacterEvent.RemoveCharacterEventHandler() {
 				@Override
 				public void onRemove(RemoveCharacterEvent event) {
-					removeCharacter(event.getCharacter());
+					removeCharacter(event.getCharacters());
 				}
 			});
 			eventBus.addHandler(ModifyCharacterEvent.TYPE, new ModifyCharacterEvent.ModifyCharacterEventHandler() {
 				@Override
-				public void onRename(ModifyCharacterEvent event) {
-					modifyCharacter(event.getCharacter(), event.getName(), event.getOrgan());
+				public void onModify(ModifyCharacterEvent event) {
+					modifyCharacter(event.getOldCharacter(), event.getNewName(), event.getNewOrgan());
 				}
 			});
 			eventBus.addHandler(MoveCharacterEvent.TYPE, new MoveCharacterEvent.MoveCharacterEventHandler() {
@@ -297,7 +300,7 @@ public class MatrixView implements IsWidget {
 			eventBus.addHandler(HideCharacterEvent.TYPE, new HideCharacterEvent.HideCharacterEventHandler() {
 				@Override
 				public void onHide(HideCharacterEvent event) {
-					hideCharacter(event.getCharacter(), event.isHide());
+					hideCharacters(event.getCharacters(), event.isHide());
 				}
 			});
 			eventBus.addHandler(SortTaxaByCharacterEvent.TYPE, new SortTaxaByCharacterEvent.SortTaxaByCharacterEventHandler() {
@@ -349,11 +352,36 @@ public class MatrixView implements IsWidget {
 			taxonMatrix.setComment(value, comment);
 			taxonStore.update(value.getTaxon());
 		}
-
-		protected void load(TaxonMatrix taxonMatrix) {
+		
+		private void load(TaxonMatrix taxonMatrix) {
 			this.taxonMatrix = taxonMatrix;
-			this.valueCell = new ValueCell(eventBus, taxonMatrix);
-			List<Taxon> taxa = taxonMatrix.list();
+									
+			List<ColumnConfig<Taxon, ?>> characterColumnConfigs = new ArrayList<ColumnConfig<Taxon, ?>>();
+			for(Character character : taxonMatrix.getCharacters())
+				characterColumnConfigs.add(this.createCharacterColumnConfig(character));
+			if(!taxonTreeGrid.isInitialized()) {
+				taxonTreeGrid.init(characterColumnConfigs, new CharactersGridView(eventBus, taxonMatrix));
+				editing = new LockableControlableMatrixEditing(eventBus, taxonTreeGrid.getGrid(), taxonTreeGrid.getTreeGrid().getListStore(), taxonMatrix);
+				
+				//necessary otherwise VerticalLayout that embedds MatrixView and MenuView in MatrixReviewView won't layout correctly correctly
+				taxonTreeGrid.forceLayout();
+			} else {
+				taxonTreeGrid.reconfigure(characterColumnConfigs);
+			}
+			
+			valueCell.setListStore(taxonTreeGrid.getTreeGrid().getListStore());
+			editEventsHandler = new EditEventsHandler();
+			initCharacterEditing();
+			initCharacterFiltering();
+			
+			taxonStore.clear();
+			for(Taxon rootTaxon : taxonMatrix.getRootTaxa()) {
+				this.addRootToStore(rootTaxon);
+			}
+			
+			//TODO: modelMode
+			/*
+			 * List<Taxon> taxa = taxonMatrix.list();
 			
 			if(taxonTreeGrid.isInitialized())
 				taxonStore.clear();
@@ -367,27 +395,14 @@ public class MatrixView implements IsWidget {
 				case CUSTOM_HIERARCHY:
 				case TAXONOMIC_HIERARCHY:
 					for(Taxon taxon : taxonMatrix.getRootTaxa()) {
-						insertToStoreRecursively(taxon);
+						addRootToStore(taxon);
 					}
 					break;
 			}
-
-			if(taxonTreeGrid.isInitialized()) {
-				List<CharacterColumnConfig> characterColumnConfigs = taxonTreeGrid.getColumnModel().getCharacterColumns();
-				for(CharacterColumnConfig characterColumnConfig : characterColumnConfigs)
-					characterColumnConfig.setCell(valueCell);
-				taxonTreeGrid.reconfigure(characterColumnConfigs);
-				valueCell.setListStore(taxonTreeGrid.getTreeGrid().getListStore());
-			} else {
-				List<ColumnConfig<Taxon, ?>> characterColumnConfigs = new ArrayList<ColumnConfig<Taxon, ?>>();
-				for(Character character : taxonMatrix.getCharacters())
-					characterColumnConfigs.add(this.createCharacterColumnConfig(character));
-				taxonTreeGrid.init(characterColumnConfigs, new CharactersGridView(eventBus, taxonMatrix));
-				valueCell.setListStore(taxonTreeGrid.getTreeGrid().getListStore());
-				editing = new LockableControlableMatrixEditing(eventBus, taxonTreeGrid.getGrid(), taxonTreeGrid.getTreeGrid().getListStore(), taxonMatrix);
-				initCharacterEditing();
-				initCharacterFiltering();
-			}
+			 */
+			
+			//TODO anything else necessary?: hiding characters, colors, comments? 
+			//should all be loaded by cell implementation from updated model?
 		}
 		
 		private void initCharacterFiltering() {
@@ -482,13 +497,19 @@ public class MatrixView implements IsWidget {
 			return index;
 		}
 		
-		private void  insertToStoreRecursively(Taxon taxon) {
+		private void addRootToStore(Taxon taxon) {
+			taxonStore.add(taxon);
+			for(Taxon child : taxon.getChildren()) 
+				addToStoreRecursively(child);
+		}
+		
+		private void  addToStoreRecursively(Taxon taxon) {
 			if(!taxon.hasParent())
 				taxonStore.add(taxon);
 			else 
 				taxonStore.add(taxon.getParent(), taxon);
 			for(Taxon child : taxon.getChildren())
-				insertToStoreRecursively(child);
+				addToStoreRecursively(child);
 		}
 		
 		protected void modifyTaxon(Taxon taxon, Taxon parent, Level level, String name, String author, String year) {
@@ -534,28 +555,33 @@ public class MatrixView implements IsWidget {
 			}
 		}
 		
-		protected void removeTaxon(final Taxon taxon) {
-			if (!taxon.getChildren().isEmpty()) {
-				String childrenString = "";
-				for (Taxon child : taxon.getChildren()) {
-					childrenString += child.getFullName() + ", ";
-				}
-				childrenString = childrenString.substring(0, childrenString.length() - 2);
-				ConfirmMessageBox box = new ConfirmMessageBox(
-						"Remove Taxon",
-						"Removing the taxon will also remove all of it's descendants: "
-								+ childrenString);
-				box.addDialogHideHandler(new DialogHideHandler() {
-					@Override
-					public void onDialogHide(DialogHideEvent event) {
-						if(event.getHideButton().equals(PredefinedButton.YES)) {
-							removeFromStoreRecursively(taxon);
-							taxonMatrix.removeTaxon(taxon);
-						}
+		protected void removeTaxon(final Collection<Taxon> taxa) {
+			for(final Taxon taxon : taxa) {
+				if (!taxon.getChildren().isEmpty()) {
+					String childrenString = "";
+					for (Taxon child : taxon.getChildren()) {
+						childrenString += child.getFullName() + ", ";
 					}
-					
-				});
-				box.show();
+					childrenString = childrenString.substring(0, childrenString.length() - 2);
+					ConfirmMessageBox box = new ConfirmMessageBox(
+							"Remove Taxon",
+							"Removing the taxon will also remove all of it's descendants: "
+									+ childrenString);
+					box.addDialogHideHandler(new DialogHideHandler() {
+						@Override
+						public void onDialogHide(DialogHideEvent event) {
+							if(event.getHideButton().equals(PredefinedButton.YES)) {
+								removeFromStoreRecursively(taxon);
+								taxonMatrix.removeTaxon(taxon);
+							}
+						}
+						
+					});
+					box.show();
+				} else {
+					removeFromStoreRecursively(taxon);
+					taxonMatrix.removeTaxon(taxon);
+				}
 			}
 		}
 		
@@ -646,24 +672,21 @@ public class MatrixView implements IsWidget {
 			sortCharacters(comparator);
 		}
 
-		protected void hideTaxon(Taxon taxon, boolean hide) {
-			taxonMatrix.setHidden(taxon, hide);
-			taxonTreeGrid.hide(taxon, hide);
+		protected void hideTaxa(Set<Taxon> taxa, boolean hide) {
+			taxonMatrix.setHiddenTaxa(taxa, hide);
+			taxonTreeGrid.hide(taxa, hide);
 		}
 
-		protected void hideCharacter(Character character, boolean hide) {
-			taxonMatrix.setHidden(character, hide);
+		protected void hideCharacters(Set<Character> toHideCharacters, boolean hide) {
+			taxonMatrix.setHiddenCharacters(toHideCharacters, hide);
 			List<CharacterColumnConfig> characterColumnConfigs = taxonTreeGrid.getColumnModel().getCharacterColumns();
 			int columnIndex = -1;
 			for(int i=0; i<characterColumnConfigs.size(); i++) {
 				CharacterColumnConfig config = characterColumnConfigs.get(i);
-				if(config.getCharacter().equals(character)) {
-					columnIndex = i;
-					break;
+				if(toHideCharacters.contains(config.getCharacter())) {
+					taxonTreeGrid.getColumnModel().setHidden(columnIndex, hide);
 				}
-			}
-			if(columnIndex != - 1);
-				taxonTreeGrid.getColumnModel().setHidden(columnIndex, hide);
+			}				
 		}
 
 		protected void sortTaxaByCharacter(final Character character, SortDir sortDirection) {
@@ -857,16 +880,17 @@ public class MatrixView implements IsWidget {
 			taxonTreeGrid.reconfigure(columns);
 		}
 		
-		protected void modifyCharacter(Character character, String name, Organ organ) {
-			taxonMatrix.modifyCharacter(character, name, organ);
+		protected void modifyCharacter(Character oldCharacter, String newName, Organ newOrgan) {
+			taxonMatrix.modifyCharacter(oldCharacter, newName, newOrgan);
 			CharactersColumnModel columnModel = taxonTreeGrid.getColumnModel();
-			CharacterColumnConfig config = taxonTreeGrid.getGrid().getCharacterColumnConfig(character);
-			config.setHeader(SafeHtmlUtils.fromString(character.toString()));
+			CharacterColumnConfig config = 
+					taxonTreeGrid.getGrid().getCharacterColumnConfig(oldCharacter);
+			config.setHeader(SafeHtmlUtils.fromString(oldCharacter.toString()));
 			taxonTreeGrid.updateCharacterGridHeads();
 		}
 		
 		private void initCharacterEditing() {
-			EditEventsHandler editEventsHandler = new EditEventsHandler();
+			editing.clearEditors();
 			for(CharacterColumnConfig config : taxonTreeGrid.getGrid().getColumnModel().getCharacterColumns()) {
 				editing.addEditor(config);
 				editing.addBeforeStartEditHandler(editEventsHandler);
@@ -886,6 +910,12 @@ public class MatrixView implements IsWidget {
 			this.addCharacterAfter(taxonMatrix.getCharacterCount() - 1, character);
 		}
 
+		protected void removeCharacter(Collection<Character> characters) {
+			for(Character character : characters) {
+				removeCharacter(character);
+			}
+		}
+		
 		protected void removeCharacter(Character character) {
 			taxonMatrix.removeCharacter(character);
 			List<CharacterColumnConfig> columns = new LinkedList<CharacterColumnConfig>(taxonTreeGrid.getColumnModel().getCharacterColumns());
@@ -899,7 +929,7 @@ public class MatrixView implements IsWidget {
 			}
 			taxonTreeGrid.reconfigure(columns);
 		}
-		
+
 		protected void addCharacterAfter(int colIndex, Character character) {
 			taxonMatrix.addCharacter(colIndex + 1, character);
 			List<CharacterColumnConfig> columns = new LinkedList<CharacterColumnConfig>(taxonTreeGrid.getColumnModel().getCharacterColumns());
@@ -941,16 +971,12 @@ public class MatrixView implements IsWidget {
 	
 	private TaxonStore taxonStore;
 	private FrozenFirstColumTaxonTreeGrid taxonTreeGrid;
-	//private TaxonCell taxonCell;
 	private SimpleEventBus eventBus;
 	
 	private ModelControler modelControler;
-	private TaxonMatrix taxonMatrix;
 
-	public MatrixView(SimpleEventBus eventBus, TaxonMatrix taxonMatrix) {
+	public MatrixView(SimpleEventBus eventBus) {
 		this.eventBus = eventBus;
-		this.taxonMatrix = taxonMatrix;
-		//this.taxonCell = new TaxonCell(eventBus, taxonMatrix);
 		
 		// create store: 
 		taxonStore = new TaxonStore();
@@ -963,21 +989,14 @@ public class MatrixView implements IsWidget {
 		// things, such as coverage, because it is not yet represented in model
 		// if autocommit is set to false
 		taxonStore.setAutoCommit(true);
-		//store.setAutoCommit(true);
-		
-		taxonTreeGrid = new FrozenFirstColumTaxonTreeGrid(eventBus, taxonMatrix, taxonStore, createTaxaColumnConfig());
+		taxonTreeGrid = new FrozenFirstColumTaxonTreeGrid(eventBus, taxonStore, createTaxaColumnConfig());
 		
 		addEventHandlers();
-		
-		//NewDataManager manager = new NewDataManager(taxonTreeGrid);
-		//manager.load(taxonMatrix);
-		
-		//this.initWidget(taxonTreeGrid.asWidget());
 	}
 
 	private void addEventHandlers() {
 		modelControler = new ModelControler();
-		
+		//modelControler.init();
 	}
 
 	private TaxaColumnConfig createTaxaColumnConfig() {
@@ -1002,5 +1021,9 @@ public class MatrixView implements IsWidget {
 	
 	public TaxonStore getTaxonStore() {
 		return taxonStore;
+	}
+	
+	public ModelControler getModelControler() {
+		return modelControler;
 	}
 }

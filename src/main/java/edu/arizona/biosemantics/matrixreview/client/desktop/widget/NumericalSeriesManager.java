@@ -158,7 +158,7 @@ public class NumericalSeriesManager extends AbstractWindowManager {
 
 	@Override
 	protected void addEventHandlers() {
-		eventBus.addHandler(SetValueEvent.TYPE, new SetValueEvent.SetValueEventHandler() {
+		subMatrixEventBus.addHandler(SetValueEvent.TYPE, new SetValueEvent.SetValueEventHandler() {
 			@Override
 			public void onSet(SetValueEvent event) {
 				if(event.getOldValue().getCharacter().equals(character)) {
@@ -166,10 +166,10 @@ public class NumericalSeriesManager extends AbstractWindowManager {
 				}
 			}
 		});
-		eventBus.addHandler(ModifyCharacterEvent.TYPE, new ModifyCharacterEvent.ModifyCharacterEventHandler() {
+		subMatrixEventBus.addHandler(ModifyCharacterEvent.TYPE, new ModifyCharacterEvent.ModifyCharacterEventHandler() {
 			@Override
-			public void onRename(ModifyCharacterEvent event) {
-				if(event.getCharacter().equals(character)) {
+			public void onModify(ModifyCharacterEvent event) {
+				if(event.getOldCharacter().equals(character)) {
 					refreshTitle();
 				}
 			}

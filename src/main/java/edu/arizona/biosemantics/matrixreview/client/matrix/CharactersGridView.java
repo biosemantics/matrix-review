@@ -22,6 +22,7 @@ import com.sencha.gxt.widget.core.client.grid.GridView;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.grid.RowExpander;
 
+import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCoverageEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByNameEvent;
@@ -284,6 +285,12 @@ public class CharactersGridView extends GridView<Taxon> {
 	}
 	
 	private void addEventHandlers() {
+		eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+			@Override
+			public void onLoad(LoadTaxonMatrixEvent event) {
+				taxonMatrix = event.getTaxonMatrix();
+			}
+		});
 		eventBus.addHandler(SortTaxaByNameEvent.TYPE, new SortTaxaByNameEvent.SortTaxaByNameEventHandler() {
 			@Override
 			public void onSort(SortTaxaByNameEvent event) {

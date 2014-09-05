@@ -1,5 +1,8 @@
 package edu.arizona.biosemantics.matrixreview.client.event;
 
+import java.util.Collection;
+import java.util.LinkedList;
+
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
@@ -13,10 +16,15 @@ public class RemoveCharacterEvent extends GwtEvent<RemoveCharacterEventHandler> 
 	}
 	
 	public static Type<RemoveCharacterEventHandler> TYPE = new Type<RemoveCharacterEventHandler>();
-	private Character character;
+	private Collection<Character> characters;
+	
+	public RemoveCharacterEvent(Collection<Character> characters) {
+		this.characters = characters;
+	}
 	
 	public RemoveCharacterEvent(Character character) {
-		this.character = character;
+		this.characters = new LinkedList<Character>();
+		this.characters.add(character);
 	}
 	
 	@Override
@@ -33,8 +41,8 @@ public class RemoveCharacterEvent extends GwtEvent<RemoveCharacterEventHandler> 
 		return TYPE;
 	}
 
-	public Character getCharacter() {
-		return character;
+	public Collection<Character> getCharacters() {
+		return characters;
 	}	
 	
 }

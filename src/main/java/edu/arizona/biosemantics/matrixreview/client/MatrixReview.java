@@ -1,5 +1,8 @@
 package edu.arizona.biosemantics.matrixreview.client;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -7,18 +10,31 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.sencha.gxt.widget.core.client.Dialog;
+import com.sencha.gxt.widget.core.client.event.HideEvent;
+import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 
+import edu.arizona.biosemantics.matrixreview.client.matrix.MatrixMerger;
 import edu.arizona.biosemantics.matrixreview.shared.IMatrixService;
 import edu.arizona.biosemantics.matrixreview.shared.IMatrixServiceAsync;
+import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 
 public class MatrixReview implements EntryPoint {
 	
 	@Override
 	public void onModuleLoad() {
-		/**
-		 * The current for impl. of basic grid funct.
-		 */
+		final MatrixReviewView view = new MatrixReviewView();			
+		
+		// simulate etc site
+		DockLayoutPanel dock = new DockLayoutPanel(Unit.EM);
+		dock.addNorth(new HTML("header"), 2);
+		HTML footer = new HTML("footer");
+		dock.addSouth(footer, 2);				
+		dock.add(view.asWidget());
+		RootLayoutPanel.get().add(dock);
+		
 		IMatrixServiceAsync matrixService = GWT.create(IMatrixService.class);
 		// TaxonMatrix taxonMatrix = createSampleMatrix();
 		matrixService.getMatrix(new AsyncCallback<TaxonMatrix>() {
@@ -28,16 +44,8 @@ public class MatrixReview implements EntryPoint {
 			}
 
 			@Override
-			public void onSuccess(TaxonMatrix result) {
-				MatrixReviewView view = new MatrixReviewView(result);
-
-				// simulate etc site
-				DockLayoutPanel dock = new DockLayoutPanel(Unit.EM);
-				dock.addNorth(new HTML("header"), 2);
-				HTML footer = new HTML("footer");
-				dock.addSouth(footer, 2);				
-				dock.add(view.asWidget());
-				RootLayoutPanel.get().add(dock);
+			public void onSuccess(final TaxonMatrix result) {
+				view.setFullMatrix(result);
 			}
 		});
 	}

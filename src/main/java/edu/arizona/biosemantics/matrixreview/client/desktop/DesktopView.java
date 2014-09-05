@@ -3,6 +3,7 @@ package edu.arizona.biosemantics.matrixreview.client.desktop;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
@@ -40,11 +41,12 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 	public class DesktopController {
 				
 		private Console console;
+		private TaxonMatrix taxonMatrix;
 		
 		public DesktopController() {
 			// TODO let is show all interesting events - also for debugging
 			Window consoleWindow = new Window(false);
-			ConsoleManager manager = new ConsoleManager(eventBus, consoleWindow);
+			ConsoleManager manager = new ConsoleManager(fullMatrixBus, subMatrixBus, consoleWindow);
 			consoleWindow.setWindowManager(manager);
 			addWindow(consoleWindow);
 			
@@ -52,13 +54,19 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 		}
 
 		private void addEventHandlers() {
-			eventBus.addHandler(ShowDescriptionEvent.TYPE, new ShowDescriptionEvent.ShowDescriptionEventHandler() {
+			subMatrixBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+				@Override
+				public void onLoad(LoadTaxonMatrixEvent event) {
+					taxonMatrix = event.getTaxonMatrix();
+				}
+			});
+			subMatrixBus.addHandler(ShowDescriptionEvent.TYPE, new ShowDescriptionEvent.ShowDescriptionEventHandler() {
 				@Override
 				public void onShow(ShowDescriptionEvent event) {
 					showDescription(event.getTaxon());
 				}
 			});
-			eventBus.addHandler(AnalyzeCharacterEvent.TYPE, new AnalyzeCharacterEvent.AnalyzeCharacterEventHandler() {
+			subMatrixBus.addHandler(AnalyzeCharacterEvent.TYPE, new AnalyzeCharacterEvent.AnalyzeCharacterEventHandler() {
 				@Override
 				public void onAnalyze(AnalyzeCharacterEvent event) {
 					Character character = event.getCharacter();
@@ -81,42 +89,41 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 				
 		protected void showDescription(Taxon taxon) {
 			Window descriptionWindow = new Window(false);
-			DescriptionManager manager = new DescriptionManager(eventBus, descriptionWindow, taxon, taxonMatrix);
+			DescriptionManager manager = new DescriptionManager(subMatrixBus, descriptionWindow, taxon, taxonMatrix);
 			descriptionWindow.setWindowManager(manager);
 			addWindow(descriptionWindow);		
-			eventBus.fireEvent(new ShowDesktopEvent());
+			subMatrixBus.fireEvent(new ShowDesktopEvent());
 		}
 		
 		protected void showTermFrequencyChart(Character character) {
 			Window termFrequencyWindow = new Window(true);
-			TermFrequencyManager manager = new TermFrequencyManager(eventBus, termFrequencyWindow, taxonMatrix, character);
+			TermFrequencyManager manager = new TermFrequencyManager(subMatrixBus, termFrequencyWindow, taxonMatrix, character);
 			termFrequencyWindow.setWindowManager(manager);
 			addWindow(termFrequencyWindow);
-			eventBus.fireEvent(new ShowTermFrequencyEvent(character));
-			eventBus.fireEvent(new ShowDesktopEvent());
+			subMatrixBus.fireEvent(new ShowTermFrequencyEvent(character));
+			subMatrixBus.fireEvent(new ShowDesktopEvent());
 		}
 
 		protected void showNumericalDistribution(Character character) {
 			Window numericalSeriesWindow = new Window(true);
-			NumericalSeriesManager manager = new NumericalSeriesManager(eventBus, numericalSeriesWindow, character, taxonMatrix);
+			NumericalSeriesManager manager = new NumericalSeriesManager(subMatrixBus, numericalSeriesWindow, character, taxonMatrix);
 			numericalSeriesWindow.setWindowManager(manager);
 			addWindow(numericalSeriesWindow);
-			eventBus.fireEvent(new ShowNumericalDistributionEvent(character));
-			eventBus.fireEvent(new ShowDesktopEvent());
+			subMatrixBus.fireEvent(new ShowNumericalDistributionEvent(character));
+			subMatrixBus.fireEvent(new ShowDesktopEvent());
 		}
 		
 	}
 	
-	private SimpleEventBus eventBus;
+	private EventBus fullMatrixBus;
+	private EventBus subMatrixBus;
 	private int defaultMargin = 5;
 	private int widgetId = 0;
 	private int marginIncrement = 20;
 
-	private TaxonMatrix taxonMatrix;
-
-	public DesktopView(SimpleEventBus eventBus,TaxonMatrix taxonMatrix) {
-		this.eventBus = eventBus; 
-		this.taxonMatrix = taxonMatrix;
+	public DesktopView(EventBus fullMatrixBus, EventBus subMatrixBus) {
+		this.fullMatrixBus = fullMatrixBus;
+		this.subMatrixBus = subMatrixBus;
 		this.setScrollMode(ScrollMode.AUTO);
 		
 		DesktopController controller = new DesktopController();

@@ -51,7 +51,7 @@ public class DescriptionManager extends AbstractWindowManager {
 
 	@Override
 	protected void addEventHandlers() {
-		eventBus.addHandler(ModifyTaxonEvent.TYPE, new ModifyTaxonEvent.ModifyTaxonEventHandler() {
+		subMatrixEventBus.addHandler(ModifyTaxonEvent.TYPE, new ModifyTaxonEvent.ModifyTaxonEventHandler() {
 			@Override
 			public void onModify(ModifyTaxonEvent event) {
 				if(event.getTaxon().equals(taxon))
@@ -71,7 +71,7 @@ public class DescriptionManager extends AbstractWindowManager {
 			characterItem.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					eventBus.fireEvent(new SetValueEvent(taxon.get(character), new Value(textArea.getSelectedText()), false));
+					subMatrixEventBus.fireEvent(new SetValueEvent(taxon.get(character), new Value(textArea.getSelectedText()), false));
 				}
 			});
 		}

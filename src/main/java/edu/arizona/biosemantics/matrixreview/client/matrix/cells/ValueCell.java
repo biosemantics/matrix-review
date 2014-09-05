@@ -9,6 +9,7 @@ import com.sencha.gxt.core.client.util.ImageHelper;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 
+import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.ValueMenu;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
@@ -40,11 +41,21 @@ public class ValueCell extends MenuExtendedCell<Value> {
 	private TaxonMatrix taxonMatrix;
 	private ListStore<Taxon> listStore;
 	
-	public ValueCell(EventBus eventBus, TaxonMatrix taxonMatrix) {
+	public ValueCell(EventBus eventBus) {
 		this.eventBus = eventBus;
-		this.taxonMatrix = taxonMatrix;
+		
+		bindEvents();
 	}
 	
+	private void bindEvents() {
+		eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+			@Override
+			public void onLoad(LoadTaxonMatrixEvent event) {
+				taxonMatrix = event.getTaxonMatrix();
+			}
+		});
+	}
+
 	@Override
 	public void render(Context context,	Value value, SafeHtmlBuilder sb) {
 		if (value == null)

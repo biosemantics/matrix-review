@@ -25,6 +25,7 @@ import com.sencha.gxt.widget.core.client.menu.HeaderMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.CharacterColumnConfig;
 import edu.arizona.biosemantics.matrixreview.client.matrix.FrozenFirstColumTaxonTreeGrid.CharactersGrid;
 import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
@@ -131,6 +132,12 @@ public class CharactersGridFilters extends GridFilters<Taxon> {
 	
 	
 	private void addEventHandlers() {
+		eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+			@Override
+			public void onLoad(LoadTaxonMatrixEvent event) {
+				taxonMatrix = event.getTaxonMatrix();
+			}
+		});
 		eventBus.addHandler(AddCharacterEvent.TYPE, new AddCharacterEvent.AddCharacterEventHandler() {
 			@Override
 			public void onAdd(AddCharacterEvent event) {

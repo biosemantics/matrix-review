@@ -50,12 +50,12 @@ public class HideTaxonStoreFilter implements StoreFilter<Taxon> {
 		return item.getParent() != null && (hiddenTaxa.contains(item.getParent()) || hidenParent(item.getParent()));
 	}
 
-	public void addHiddenTaxa(Taxon taxon) {
-		this.hiddenTaxa.add(taxon);
+	public void addHiddenTaxa(Set<Taxon> taxa) {
+		this.hiddenTaxa.addAll(taxa);
 	}
 
-	public void removeHiddenTaxa(Taxon taxon) {
-		this.hiddenTaxa.remove(taxon);
+	public void removeHiddenTaxa(Set<Taxon> taxa) {
+		this.hiddenTaxa.removeAll(taxa);
 	}
 
 	public boolean isHidden(Taxon taxon) {

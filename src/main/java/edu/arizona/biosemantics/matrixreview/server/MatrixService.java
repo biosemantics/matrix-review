@@ -29,7 +29,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 	}
 	
 	private TaxonMatrix createSampleMatrix() {
-		/*List<Character> characters = new LinkedList<Character>();
+		List<Character> characters = new LinkedList<Character>();
 		Organ o1 = new Organ("stem");
 		Organ o2 = new Organ("leaf");
 		Organ o3 = new Organ("head");
@@ -56,17 +56,17 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		characters.add(c2);
 		characters.add(c3);
 		
-		for(int i=0; i<20; i++) {
+		/*for(int i=0; i<20; i++) {
 			Character o = new Character("o" + i, o2);
 			characters.add(o);
-		}
+		}*/
 		
 		TaxonMatrix taxonMatrix = new TaxonMatrix(characters);
 
 		for(int i=0; i<1; i++) {
-			Taxon t1 = new Taxon("server" + i * 4 + 1, Level.FAMILY, "rosacea", "author1", "1979", "this is the description about t1");
-			Taxon t2 = new Taxon("server" +  i * 4 + 2, Level.GENUS, "rosa", "author2", "1985",  "this is the description about t2");
-			Taxon t3 = new Taxon("server" +  i * 4 + 3, Level.SPECIES,
+			Taxon t1 = new Taxon(Level.FAMILY, "rosacea", "author1", "1979", "this is the description about t1");
+			Taxon t2 = new Taxon(Level.GENUS, "rosa", "author2", "1985",  "this is the description about t2");
+			Taxon t3 = new Taxon(Level.SPECIES,
 					"example", "author3", "2002", 
 					"Lorem ipsum dolor sit amet, consectetuer adipiscing elit. "
 							+ "Sed metus nibh, sodales a, porta at, vulputate eget, dui. Pellentesque ut nisl. "
@@ -77,7 +77,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 							+ "porttitor laoreet. Aenean lacus dui, consequat eu, adipiscing eget, nonummy non, nisi. "
 							+ "Morbi nunc est, dignissim non, ornare sed, luctus eu, massa. Vivamus eget quam. Vivamus "
 							+ "tincidunt diam nec urna. Curabitur velit.");
-			Taxon t4 = new Taxon("server" +  i * 4 + 4, Level.VARIETY,
+			Taxon t4 = new Taxon(Level.VARIETY,
 					"prototype", "author4", "2014", 
 					"Lorem ipsum dolor sit amet, consectetuer adipiscing elit. "
 							+ "Sed metus nibh, sodales a, porta at, vulputate eget, dui. Pellentesque ut nisl. "
@@ -96,6 +96,9 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 
 			Random random = new Random();
 			taxonMatrix.setValue(t1, b1, new Value(String.valueOf(random.nextInt(50))));
+			taxonMatrix.setValue(t2, b1, new Value(String.valueOf(random.nextInt(50))));
+			taxonMatrix.setValue(t3, b1, new Value(String.valueOf(random.nextInt(50))));
+			taxonMatrix.setValue(t4, b1, new Value(String.valueOf(random.nextInt(50))));
 		}
 		
 		/*for(int i=5; i<50; i++) {
@@ -103,8 +106,8 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 			taxonMatrix.addRootTaxon(t4);
 		}*/
 		
-		return null;
-		//return taxonMatrix;
+		//return null;
+		return taxonMatrix;
 	}
 
 	private TaxonMatrix readButterflyTaxonMatrix() {		
@@ -125,7 +128,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 			TaxonMatrix taxonMatrix = new TaxonMatrix(characters);
 						
 			for(Element taxonEntry : taxonEntryList) {
-				Taxon taxon = new Taxon("server" + taxonEntryList.indexOf(taxonEntry), Level.SPECIES, taxonEntry.getAttributeValue("recordID"), "author", "2002", "The description");
+				Taxon taxon = new Taxon(Level.SPECIES, taxonEntry.getAttributeValue("recordID"), "author", "2002", "The description");
 				taxonMatrix.addRootTaxon(taxon);
 				
 				List<Element> itemsList = taxonEntry.getChildren("Items");

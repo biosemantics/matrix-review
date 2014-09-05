@@ -8,6 +8,9 @@ import java.util.Set;
 
 public class Character implements Serializable, HasColor, HasComment, HasDirty, HasLocked, HasControlMode {
 
+	private static int ID = 0;
+	
+	private int id = ID++;
 	private String name = "";
 	private Organ organ;
 	
@@ -32,6 +35,7 @@ public class Character implements Serializable, HasColor, HasComment, HasDirty, 
 	public Character(String name, Organ organ) {
 		this.name = name;
 		this.organ = organ;
+		organ.addCharacter(this);
 	}
 	
 	public TaxonMatrix getTaxonMatrix() {
@@ -59,7 +63,10 @@ public class Character implements Serializable, HasColor, HasComment, HasDirty, 
 	}
 	
 	protected void setOrgan(Organ organ) {
+		if(this.organ != null)
+			this.organ.removeCharacter(this);
 		this.organ = organ;
+		organ.addCharacter(this);
 	}
 	
 	public String toString() {
@@ -166,5 +173,35 @@ public class Character implements Serializable, HasColor, HasComment, HasDirty, 
 	protected void setHidden(boolean hidden) {
 		this.hidden = hidden;
 	}
-	
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + id;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Character other = (Character) obj;
+		if (id != other.id)
+			return false;
+		return true;
+	}
+		
 }

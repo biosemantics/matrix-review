@@ -31,6 +31,7 @@ import com.sencha.gxt.widget.core.client.grid.Grid.GridCell;
 import com.sencha.gxt.widget.core.client.grid.editing.ClicksToEdit;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 
+import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockTaxonEvent;
@@ -67,6 +68,12 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 	}
 	
 	private void addEventHandlers() {
+		eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+			@Override
+			public void onLoad(LoadTaxonMatrixEvent event) {
+				taxonMatrix = event.getTaxonMatrix();
+			}
+		});
 		eventBus.addHandler(LockTaxonEvent.TYPE, new LockTaxonEvent.LockTaxonEventHandler() {
 			@Override
 			public void onLock(LockTaxonEvent event) {

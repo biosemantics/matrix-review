@@ -38,7 +38,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveColorsEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent;
@@ -152,16 +152,16 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 					refresh();
 				}
 			});
-			eventBus.addHandler(RemoveTaxonEvent.TYPE, new RemoveTaxonEvent.RemoveTaxonEventHandler() {
+			eventBus.addHandler(RemoveTaxaEvent.TYPE, new RemoveTaxaEvent.RemoveTaxonEventHandler() {
 				@Override
-				public void onRemove(RemoveTaxonEvent event) {
+				public void onRemove(RemoveTaxaEvent event) {
 					refresh();
 				}
 			});
 			eventBus.addHandler(ModifyCharacterEvent.TYPE, new ModifyCharacterEvent.ModifyCharacterEventHandler() {
 				@Override
-				public void onRename(ModifyCharacterEvent event) {
-					if(event.getCharacter().equals(getColumnConfig().getCharacter()))
+				public void onModify(ModifyCharacterEvent event) {
+					if(event.getOldCharacter().equals(getColumnConfig().getCharacter()))
 						refresh();
 				}
 			});
@@ -499,6 +499,17 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 		super(container, cm, appearance);
 		this.eventBus = eventBus;
 		this.taxonMatrix = taxonMatrix;
+		
+		bindEvents();
+	}
+
+	private void bindEvents() {
+		eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+			@Override
+			public void onLoad(LoadTaxonMatrixEvent event) {
+				taxonMatrix = event.getTaxonMatrix();
+			}
+		});
 	}
 
 	@Override

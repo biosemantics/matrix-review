@@ -3,6 +3,7 @@ package edu.arizona.biosemantics.matrixreview.client.matrix;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
@@ -40,10 +41,9 @@ import com.sencha.gxt.widget.core.client.tree.Tree.Joint;
 import com.sencha.gxt.widget.core.client.tree.Tree.TreeAppearance;
 import com.sencha.gxt.widget.core.client.tree.Tree.TreeNode;
 import com.sencha.gxt.widget.core.client.tree.TreeView.TreeViewRenderMode;
-import com.sencha.gxt.widget.core.client.treegrid.FrozenFirstColumnTreeGrid;
-import com.sencha.gxt.widget.core.client.treegrid.MaintainListStoreTreeGrid;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGridView;
 
+import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModelModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByNameEvent;
@@ -304,20 +304,31 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 			return characterConfigMap.get(character);
 		}
 		
+		
 	}
 	
 	private EventBus eventBus;
 	private TaxonMatrix taxonMatrix;
 	private HideTaxonStoreFilter hideTaxonFilter;
 	
-	public FrozenFirstColumTaxonTreeGrid(EventBus eventBus, TaxonMatrix taxonMatrix, TaxonStore taxonStore, TaxaColumnConfig taxaColumnConfig) {
+	public FrozenFirstColumTaxonTreeGrid(EventBus eventBus, TaxonStore taxonStore, TaxaColumnConfig taxaColumnConfig) {
 		super(taxonStore, taxaColumnConfig);
 		this.eventBus = eventBus;
-		this.taxonMatrix = taxonMatrix;
 		this.hideTaxonFilter = new HideTaxonStoreFilter(eventBus);
 		this.store.addFilter(hideTaxonFilter);
+		
+		bindEvents();
 	}
 	
+	private void bindEvents() {
+		eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+			@Override
+			public void onLoad(LoadTaxonMatrixEvent event) {
+				taxonMatrix = event.getTaxonMatrix();
+			}
+		});
+	}
+
 	@Override
 	public void init(List<ColumnConfig<Taxon, ?>> otherColumnConfigs, GridView<Taxon> gridView) {
 		HashMap<Character, CharacterColumnConfig> characterConfigMap = new HashMap<Character, CharacterColumnConfig>();
@@ -410,11 +421,11 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 		getGrid().getView().getHeader().refresh();
 	}
 
-	public void hide(Taxon taxon, boolean hide) {
+	public void hide(Set<Taxon> taxa, boolean hide) {
 		if(hide)
-			hideTaxonFilter.addHiddenTaxa(taxon);
+			hideTaxonFilter.addHiddenTaxa(taxa);
 		else
-			hideTaxonFilter.removeHiddenTaxa(taxon);
+			hideTaxonFilter.removeHiddenTaxa(taxa);
 		//force filter refresh
 		store.setEnableFilters(true);
 		store.applyFilters();

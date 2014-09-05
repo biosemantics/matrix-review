@@ -22,8 +22,6 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
 public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComment, HasDirty, HasLocked {
 	
-	public static int currentId = 0;	
-	
 	public enum Level implements Serializable  {
 		LIFE(0), 
 		SUPERDOMAIN(1), DOMAIN(1), SUBDOMAIN(2), 
@@ -73,6 +71,10 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 		}
 	}
 	
+
+	public static int ID = 0;	
+	private int id = ID++;
+	
 	/**
 	 * Taxon hierarchy
 	 */
@@ -95,7 +97,6 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 	/**
 	 * Matrix related
 	 */
-	private String id;
 	private TaxonMatrix taxonMatrix;
 	private Map<Character, Value> values = new HashMap<Character, Value>();
 	private String comment = "";
@@ -106,26 +107,25 @@ public class Taxon implements Serializable, Comparable<Taxon>, HasColor, HasComm
 	
 	public Taxon() { }
 	
-	public Taxon(String id, Level level, String name, String author, String year) {
-		this.id = id;
+	public Taxon(Level level, String name, String author, String year) {
 		this.level = level;
 		this.name = name;
 		this.author = author;
 		this.year = year;
 	}
 	
-	public Taxon(String id, Level level, String name, String author, String year, String description) {
-		this(id, level, name, author, year);
+	public Taxon(Level level, String name, String author, String year, String description) {
+		this(level, name, author, year);
 		this.description = description;
 	}
 	
-	public Taxon(String id, Level level, String name, String author, String year, String description, Collection<Character> characters) {
-		this(id, level, name, author, year, description);
+	public Taxon( Level level, String name, String author, String year, String description, Collection<Character> characters) {
+		this(level, name, author, year, description);
 		this.init(characters);
 	}
 	
-	public Taxon(String id, Level level, String name, String author, String year, Map<Character, Value> values) {
-		this(id, level, name, author, year);
+	public Taxon(Level level, String name, String author, String year, Map<Character, Value> values) {
+		this(level, name, author, year);
 		this.values = values;
 	}
 		

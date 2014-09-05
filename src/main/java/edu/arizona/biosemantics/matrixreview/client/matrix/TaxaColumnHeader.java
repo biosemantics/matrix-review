@@ -16,12 +16,13 @@ import com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance;
 
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveColorsEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent;
@@ -103,9 +104,9 @@ public class TaxaColumnHeader extends ColumnHeader<Taxon> {
 					refresh();
 				}
 			});
-			eventBus.addHandler(RemoveTaxonEvent.TYPE, new RemoveTaxonEvent.RemoveTaxonEventHandler() {
+			eventBus.addHandler(RemoveTaxaEvent.TYPE, new RemoveTaxaEvent.RemoveTaxonEventHandler() {
 				@Override
-				public void onRemove(RemoveTaxonEvent event) {
+				public void onRemove(RemoveTaxaEvent event) {
 					refresh();
 				}
 			});
@@ -123,7 +124,7 @@ public class TaxaColumnHeader extends ColumnHeader<Taxon> {
 			});
 			eventBus.addHandler(ModifyCharacterEvent.TYPE, new ModifyCharacterEvent.ModifyCharacterEventHandler() {
 				@Override
-				public void onRename(ModifyCharacterEvent event) {
+				public void onModify(ModifyCharacterEvent event) {
 					refresh();
 				}
 			});
@@ -157,8 +158,19 @@ public class TaxaColumnHeader extends ColumnHeader<Taxon> {
 		super(container, cm, appearance);
 		this.eventBus = eventBus;
 		this.taxonMatrix = taxonMatrix;
+		
+		bindEvents();
 	}
 
+
+	private void bindEvents() {
+		eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+			@Override
+			public void onLoad(LoadTaxonMatrixEvent event) {
+				taxonMatrix = event.getTaxonMatrix();
+			}
+		});
+	}
 
 	@Override
 	@SuppressWarnings("rawtypes")

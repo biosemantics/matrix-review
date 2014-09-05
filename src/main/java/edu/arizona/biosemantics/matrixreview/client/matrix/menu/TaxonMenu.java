@@ -65,9 +65,10 @@ import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.CollapseTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ExpandTaxaEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxonFlatEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonCommentEvent;
@@ -153,7 +154,7 @@ public class TaxonMenu extends Menu {
 		public TaxonInformationContainer(TaxonMatrix taxonMatrix, Taxon initialParent, final Taxon taxon) {
 			FieldSet fieldSet = new FieldSet();
 		    fieldSet.setHeadingText("Taxon Information");
-		    fieldSet.setCollapsible(true);
+		    fieldSet.setCollapsible(false);
 		    this.add(fieldSet, new MarginData(10));
 		 
 		    VerticalLayoutContainer p = new VerticalLayoutContainer();
@@ -184,7 +185,7 @@ public class TaxonMenu extends Menu {
 		    //SelectionModel.SINGLE doesnt deselect upon second click (also not with CTRL), see TreeSelectionModel impl.
 		    //SelectionModel.SIMPLE doesnt restrict to a single selection, hence custom implementation
 		    //taxaTree.getSelectionModel().setSelectionMode(SelectionMode.SIMPLE);
-			taxaTree.setSelectionModel(new TreeSelectionModel<Taxon>() {
+		    taxaTree.setSelectionModel(new TreeSelectionModel<Taxon>() {
 				@Override
 				protected void onMouseDown(MouseDownEvent mde) {
 					/*				    
@@ -218,6 +219,7 @@ public class TaxonMenu extends Menu {
 					super.onMouseDown(mde);
 				}
 			});
+			taxaTree.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 			taxaTree.getSelectionModel().addSelectionChangedHandler(levelFilter);
 		    
 		    //if(initialParent != null)
@@ -321,7 +323,7 @@ public class TaxonMenu extends Menu {
 						return;
 					}
 					
-					Taxon newTaxon = new Taxon(String.valueOf(Taxon.currentId++), 
+					Taxon newTaxon = new Taxon(
 							levelCombo.getValue(), nameField.getText(), authorField.getText(), yearField.getText());
 					eventBus.fireEvent(new AddTaxonEvent(newTaxon, taxaTree.getSelectionModel().getSelectedItem()));
 					TaxonAddDialog.this.hide();
@@ -338,6 +340,8 @@ public class TaxonMenu extends Menu {
 		    addButton(cancel);
 		}
 
+		//Only call this once the taxonInformationContains is already attached/displayed, otherwise the call will fail with an AssertionExcpeption, because
+		//the node to expand simply does not exist yet
 		public void selectParent(Taxon taxon) {
 			taxonInformationContainer.selectParent(taxon);
 		}
@@ -430,8 +434,19 @@ public class TaxonMenu extends Menu {
 		add(new HeaderMenuItem("Analysis"));
 		add(createShowDescription());
 		//add(createAnalysis());	
+		
+		bindEvents();
 	}
 	
+	private void bindEvents() {
+		eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+			@Override
+			public void onLoad(LoadTaxonMatrixEvent event) {
+				taxonMatrix = event.getTaxonMatrix();
+			}
+		});
+	}
+
 	@Override
 	public void add(Widget child) {
 		if(child != null)
@@ -645,7 +660,7 @@ public class TaxonMenu extends Menu {
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				eventBus.fireEvent(new RemoveTaxonEvent(taxon));
+				eventBus.fireEvent(new RemoveTaxaEvent(taxon));
 			}
 		});
 		return item;

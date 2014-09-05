@@ -18,7 +18,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.CollapseTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ExpandTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.HideCharacterEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.HideTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.HideTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockMatrixEvent;
@@ -32,7 +32,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxonFlatEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.PrintableEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveColorsEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent;
@@ -59,10 +59,10 @@ public class ConsoleManager extends AbstractWindowManager {
 
 	private class ConsoleEventsHandler implements AddCharacterEventHandler, AddColorEvent.AddColorEventHandler, 
 		AddTaxonEvent.AddTaxonEventHandler, AnalyzeCharacterEvent.AnalyzeCharacterEventHandler, HideCharacterEvent.HideCharacterEventHandler, 
-		HideTaxonEvent.HideCharacterEventHandler, LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler, LockCharacterEvent.LockCharacterEventHandler,
+		HideTaxaEvent.HideCharacterEventHandler, LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler, LockCharacterEvent.LockCharacterEventHandler,
 		LockMatrixEvent.LockMatrixEventHandler, RemoveColorsEvent.RemoveColorsEventHandler,
 		MergeCharactersEvent.MergeCharactersEventHandler, MoveCharacterEvent.MoveCharacterEventHandler, MoveTaxonFlatEvent.MoveTaxonEventHandler, 
-		RemoveCharacterEvent.RemoveCharacterEventHandler, RemoveTaxonEvent.RemoveTaxonEventHandler, ModifyCharacterEvent.ModifyCharacterEventHandler, 
+		RemoveCharacterEvent.RemoveCharacterEventHandler, RemoveTaxaEvent.RemoveTaxonEventHandler, ModifyCharacterEvent.ModifyCharacterEventHandler, 
 		ModifyTaxonEvent.ModifyTaxonEventHandler, SetCharacterColorEvent.SetCharacterColorEventHandler, SetCharacterCommentEvent.SetCharacterCommentEventHandler, 
 		SetControlModeEvent.SetControlModeEventHandler, SetTaxonColorEvent.SetTaxonColorEventHandler, SetTaxonCommentEvent.SetTaxonCommentEventHandler, 
 		ShowDesktopEvent.ShowDesktopEventHandler, ShowNumericalDistributionEvent.ShowNumericalDistributionEventHandler, 
@@ -81,47 +81,50 @@ public class ConsoleManager extends AbstractWindowManager {
 		}
 	
 		private void addEventHandlers() {
-			eventBus.addHandler(AddCharacterEvent.TYPE, this);
-			eventBus.addHandler(AddColorEvent.TYPE, this);
-			eventBus.addHandler(AddTaxonEvent.TYPE, this);
-			eventBus.addHandler(AnalyzeCharacterEvent.TYPE, this);
-			eventBus.addHandler(HideCharacterEvent.TYPE, this);
-			eventBus.addHandler(HideTaxonEvent.TYPE, this);
-			eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, this);
-			eventBus.addHandler(LockCharacterEvent.TYPE, this);
-			eventBus.addHandler(LockMatrixEvent.TYPE, this);
-			eventBus.addHandler(MergeCharactersEvent.TYPE, this);
-			eventBus.addHandler(MoveCharacterEvent.TYPE, this);
-			eventBus.addHandler(MoveTaxonFlatEvent.TYPE, this);
-			eventBus.addHandler(RemoveCharacterEvent.TYPE, this);
-			eventBus.addHandler(RemoveTaxonEvent.TYPE, this);
-			eventBus.addHandler(RemoveColorsEvent.TYPE, this);
-			eventBus.addHandler(ModifyCharacterEvent.TYPE, this);
-			eventBus.addHandler(ModifyTaxonEvent.TYPE, this);
-			eventBus.addHandler(SetCharacterColorEvent.TYPE, this);
-			eventBus.addHandler(SetCharacterCommentEvent.TYPE, this);
-			eventBus.addHandler(SetControlModeEvent.TYPE, this);
-			eventBus.addHandler(SetTaxonColorEvent.TYPE, this);
-			eventBus.addHandler(SetTaxonCommentEvent.TYPE, this);
-			eventBus.addHandler(ShowDesktopEvent.TYPE, this);
-			eventBus.addHandler(ShowNumericalDistributionEvent.TYPE, this);
-			eventBus.addHandler(ShowTermFrequencyEvent.TYPE, this);
-			eventBus.addHandler(SortCharactersByCoverageEvent.TYPE, this);
-			eventBus.addHandler(SortCharactersByNameEvent.TYPE, this);
-			eventBus.addHandler(SortCharactersByOrganEvent.TYPE, this);
-			eventBus.addHandler(SortTaxaByCharacterEvent.TYPE, this);
-			eventBus.addHandler(SortTaxaByCoverageEvent.TYPE, this);
-			eventBus.addHandler(SortTaxaByNameEvent.TYPE, this);
-			eventBus.addHandler(ToggleDesktopEvent.TYPE, this);
-			eventBus.addHandler(SetValueColorEvent.TYPE, this);
-			eventBus.addHandler(SetValueCommentEvent.TYPE, this);
-			eventBus.addHandler(AnalyzeTaxonEvent.TYPE, this);
-			eventBus.addHandler(LockTaxonEvent.TYPE, this);
-			eventBus.addHandler(ShowDescriptionEvent.TYPE, this);	
-			eventBus.addHandler(SetValueEvent.TYPE, this);
-			eventBus.addHandler(ModelModeEvent.TYPE, this);
-			eventBus.addHandler(CollapseTaxaEvent.TYPE, this);
-			eventBus.addHandler(ExpandTaxaEvent.TYPE, this);
+			//TODO
+			//fullMatrixEventBus.addHandler(type, handler)
+			
+			subMatrixEventBus.addHandler(AddCharacterEvent.TYPE, this);
+			subMatrixEventBus.addHandler(AddColorEvent.TYPE, this);
+			subMatrixEventBus.addHandler(AddTaxonEvent.TYPE, this);
+			subMatrixEventBus.addHandler(AnalyzeCharacterEvent.TYPE, this);
+			subMatrixEventBus.addHandler(HideCharacterEvent.TYPE, this);
+			subMatrixEventBus.addHandler(HideTaxaEvent.TYPE, this);
+			subMatrixEventBus.addHandler(LoadTaxonMatrixEvent.TYPE, this);
+			subMatrixEventBus.addHandler(LockCharacterEvent.TYPE, this);
+			subMatrixEventBus.addHandler(LockMatrixEvent.TYPE, this);
+			subMatrixEventBus.addHandler(MergeCharactersEvent.TYPE, this);
+			subMatrixEventBus.addHandler(MoveCharacterEvent.TYPE, this);
+			subMatrixEventBus.addHandler(MoveTaxonFlatEvent.TYPE, this);
+			subMatrixEventBus.addHandler(RemoveCharacterEvent.TYPE, this);
+			subMatrixEventBus.addHandler(RemoveTaxaEvent.TYPE, this);
+			subMatrixEventBus.addHandler(RemoveColorsEvent.TYPE, this);
+			subMatrixEventBus.addHandler(ModifyCharacterEvent.TYPE, this);
+			subMatrixEventBus.addHandler(ModifyTaxonEvent.TYPE, this);
+			subMatrixEventBus.addHandler(SetCharacterColorEvent.TYPE, this);
+			subMatrixEventBus.addHandler(SetCharacterCommentEvent.TYPE, this);
+			subMatrixEventBus.addHandler(SetControlModeEvent.TYPE, this);
+			subMatrixEventBus.addHandler(SetTaxonColorEvent.TYPE, this);
+			subMatrixEventBus.addHandler(SetTaxonCommentEvent.TYPE, this);
+			subMatrixEventBus.addHandler(ShowDesktopEvent.TYPE, this);
+			subMatrixEventBus.addHandler(ShowNumericalDistributionEvent.TYPE, this);
+			subMatrixEventBus.addHandler(ShowTermFrequencyEvent.TYPE, this);
+			subMatrixEventBus.addHandler(SortCharactersByCoverageEvent.TYPE, this);
+			subMatrixEventBus.addHandler(SortCharactersByNameEvent.TYPE, this);
+			subMatrixEventBus.addHandler(SortCharactersByOrganEvent.TYPE, this);
+			subMatrixEventBus.addHandler(SortTaxaByCharacterEvent.TYPE, this);
+			subMatrixEventBus.addHandler(SortTaxaByCoverageEvent.TYPE, this);
+			subMatrixEventBus.addHandler(SortTaxaByNameEvent.TYPE, this);
+			subMatrixEventBus.addHandler(ToggleDesktopEvent.TYPE, this);
+			subMatrixEventBus.addHandler(SetValueColorEvent.TYPE, this);
+			subMatrixEventBus.addHandler(SetValueCommentEvent.TYPE, this);
+			subMatrixEventBus.addHandler(AnalyzeTaxonEvent.TYPE, this);
+			subMatrixEventBus.addHandler(LockTaxonEvent.TYPE, this);
+			subMatrixEventBus.addHandler(ShowDescriptionEvent.TYPE, this);	
+			subMatrixEventBus.addHandler(SetValueEvent.TYPE, this);
+			subMatrixEventBus.addHandler(ModelModeEvent.TYPE, this);
+			subMatrixEventBus.addHandler(CollapseTaxaEvent.TYPE, this);
+			subMatrixEventBus.addHandler(ExpandTaxaEvent.TYPE, this);
 		}
 
 		@Override
@@ -222,12 +225,12 @@ public class ConsoleManager extends AbstractWindowManager {
 		}
 	
 		@Override
-		public void onRename(ModifyCharacterEvent event) {
+		public void onModify(ModifyCharacterEvent event) {
 			printToConsole(event);
 		}
 	
 		@Override
-		public void onRemove(RemoveTaxonEvent event) {
+		public void onRemove(RemoveTaxaEvent event) {
 			printToConsole(event);
 		}
 	
@@ -262,7 +265,7 @@ public class ConsoleManager extends AbstractWindowManager {
 		}
 	
 		@Override
-		public void onHide(HideTaxonEvent event) {
+		public void onHide(HideTaxaEvent event) {
 			printToConsole(event);
 		}
 	
@@ -342,9 +345,12 @@ public class ConsoleManager extends AbstractWindowManager {
 		}
 		
 	}
+
+	private EventBus fullMatrixEventBus;
 	
-	public ConsoleManager(EventBus eventBus, Window window) {
-		super(eventBus, window);
+	public ConsoleManager(EventBus fullMatrixEventBus, EventBus subMatrixEventBus, Window window) {
+		super(subMatrixEventBus, window);
+		this.fullMatrixEventBus = fullMatrixEventBus;
 		init();
 	}
 

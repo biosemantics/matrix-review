@@ -22,6 +22,7 @@ import com.sencha.gxt.widget.core.client.tree.Tree;
 import com.sencha.gxt.widget.core.client.tree.Tree.TreeNode;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGrid;
 
+import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModelModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxonFlatEvent;
@@ -91,6 +92,12 @@ public class UpdateModelDropTarget extends TreeGridDropTarget<Taxon> {
     
 	
 	private void addEventHandlers() {
+		eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+			@Override
+			public void onLoad(LoadTaxonMatrixEvent event) {
+				taxonMatrix = event.getTaxonMatrix();
+			}
+		});
 		eventBus.addHandler(ModelModeEvent.TYPE, new ModelModeEvent.ModelModeEventHandler() {
 			@Override
 			public void onMode(ModelModeEvent event) {

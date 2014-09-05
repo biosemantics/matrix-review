@@ -10,18 +10,19 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Organ;
 public class ModifyCharacterEvent extends GwtEvent<ModifyCharacterEventHandler> {
 
 	public interface ModifyCharacterEventHandler extends EventHandler {
-		void onRename(ModifyCharacterEvent event);
+		void onModify(ModifyCharacterEvent event);
 	}
 	
 	public static Type<ModifyCharacterEventHandler> TYPE = new Type<ModifyCharacterEventHandler>();
-	private Character character;
-	private String name;
-	private Organ organ;
+	private Character oldCharacter;
+	private String newName;
+	private Organ newOrgan;
 	
-	public ModifyCharacterEvent(Character character, String name, Organ organ) {
-		this.character = character;
-		this.name = name;
-		this.organ = organ;
+	
+	public ModifyCharacterEvent(Character oldCharacter, String newName, Organ newOrgan) {
+		this.oldCharacter = oldCharacter;
+		this.newName = newName;
+		this.newOrgan = newOrgan;
 	}
 	
 	@Override
@@ -31,23 +32,23 @@ public class ModifyCharacterEvent extends GwtEvent<ModifyCharacterEventHandler> 
 
 	@Override
 	protected void dispatch(ModifyCharacterEventHandler handler) {
-		handler.onRename(this);
+		handler.onModify(this);
 	}
 
 	public static Type<ModifyCharacterEventHandler> getTYPE() {
 		return TYPE;
 	}
 
-	public Character getCharacter() {
-		return character;
+	public Character getOldCharacter() {
+		return oldCharacter;
 	}
 
-	public String getName() {
-		return name;
+	public String getNewName() {
+		return newName;
 	}
-
-	public Organ getOrgan() {
-		return organ;
-	}		
+	
+	public Organ getNewOrgan() {
+		return newOrgan;
+	}
 	
 }
