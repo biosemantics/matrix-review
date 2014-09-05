@@ -208,7 +208,6 @@ public class ManageCharactersView extends ContentPanel {
 		eventBus.addHandler(MoveOrgansDownEvent.TYPE, new MoveOrgansDownEvent.MoveOrgansDownEventHandler() {
 			@Override
 			public void onMove(MoveOrgansDownEvent event) {
-				
 				move(getOrganNodes(event.getOrgans()), false);
 			}
 		});
@@ -292,7 +291,6 @@ public class ManageCharactersView extends ContentPanel {
 				}
 			}
 		}
-		tree.getSelectionModel().setSelection(organCharacterNodes);
 	}
 
 	protected void removeCharacter(Collection<Character> characters) {
@@ -496,6 +494,7 @@ public class ManageCharactersView extends ContentPanel {
 				}
 				eventBus.fireEvent(new MoveCharactersUpEvent(characters));
 				eventBus.fireEvent(new MoveOrgansUpEvent(organs));
+				tree.getSelectionModel().setSelection(selected);
 			}
 		});
 		TextButton downButton = new TextButton("Move Down");
@@ -517,6 +516,7 @@ public class ManageCharactersView extends ContentPanel {
 				}
 				eventBus.fireEvent(new MoveCharactersDownEvent(characters));
 				eventBus.fireEvent(new MoveOrgansDownEvent(organs));
+				tree.getSelectionModel().setSelection(selected);
 			}
 		});
 

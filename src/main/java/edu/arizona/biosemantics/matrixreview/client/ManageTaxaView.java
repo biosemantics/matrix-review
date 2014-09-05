@@ -212,7 +212,6 @@ public class ManageTaxaView extends ContentPanel {
 				}
 			}
 		}
-		tree.getSelectionModel().setSelection(taxa);
 	}
 
 	private IsWidget createTaxaButtonBar() {
@@ -280,6 +279,7 @@ public class ManageTaxaView extends ContentPanel {
 			public void onSelect(SelectEvent event) {
 				List<Taxon> selected = tree.getSelectionModel().getSelectedItems();
 				eventBus.fireEvent(new MoveTaxaUpEvent(selected));
+				tree.getSelectionModel().setSelection(selected);
 			}
 		});
 		TextButton downButton = new TextButton("Move Down");
@@ -288,6 +288,7 @@ public class ManageTaxaView extends ContentPanel {
 			public void onSelect(SelectEvent event) {
 				List<Taxon> selected = tree.getSelectionModel().getSelectedItems();
 				eventBus.fireEvent(new MoveTaxaDownEvent(selected));
+				tree.getSelectionModel().setSelection(selected);
 			}
 		});
 		
