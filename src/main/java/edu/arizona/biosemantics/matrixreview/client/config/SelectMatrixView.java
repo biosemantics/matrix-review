@@ -1,4 +1,4 @@
-package edu.arizona.biosemantics.matrixreview.client;
+package edu.arizona.biosemantics.matrixreview.client.config;
 
 import java.util.HashMap;
 import java.util.LinkedList;

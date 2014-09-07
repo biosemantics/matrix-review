@@ -1,4 +1,4 @@
-package edu.arizona.biosemantics.matrixreview.client;
+package edu.arizona.biosemantics.matrixreview.client.config;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,6 +52,9 @@ import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.FieldSet;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 
+import edu.arizona.biosemantics.matrixreview.client.common.CharacterAddDialog;
+import edu.arizona.biosemantics.matrixreview.client.common.CharacterModifyDialog;
+import edu.arizona.biosemantics.matrixreview.client.common.SelectCharacterStatesWindow;
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
@@ -68,9 +71,6 @@ import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEven
 import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent.SetCharacterStatesEventHandler;
 import edu.arizona.biosemantics.matrixreview.client.matrix.CharacterColumnConfig;
-import edu.arizona.biosemantics.matrixreview.client.matrix.menu.CharacterMenu.CharacterAddDialog;
-import edu.arizona.biosemantics.matrixreview.client.matrix.menu.CharacterMenu.CharacterModifyDialog;
-import edu.arizona.biosemantics.matrixreview.client.matrix.menu.CharacterMenu.SelectCharacterStatesWindow;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.HasControlMode.ControlMode;
 import edu.arizona.biosemantics.matrixreview.shared.model.HasControlMode.ControlModeProperties;

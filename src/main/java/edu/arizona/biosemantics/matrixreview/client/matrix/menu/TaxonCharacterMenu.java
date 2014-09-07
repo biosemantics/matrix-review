@@ -15,6 +15,8 @@ import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
+import edu.arizona.biosemantics.matrixreview.client.common.CharacterAddDialog;
+import edu.arizona.biosemantics.matrixreview.client.common.TaxonAddDialog;
 import edu.arizona.biosemantics.matrixreview.client.event.CollapseTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ExpandTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.HideCharacterEvent;
@@ -29,7 +31,6 @@ import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCoverageEven
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByNameEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.ColorSettingsDialog;
 import edu.arizona.biosemantics.matrixreview.client.matrix.MatrixView.ModelMode;
-import edu.arizona.biosemantics.matrixreview.client.matrix.menu.CharacterMenu.CharacterAddDialog;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Organ;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
@@ -574,7 +575,7 @@ public class TaxonCharacterMenu extends Menu {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				for (int i = 0; i < 1; i++) {
-					TaxonMenu.TaxonAddDialog addDialog = new TaxonMenu.TaxonAddDialog(eventBus, taxonMatrix, null);
+					TaxonAddDialog addDialog = new TaxonAddDialog(eventBus, taxonMatrix, null);
 					addDialog.show();
 					//eventBus.fireEvent(new AddTaxonEvent(new Taxon(Level.SPECIES, "taxon" + Random.nextInt(), "author", "year")));
 				}

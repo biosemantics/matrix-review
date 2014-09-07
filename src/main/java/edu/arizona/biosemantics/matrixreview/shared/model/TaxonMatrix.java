@@ -483,4 +483,12 @@ public class TaxonMatrix implements Serializable, HasDirty, HasLocked {
 		organ.setName(newName);
 	}
 
+	public void setTaxonChildren(Taxon parent, List<Taxon> children) {
+		parent.setChildren(children);
+	}
+
+	public void setCharacters(List<Character> characters) {
+		this.characters = characters;
+	}
+
 }

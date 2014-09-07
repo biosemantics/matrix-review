@@ -38,6 +38,8 @@ import com.sencha.gxt.widget.core.client.menu.MenuBar;
 import com.sencha.gxt.widget.core.client.menu.MenuBarItem;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
+import edu.arizona.biosemantics.matrixreview.client.config.ManageMatrixView;
+import edu.arizona.biosemantics.matrixreview.client.config.MatrixModelControler;
 import edu.arizona.biosemantics.matrixreview.client.desktop.DesktopView;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowDesktopEvent;
@@ -61,7 +63,7 @@ public class MatrixReviewView extends SplitLayoutPanel {
 			
 			MenuBarItem item = new MenuBarItem("Matrix", sub);
 			
-			
+			/*
 			MenuItem subMatrixItem = new MenuItem("Load");
 			subMatrixItem.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
@@ -81,7 +83,7 @@ public class MatrixReviewView extends SplitLayoutPanel {
 						}
 					});
 				}
-			});
+			}); */
 			
 			MenuItem modifyMatrixItem = new MenuItem("Configure");
 			modifyMatrixItem.addSelectionHandler(new SelectionHandler<Item>() {
@@ -97,7 +99,7 @@ public class MatrixReviewView extends SplitLayoutPanel {
 				public void onSelection(SelectionEvent<Item> event) {}
 			});
 
-			sub.add(subMatrixItem);
+			//sub.add(subMatrixItem);
 			sub.add(modifyMatrixItem);
 			sub.add(exportItem);
 			add(item);

@@ -1,6 +1,7 @@
-package edu.arizona.biosemantics.matrixreview.client;
+package edu.arizona.biosemantics.matrixreview.client.config;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.event.shared.EventBus;
@@ -16,6 +17,10 @@ import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyOrganEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyTaxonEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveCharactersDownEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveCharactersUpEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaDownEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaUpEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent;
@@ -71,6 +76,30 @@ public class MatrixModelControler {
 				}
 			}
 		});
+		eventBus.addHandler(MoveTaxaUpEvent.TYPE, new MoveTaxaUpEvent.MoveTaxaUpEventHandler() {
+			@Override
+			public void onMove(MoveTaxaUpEvent event) {
+				moveUpTaxa(event.getTaxa());
+			}
+		});
+		eventBus.addHandler(MoveTaxaDownEvent.TYPE, new MoveTaxaDownEvent.MoveTaxaDownEventHandler() {
+			@Override
+			public void onMove(MoveTaxaDownEvent event) {
+				moveDownTaxa(event.getTaxa());
+			}
+		});
+		eventBus.addHandler(MoveCharactersUpEvent.TYPE, new MoveCharactersUpEvent.MoveCharactersUpEventHandler() {
+			@Override
+			public void onMove(MoveCharactersUpEvent event) {
+				moveUpCharacters(event.getCharacters());
+			}
+		});
+		eventBus.addHandler(MoveCharactersDownEvent.TYPE, new MoveCharactersDownEvent.MoveCharacterDownEventHandler() {
+			@Override
+			public void onMove(MoveCharactersDownEvent event) {
+				moveDownCharacters(event.getCharacters());
+			}
+		});
 		
 		eventBus.addHandler(AddCharacterEvent.TYPE, new AddCharacterEvent.AddCharacterEventHandler() {
 			@Override
@@ -106,6 +135,50 @@ public class MatrixModelControler {
 				setControlMode(event.getCharacter(), event.getControlMode(), event.getStates());
 			}
 		});
+	}
+
+	protected void moveDownCharacters(List<Character> characters) {
+		for(Character character : characters) {
+			Organ organ = character.getOrgan();
+			List<Character> children = taxonMatrix.getCharacters();
+			int index = children.indexOf(character);
+			if(index < children.size() - 1)
+				Collections.swap(children, index, index + 1);
+			taxonMatrix.setCharacters(children);
+		}
+	}
+
+	protected void moveUpCharacters(List<Character> characters) {
+		for(Character character : characters) {
+			Organ organ = character.getOrgan();
+			List<Character> children = taxonMatrix.getCharacters();
+			int index = children.indexOf(character);
+			if(index > 0)
+				Collections.swap(children, index, index - 1);
+			taxonMatrix.setCharacters(children);
+		}
+	}
+
+	protected void moveDownTaxa(List<Taxon> taxa) {
+		for(Taxon taxon : taxa) {
+			Taxon parent = taxon.getParent();
+			List<Taxon> children = parent.getChildren();
+			int index = children.indexOf(taxon);
+			if(index < children.size() - 1)
+				Collections.swap(children, index, index + 1);
+			taxonMatrix.setTaxonChildren(parent, children);
+		}
+	}
+
+	protected void moveUpTaxa(List<Taxon> taxa) {
+		for(Taxon taxon : taxa) {
+			Taxon parent = taxon.getParent();
+			List<Taxon> children = parent.getChildren();
+			int index = children.indexOf(taxon);
+			if(index > 0)
+				Collections.swap(children, index, index - 1);
+			taxonMatrix.setTaxonChildren(parent, children);
+		}
 	}
 
 	protected void modifyOrgan(Organ organ, String newName) {

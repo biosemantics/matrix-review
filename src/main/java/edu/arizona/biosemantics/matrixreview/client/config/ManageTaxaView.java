@@ -1,4 +1,4 @@
-package edu.arizona.biosemantics.matrixreview.client;
+package edu.arizona.biosemantics.matrixreview.client.config;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -40,6 +40,8 @@ import com.sencha.gxt.widget.core.client.form.FieldSet;
 import com.sencha.gxt.widget.core.client.form.TextArea;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 
+import edu.arizona.biosemantics.matrixreview.client.common.TaxonAddDialog;
+import edu.arizona.biosemantics.matrixreview.client.common.TaxonModifyDialog;
 import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyTaxonEvent;
@@ -48,7 +50,6 @@ import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaUpEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.TaxonMenu;
-import edu.arizona.biosemantics.matrixreview.client.matrix.menu.TaxonMenu.TaxonModifyDialog;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.OrganCharacterNode;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
@@ -229,7 +230,7 @@ public class ManageTaxaView extends ContentPanel {
 			@Override
 			public void onSelect(SelectEvent event) {
 				Taxon selected = tree.getSelectionModel().getSelectedItem();
-				TaxonMenu.TaxonAddDialog addDialog = new TaxonMenu.TaxonAddDialog(eventBus, matrix, null);
+				TaxonAddDialog addDialog = new TaxonAddDialog(eventBus, matrix, null);
 				addDialog.show();
 				if(selected != null)
 					addDialog.selectParent(selected);
