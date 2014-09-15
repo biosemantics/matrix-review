@@ -69,6 +69,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaUpEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxaEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonCommentEvent;
@@ -195,6 +196,19 @@ public class ManageTaxaView extends ContentPanel {
 				move(event.getTaxa(), false);
 			}
 		});
+		eventBus.addHandler(SetTaxonColorEvent.TYPE, new SetTaxonColorEvent.SetTaxonColorEventHandler() {
+			@Override
+			public void onSet(SetTaxonColorEvent event) {
+				store.update(event.getTaxon());
+			}
+		});
+		eventBus.addHandler(SetTaxonCommentEvent.TYPE, new SetTaxonCommentEvent.SetTaxonCommentEventHandler() {
+			@Override
+			public void onSet(SetTaxonCommentEvent event) {
+				store.update(event.getTaxon());
+			}
+		});
+		
 		
 		tree.getSelectionModel().addSelectionChangedHandler(new SelectionChangedHandler<Taxon>() {
 			@Override
@@ -204,6 +218,7 @@ public class ManageTaxaView extends ContentPanel {
 				}
 			}
 		});
+		
 	}
 
 	protected void move(List<Taxon> taxa, boolean up) {

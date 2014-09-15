@@ -2,8 +2,11 @@ package edu.arizona.biosemantics.matrixreview.shared.model;
 
 import java.io.Serializable;
 
-public class Color implements Serializable {
+public class Color implements Serializable, Comparable<Color> {
 
+	private static int ID = 0;
+	
+	private int id = ID++;
 	private String hex;
 	private String use;
 	
@@ -31,5 +34,14 @@ public class Color implements Serializable {
 	public String toString() {
 		return hex + ":" + use;
 	}
+
+	public int getId() {
+		return id;
+	}
+
+	@Override
+	public int compareTo(Color o) {
+		return this.hex.compareTo(o.hex);
+	}	
 
 }

@@ -83,6 +83,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEven
 import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonCommentEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetValueColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent.SetCharacterStatesEventHandler;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.ControlMode;
@@ -255,6 +256,18 @@ public class ManageCharactersView extends ContentPanel {
 				} else {
 					store.update(characterNodes.get(event.getCharacter()));
 				}	
+			}
+		});
+		eventBus.addHandler(SetCharacterColorEvent.TYPE, new SetCharacterColorEvent.SetCharacterColorEventHandler() {
+			@Override
+			public void onSet(SetCharacterColorEvent event) {
+				store.update(characterNodes.get(event.getCharacter()));
+			}
+		});
+		eventBus.addHandler(SetCharacterCommentEvent.TYPE, new SetCharacterCommentEvent.SetCharacterCommentEventHandler() {
+			@Override
+			public void onSet(SetCharacterCommentEvent event) {
+				store.update(characterNodes.get(event.getCharacter()));
 			}
 		});
 		
