@@ -6,8 +6,9 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 import edu.arizona.biosemantics.matrixreview.client.event.ShowModifyEvent.ShowModifyEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 
 public class ShowModifyEvent extends GwtEvent<ShowModifyEventHandler> {
 
@@ -16,8 +17,10 @@ public class ShowModifyEvent extends GwtEvent<ShowModifyEventHandler> {
 	}
 	
 	public static Type<ShowModifyEventHandler> TYPE = new Type<ShowModifyEventHandler>();
+	private Model model;
 	
-	public ShowModifyEvent() {
+	public ShowModifyEvent(Model model) {
+		this.model = model;
 	}
 	
 	@Override
@@ -30,5 +33,8 @@ public class ShowModifyEvent extends GwtEvent<ShowModifyEventHandler> {
 		handler.onShow(this);
 	}
 
+	public Model getModel() {
+		return model;
+	}
 
 }

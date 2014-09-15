@@ -4,10 +4,9 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonColorEvent.SetTaxonColorEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
-import edu.arizona.biosemantics.matrixreview.shared.model.HasControlMode.ControlMode;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
 public class SetTaxonColorEvent extends GwtEvent<SetTaxonColorEventHandler> {
 

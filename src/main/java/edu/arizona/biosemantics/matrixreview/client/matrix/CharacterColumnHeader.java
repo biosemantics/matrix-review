@@ -33,25 +33,26 @@ import com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance;
 import com.sencha.gxt.widget.core.client.grid.HeaderGroupConfig;
 
 import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.RemoveColorsEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetColorsEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCoverageEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByNameEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.FrozenFirstColumTaxonTreeGrid.CharactersGrid;
 import edu.arizona.biosemantics.matrixreview.client.matrix.dom.HorizontalAutoScrollSupport;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 
 public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 
@@ -124,13 +125,13 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 			if (column instanceof CharacterColumnConfig) {
 				CharacterColumnConfig myColumnConfig = (CharacterColumnConfig) column;
 				Character character = myColumnConfig.getCharacter();
-				Color color = character.getColor();
+				Color color = model.getColor(character);
 				if (color != null)
 					getElement().getStyle().setBackgroundColor("#" + color.getHex());
 
-				if (character.isDirty())
+				if (model.isDirty(character))
 					addStyleName(gridStyles.cellDirty());
-				if (character.isCommented())
+				if (model.isCommented(character))
 					addStyleName(gridStyles.cellCommented());
 			}
 
@@ -179,9 +180,9 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 						refresh();
 				}
 			});
-			eventBus.addHandler(RemoveColorsEvent.TYPE, new RemoveColorsEvent.RemoveColorsEventHandler() {
+			eventBus.addHandler(SetColorsEvent.TYPE, new SetColorsEvent.SetColorsEventHandler() {
 				@Override
-				public void onRemove(RemoveColorsEvent event) {
+				public void onSet(SetColorsEvent event) {
 					refresh();
 				}
 			});
@@ -202,7 +203,7 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 			eventBus.addHandler(SetValueEvent.TYPE, new SetValueEvent.SetValueEventHandler() {
 				@Override
 				public void onSet(SetValueEvent event) {
-					if(event.getOldValue().getCharacter().equals(getColumnConfig().getCharacter()))
+					if(model.getTaxonMatrix().getCharacter(event.getNewValue()).equals(getColumnConfig().getCharacter()))
 						refresh();
 				}
 			});
@@ -218,10 +219,10 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 		public void refresh() {
 			Character character = getColumnConfig().getCharacter();
 			setText(character.toString());
-			setCoverage(taxonMatrix.getCoverage(character));
-			setCommented(character.isCommented());
+			setCoverage(model.getTaxonMatrix().getCoverage(character));
+			setCommented(model.isCommented(character));
 			//setBackgroundColor(character.getColor());
-			setDirty(character.isDirty());
+			setDirty(model.isDirty(character));
 			setQuickTipText(getQuickTipText(character));
 		}
 
@@ -231,24 +232,24 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 				result +=  " of Organ " + character.getOrgan() + "<br>"; 
 			else 
 				result += "<br>";
-			result += "Taxon coverage: " + taxonMatrix.getCoverage(character) + "<br>";
+			result += "Taxon coverage: " + model.getTaxonMatrix().getCoverage(character) + "<br>";
 			result += getControlMode(character);
-			if(character.hasColor())
-				result += "Color: " + character.getColor().getUse() + "<br>";
-			if(character.isLocked())
+			if(model.hasColor(character))
+				result += "Color: " + model.getColor(character).getUse() + "<br>";
+			if(model.isLocked(character))
 				result += "Locked<br>";
-			if(character.isDirty()) 
+			if(model.isDirty(character)) 
 				result += "Dirty<br>";
-			if(character.isCommented()) 
-				result += "Comment: " + character.getComment();
+			if(model.isCommented(character)) 
+				result += "Comment: " + model.getComment(character);
 			return result;
 		}
 
 		private String getControlMode(Character character) {
-			switch(character.getControlMode()) {
+			switch(model.getControlMode(character)) {
 			case CATEGORICAL:
-				String result = "Control Mode: Categorical<br>States (" + character.getStates().size() + "): <br>";
-				for(String state : character.getStates()) {
+				String result = "Control Mode: Categorical<br>States (" + model.getStates(character).size() + "): <br>";
+				for(String state : model.getStates(character)) {
 					result += "- " + state + "<br>";
 				}
 				return result;
@@ -488,26 +489,26 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 	}
 
 	private EventBus eventBus;
-	private TaxonMatrix taxonMatrix;
+	private Model model;
 	
-	public CharacterColumnHeader(EventBus eventBus, TaxonMatrix taxonMatrix, CharactersGrid container, CharactersColumnModel cm) {
-		this(eventBus, taxonMatrix, container, cm, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
+	public CharacterColumnHeader(EventBus eventBus, Model model, CharactersGrid container, CharactersColumnModel cm) {
+		this(eventBus, model, container, cm, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
 	}
 
-	public CharacterColumnHeader(EventBus eventBus, TaxonMatrix taxonMatrix, 
+	public CharacterColumnHeader(EventBus eventBus, Model model, 
 			CharactersGrid container, CharactersColumnModel cm, ColumnHeaderAppearance appearance) {
 		super(container, cm, appearance);
 		this.eventBus = eventBus;
-		this.taxonMatrix = taxonMatrix;
+		this.model = model;
 		
 		bindEvents();
 	}
 
 	private void bindEvents() {
-		eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+		eventBus.addHandler(LoadModelEvent.TYPE, new LoadModelEvent.LoadModelEventHandler() {
 			@Override
-			public void onLoad(LoadTaxonMatrixEvent event) {
-				taxonMatrix = event.getTaxonMatrix();
+			public void onLoad(LoadModelEvent event) {
+				model = event.getModel();
 			}
 		});
 	}

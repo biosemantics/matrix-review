@@ -1,5 +1,6 @@
 package edu.arizona.biosemantics.matrixreview.client.common;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.cell.client.TextCell;
@@ -23,7 +24,7 @@ import com.sencha.gxt.widget.core.client.form.validator.EmptyValidator;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent.SetCharacterStatesEventHandler;
 
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 
 public class SelectCharacterStatesWindow extends Window {
 
@@ -90,7 +91,7 @@ public class SelectCharacterStatesWindow extends Window {
 				if (!states.isEmpty()) {
 					SelectCharacterStatesWindow.this
 							.fireEvent(new SetCharacterStatesEvent(character,
-									toStates.getAll()));
+									new ArrayList<String>(toStates.getAll())));
 					SelectCharacterStatesWindow.this.hide();
 				} else {
 					AlertMessageBox alert = new AlertMessageBox(

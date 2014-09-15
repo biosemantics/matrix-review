@@ -4,8 +4,8 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent.AddCharacterEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.Organ;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Organ;
 
 public class AddCharacterEvent extends GwtEvent<AddCharacterEventHandler> implements PrintableEvent {
 
@@ -14,15 +14,20 @@ public class AddCharacterEvent extends GwtEvent<AddCharacterEventHandler> implem
 	}
 	
 	public static Type<AddCharacterEventHandler> TYPE = new Type<AddCharacterEventHandler>();
-	private Organ organ;
-	private Character after;
-	private Character character;
 	
+	private Organ organ;
+	private Character character;
+	private Character addAfterCharacter = null;
 
-	public AddCharacterEvent(Organ organ, Character after, Character character) {
+	public AddCharacterEvent(Organ organ, Character character) {
 		this.organ = organ;
-		this.after = after;
 		this.character = character;
+	}
+	
+	public AddCharacterEvent(Organ organ, Character character, Character addAfterCharacter) {
+		this.organ = organ;
+		this.character = character;
+		this.addAfterCharacter = addAfterCharacter;
 	}
 
 	@Override
@@ -35,10 +40,6 @@ public class AddCharacterEvent extends GwtEvent<AddCharacterEventHandler> implem
 		handler.onAdd(this);
 	}
 
-	public Character getAfter() {
-		return after;
-	}
-
 	public Character getCharacter() {
 		return character;
 	}
@@ -49,10 +50,11 @@ public class AddCharacterEvent extends GwtEvent<AddCharacterEventHandler> implem
 
 	@Override
 	public String print() {
-		if(after == null)
-			return "Add character " + character;
-		return "Add character " + character + " after " + after;
+		return "Add character " + character;
 	}
-	
+
+	public Character getAddAfterCharacter() {
+		return addAfterCharacter;
+	}	
 	
 }

@@ -7,7 +7,7 @@ import java.util.List;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
 public class TaxaColumnModel extends ColumnModel<Taxon> {
 

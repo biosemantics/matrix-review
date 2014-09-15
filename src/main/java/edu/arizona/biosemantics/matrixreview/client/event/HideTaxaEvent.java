@@ -7,17 +7,17 @@ import java.util.Set;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import edu.arizona.biosemantics.matrixreview.client.event.HideTaxaEvent.HideCharacterEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
+import edu.arizona.biosemantics.matrixreview.client.event.HideTaxaEvent.HideTaxaEventHandler;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
-public class HideTaxaEvent extends GwtEvent<HideCharacterEventHandler> {
+public class HideTaxaEvent extends GwtEvent<HideTaxaEventHandler> {
 
-	public interface HideCharacterEventHandler extends EventHandler {
+	public interface HideTaxaEventHandler extends EventHandler {
 		void onHide(HideTaxaEvent event);
 	}
 	
-	public static Type<HideCharacterEventHandler> TYPE = new Type<HideCharacterEventHandler>();
+	public static Type<HideTaxaEventHandler> TYPE = new Type<HideTaxaEventHandler>();
 	private boolean hide;
 	private Set<Taxon> taxa;
 	
@@ -39,16 +39,16 @@ public class HideTaxaEvent extends GwtEvent<HideCharacterEventHandler> {
 	}
 
 	@Override
-	public GwtEvent.Type<HideCharacterEventHandler> getAssociatedType() {
+	public GwtEvent.Type<HideTaxaEventHandler> getAssociatedType() {
 		return TYPE;
 	}
 
 	@Override
-	protected void dispatch(HideCharacterEventHandler handler) {
+	protected void dispatch(HideTaxaEventHandler handler) {
 		handler.onHide(this);
 	}
 
-	public static Type<HideCharacterEventHandler> getTYPE() {
+	public static Type<HideTaxaEventHandler> getTYPE() {
 		return TYPE;
 	}
 	public Set<Taxon> getTaxa() {

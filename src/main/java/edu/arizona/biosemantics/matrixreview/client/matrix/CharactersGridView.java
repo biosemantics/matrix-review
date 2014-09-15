@@ -22,32 +22,33 @@ import com.sencha.gxt.widget.core.client.grid.GridView;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.grid.RowExpander;
 
-import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCoverageEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByNameEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.FrozenFirstColumTaxonTreeGrid.CharactersGrid;
 import edu.arizona.biosemantics.matrixreview.client.matrix.filters.ScrollStateMaintainer;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.CharacterMenu;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 
 public class CharactersGridView extends GridView<Taxon> {
 
 	private ColumnHeaderStyles columnHeaderStyles;
 	private EventBus eventBus;
-	private TaxonMatrix taxonMatrix;
+	private Model model;
 	
 	private ScrollStateMaintainer<Taxon> scrollStateMaintainer = new ScrollStateMaintainer<Taxon>(this);
 
-	public CharactersGridView(EventBus eventBus, TaxonMatrix taxonMatrix) {
-		this(eventBus, taxonMatrix, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
+	public CharactersGridView(EventBus eventBus, Model model) {
+		this(eventBus, model, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
 	}
 
-	public CharactersGridView(EventBus eventBus, TaxonMatrix taxonMatrix, ColumnHeaderAppearance apperance) {
+	public CharactersGridView(EventBus eventBus, Model model, ColumnHeaderAppearance apperance) {
 		this.eventBus = eventBus;
-		this.taxonMatrix = taxonMatrix;
+		this.model = model;
 		this.columnHeaderStyles = apperance.styles();
 		
 		this.setColumnLines(true);
@@ -59,7 +60,7 @@ public class CharactersGridView extends GridView<Taxon> {
 
 	@Override
 	protected Menu createContextMenu(final int colIndex) {
-		CharacterMenu menu = new CharacterMenu(eventBus, (CharactersGrid)grid, taxonMatrix, getColumnModel().getColumn(colIndex).getCharacter());
+		CharacterMenu menu = new CharacterMenu(eventBus, (CharactersGrid)grid, model, getColumnModel().getColumn(colIndex).getCharacter());
 		return menu;
 	}
 
@@ -242,7 +243,7 @@ public class CharactersGridView extends GridView<Taxon> {
 	@Override
 	protected void initHeader() {
 		if (header == null) {
-			header = new CharacterColumnHeader(eventBus, taxonMatrix, (CharactersGrid)grid, getColumnModel());
+			header = new CharacterColumnHeader(eventBus, model, (CharactersGrid)grid, getColumnModel());
 		}
 		super.initHeader();
 	}
@@ -285,10 +286,10 @@ public class CharactersGridView extends GridView<Taxon> {
 	}
 	
 	private void addEventHandlers() {
-		eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+		eventBus.addHandler(LoadModelEvent.TYPE, new LoadModelEvent.LoadModelEventHandler() {
 			@Override
-			public void onLoad(LoadTaxonMatrixEvent event) {
-				taxonMatrix = event.getTaxonMatrix();
+			public void onLoad(LoadModelEvent event) {
+				model = event.getModel();
 			}
 		});
 		eventBus.addHandler(SortTaxaByNameEvent.TYPE, new SortTaxaByNameEvent.SortTaxaByNameEventHandler() {

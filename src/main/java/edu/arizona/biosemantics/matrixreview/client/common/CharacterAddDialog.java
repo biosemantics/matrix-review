@@ -10,19 +10,20 @@ import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.TextField;
 
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent;
-import edu.arizona.biosemantics.matrixreview.shared.model.Organ;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Organ;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 
 public class CharacterAddDialog extends Dialog {
 
 	private Character after = null;
 
-	public CharacterAddDialog(final EventBus eventBus, TaxonMatrix taxonMatrix,
+	public CharacterAddDialog(final EventBus eventBus, Model model,
 			Organ initialOrgan) {
 		this.setHeadingText("Add Character");
 		CharacterInformationContainer characterInformationContainer = new CharacterInformationContainer(
-				taxonMatrix, "", initialOrgan);
+				model, "", initialOrgan);
 		this.add(characterInformationContainer);
 
 		final ComboBox<Organ> organComboBox = characterInformationContainer
@@ -42,11 +43,13 @@ public class CharacterAddDialog extends Dialog {
 					return;
 				}
 
-				Organ selected = organComboBox.getValue();
+				Organ organ = organComboBox.getValue();
+				int afterIndex = organ.getFlatCharacters().indexOf(after) ;
+				int organindex = afterIndex == -1 ? 0 : afterIndex + 1;
 				Character newCharacter = new Character(characterNameField
-						.getText(), selected);
-				eventBus.fireEvent(new AddCharacterEvent(selected, after,
-						newCharacter));
+						.getText(), organ, organindex);
+				eventBus.fireEvent(new AddCharacterEvent(organ, newCharacter, after));
+				//eventBus.fireEvent(new some move event that moves "after");
 				CharacterAddDialog.this.hide();
 			}
 		});

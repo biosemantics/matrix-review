@@ -1,4 +1,4 @@
-package edu.arizona.biosemantics.matrixreview.client.matrix;
+package edu.arizona.biosemantics.matrixreview.client.common;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -31,26 +31,36 @@ import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData;
+import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
+import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
+import com.sencha.gxt.widget.core.client.form.FieldLabel;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.form.Validator;
 import com.sencha.gxt.widget.core.client.form.error.DefaultEditorError;
 
-import edu.arizona.biosemantics.matrixreview.client.event.AddColorEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.RemoveColorsEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetColorsEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.cells.ColorCell;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 
 public class ColorSettingsDialog extends Dialog {
 
-	public ColorSettingsDialog(final EventBus eventBus, final TaxonMatrix taxonMatrix) {
+	public ColorSettingsDialog(final EventBus eventBus, final Model model) {
 		final CellTable<Color> colorsTable = new CellTable<Color>();
+		final LinkedList<Color> colorsCopy = new LinkedList<Color>(model.getColors());
 
 		this.setBodyBorder(false);
-		this.setHeadingText("BorderLayout Dialog");
+		this.setHeadingText("Colors");
 		this.setWidth(600);
-		this.setHeight(275);
+		this.setHeight(400);
 		this.setHideOnButtonClick(true);
+		this.getButton(PredefinedButton.OK).addSelectHandler(new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				eventBus.fireEvent(new SetColorsEvent(colorsCopy));
+			}
+		});
 
 		BorderLayoutContainer layout = new BorderLayoutContainer();
 		this.add(layout);
@@ -58,42 +68,43 @@ public class ColorSettingsDialog extends Dialog {
 		// Layout - west
 		ContentPanel westPanel = new ContentPanel();
 		westPanel.setHeadingText("Create Color");
-		BorderLayoutData data = new BorderLayoutData(150);
+		BorderLayoutData data = new BorderLayoutData(302);
 		data.setMargins(new Margins(0, 5, 0, 0));
 		westPanel.setLayoutData(data);
-		VerticalPanel colorChoosePanel = new VerticalPanel();
+		VerticalLayoutContainer colorChoosePanel = new VerticalLayoutContainer();
+		
 		ColorPalette colorPalette = new ColorPalette();
-		colorChoosePanel.add(colorPalette);
-		final TextField textField = new TextField();
+		colorChoosePanel.add(new FieldLabel(colorPalette, "Color Palette"));
+		final TextField hexField = new TextField();
 		final Label colorLabel = new Label();
 		colorLabel.setWidth("30px");
 		colorLabel.setHeight("30px");
-		colorChoosePanel.add(textField);
-		colorChoosePanel.add(colorLabel);
+		colorChoosePanel.add(new FieldLabel(hexField, "Hexadecimal Color-code"));
+		colorChoosePanel.add(new FieldLabel(colorLabel, "Color"));
 		colorPalette.addSelectionHandler(new SelectionHandler<String>() {
 			@Override
 			public void onSelection(SelectionEvent<String> event) {
-				textField.setValue(event.getSelectedItem());
-				textField.validate();
+				hexField.setValue(event.getSelectedItem());
+				hexField.validate();
 			}
 		});
-		textField.addKeyUpHandler(new KeyUpHandler() {
+		hexField.addKeyUpHandler(new KeyUpHandler() {
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
-				textField.validate();
+				hexField.validate();
 			}
 		});
-		textField.addValidator(new Validator<String>() {
+		hexField.addValidator(new Validator<String>() {
 			@Override
 			public List<EditorError> validate(Editor<String> editor,
 					String value) {
 				List<EditorError> error = new LinkedList<EditorError>();
 				RegExp hexPattern = RegExp.compile("^([A-Fa-f0-9]{6})$");
-				if (!hexPattern.test(textField.getValue())) {
+				if (!hexPattern.test(hexField.getValue())) {
 					error.add(new DefaultEditorError(editor,
 							"Not a valid color code", value));
 				} else {
-					String text = textField.getText();
+					String text = hexField.getText();
 					if (text.length() == 6) {
 						colorLabel.getElement().getStyle()
 								.setBackgroundColor("#" + text);
@@ -105,24 +116,23 @@ public class ColorSettingsDialog extends Dialog {
 		westPanel.add(colorChoosePanel);
 		Button addButton = new Button("add");
 		westPanel.addButton(addButton);
+		
 		addButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				if(textField.validate()) {
-					List<Color> colors = taxonMatrix.getColors();
+				if(hexField.validate()) {
 					boolean exists = false;
-					for(Color color : colors) {
-						if(color.getHex().equals(textField.getText())) {
+					for(Color color : colorsCopy) {
+						if(color.getHex().equals(hexField.getText())) {
 							AlertMessageBox alert = new AlertMessageBox("Duplicate color", "This color exists already");
 							alert.show();
 							exists = true;
 						}
 					}
 					if(!exists) {
-						Color color = new Color(textField.getText(), "");
-						colors.add(color);
-						colorsTable.setRowData(colors);
-						eventBus.fireEvent(new AddColorEvent(color));
+						Color color = new Color(hexField.getText(), "");
+						colorsCopy.add(color);
+						colorsTable.setRowData(colorsCopy);
 					}
 				} else {
 					AlertMessageBox alert = new AlertMessageBox("Not a valid color", "Can't add invalid color code");
@@ -131,10 +141,10 @@ public class ColorSettingsDialog extends Dialog {
 			}
 		});
 
-		BorderLayoutData westLayoutData = new BorderLayoutData(200);
-		westLayoutData.setCollapsible(true);
-		westLayoutData.setSplit(true);
-		westLayoutData.setCollapseMini(true);
+		BorderLayoutData westLayoutData = new BorderLayoutData(280);
+		westLayoutData.setCollapsible(false);
+		westLayoutData.setSplit(false);
+		westLayoutData.setCollapseMini(false);
 		westLayoutData.setMargins(new Margins(0, 8, 0, 5));
 		layout.setWestWidget(westPanel, westLayoutData);
 
@@ -173,10 +183,14 @@ public class ColorSettingsDialog extends Dialog {
 			}
 		});
 
-		colorsTable.addColumn(checkColumn, "Select");
+		//colorsTable.setTableLayoutFixed(true);
+		colorsTable.addColumn(checkColumn, "");
+		//colorsTable.setColumnWidth(checkColumn, "10%");
 		colorsTable.addColumn(colorColumn, "Color");
+		//colorsTable.setColumnWidth(colorColumn, "10%");
 		colorsTable.addColumn(useColumn, "Usage");
-		colorsTable.setRowData(taxonMatrix.getColors());
+		//colorsTable.setColumnWidth(useColumn, "80%");
+		colorsTable.setRowData(colorsCopy);
 
 		ScrollPanel scrollPanel = new ScrollPanel();
 		Button removeButton = new Button("remove");
@@ -185,8 +199,7 @@ public class ColorSettingsDialog extends Dialog {
 			@Override
 			public void onClick(ClickEvent event) {
 				Set<Color> toRemove = new HashSet<Color>();
-				List<Color> colors = taxonMatrix.getColors();
-				for (Color color : colors) {
+				for (Color color : colorsCopy) {
 					Boolean checked = checkboxCell.getViewData(color);
 					if (checked == null)
 						continue;
@@ -194,11 +207,10 @@ public class ColorSettingsDialog extends Dialog {
 						toRemove.add(color);
 					}
 				}
-				eventBus.fireEvent(new RemoveColorsEvent(toRemove));
 				for (Color color : toRemove) {
-					colors.remove(color);
+					colorsCopy.remove(color);
 				}
-				colorsTable.setRowData(colors);
+				colorsTable.setRowData(colorsCopy);
 			}
 		});
 		scrollPanel.setWidget(colorsTable);

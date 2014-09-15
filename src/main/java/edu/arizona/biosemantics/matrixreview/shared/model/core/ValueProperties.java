@@ -1,4 +1,4 @@
-package edu.arizona.biosemantics.matrixreview.shared.model;
+package edu.arizona.biosemantics.matrixreview.shared.model.core;
 
 import com.google.gwt.editor.client.Editor.Path;
 import com.sencha.gxt.core.client.ValueProvider;

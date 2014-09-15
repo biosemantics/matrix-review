@@ -8,7 +8,7 @@ import java.util.Set;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 
 import edu.arizona.biosemantics.matrixreview.client.event.HideCharacterEvent.HideCharacterEventHandler;
 
@@ -35,7 +35,7 @@ public class HideCharacterEvent extends GwtEvent<HideCharacterEventHandler> {
 
 	public HideCharacterEvent(List<Character> characters, boolean hide) {
 		this.characters = new HashSet<Character>();
-		characters.addAll(characters);
+		this.characters.addAll(characters);
 		this.hide = hide;
 	}
 

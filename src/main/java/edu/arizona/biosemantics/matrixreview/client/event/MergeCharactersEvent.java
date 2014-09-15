@@ -1,10 +1,16 @@
 package edu.arizona.biosemantics.matrixreview.client.event;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent.MergeCharactersEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
 public class MergeCharactersEvent extends GwtEvent<MergeCharactersEventHandler> {
 
@@ -21,11 +27,17 @@ public class MergeCharactersEvent extends GwtEvent<MergeCharactersEventHandler> 
 	private Character character;
 	private Character target;
 	private MergeMode mergeMode;
+	private Set<Taxon> toMerge = null;
 
 	public MergeCharactersEvent(Character character, Character target, MergeMode mergeMode) {
 		this.character = character;
 		this.target = target;
 		this.mergeMode = mergeMode;
+	}
+	
+	public MergeCharactersEvent(Character character, Character target, MergeMode mergeMode, Collection<Taxon> toMerge) {
+		this(character, target, mergeMode);
+		this.toMerge = new HashSet<Taxon>(toMerge);
 	}
 	
 	@Override
@@ -48,6 +60,14 @@ public class MergeCharactersEvent extends GwtEvent<MergeCharactersEventHandler> 
 
 	public MergeMode getMergeMode() {
 		return mergeMode;
+	}
+
+	public Set<Taxon> getToMerge() {
+		return toMerge;
+	}
+	
+	public boolean mergeAll() {
+		return toMerge == null;
 	}
 	
 }

@@ -17,23 +17,23 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueCommentEvent;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
-import edu.arizona.biosemantics.matrixreview.shared.model.Value;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
 public class ValueMenu extends Menu {
 
 	private EventBus eventBus;
-	private TaxonMatrix taxonMatrix;
+	private Model model;
 	private Taxon taxon;
 	private Character character;
 	private Value value;
 
-	public ValueMenu(EventBus eventBus, TaxonMatrix taxonMatrix, Value value, Taxon taxon, Character character) {
+	public ValueMenu(EventBus eventBus, Model model, Value value, Taxon taxon, Character character) {
 		this.eventBus = eventBus;
-		this.taxonMatrix = taxonMatrix;
+		this.model = model;
 		this.value = value;
 		this.taxon = taxon;
 		this.character = character;
@@ -50,7 +50,7 @@ public class ValueMenu extends Menu {
 	}
 
 	private Widget createColorize() {
-		if(taxonMatrix.getColors().isEmpty())
+		if(model.getColors().isEmpty())
 			return null;
 		
 		MenuItem item = new MenuItem("Colorize");
@@ -64,7 +64,7 @@ public class ValueMenu extends Menu {
 			}
 		});
 		colorMenu.add(offItem);
-		for(final Color color : taxonMatrix.getColors()) {
+		for(final Color color : model.getColors()) {
 			MenuItem colorItem = new MenuItem(color.getUse());
 			colorItem.getElement().getStyle().setProperty("backgroundColor", "#" + color.getHex());
 			colorItem.addSelectionHandler(new SelectionHandler<Item>() {
@@ -84,7 +84,7 @@ public class ValueMenu extends Menu {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox("Comment", "");
-				box.getTextArea().setValue(value.getComment());
+				box.getTextArea().setValue(model.getComment(value));
 				box.addHideHandler(new HideHandler() {
 					@Override
 					public void onHide(HideEvent event) {

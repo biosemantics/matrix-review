@@ -4,7 +4,7 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyOrganEvent.ModifyOrganEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.Organ;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Organ;
 
 public class ModifyOrganEvent extends GwtEvent<ModifyOrganEventHandler> {
 
@@ -14,11 +14,13 @@ public class ModifyOrganEvent extends GwtEvent<ModifyOrganEventHandler> {
 	
 	public static Type<ModifyOrganEventHandler> TYPE = new Type<ModifyOrganEventHandler>();
 	private Organ oldOrgan;
+	private String oldName;
 	private String newName;
 	
-	public ModifyOrganEvent(Organ oldOrgan, String newName) {
+	public ModifyOrganEvent(Organ oldOrgan, String oldName, String newName) {
 		this.oldOrgan = oldOrgan;
 		this.newName = newName;
+		this.oldName = oldName;
 	}
 	
 	@Override
@@ -38,6 +40,8 @@ public class ModifyOrganEvent extends GwtEvent<ModifyOrganEventHandler> {
 	public String getNewName() {
 		return newName;
 	}
-	
 
+	public String getOldName() {
+		return oldName;
+	}
 }

@@ -30,10 +30,11 @@ import com.sencha.gxt.widget.core.client.tree.TreeSelectionModel;
 
 import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.AllAccessListStore;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon.Level;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonProperties;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonProperties;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon.Rank;
 
 public class TaxonInformationContainer extends SimpleContainer {
 	
@@ -41,37 +42,38 @@ public class TaxonInformationContainer extends SimpleContainer {
 	private TextField authorField;
 	private TextField yearField;
 	
-	private AllAccessListStore<Level> levelsStore = new AllAccessListStore<Level>(new ModelKeyProvider<Level>() {
+	private AllAccessListStore<Rank> levelsStore = new AllAccessListStore<Rank>(new ModelKeyProvider<Rank>() {
 		@Override
-		public String getKey(Level item) {
+		public String getKey(Rank item) {
 			return item.name();
 		}
 	});	    
-	private ComboBox<Level> levelComboBox = new ComboBox<Level>(new ComboBoxCell<Level>(levelsStore, new LabelProvider<Level>() {
+	private ComboBox<Rank> levelComboBox = new ComboBox<Rank>(new ComboBoxCell<Rank>(levelsStore, new LabelProvider<Rank>() {
 		@Override
-		public String getLabel(Level item) {
+		public String getLabel(Rank item) {
 			return item.name();
 		}
     }));
 	private Tree<Taxon, String> taxaTree;
+	private Model model;
 	
-	public class LevelFilter implements StoreFilter<Level>, SelectionChangedHandler<Taxon> {
-		private Set<Level> selectableLevels = new LinkedHashSet<Level>();
-		private Level defaultLevel;
-		public LevelFilter(Level defaultLevel) {
+	public class LevelFilter implements StoreFilter<Rank>, SelectionChangedHandler<Taxon> {
+		private Set<Rank> selectableLevels = new LinkedHashSet<Rank>();
+		private Rank defaultLevel;
+		public LevelFilter(Rank defaultLevel) {
 			this.defaultLevel = defaultLevel;
 			init();
 		}
 		private void init() {
-			for(Level level : Level.values())
+			for(Rank level : Rank.values())
 				selectableLevels.add(level);
 			if(defaultLevel == null)
-				levelComboBox.setValue(Level.GENUS);
+				levelComboBox.setValue(Rank.GENUS);
 			else 
 				levelComboBox.setValue(defaultLevel);
 		}
 		@Override
-		public boolean select(Store<Level> store, Level parent, Level item) {
+		public boolean select(Store<Rank> store, Rank parent, Rank item) {
 			return selectableLevels.contains(item);
 		}
 		@Override
@@ -83,14 +85,14 @@ public class TaxonInformationContainer extends SimpleContainer {
 			else {
 				Taxon taxon = selection.get(0);
 				boolean collect = false;
-				for(Level level : Level.values()) {
+				for(Rank level : Rank.values()) {
 					if(collect)
 						selectableLevels.add(level);
-					if(level.equals(taxon.getLevel())) 
+					if(level.equals(taxon.getRank())) 
 						collect = true;
 				}
 				if(selectableLevels.isEmpty()) {
-					selectableLevels.add(Level.values()[Level.values().length - 1]);
+					selectableLevels.add(Rank.values()[Rank.values().length - 1]);
 				}
 				if(defaultLevel == null || !selectableLevels.contains(defaultLevel))
 					levelComboBox.setValue(selectableLevels.iterator().next());
@@ -101,7 +103,9 @@ public class TaxonInformationContainer extends SimpleContainer {
 		}
 	}
 
-	public TaxonInformationContainer(TaxonMatrix taxonMatrix, Taxon initialParent, final Taxon taxon) {
+	public TaxonInformationContainer(Model model, Taxon initialParent, final Taxon taxon) {
+		this.model = model; 
+		
 		FieldSet fieldSet = new FieldSet();
 	    fieldSet.setHeadingText("Taxon Information");
 	    fieldSet.setCollapsible(false);
@@ -111,9 +115,7 @@ public class TaxonInformationContainer extends SimpleContainer {
 	    fieldSet.add(p);
 
 	    TaxonStore taxonStore = new TaxonStore();
-		for(Taxon t : taxonMatrix.list()) {
-			if(t.hasParent())
-				continue;
+		for(Taxon t : model.getTaxonMatrix().getHierarchyRootTaxa()) {
 			insertToStoreRecursively(taxonStore, t);
 		}
 		taxonStore.setEnableFilters(true);
@@ -128,7 +130,7 @@ public class TaxonInformationContainer extends SimpleContainer {
 			
 		});
 		
-		LevelFilter levelFilter = new LevelFilter(taxon == null ? null : taxon.getLevel());			
+		LevelFilter levelFilter = new LevelFilter(taxon == null ? null : taxon.getRank());			
 	    
 	    TaxonProperties taxonProperties = GWT.create(TaxonProperties.class);
 	    taxaTree = new Tree<Taxon, String>(taxonStore, taxonProperties.fullName());
@@ -179,7 +181,7 @@ public class TaxonInformationContainer extends SimpleContainer {
 	    scrollPanel.setHeight("200px");
 	    p.add(new FieldLabel(scrollPanel, "Parent"), new VerticalLayoutData(1, -1));
 	    
-		levelsStore.addAll(Arrays.asList(Level.values()));
+		levelsStore.addAll(Arrays.asList(Rank.values()));
 		levelsStore.addFilter(levelFilter);
 	    levelComboBox.setAllowBlank(false);
 	    levelComboBox.setForceSelection(true);
@@ -203,10 +205,21 @@ public class TaxonInformationContainer extends SimpleContainer {
 	}
 	
 	private void insertToStoreRecursively(TaxonStore taxonStore, Taxon taxon) {
-		if(!taxon.hasParent())
+		if(!taxon.hasParent()) { 
 			taxonStore.add(taxon);
-		else 
-			taxonStore.add(taxon.getParent(), taxon);
+		} else {
+			Taxon parent = taxon.getParent();
+			while(parent != null) {
+				if(!model.getTaxonMatrix().isVisiblyContained(parent))
+					parent = parent.getParent();
+				else 
+					break;
+			}
+			if(parent == null) 
+				taxonStore.add(taxon);
+			else 
+				taxonStore.add(parent, taxon);
+		}
 		for(Taxon child : taxon.getChildren())
 			insertToStoreRecursively(taxonStore, child);
 	}
@@ -223,7 +236,7 @@ public class TaxonInformationContainer extends SimpleContainer {
 		return yearField;
 	}
 
-	public ComboBox<Level> getLevelComboBox() {
+	public ComboBox<Rank> getLevelComboBox() {
 		return levelComboBox;
 	}
 

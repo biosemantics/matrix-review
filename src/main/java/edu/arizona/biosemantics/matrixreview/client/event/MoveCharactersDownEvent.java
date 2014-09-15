@@ -5,16 +5,16 @@ import java.util.List;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import edu.arizona.biosemantics.matrixreview.client.event.MoveCharactersDownEvent.MoveCharacterDownEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.client.event.MoveCharactersDownEvent.MoveCharactersDownEventHandler;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 
-public class MoveCharactersDownEvent extends GwtEvent<MoveCharacterDownEventHandler> {
+public class MoveCharactersDownEvent extends GwtEvent<MoveCharactersDownEventHandler> {
 
-	public interface MoveCharacterDownEventHandler extends EventHandler {
+	public interface MoveCharactersDownEventHandler extends EventHandler {
 		void onMove(MoveCharactersDownEvent event);
 	}
 	
-	public static Type<MoveCharacterDownEventHandler> TYPE = new Type<MoveCharacterDownEventHandler>();
+	public static Type<MoveCharactersDownEventHandler> TYPE = new Type<MoveCharactersDownEventHandler>();
 	
 	private List<Character> characters;
 
@@ -24,12 +24,12 @@ public class MoveCharactersDownEvent extends GwtEvent<MoveCharacterDownEventHand
 	}
 
 	@Override
-	protected void dispatch(MoveCharacterDownEventHandler handler) {
+	protected void dispatch(MoveCharactersDownEventHandler handler) {
 		handler.onMove(this);
 	}
 
 	@Override
-	public Type<MoveCharacterDownEventHandler> getAssociatedType() {
+	public Type<MoveCharactersDownEventHandler> getAssociatedType() {
 		return TYPE;
 	}
 

@@ -16,21 +16,21 @@ import com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance;
 
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveCharacterEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.RemoveColorsEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.FrozenFirstColumTaxonTreeGrid.TaxaTreeGrid;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 
 public class TaxaColumnHeader extends ColumnHeader<Taxon> {
 
@@ -142,32 +142,32 @@ public class TaxaColumnHeader extends ColumnHeader<Taxon> {
 		
 		public void setQuickTipText() {
 			getElement().setAttribute("qtip", "The matrix contains " + 
-					taxonMatrix.list().size() + " taxa and " + taxonMatrix.getCharacterCount() + " characters of " +
-					taxonMatrix.getOrgans().size() + " organs");
+					model.getTaxonMatrix().getHierarchyTaxaDFS().size() + " taxa and " + model.getTaxonMatrix().getCharacterCount() + " characters of " +
+					model.getTaxonMatrix().getHierarchyCharacters().size() + " organs");
 		}
 	}
 
-	private TaxonMatrix taxonMatrix;
+	private Model model;
 	private EventBus eventBus;
 
-	public TaxaColumnHeader(EventBus eventBus, TaxaTreeGrid container, ColumnModel<Taxon> cm, TaxonMatrix taxonMatrix) {
-		this(eventBus, container, cm, taxonMatrix, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
+	public TaxaColumnHeader(EventBus eventBus, TaxaTreeGrid container, ColumnModel<Taxon> cm, Model model) {
+		this(eventBus, container, cm, model, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class));
 	}
 
-	public TaxaColumnHeader(EventBus eventBus, TaxaTreeGrid container, ColumnModel<Taxon> cm, TaxonMatrix taxonMatrix, ColumnHeaderAppearance appearance) {
+	public TaxaColumnHeader(EventBus eventBus, TaxaTreeGrid container, ColumnModel<Taxon> cm, Model model, ColumnHeaderAppearance appearance) {
 		super(container, cm, appearance);
 		this.eventBus = eventBus;
-		this.taxonMatrix = taxonMatrix;
+		this.model = model;
 		
 		bindEvents();
 	}
 
 
 	private void bindEvents() {
-		eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+		eventBus.addHandler(LoadModelEvent.TYPE, new LoadModelEvent.LoadModelEventHandler() {
 			@Override
-			public void onLoad(LoadTaxonMatrixEvent event) {
-				taxonMatrix = event.getTaxonMatrix();
+			public void onLoad(LoadModelEvent event) {
+				model = event.getModel();
 			}
 		});
 	}

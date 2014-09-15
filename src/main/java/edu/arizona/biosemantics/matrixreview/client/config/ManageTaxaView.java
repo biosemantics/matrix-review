@@ -11,19 +11,28 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
+import com.sencha.gxt.core.client.util.Format;
+import com.sencha.gxt.core.client.util.Params;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.data.shared.TreeStore.TreeNode;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
+import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
 import com.sencha.gxt.widget.core.client.button.ButtonBar;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
@@ -32,44 +41,65 @@ import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutP
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
+import com.sencha.gxt.widget.core.client.event.BeforeShowEvent;
+import com.sencha.gxt.widget.core.client.event.BeforeShowEvent.BeforeShowHandler;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
+import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent.DialogHideHandler;
+import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.FieldSet;
 import com.sencha.gxt.widget.core.client.form.TextArea;
+import com.sencha.gxt.widget.core.client.info.Info;
+import com.sencha.gxt.widget.core.client.menu.Item;
+import com.sencha.gxt.widget.core.client.menu.Menu;
+import com.sencha.gxt.widget.core.client.menu.MenuItem;
+import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
+import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent.SelectionChangedHandler;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 
 import edu.arizona.biosemantics.matrixreview.client.common.TaxonAddDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.TaxonModifyDialog;
 import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaDownEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaUpEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.RemoveCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxaEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonColorEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonCommentEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetValueColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.TaxonMenu;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.Color;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.OrganCharacterNode;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonProperties;
 import edu.arizona.biosemantics.matrixreview.shared.model.OrganCharacterNode.CharacterNode;
 import edu.arizona.biosemantics.matrixreview.shared.model.OrganCharacterNode.OrganNode;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Organ;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonProperties;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
 public class ManageTaxaView extends ContentPanel {
 
 	private TaxonProperties taxonProperties = GWT.create(TaxonProperties.class);
 	private HTML infoHtml = new HTML();
-	private TaxonMatrix matrix;
+	private Model model;
 	private EventBus eventBus;
-	private Tree<Taxon, String> tree;
+	private Tree<Taxon, Taxon> tree;
 	private TreeStore<Taxon> store = new TreeStore<Taxon>(taxonProperties.key());
+	private Set<SelectionChangedHandler<Taxon>> selectionChangeHandlers = 
+			new HashSet<SelectionChangedHandler<Taxon>>();
 	
 	public ManageTaxaView(EventBus eventBus, boolean navigation) {
 		this.eventBus = eventBus;
-		tree = createTree(matrix);
+		tree = createTree();
 		
 		this.setTitle("Taxa Management");
 		this.setHeadingText("Taxa Management");this.setHeadingText("Taxa Management");this.setHeadingText("Taxa Management");
@@ -112,11 +142,11 @@ public class ManageTaxaView extends ContentPanel {
 	}
 
 	private void bindEvents() {
-		eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+		eventBus.addHandler(LoadModelEvent.TYPE, new LoadModelEvent.LoadModelEventHandler() {
 			@Override
-			public void onLoad(LoadTaxonMatrixEvent event) {
-				matrix = event.getTaxonMatrix();
-				loadMatrix();
+			public void onLoad(LoadModelEvent event) {
+				model = event.getModel();
+				loadModel();
 			}
 		});
 		eventBus.addHandler(RemoveTaxaEvent.TYPE, new RemoveTaxaEvent.RemoveTaxonEventHandler() {
@@ -141,7 +171,12 @@ public class ManageTaxaView extends ContentPanel {
 			@Override
 			public void onModify(ModifyTaxonEvent event) {
 				Taxon taxon = event.getTaxon();
-				if(!event.getParent().equals(store.getParent(taxon))) {
+				
+				if(event.getParent() == null && taxon.getParent() != null) {
+					store.remove(taxon);
+					store.add(taxon);
+				} else if(event.getParent() != null && 
+						!event.getParent().equals(store.getParent(taxon))) {
 					store.remove(taxon);
 					store.add(event.getParent(), taxon);
 				}
@@ -158,6 +193,15 @@ public class ManageTaxaView extends ContentPanel {
 			@Override
 			public void onMove(MoveTaxaDownEvent event) {
 				move(event.getTaxa(), false);
+			}
+		});
+		
+		tree.getSelectionModel().addSelectionChangedHandler(new SelectionChangedHandler<Taxon>() {
+			@Override
+			public void onSelectionChanged(SelectionChangedEvent<Taxon> event) {
+				for(SelectionChangedHandler<Taxon> handler :  selectionChangeHandlers) {
+					handler.onSelectionChanged(new SelectionChangedEvent<Taxon>(event.getSelection()));
+				}
 			}
 		});
 	}
@@ -230,7 +274,7 @@ public class ManageTaxaView extends ContentPanel {
 			@Override
 			public void onSelect(SelectEvent event) {
 				Taxon selected = tree.getSelectionModel().getSelectedItem();
-				TaxonAddDialog addDialog = new TaxonAddDialog(eventBus, matrix, null);
+				TaxonAddDialog addDialog = new TaxonAddDialog(eventBus, model, null);
 				addDialog.show();
 				if(selected != null)
 					addDialog.selectParent(selected);
@@ -241,7 +285,7 @@ public class ManageTaxaView extends ContentPanel {
 			@Override
 			public void onSelect(SelectEvent event) {
 				Taxon selected = tree.getSelectionModel().getSelectedItem();
-				TaxonModifyDialog modifyDialog = new TaxonModifyDialog(eventBus, matrix, selected);
+				TaxonModifyDialog modifyDialog = new TaxonModifyDialog(eventBus, model, selected);
 				modifyDialog.show();
 				if(selected != null && selected.getParent() != null)
 					modifyDialog.selectParent(selected.getParent());
@@ -306,23 +350,161 @@ public class ManageTaxaView extends ContentPanel {
 		return taxaButtonBar;
 	}
 
-	private Tree<Taxon, String> createTree(TaxonMatrix matrix) {
-		Tree<Taxon, String> tree = new Tree<Taxon, String>(store, taxonProperties.fullName());	
+	private Tree<Taxon, Taxon> createTree() {
+		final Tree<Taxon, Taxon> tree = new Tree<Taxon, Taxon>(store, new IdentityValueProvider<Taxon>());	
 		tree.getSelectionModel().addSelectionHandler(new SelectionHandler<Taxon>() {
 			@Override
 			public void onSelection(SelectionEvent<Taxon> event) {
 				Taxon selection = event.getSelectedItem();
+				//tree.getSelectionModel().select(store.getChildren(selection), true);	
 				updateTextArea(selection);
+			}
+		});
+		
+		tree.setContextMenu(createTreeContextMenu(tree));
+		tree.setCell(new AbstractCell<Taxon>() {
+			@Override
+			public void render(com.google.gwt.cell.client.Cell.Context context,	Taxon taxon, SafeHtmlBuilder sb) {
+					String colorHex = "";
+					if(model.hasColor(taxon))
+						colorHex = model.getColor(taxon).getHex();
+					sb.append(SafeHtmlUtils.fromTrustedString("<div style='background-color:#" + colorHex + "'>" + 
+							taxon.getFullName() + "</div>"));
 			}
 		});
 		return tree;
 	}
 	
-	protected void loadMatrix() {
-		for(Taxon rootTaxon : matrix.getRootTaxa()) {
+	private Menu createTreeContextMenu(final Tree<Taxon, Taxon> tree) {
+		final Menu menu = new Menu();
+		
+		MenuItem item = new MenuItem();
+		item.setText("Expand All");
+		// item.setIcon(header.getAppearance().sortAscendingIcon());
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				tree.expandAll();
+			}
+		});
+		menu.add(item);
+		
+		item = new MenuItem();
+		item.setText("Collapse All");
+		// item.setIcon(header.getAppearance().sortAscendingIcon());
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				tree.collapseAll();
+			}
+		});
+		menu.add(item);
+		
+		item = new MenuItem();
+		item.setText("Comment");
+		// item.setIcon(header.getAppearance().sortAscendingIcon());
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				final List<Taxon> taxa = getSelectedTaxa();
+				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox("Comment", "");
+
+				if(taxa.size() == 1)
+					box.getTextArea().setValue(model.hasComment(taxa.get(0)) ? model.getComment(taxa.get(0)) : "");
+				else 
+					box.getTextArea().setValue("");
+				
+				box.addHideHandler(new HideHandler() {
+					@Override
+					public void onHide(HideEvent event) {
+						for(Taxon taxon : taxa) { 
+							eventBus.fireEvent(new SetTaxonCommentEvent(taxon, box.getValue()));
+							store.update(taxon);
+						}
+						String comment = Format.ellipse(box.getValue(), 80);
+						String message = Format.substitute("'{0}' saved", new Params(comment));
+						Info.display("Comment", message);
+					}
+				});
+				box.show();
+			}
+		});
+		menu.add(item);
+			
+		menu.addBeforeShowHandler(new BeforeShowHandler() {
+			@Override
+			public void onBeforeShow(BeforeShowEvent event) {
+				boolean foundColorize = false;
+				for(int i=0; i< menu.getWidgetCount(); i++) {
+					Widget widget = menu.getWidget(i);
+					if(widget instanceof MenuItem) {
+						MenuItem item = (MenuItem)widget;
+						if(item.getText().equals("Colorize")) {
+							if(!model.getColors().isEmpty()) {
+								//refresh colors, they may have changed since last show
+								item.setSubMenu(createColorizeMenu());
+								foundColorize = true;
+							} else {
+								menu.remove(widget);
+							}
+						}
+					}
+				}
+				if(!foundColorize && !model.getColors().isEmpty()) {
+					MenuItem item = new MenuItem();
+					item.setText("Colorize");
+					item.setSubMenu(createColorizeMenu());
+					menu.add(item);
+				}
+			}
+		});
+		return menu;
+	}
+	
+	protected Menu createColorizeMenu() {
+		Menu colorMenu = new Menu();
+		MenuItem offItem = new MenuItem("None");
+		offItem.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				final List<Taxon> taxa = getSelectedTaxa();
+				for(Taxon taxon : taxa) {
+					eventBus.fireEvent(new SetTaxonColorEvent(taxon, null));
+					store.update(taxon);
+				}
+			}
+		});
+		colorMenu.add(offItem);
+		for(final Color color : model.getColors()) {
+			MenuItem colorItem = new MenuItem(color.getUse());
+			colorItem.getElement().getStyle().setProperty("backgroundColor", "#" + color.getHex());
+			colorItem.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					final List<Taxon> taxa = getSelectedTaxa();
+					for(Taxon taxon : taxa) {
+						eventBus.fireEvent(new SetTaxonColorEvent(taxon, color));
+						store.update(taxon);
+					}
+				}
+			});
+			colorMenu.add(colorItem);
+		}
+		return colorMenu;
+	}
+
+	protected void loadModel() {
+		store.clear();
+		for(Taxon rootTaxon : model.getTaxonMatrix().getHierarchyRootTaxa()) {
 			store.add(rootTaxon);
 			addToStoreRecursively(store, rootTaxon);
 		}
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+			@Override
+			public void execute() {
+				tree.expandAll();
+			}
+		});
 	}
 
 	protected void updateTextArea(Taxon taxon) {
@@ -339,20 +521,25 @@ public class ManageTaxaView extends ContentPanel {
 			Taxon anchestor = ancestors.get(i);
 			prefix += "-";
 			taxonomy += "<p>" + prefix + " " + 
-					anchestor.getLevel().name() + " " + 
+					anchestor.getRank().name() + " " + 
 					anchestor.getName() + " " + 
 					anchestor.getAuthor() + " " + 
 					anchestor.getYear() + 
 					"</p>";
 		}
 					
-		infoHtml.setHTML(SafeHtmlUtils.fromSafeConstant(
-			"<p><b>Rank:&nbsp;</b>" + taxon.getLevel().name() + "</p>" +
-			"<p><b>Name:&nbsp;</b>" + taxon.getName() + "</p>" +
-			"<p><b>Author:&nbsp;</b>" + taxon.getAuthor() + "</p>" +
-			"<p><b>Year:&nbsp;</b>" + taxon.getYear() + "</p>" +
-			"<p><b>Taxonomy:&nbsp;</b>" + taxonomy + "</p>" +
-			"<p><b>Description:&nbsp;</b>" + taxon.getDescription() + "</p>"));
+		String infoText = "<p><b>Rank:&nbsp;</b>" + taxon.getRank().name() + "</p>" +
+				"<p><b>Name:&nbsp;</b>" + taxon.getName() + "</p>" +
+				"<p><b>Author:&nbsp;</b>" + taxon.getAuthor() + "</p>" +
+				"<p><b>Year:&nbsp;</b>" + taxon.getYear() + "</p>" +
+				"<p><b>Taxonomy:&nbsp;</b>" + taxonomy + "</p>" +
+				"<p><b>Description:&nbsp;</b>" + taxon.getDescription() + "</p>";
+		if(model.hasComment(taxon))
+			infoText +=	"<p><b>Comment:&nbsp;</b>" + model.getComment(taxon) + "</p>";
+		if(model.hasColor(taxon))
+			infoText += "<p><b>Color:&nbsp;</b>" + model.getColor(taxon).getUse() + "</p>";
+		
+		infoHtml.setHTML(SafeHtmlUtils.fromSafeConstant(infoText));
 	}
 
 	private void addToStoreRecursively(TreeStore<Taxon> store, Taxon taxon) {
@@ -364,5 +551,13 @@ public class ManageTaxaView extends ContentPanel {
 
 	public List<Taxon> getSelectedTaxa() {
 		return tree.getSelectionModel().getSelectedItems();
+	}
+	
+	public void addSelectionChangeHandler(SelectionChangedHandler<Taxon> handler) {
+		this.selectionChangeHandlers.add(handler);
+	}
+	
+	public void removeSelectionChangeHandler(SelectionChangedHandler<Taxon> handler) {
+		this.selectionChangeHandlers.remove(handler);
 	}
 }

@@ -31,18 +31,21 @@ import com.sencha.gxt.widget.core.client.grid.Grid.GridCell;
 import com.sencha.gxt.widget.core.client.grid.editing.ClicksToEdit;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 
-import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.CharacterColumnConfig;
 import edu.arizona.biosemantics.matrixreview.client.matrix.FrozenFirstColumTaxonTreeGrid.CharactersGrid;
+import edu.arizona.biosemantics.matrixreview.client.matrix.form.CategoricalValidator;
+import edu.arizona.biosemantics.matrixreview.client.matrix.form.NumericalValidator;
 import edu.arizona.biosemantics.matrixreview.client.matrix.form.ResetOldValueComboBoxCell;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.AllAccessListStore;
-import edu.arizona.biosemantics.matrixreview.shared.model.HasControlMode.ControlMode;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.ControlMode;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 
 public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 
@@ -51,27 +54,28 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 	private ListStore<Taxon> store;
 	private EventBus eventBus;
 	private ColumnHeaderStyles columnHeaderStyles;
-	private TaxonMatrix taxonMatrix;
+	private Model model;
 	
-	public LockableControlableMatrixEditing(EventBus eventBus, CharactersGrid editableGrid, ListStore<Taxon> store, TaxonMatrix taxonMatrix) {
-		this(eventBus, editableGrid, store, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class), taxonMatrix);
+	public LockableControlableMatrixEditing(EventBus eventBus, CharactersGrid editableGrid, ListStore<Taxon> store, Model model) {
+		this(eventBus, editableGrid, store, GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class), model);
 	}
 	
-	public LockableControlableMatrixEditing(EventBus eventBus, CharactersGrid editableGrid, ListStore<Taxon> store, ColumnHeaderAppearance columnHeaderAppearance, TaxonMatrix taxonMatrix) {
+	public LockableControlableMatrixEditing(EventBus eventBus, CharactersGrid editableGrid, ListStore<Taxon> store, ColumnHeaderAppearance columnHeaderAppearance, 
+			Model model) {
 		super(editableGrid);
 		this.eventBus = eventBus;
 		this.store = store;
 		this.columnHeaderStyles = columnHeaderAppearance.styles();
-		this.taxonMatrix = taxonMatrix;
+		this.model = model;
 		
 		addEventHandlers();
 	}
 	
 	private void addEventHandlers() {
-		eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+		eventBus.addHandler(LoadModelEvent.TYPE, new LoadModelEvent.LoadModelEventHandler() {
 			@Override
-			public void onLoad(LoadTaxonMatrixEvent event) {
-				taxonMatrix = event.getTaxonMatrix();
+			public void onLoad(LoadModelEvent event) {
+				model = event.getModel();
 			}
 		});
 		eventBus.addHandler(LockTaxonEvent.TYPE, new LockTaxonEvent.LockTaxonEventHandler() {
@@ -98,8 +102,8 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 			@Override
 			public void onLock(LockMatrixEvent event) {
 				if(event.isLock()) {
-					lockedTaxa.addAll(taxonMatrix.list());
-					lockedCharacters.addAll(taxonMatrix.getCharacters());
+					lockedTaxa.addAll(model.getTaxonMatrix().getHierarchyTaxaDFS());
+					lockedCharacters.addAll(model.getTaxonMatrix().getVisibleFlatCharacters());
 				} else {
 					lockedTaxa.clear();
 					lockedCharacters.clear();
@@ -153,7 +157,6 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 	private Field<String> getEditorField(Character character, ControlMode controlMode, final List<String> states) {	
 		switch(controlMode) {
 		case CATEGORICAL:
-			TaxonMatrix taxonMatrix = character.getTaxonMatrix();
 			ValueConverter converter = new ValueConverter();			
 			final AllAccessListStore<String> comboValues = new AllAccessListStore<String>(new ModelKeyProvider<String>() {
 				@Override
@@ -176,16 +179,7 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 					return item;
 				}
 			}));
-			editComboBox.addValidator(new Validator<String>() {
-				@Override
-				public List<EditorError> validate(Editor<String> editor, String value) {
-					List<EditorError> result = new LinkedList<EditorError>();
-					if (!states.contains(value)) {
-						result.add(new DefaultEditorError(editor, "Value entered not part of the character's vocabulary", value));
-					}
-					return result;
-				}
-			});
+			editComboBox.addValidator(new CategoricalValidator(new HashSet<String>(states)));
 			// editComboBox.setAddUserValues(true);
 			// editComboBox.setFinishEditOnEnter(true);
 			//editComboBox.setForceSelection(false);
@@ -204,16 +198,7 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 			// TODO add validation to only allow numerical values from there on
 			final TextField textField = new TextField();
 			textField.setAllowBlank(false);
-			Validator<String> validator = new Validator<String>() {
-				@Override
-				public List<EditorError> validate(Editor<String> editor, String value) {
-					List<EditorError> result = new LinkedList<EditorError>();
-					if (value == null || !value.matches("[0-9]*")) {
-						result.add(new DefaultEditorError(editor, "Value not numeric", value));
-					}
-					return result;
-				}
-			};
+			Validator<String> validator = new NumericalValidator();
 			textField.addValidator(validator);
 			TextFieldChangeHandler changeHandler = new TextFieldChangeHandler(validator);
 			textField.addValueChangeHandler(changeHandler);
@@ -227,7 +212,7 @@ public class LockableControlableMatrixEditing extends GridInlineEditing<Taxon> {
 
 	public void addEditor(CharacterColumnConfig columnConfig) {
 		Character character = columnConfig.getCharacter();
-		addEditor(columnConfig, new ValueConverter(), getEditorField(character, character.getControlMode(), character.getStates()));
+		addEditor(columnConfig, new ValueConverter(), getEditorField(character, model.getControlMode(character), model.getStates(character)));
 	}
 	
 	protected void onClick(final ClickEvent event) {

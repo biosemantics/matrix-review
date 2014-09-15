@@ -4,7 +4,7 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 import edu.arizona.biosemantics.matrixreview.client.event.ShowTermFrequencyEvent.ShowTermFrequencyEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 
 public class ShowTermFrequencyEvent extends GwtEvent<ShowTermFrequencyEventHandler> {
 

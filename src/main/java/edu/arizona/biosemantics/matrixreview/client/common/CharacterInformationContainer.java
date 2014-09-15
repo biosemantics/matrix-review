@@ -1,5 +1,6 @@
 package edu.arizona.biosemantics.matrixreview.client.common;
 
+import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
@@ -16,19 +17,20 @@ import com.sencha.gxt.widget.core.client.form.TextField;
 
 import edu.arizona.biosemantics.matrixreview.client.matrix.form.AllowFreeTextComboBoxCell;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.AllAccessListStore;
-import edu.arizona.biosemantics.matrixreview.shared.model.Organ;
-import edu.arizona.biosemantics.matrixreview.shared.model.OrganProperties;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Organ;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.OrganProperties;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 
 public class CharacterInformationContainer extends SimpleContainer {
 	
 		private ComboBox<Organ> organComboBox;
 		private TextField characterNameField;
 
-		public CharacterInformationContainer(TaxonMatrix taxonMatrix, String initialName, Organ initialOrgan) {
+		public CharacterInformationContainer(final Model model, String initialName, Organ initialOrgan) {
 			FieldSet fieldSet = new FieldSet();
 		    fieldSet.setHeadingText("Character Information");
-		    fieldSet.setCollapsible(true);
+		    fieldSet.setCollapsible(false);
 		    this.add(fieldSet, new MarginData(10));
 		 
 		    VerticalLayoutContainer p = new VerticalLayoutContainer();
@@ -36,13 +38,13 @@ public class CharacterInformationContainer extends SimpleContainer {
 		    
 		    OrganProperties organProperties = GWT.create(OrganProperties.class);
 		    AllAccessListStore<Organ> store = new AllAccessListStore<Organ>(organProperties.key());
-		    Set<Organ> organs = taxonMatrix.getOrgans();
+		    List<Organ> organs = model.getTaxonMatrix().getHierarchyCharacters();
 		    store.addAll(organs);
 		    organComboBox = new ComboBox<Organ>(new AllowFreeTextComboBoxCell<Organ>(store, organProperties.nameLabel(), 
 		    		new Converter<Organ, String>() {
 						@Override
 						public Organ convertFieldValue(String name) {
-							return new Organ(name);
+							return model.getTaxonMatrix().getOrCreateOrgan(name);
 						}
 
 						@Override

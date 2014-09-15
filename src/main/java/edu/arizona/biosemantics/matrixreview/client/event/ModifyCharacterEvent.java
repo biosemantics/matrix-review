@@ -4,8 +4,8 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent.ModifyCharacterEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.Organ;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Organ;
 
 public class ModifyCharacterEvent extends GwtEvent<ModifyCharacterEventHandler> {
 
@@ -15,13 +15,17 @@ public class ModifyCharacterEvent extends GwtEvent<ModifyCharacterEventHandler> 
 	
 	public static Type<ModifyCharacterEventHandler> TYPE = new Type<ModifyCharacterEventHandler>();
 	private Character oldCharacter;
+	private String oldName;
 	private String newName;
+	private Organ oldOrgan;
 	private Organ newOrgan;
 	
 	
-	public ModifyCharacterEvent(Character oldCharacter, String newName, Organ newOrgan) {
+	public ModifyCharacterEvent(Character oldCharacter, String oldName, String newName, Organ oldOrgan, Organ newOrgan) {
 		this.oldCharacter = oldCharacter;
+		this.oldName = oldName;
 		this.newName = newName;
+		this.oldOrgan = oldOrgan;
 		this.newOrgan = newOrgan;
 	}
 	
@@ -50,5 +54,13 @@ public class ModifyCharacterEvent extends GwtEvent<ModifyCharacterEventHandler> 
 	public Organ getNewOrgan() {
 		return newOrgan;
 	}
-	
+
+	public String getOldName() {
+		return oldName;
+	}
+
+	public Organ getOldOrgan() {
+		return oldOrgan;
+	}
+		
 }

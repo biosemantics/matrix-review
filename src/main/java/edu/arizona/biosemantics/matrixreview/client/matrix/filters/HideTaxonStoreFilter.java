@@ -7,15 +7,15 @@ import com.google.gwt.event.shared.EventBus;
 import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.data.shared.Store.StoreFilter;
 
-import edu.arizona.biosemantics.matrixreview.client.event.ModelModeEvent;
-import edu.arizona.biosemantics.matrixreview.client.matrix.MatrixView.ModelMode;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
+import edu.arizona.biosemantics.matrixreview.client.event.MatrixModeEvent;
+import edu.arizona.biosemantics.matrixreview.shared.model.MatrixMode;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
 public class HideTaxonStoreFilter implements StoreFilter<Taxon> {
 
 	public Set<Taxon> hiddenTaxa = new HashSet<Taxon>();
 	private EventBus eventBus;
-	private ModelMode modelMode = ModelMode.TAXONOMIC_HIERARCHY; 
+	private MatrixMode modelMode = MatrixMode.HIERARCHY; 
 
 	public HideTaxonStoreFilter(EventBus eventBus) {
 		this.eventBus = eventBus;
@@ -23,9 +23,9 @@ public class HideTaxonStoreFilter implements StoreFilter<Taxon> {
 	}
 	
 	private void addEventHandlers() {
-		eventBus.addHandler(ModelModeEvent.TYPE, new ModelModeEvent.ModelModeEventHandler() {
+		eventBus.addHandler(MatrixModeEvent.TYPE, new MatrixModeEvent.MatrixModeEventHandler() {
 			@Override
-			public void onMode(ModelModeEvent event) {
+			public void onMode(MatrixModeEvent event) {
 				modelMode = event.getMode();
 			}
 		});
@@ -36,8 +36,7 @@ public class HideTaxonStoreFilter implements StoreFilter<Taxon> {
 		switch(modelMode) {
 		case FLAT:
 			return !hiddenTaxa.contains(item);
-		case CUSTOM_HIERARCHY:
-		case TAXONOMIC_HIERARCHY:
+		case HIERARCHY:
 			if(hiddenTaxa.contains(item) || hidenParent(item)) {
 				return false;
 			}

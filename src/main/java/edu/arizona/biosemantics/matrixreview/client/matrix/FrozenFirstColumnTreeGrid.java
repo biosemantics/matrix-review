@@ -25,7 +25,11 @@ import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.grid.GridView;
 import com.sencha.gxt.widget.core.client.tips.QuickTip;
+import com.sencha.gxt.widget.core.client.tree.Tree.TreeAppearance;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGrid;
+
+import edu.arizona.biosemantics.matrixreview.client.matrix.FrozenFirstColumTaxonTreeGrid.TaxaTreeGrid;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
 public class FrozenFirstColumnTreeGrid<M> extends HorizontalLayoutContainer {
 	
@@ -161,5 +165,5 @@ public class FrozenFirstColumnTreeGrid<M> extends HorizontalLayoutContainer {
 
 	public boolean isInitialized() {
 		return initialized;
-	}	
+	}
 }

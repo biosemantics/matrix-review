@@ -31,10 +31,11 @@ import com.sencha.gxt.widget.core.client.event.ExpandEvent.ExpandHandler;
 import edu.arizona.biosemantics.matrixreview.client.desktop.Window;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
-import edu.arizona.biosemantics.matrixreview.shared.model.Value;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
 public class TermFrequencyManager extends AbstractWindowManager {
 
@@ -68,12 +69,12 @@ public class TermFrequencyManager extends AbstractWindowManager {
 
 	private static final DataPropertyAccess dataAccess = GWT.create(DataPropertyAccess.class);
 	
-	private TaxonMatrix taxonMatrix;
+	private Model model;
 	private Character character;
 
-	public TermFrequencyManager(EventBus eventBus, Window window, TaxonMatrix taxonMatrix, Character character) {
+	public TermFrequencyManager(EventBus eventBus, Window window, Model model, Character character) {
 		super(eventBus, window);
-		this.taxonMatrix = taxonMatrix;
+		this.model = model;
 		this.character = character;
 		init();
 	}
@@ -83,8 +84,8 @@ public class TermFrequencyManager extends AbstractWindowManager {
 		// draw bar chart for categorical values and free-text
 		// draw curve for numerical values
 		TreeMap<String, Integer> counts = new TreeMap<String, Integer>();
-		for (Taxon taxon : taxonMatrix.list()) {
-			Value value = taxon.get(character);
+		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
+			Value value = model.getTaxonMatrix().getValue(taxon, character);
 			if (!counts.containsKey(value.toString()))
 				counts.put(value.toString(), 0);
 			counts.put(value.toString(), counts.get(value.toString()) + 1);
@@ -144,7 +145,7 @@ public class TermFrequencyManager extends AbstractWindowManager {
 		subMatrixEventBus.addHandler(SetValueEvent.TYPE, new SetValueEvent.SetValueEventHandler() {
 			@Override
 			public void onSet(SetValueEvent event) {
-				if(event.getOldValue().getCharacter().equals(character)) {
+				if(model.getTaxonMatrix().getCharacter(event.getOldValue()).equals(character)) {
 					refreshContent();
 				}
 			}

@@ -1,0 +1,87 @@
+package edu.arizona.biosemantics.matrixreview.shared.model.core;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class Character implements Serializable {
+
+	private static int ID = 0;
+	private int id = ID++;
+	
+	private String name = "";
+	private Organ organ = null;
+	
+	public Character() { }
+	
+	public Character(String name) {
+		this.name = name;
+	}
+	
+	public Character(String name, Organ organ, int flatIndex) {
+		this.name = name;
+		this.organ = organ;
+		organ.ensureContained(this, flatIndex);
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public Organ getOrgan() {
+		return organ;
+	}
+	
+	public boolean hasOrgan() {
+		return organ != null;
+	}
+	
+	public void setOrgan(Organ organ, int flatIndex) {
+		if(this.organ != null && !this.organ.equals(organ)) {
+			this.organ.remove(this);
+			organ.ensureContained(this, flatIndex);
+			this.organ = organ;
+		}
+	}
+	
+	public String toString() {
+		if(organ == null)
+			return name;
+		if(organ.toString().trim().isEmpty())
+			return name;
+		return name + " of " + organ.toString();
+	}
+	
+	public int getId() {
+		return id;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + id;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Character other = (Character) obj;
+		if (id != other.id)
+			return false;
+		return true;
+	}
+		
+}

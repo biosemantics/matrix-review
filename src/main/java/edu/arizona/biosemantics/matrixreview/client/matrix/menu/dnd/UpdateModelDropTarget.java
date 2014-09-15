@@ -22,30 +22,31 @@ import com.sencha.gxt.widget.core.client.tree.Tree;
 import com.sencha.gxt.widget.core.client.tree.Tree.TreeNode;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGrid;
 
-import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.ModelModeEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MatrixModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxonFlatEvent;
-import edu.arizona.biosemantics.matrixreview.client.matrix.MatrixView.ModelMode;
 import edu.arizona.biosemantics.matrixreview.client.matrix.TaxonStore;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon.Level;
+import edu.arizona.biosemantics.matrixreview.shared.model.MatrixMode;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon.Rank;
 
 public class UpdateModelDropTarget extends TreeGridDropTarget<Taxon> {
 
 	private TaxonStore taxonStore;
-	private TaxonMatrix taxonMatrix;
+	private Model model;
 	private EventBus eventBus;
-	private ModelMode modelMode = ModelMode.TAXONOMIC_HIERARCHY; 
+	private MatrixMode matrixMode = MatrixMode.HIERARCHY; 
     private AutoScrollSupport scrollSupport;
 	private TreeGrid<Taxon> tree;
 	
-	public UpdateModelDropTarget(EventBus eventBus, TreeGrid<Taxon> tree, TaxonMatrix taxonMatrix, TaxonStore taxonStore) {
+	public UpdateModelDropTarget(EventBus eventBus, TreeGrid<Taxon> tree, Model model, TaxonStore taxonStore) {
 		super(tree);
 		this.tree = tree;
 		this.eventBus = eventBus;
-		this.taxonMatrix = taxonMatrix;
+		this.model = model;
 		this.taxonStore = taxonStore;
 		setAllowSelfAsSource(true);
 		setAllowDropOnLeaf(true);
@@ -92,23 +93,22 @@ public class UpdateModelDropTarget extends TreeGridDropTarget<Taxon> {
     
 	
 	private void addEventHandlers() {
-		eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+		eventBus.addHandler(LoadModelEvent.TYPE, new LoadModelEvent.LoadModelEventHandler() {
 			@Override
-			public void onLoad(LoadTaxonMatrixEvent event) {
-				taxonMatrix = event.getTaxonMatrix();
+			public void onLoad(LoadModelEvent event) {
+				model = event.getModel();
 			}
 		});
-		eventBus.addHandler(ModelModeEvent.TYPE, new ModelModeEvent.ModelModeEventHandler() {
+		eventBus.addHandler(MatrixModeEvent.TYPE, new MatrixModeEvent.MatrixModeEventHandler() {
 			@Override
-			public void onMode(ModelModeEvent event) {
-				modelMode = event.getMode();
+			public void onMode(MatrixModeEvent event) {
+				matrixMode = event.getMode();
 				
-				switch(modelMode) {
+				switch(matrixMode) {
 				case FLAT:
 					setFeedback(Feedback.INSERT);
 					break;
-				case CUSTOM_HIERARCHY:
-				case TAXONOMIC_HIERARCHY:
+				case HIERARCHY:
 					setFeedback(Feedback.BOTH);
 					break;
 				default:
@@ -137,16 +137,15 @@ public class UpdateModelDropTarget extends TreeGridDropTarget<Taxon> {
 		
 		boolean validDrop = true;
 		for(int i=0; i<models.size(); i++)
-			if(!Level.isValidParentChild(p == null ? null : p.getLevel(), models.get(i).getLevel()))
+			if(!Rank.isValidParentChild(p == null ? null : p.getRank(), models.get(i).getRank()))
 				validDrop = false;
 		
 		if(validDrop) {
-			switch(modelMode) {
+			switch(matrixMode) {
 			case FLAT:
 				eventBus.fireEvent(new MoveTaxonFlatEvent(models, index == 0 ? null : taxonStore.getChild(index - 1)));
 				break;
-			case TAXONOMIC_HIERARCHY:
-			case CUSTOM_HIERARCHY:
+			case HIERARCHY:
 				eventBus.fireEvent(new MoveTaxaEvent(p, index, models));
 				break;
 			
@@ -180,12 +179,11 @@ public class UpdateModelDropTarget extends TreeGridDropTarget<Taxon> {
 	
 	  @Override
 	  protected void showFeedback(DndDragMoveEvent event) {
-		switch (modelMode) {
+		switch (matrixMode) {
 		case FLAT:
 			super.showFeedback(event);
 			break;
-		case TAXONOMIC_HIERARCHY:
-		case CUSTOM_HIERARCHY:
+		case HIERARCHY:
 			// TODO this might not get the right element
 		    final TreeNode<Taxon> item = getWidget().findNode(
 		        event.getDragMoveEvent().getNativeEvent().getEventTarget().<Element> cast());
@@ -203,7 +201,7 @@ public class UpdateModelDropTarget extends TreeGridDropTarget<Taxon> {
 		      for (int i = 0; i < list.size(); i++) {
 		        Taxon sel = list.get(i);
 		        
-		        if(!Level.isValidParentChild(overModel == null ? null : overModel.getLevel(), sel.getLevel())) {
+		        if(!Rank.isValidParentChild(overModel == null ? null : overModel.getRank(), sel.getRank())) {
 		          Insert.get().hide();
 			      event.getStatusProxy().setStatus(false);
 			      return;

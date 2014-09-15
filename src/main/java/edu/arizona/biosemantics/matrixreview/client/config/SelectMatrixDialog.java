@@ -9,9 +9,10 @@ import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 
 public class SelectMatrixDialog extends Dialog {
 
@@ -19,10 +20,10 @@ public class SelectMatrixDialog extends Dialog {
 	//private SelectCharactersView selectCharactersView;
 	private SelectMatrixView selectMatrixView;
 
-	public SelectMatrixDialog(TaxonMatrix fullMatrix) {
+	public SelectMatrixDialog(Model model) {
 		//selectTaxaView = new SelectTaxaView(fullMatrixBus, true);
 		//selectCharactersView = new SelectCharactersView(fullMatrixBus, true);
-		selectMatrixView = new SelectMatrixView(fullMatrix);
+		selectMatrixView = new SelectMatrixView(model);
 		
 		/*selectTaxaView.addHideHandler(new HideHandler() {
 			@Override

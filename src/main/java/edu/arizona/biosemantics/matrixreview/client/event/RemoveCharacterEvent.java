@@ -7,7 +7,7 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveCharacterEvent.RemoveCharacterEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 
 public class RemoveCharacterEvent extends GwtEvent<RemoveCharacterEventHandler> {
 

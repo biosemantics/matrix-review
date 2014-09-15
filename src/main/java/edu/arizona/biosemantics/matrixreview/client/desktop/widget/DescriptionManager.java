@@ -16,21 +16,22 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import edu.arizona.biosemantics.matrixreview.client.desktop.Window;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
-import edu.arizona.biosemantics.matrixreview.shared.model.Value;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
 public class DescriptionManager extends AbstractWindowManager {
 
 	private Taxon taxon;
-	private TaxonMatrix taxonMatrix;
+	private Model model;
 	private TextArea textArea;
 
-	public DescriptionManager(EventBus eventBus, Window window, Taxon taxon, TaxonMatrix taxonMatrix) {
+	public DescriptionManager(EventBus eventBus, Window window, Taxon taxon, Model model) {
 		super(eventBus, window);
 		this.taxon = taxon;
-		this.taxonMatrix = taxonMatrix;
+		this.model = model;
 		init();
 	}
 	
@@ -65,13 +66,14 @@ public class DescriptionManager extends AbstractWindowManager {
 		Menu contextMenu = new Menu();
 		MenuItem item = new MenuItem("Set State");
 		Menu characterMenu = new Menu();
-		for(final Character character : taxonMatrix.getCharacters()) {
+		for(final Character character : model.getTaxonMatrix().getVisibleFlatCharacters()) {
 			MenuItem characterItem = new MenuItem(character.toString());
 			characterMenu.add(characterItem);
 			characterItem.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					subMatrixEventBus.fireEvent(new SetValueEvent(taxon.get(character), new Value(textArea.getSelectedText()), false));
+					subMatrixEventBus.fireEvent(new SetValueEvent(taxon, character, 
+							model.getTaxonMatrix().getValue(taxon, character), new Value(textArea.getSelectedText())));
 				}
 			});
 		}

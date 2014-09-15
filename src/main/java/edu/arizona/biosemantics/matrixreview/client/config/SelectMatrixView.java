@@ -35,17 +35,18 @@ import com.sencha.gxt.widget.core.client.form.FieldSet;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent.SelectionChangedHandler;
 
-import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.field.DualTreeField;
 import edu.arizona.biosemantics.matrixreview.client.matrix.field.DualTreeFieldDefaultAppearance;
 import edu.arizona.biosemantics.matrixreview.client.matrix.field.DualTreeField.Mode;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.Organ;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.OrganCharacterNode;
 import edu.arizona.biosemantics.matrixreview.shared.model.OrganCharacterNode.*;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonProperties;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Organ;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonProperties;
 
 public class SelectMatrixView extends ContentPanel {
 
@@ -72,13 +73,13 @@ public class SelectMatrixView extends ContentPanel {
 	private DualTreeField<Taxon, String> taxaField;
 	private HTML selectedHtml = new HTML();
 	private UpdateSelectedHandler updateSelectedHandler = new UpdateSelectedHandler();
-	protected TaxonMatrix matrix;
+	protected Model model;
 
-	public SelectMatrixView(TaxonMatrix matrix) {
-		this.matrix = matrix;
+	public SelectMatrixView(Model model) {
+		this.model = model;
 		loadMatrix();
-		organCharacterField = getDualOrganCharacterTreeField(matrix);		
-		taxaField = getDualTaxaTreeField(matrix);
+		organCharacterField = getDualOrganCharacterTreeField(model.getTaxonMatrix());		
+		taxaField = getDualTaxaTreeField(model.getTaxonMatrix());
 		
 		VerticalLayoutContainer verticalLayoutContainer = new VerticalLayoutContainer();
 		
@@ -177,9 +178,9 @@ public class SelectMatrixView extends ContentPanel {
 	
 	protected void loadMatrix() {
 		List<OrganCharacterNode> organCharacterNodes = new LinkedList<OrganCharacterNode>();
-		for(Organ organ : matrix.getOrgans()) {
+		for(Organ organ : model.getTaxonMatrix().getHierarchyCharacters()) {
 			organCharacterNodes.add(new OrganNode(organ));
-			for(Character character : organ.getCharacters()) {
+			for(Character character : organ.getFlatCharacters()) {
 				organCharacterNodes.add(new CharacterNode(character));
 			}
 		}
@@ -200,7 +201,7 @@ public class SelectMatrixView extends ContentPanel {
 			}
 		}
 		
-		for(Taxon rootTaxon : matrix.getRootTaxa()) {
+		for(Taxon rootTaxon : model.getTaxonMatrix().getHierarchyRootTaxa()) {
 			taxaFromStore.add(rootTaxon);
 			addToStoreRecursively(taxaFromStore, rootTaxon);
 		}

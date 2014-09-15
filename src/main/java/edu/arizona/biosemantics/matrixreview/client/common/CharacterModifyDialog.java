@@ -10,15 +10,16 @@ import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.TextField;
 
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
-import edu.arizona.biosemantics.matrixreview.shared.model.Organ;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Organ;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 
 public class CharacterModifyDialog extends Dialog {
 			
-		public CharacterModifyDialog(final EventBus eventBus, TaxonMatrix taxonMatrix, final Character character) {
+		public CharacterModifyDialog(final EventBus eventBus, Model model, final Character character) {
 			this.setHeadingText("Modify Character");	
-			CharacterInformationContainer characterInformationContainer = new CharacterInformationContainer(taxonMatrix, character.getName(), character.getOrgan());
+			CharacterInformationContainer characterInformationContainer = new CharacterInformationContainer(model, character.getName(), character.getOrgan());
 		    this.add(characterInformationContainer);
 		 
 		    final ComboBox<Organ> organComboBox = characterInformationContainer.getOrganComboBox();
@@ -35,7 +36,8 @@ public class CharacterModifyDialog extends Dialog {
 						return;
 					}
 					Organ selected = organComboBox.getValue();
-					eventBus.fireEvent(new ModifyCharacterEvent(character, characterNameField.getText(), selected));
+					eventBus.fireEvent(new ModifyCharacterEvent(character, character.getName(), 
+							characterNameField.getText(), character.getOrgan(), selected));
 					CharacterModifyDialog.this.hide();
 				}
 		    });

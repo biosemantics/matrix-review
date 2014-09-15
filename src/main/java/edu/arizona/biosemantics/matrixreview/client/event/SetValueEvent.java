@@ -5,7 +5,9 @@ import com.google.gwt.event.shared.GwtEvent;
 
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent.SetValueEventHandler;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
-import edu.arizona.biosemantics.matrixreview.shared.model.Value;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
 public class SetValueEvent extends GwtEvent<SetValueEventHandler> implements PrintableEvent {
 
@@ -16,12 +18,14 @@ public class SetValueEvent extends GwtEvent<SetValueEventHandler> implements Pri
 	public static Type<SetValueEventHandler> TYPE = new Type<SetValueEventHandler>();
 	private Value oldValue;
 	private Value newValue;
-	private boolean changeRecordedInModel;
+	private Taxon taxon;
+	private Character character;
 	
-	public SetValueEvent(Value oldValue, Value newValue, boolean changeRecordedInModel) {
+	public SetValueEvent(Taxon taxon, Character character, Value oldValue, Value newValue) {
+		this.taxon = taxon;
+		this.character = character;
 		this.newValue = newValue;
 		this.oldValue = oldValue;
-		this.changeRecordedInModel = changeRecordedInModel;
 	}
 	
 	@Override
@@ -33,11 +37,7 @@ public class SetValueEvent extends GwtEvent<SetValueEventHandler> implements Pri
 	protected void dispatch(SetValueEventHandler handler) {
 		handler.onSet(this);
 	}
-
-	public Value getValue() {
-		return newValue;
-	}
-
+	
 	public Value getOldValue() {
 		return oldValue;
 	}
@@ -46,14 +46,19 @@ public class SetValueEvent extends GwtEvent<SetValueEventHandler> implements Pri
 		return newValue;
 	}
 	
-	public boolean isChangeRecordedInModel() {
-		return changeRecordedInModel;
+	public Taxon getTaxon() {
+		return taxon;
+	}
+
+	public Character getCharacter() {
+		return character;
 	}
 
 	@Override
 	public String print() {
-		return "Set value for " + oldValue.getTaxon().getFullName() + " at character " + oldValue.getCharacter().toString() + 
-				" from " + oldValue.getValue() + " to " + newValue.getValue();
+		return "set value from " + oldValue.getValue() + " to " + newValue.getValue(); 
+		/*return "Set value for " + oldValue.getTaxon().getFullName() + " at character " + oldValue.getCharacter().toString() + 
+				" from " + oldValue.getValue() + " to " + newValue.getValue();*/
 	}
 
 	

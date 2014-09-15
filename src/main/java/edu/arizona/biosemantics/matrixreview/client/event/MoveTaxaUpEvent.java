@@ -6,7 +6,7 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 import edu.arizona.biosemantics.matrixreview.client.event.MoveTaxaUpEvent.MoveTaxaUpEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
 public class MoveTaxaUpEvent extends GwtEvent<MoveTaxaUpEventHandler> {
 

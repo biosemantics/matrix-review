@@ -43,19 +43,20 @@ import com.sencha.gxt.widget.core.client.tree.Tree.TreeNode;
 import com.sencha.gxt.widget.core.client.tree.TreeView.TreeViewRenderMode;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGridView;
 
-import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.ModelModeEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MatrixModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByNameEvent;
-import edu.arizona.biosemantics.matrixreview.client.matrix.MatrixView.ModelMode;
 import edu.arizona.biosemantics.matrixreview.client.matrix.filters.HideTaxonStoreFilter;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.TaxonMenu;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.TaxonCharacterMenu;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.dnd.UpdateModelDragSource;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.dnd.UpdateModelDropTarget;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.MatrixMode;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 
 public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Taxon> {
 	
@@ -98,7 +99,7 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 
 			@Override
 			protected Menu createContextMenu(final int colIndex) {
-				return new TaxonCharacterMenu(eventBus, taxonMatrix, modelMode, treeStore);
+				return new TaxonCharacterMenu(eventBus, model, matrixMode, treeStore);
 			}
 
 			public Element getMenuElement(TreeNode<Taxon> node) {
@@ -121,7 +122,7 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 			@Override
 			protected void initHeader() {
 				if (header == null) {
-					header = new TaxaColumnHeader(eventBus, (TaxaTreeGrid)grid, cm, taxonMatrix);
+					header = new TaxaColumnHeader(eventBus, (TaxaTreeGrid)grid, cm, model);
 				}
 				super.initHeader();
 			}
@@ -170,21 +171,23 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 			}
 		}
 		
-		private ModelMode modelMode = ModelMode.TAXONOMIC_HIERARCHY;
+		private MatrixMode matrixMode = MatrixMode.HIERARCHY;
 		private TaxonStore taxonStore;
 		
-		public TaxaTreeGrid(TaxonStore store, TaxaColumnModel cm, TaxaColumnConfig treeColumn) {
+		public TaxaTreeGrid(TaxonStore store, TaxaColumnModel cm, TaxaColumnConfig treeColumn, 
+				TreeAppearance appearance) {
 			super(store, cm, treeColumn, GWT.<GridAppearance> create(GridAppearance.class), 
-				GWT.<TreeAppearance> create(TaxonTreeAppearance.class));
+					appearance);
+				//GWT.<TreeAppearance> create(TaxonTreeAppearance.class));
 			this.setView(new TaxonTreeGridView(eventBus));
 			this.taxonStore = store;
 			this.setAutoExpand(true);
 			this.setExpandOnFilter(true);
 			
-			eventBus.addHandler(ModelModeEvent.TYPE, new ModelModeEvent.ModelModeEventHandler() {
+			eventBus.addHandler(MatrixModeEvent.TYPE, new MatrixModeEvent.MatrixModeEventHandler() {
 				@Override
-				public void onMode(ModelModeEvent event) {
-					modelMode = event.getMode();
+				public void onMode(MatrixModeEvent event) {
+					matrixMode = event.getMode();
 				}
 			});
 		}
@@ -239,7 +242,7 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 		} 
 
 		private void showContextMenu(final Element parent, Taxon taxon) {
-			Menu menu = new TaxonMenu(eventBus, taxonMatrix, modelMode, taxon, taxonStore);
+			Menu menu = new TaxonMenu(eventBus, model, matrixMode, taxon, taxonStore);
 			if (menu != null) {
 				menu.setId("taxon" + taxon.toString() + "-menu");
 				menu.addHideHandler(new HideHandler() {
@@ -308,23 +311,26 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 	}
 	
 	private EventBus eventBus;
-	private TaxonMatrix taxonMatrix;
+	private Model model;
 	private HideTaxonStoreFilter hideTaxonFilter;
+	private TreeAppearance treeAppearance;
 	
-	public FrozenFirstColumTaxonTreeGrid(EventBus eventBus, TaxonStore taxonStore, TaxaColumnConfig taxaColumnConfig) {
+	public FrozenFirstColumTaxonTreeGrid(EventBus eventBus, TaxonStore taxonStore, 
+			TaxaColumnConfig taxaColumnConfig, TreeAppearance treeAppearance) {
 		super(taxonStore, taxaColumnConfig);
 		this.eventBus = eventBus;
 		this.hideTaxonFilter = new HideTaxonStoreFilter(eventBus);
 		this.store.addFilter(hideTaxonFilter);
+		this.treeAppearance = treeAppearance;
 		
 		bindEvents();
 	}
 	
 	private void bindEvents() {
-		eventBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+		eventBus.addHandler(LoadModelEvent.TYPE, new LoadModelEvent.LoadModelEventHandler() {
 			@Override
-			public void onLoad(LoadTaxonMatrixEvent event) {
-				taxonMatrix = event.getTaxonMatrix();
+			public void onLoad(LoadModelEvent event) {
+				model = event.getModel();
 			}
 		});
 	}
@@ -342,7 +348,7 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 		getGrid().setCharacterConfigMap(characterConfigMap);
 		
 		UpdateModelDragSource dragSource = new UpdateModelDragSource(super.getTreeGrid());		
-		UpdateModelDropTarget dropTarget = new UpdateModelDropTarget(eventBus, super.getTreeGrid(), taxonMatrix, getTaxonStore());
+		UpdateModelDropTarget dropTarget = new UpdateModelDropTarget(eventBus, super.getTreeGrid(), model, getTaxonStore());
 		//let event handling take care of "move" behaviour
 		dropTarget.setOperation(Operation.COPY);
 	}
@@ -384,7 +390,7 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 		assert store instanceof TaxonStore;
 		assert columnModel instanceof TaxaColumnModel;
 		assert treeColumn instanceof TaxaColumnConfig;
-		return new TaxaTreeGrid((TaxonStore)store, (TaxaColumnModel)columnModel, (TaxaColumnConfig)treeColumn);
+		return new TaxaTreeGrid((TaxonStore)store, (TaxaColumnModel)columnModel, (TaxaColumnConfig)treeColumn, treeAppearance);
 	}
 
 	@Override

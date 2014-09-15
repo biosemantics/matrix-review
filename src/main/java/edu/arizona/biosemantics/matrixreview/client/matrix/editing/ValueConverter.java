@@ -2,7 +2,7 @@ package edu.arizona.biosemantics.matrixreview.client.matrix.editing;
 
 import com.sencha.gxt.data.shared.Converter;
 
-import edu.arizona.biosemantics.matrixreview.shared.model.Value;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
 public class ValueConverter implements Converter<Value, String> {
 	@Override

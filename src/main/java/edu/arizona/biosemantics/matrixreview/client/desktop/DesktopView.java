@@ -1,52 +1,34 @@
 package edu.arizona.biosemantics.matrixreview.client.desktop;
 
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.event.shared.SimpleEventBus;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.fx.client.Draggable;
-import com.sencha.gxt.widget.core.client.FramedPanel;
 import com.sencha.gxt.widget.core.client.Resizable;
 import com.sencha.gxt.widget.core.client.Resizable.Dir;
-import com.sencha.gxt.widget.core.client.button.ToolButton;
 import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.MarginData;
-import com.sencha.gxt.widget.core.client.event.CollapseEvent;
-import com.sencha.gxt.widget.core.client.event.ExpandEvent;
-import com.sencha.gxt.widget.core.client.event.CollapseEvent.CollapseHandler;
-import com.sencha.gxt.widget.core.client.event.ExpandEvent.ExpandHandler;
-import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
-import com.sencha.gxt.widget.core.client.menu.Item;
-import com.sencha.gxt.widget.core.client.menu.Menu;
-import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
 import edu.arizona.biosemantics.matrixreview.client.desktop.widget.ConsoleManager;
 import edu.arizona.biosemantics.matrixreview.client.desktop.widget.DescriptionManager;
 import edu.arizona.biosemantics.matrixreview.client.desktop.widget.NumericalSeriesManager;
 import edu.arizona.biosemantics.matrixreview.client.desktop.widget.TermFrequencyManager;
 import edu.arizona.biosemantics.matrixreview.client.desktop.widget.ConsoleManager.Console;
-import edu.arizona.biosemantics.matrixreview.client.desktop.widget.AbstractWindowManager;
 import edu.arizona.biosemantics.matrixreview.client.event.*;
-import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent.AddCharacterEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
 public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 	
 	public class DesktopController {
 				
 		private Console console;
-		private TaxonMatrix taxonMatrix;
+		private Model model;
 		
 		public DesktopController() {
 			// TODO let is show all interesting events - also for debugging
 			Window consoleWindow = new Window(false);
-			ConsoleManager manager = new ConsoleManager(fullMatrixBus, subMatrixBus, consoleWindow);
+			ConsoleManager manager = new ConsoleManager(fullModelBus, subMatrixBus, consoleWindow);
 			consoleWindow.setWindowManager(manager);
 			addWindow(consoleWindow);
 			
@@ -54,30 +36,17 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 		}
 
 		private void addEventHandlers() {
-			fullMatrixBus.addHandler(AnalyzeCharacterEvent.TYPE, new AnalyzeCharacterEvent.AnalyzeCharacterEventHandler() {
+			fullModelBus.addHandler(AnalyzeCharacterEvent.TYPE, new AnalyzeCharacterEvent.AnalyzeCharacterEventHandler() {
 				@Override
 				public void onAnalyze(AnalyzeCharacterEvent event) {
-					Character character = event.getCharacter();
-					switch(character.getControlMode()) {
-					case CATEGORICAL:
-						showTermFrequencyChart(character);
-						break;
-					case NUMERICAL:
-						showNumericalDistribution(character);
-						break;
-					case OFF:
-						showTermFrequencyChart(character);
-						break;
-					default:
-						break;
-					}
+					onAnalyzeCharacter(event);
 				}
 			});
 			//or take matrix from subMatrixBus here?
-			fullMatrixBus.addHandler(LoadTaxonMatrixEvent.TYPE, new LoadTaxonMatrixEvent.LoadTaxonMatrixEventHandler() {
+			fullModelBus.addHandler(LoadModelEvent.TYPE, new LoadModelEvent.LoadModelEventHandler() {
 				@Override
-				public void onLoad(LoadTaxonMatrixEvent event) {
-					taxonMatrix = event.getTaxonMatrix();
+				public void onLoad(LoadModelEvent event) {
+					model = event.getModel();
 				}
 			});
 			subMatrixBus.addHandler(ShowDescriptionEvent.TYPE, new ShowDescriptionEvent.ShowDescriptionEventHandler() {
@@ -89,44 +58,49 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 			subMatrixBus.addHandler(AnalyzeCharacterEvent.TYPE, new AnalyzeCharacterEvent.AnalyzeCharacterEventHandler() {
 				@Override
 				public void onAnalyze(AnalyzeCharacterEvent event) {
-					Character character = event.getCharacter();
-					switch(character.getControlMode()) {
-					case CATEGORICAL:
-						showTermFrequencyChart(character);
-						break;
-					case NUMERICAL:
-						showNumericalDistribution(character);
-						break;
-					case OFF:
-						showTermFrequencyChart(character);
-						break;
-					default:
-						break;
-					}
+					onAnalyzeCharacter(event);
 				}
 			});
 		}
 				
+		protected void onAnalyzeCharacter(AnalyzeCharacterEvent event) {
+			Model model = event.getModel() == null ? DesktopController.this.model : event.getModel();
+			Character character = event.getCharacter();
+			switch(model.getControlMode(character)) {
+			case CATEGORICAL:
+				showTermFrequencyChart(character, model);
+				break;
+			case NUMERICAL:
+				showNumericalDistribution(character, model);
+				break;
+			case OFF:
+				showTermFrequencyChart(character, model);
+				break;
+			default:
+				break;
+			}
+		}
+
 		protected void showDescription(Taxon taxon) {
 			Window descriptionWindow = new Window(false);
-			DescriptionManager manager = new DescriptionManager(subMatrixBus, descriptionWindow, taxon, taxonMatrix);
+			DescriptionManager manager = new DescriptionManager(subMatrixBus, descriptionWindow, taxon, model);
 			descriptionWindow.setWindowManager(manager);
 			addWindow(descriptionWindow);		
 			subMatrixBus.fireEvent(new ShowDesktopEvent());
 		}
 		
-		protected void showTermFrequencyChart(Character character) {
+		protected void showTermFrequencyChart(Character character, Model model) {
 			Window termFrequencyWindow = new Window(true);
-			TermFrequencyManager manager = new TermFrequencyManager(subMatrixBus, termFrequencyWindow, taxonMatrix, character);
+			TermFrequencyManager manager = new TermFrequencyManager(subMatrixBus, termFrequencyWindow, model, character);
 			termFrequencyWindow.setWindowManager(manager);
 			addWindow(termFrequencyWindow);
 			subMatrixBus.fireEvent(new ShowTermFrequencyEvent(character));
 			subMatrixBus.fireEvent(new ShowDesktopEvent());
 		}
 
-		protected void showNumericalDistribution(Character character) {
+		protected void showNumericalDistribution(Character character, Model model) {
 			Window numericalSeriesWindow = new Window(true);
-			NumericalSeriesManager manager = new NumericalSeriesManager(subMatrixBus, numericalSeriesWindow, character, taxonMatrix);
+			NumericalSeriesManager manager = new NumericalSeriesManager(subMatrixBus, numericalSeriesWindow, character, model);
 			numericalSeriesWindow.setWindowManager(manager);
 			addWindow(numericalSeriesWindow);
 			subMatrixBus.fireEvent(new ShowNumericalDistributionEvent(character));
@@ -135,15 +109,15 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 		
 	}
 	
-	private EventBus fullMatrixBus;
+	private EventBus fullModelBus;
 	private EventBus subMatrixBus;
 	private int defaultMargin = 5;
 	private int widgetId = 0;
 	private int marginIncrement = 20;
 
-	public DesktopView(EventBus fullMatrixBus, EventBus subMatrixBus) {
-		this.fullMatrixBus = fullMatrixBus;
-		this.subMatrixBus = subMatrixBus;
+	public DesktopView(EventBus fullModelBus, EventBus subModelBus) {
+		this.fullModelBus = fullModelBus;
+		this.subMatrixBus = subModelBus;
 		this.setScrollMode(ScrollMode.AUTO);
 		
 		DesktopController controller = new DesktopController();

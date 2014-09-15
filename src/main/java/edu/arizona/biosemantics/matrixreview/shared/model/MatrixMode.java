@@ -1,7 +1,5 @@
 package edu.arizona.biosemantics.matrixreview.shared.model;
 
-public interface HasDirty {
-
-	public boolean isDirty();
-	
+public enum MatrixMode {
+	FLAT, HIERARCHY //, CUSTOM_HIERARCHY
 }

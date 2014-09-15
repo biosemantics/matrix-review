@@ -5,6 +5,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -38,19 +40,19 @@ import com.sencha.gxt.widget.core.client.menu.MenuBar;
 import com.sencha.gxt.widget.core.client.menu.MenuBarItem;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
+import edu.arizona.biosemantics.matrixreview.client.common.ColorSettingsDialog;
+import edu.arizona.biosemantics.matrixreview.client.common.ColorsDialog;
+import edu.arizona.biosemantics.matrixreview.client.common.CommentsDialog;
 import edu.arizona.biosemantics.matrixreview.client.config.ManageMatrixView;
-import edu.arizona.biosemantics.matrixreview.client.config.MatrixModelControler;
+import edu.arizona.biosemantics.matrixreview.client.config.ModelControler;
 import edu.arizona.biosemantics.matrixreview.client.desktop.DesktopView;
-import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowDesktopEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowModifyEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ToggleDesktopEvent;
-import edu.arizona.biosemantics.matrixreview.client.matrix.MatrixMerger;
 import edu.arizona.biosemantics.matrixreview.client.matrix.MatrixView;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 
 public class MatrixReviewView extends SplitLayoutPanel {
 
@@ -89,7 +91,7 @@ public class MatrixReviewView extends SplitLayoutPanel {
 			modifyMatrixItem.addSelectionHandler(new SelectionHandler<Item>() {
 				@Override
 				public void onSelection(SelectionEvent<Item> event) {
-					setContent(manageMatrixView);
+					fullModelBus.fireEvent(new ShowModifyEvent(fullModel));
 				}
 			});
 			
@@ -103,6 +105,38 @@ public class MatrixReviewView extends SplitLayoutPanel {
 			sub.add(modifyMatrixItem);
 			sub.add(exportItem);
 			add(item);
+			
+			sub = new Menu();
+			MenuBarItem annotationsItem = new MenuBarItem("Annotation", sub);
+			MenuItem colorSettingsItem = new MenuItem("Color Settings");
+			colorSettingsItem.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> arg0) {
+					ColorSettingsDialog dialog = new ColorSettingsDialog(fullModelBus, fullModel);
+					dialog.show();
+				}
+			});
+			sub.add(colorSettingsItem);
+			MenuItem colorsItem = new MenuItem("Colorations");
+			colorsItem.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> arg0) {
+					ColorsDialog dialog = new ColorsDialog(fullModelBus, fullModel);
+					dialog.show();
+				}
+			});
+			sub.add(colorsItem);
+			MenuItem commentsItem = new MenuItem("Comments");
+			commentsItem.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> arg0) {
+					CommentsDialog dialog = new CommentsDialog(fullModelBus, fullModel);
+					dialog.show();
+				}
+			});
+			sub.add(commentsItem);
+			add(annotationsItem);
+			
 			
 			sub = new Menu();
 			MenuBarItem questionsItem = new MenuBarItem("?", sub);
@@ -127,9 +161,11 @@ public class MatrixReviewView extends SplitLayoutPanel {
 		}
 	}
 
-	private TaxonMatrix fullMatrix;
-	private SimpleEventBus subMatrixBus;
-	private SimpleEventBus fullMatrixBus;
+	private Model fullModel;
+	private Model subModel;
+	private Model subModelOriginal;
+	private SimpleEventBus subModelBus;
+	private SimpleEventBus fullModelBus;
 
 	private MenuView menuView = new MenuView();
 	private SimpleContainer contentContainer = new SimpleContainer();
@@ -137,17 +173,18 @@ public class MatrixReviewView extends SplitLayoutPanel {
 	private MatrixView matrixView;
 	private DesktopView desktopView;
 	private int desktopHeight = 300;
-	private MatrixMerger matrixMerger = new MatrixMerger();
-	private MatrixModelControler matrixModelControler;
+	private ModelMerger modelMerger;
+	private ModelControler modelControler;
 
 	public MatrixReviewView() {	
-		subMatrixBus = new SimpleEventBus();
-		fullMatrixBus = new SimpleEventBus();
+		subModelBus = new SimpleEventBus();
+		fullModelBus = new SimpleEventBus();
 		
-		matrixModelControler = new MatrixModelControler(fullMatrixBus);
-		manageMatrixView = new ManageMatrixView(fullMatrixBus, subMatrixBus);
-		matrixView = new MatrixView(subMatrixBus);
-		desktopView = new DesktopView(fullMatrixBus, subMatrixBus);
+		modelControler = new ModelControler(fullModelBus);
+		modelMerger = new ModelMerger(fullModelBus, subModelBus);
+		manageMatrixView = new ManageMatrixView(fullModelBus, subModelBus);
+		matrixView = new MatrixView(subModelBus);
+		desktopView = new DesktopView(fullModelBus, subModelBus);
 
 		VerticalLayoutContainer verticalLayoutContainer = new VerticalLayoutContainer();
 		verticalLayoutContainer.add(menuView, new VerticalLayoutData(1,-1));
@@ -168,32 +205,54 @@ public class MatrixReviewView extends SplitLayoutPanel {
 	
 	private void setContent(IsWidget content) {
 		contentContainer.setWidget(content);
-		contentContainer.forceLayout();
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+			@Override
+			public void execute() {
+				contentContainer.forceLayout();
+				forceLayout();
+			}
+		}); 
 	}
 		
 	private void addEventHandlers() {
-		fullMatrixBus.addHandler(ShowModifyEvent.TYPE, new ShowModifyEvent.ShowModifyEventHandler() {
+		fullModelBus.addHandler(ShowModifyEvent.TYPE, new ShowModifyEvent.ShowModifyEventHandler() {
 			@Override
 			public void onShow(ShowModifyEvent event) {
+				//modelMerger.mergeToFullModel(fullModel, subModel, subModelOriginal);
+				modelMerger.commitEvents();
+				fullModelBus.fireEvent(new LoadModelEvent(fullModel));
 				setContent(manageMatrixView);
 			}
 		});
-		fullMatrixBus.addHandler(ShowMatrixEvent.TYPE, new ShowMatrixEvent.ShowMatrixEventHandler() {
+		fullModelBus.addHandler(ShowMatrixEvent.TYPE, new ShowMatrixEvent.ShowMatrixEventHandler() {
 			@Override
 			public void onShow(ShowMatrixEvent event) {
-				TaxonMatrix taxonMatrix = matrixMerger.createSubMatrix
-						(fullMatrix, event.getCharacters(), event.getTaxa());
-				subMatrixBus.fireEvent(new LoadTaxonMatrixEvent(taxonMatrix));
+				Model subModel = modelMerger.getSubModel(event.getCharacters(), event.getTaxa());
+				/*// the order is critical, because characters bind themselves to an organ  instance
+				// merger will create new organ's per create sub model but characters are always original
+				// character's need to be bound to submodel's organ's to proceed in showing matrix 
+				// and merging results back to full model; Needs improvement eventually so this is less error-prone	
+				subModelOriginal = modelMerger.createSubModel(event.getCharacters(), event.getTaxa());
+				subModel = modelMerger.createSubModel(event.getCharacters(), event.getTaxa());
+				*/
+				
+				subModelBus.fireEvent(new LoadModelEvent(subModel));
 				setContent(matrixView);
+				
+				Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+				    public void execute () {
+				    	matrixView.getTaxonTreeGrid().getTreeGrid().expandAll();
+				    }
+				});
 			}
 		});
-		subMatrixBus.addHandler(ShowDesktopEvent.TYPE, new ShowDesktopEvent.ShowDesktopEventHandler() {
+		subModelBus.addHandler(ShowDesktopEvent.TYPE, new ShowDesktopEvent.ShowDesktopEventHandler() {
 			@Override
 			public void onShow(ShowDesktopEvent showDesktopEvent) {
 				showDesktop();
 			}
 		});
-		subMatrixBus.addHandler(ToggleDesktopEvent.TYPE, new ToggleDesktopEvent.ToggleDesktopEventHandler() {
+		subModelBus.addHandler(ToggleDesktopEvent.TYPE, new ToggleDesktopEvent.ToggleDesktopEventHandler() {
 			@Override
 			public void onToggle(ToggleDesktopEvent toggleDesktopEvent) {
 				toggleDesktop();
@@ -217,9 +276,9 @@ public class MatrixReviewView extends SplitLayoutPanel {
 		animate(500);
 	}
 
-	public void setFullMatrix(TaxonMatrix fullMatrix) {
-		this.fullMatrix = fullMatrix;
-		fullMatrixBus.fireEvent(new LoadTaxonMatrixEvent(fullMatrix));
+	public void setFullModel(Model model) {
+		this.fullModel = model;
+		fullModelBus.fireEvent(new LoadModelEvent(fullModel));
 	}
 	
 }

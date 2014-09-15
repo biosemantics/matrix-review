@@ -37,19 +37,20 @@ import com.sencha.gxt.widget.core.client.event.ExpandEvent.ExpandHandler;
 import edu.arizona.biosemantics.matrixreview.client.desktop.Window;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
-import edu.arizona.biosemantics.matrixreview.shared.model.Value;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
 public class NumericalSeriesManager extends AbstractWindowManager {
 
 	public class NameNumerical {
-		private String id;
+		private int id;
 		private String name;
 		private double numerical;
 
-		public NameNumerical(String id, String name, double numerical) {
+		public NameNumerical(int id, String name, double numerical) {
 			super();
 			this.id = id;
 			this.name = name;
@@ -68,7 +69,7 @@ public class NumericalSeriesManager extends AbstractWindowManager {
 			this.numerical = numerical;
 		}
 
-		public String getId() {
+		public int getId() {
 			return id;
 		}
 	}
@@ -84,12 +85,12 @@ public class NumericalSeriesManager extends AbstractWindowManager {
 
 	private static final NameNumericalAccess dataAccess = GWT
 			.create(NameNumericalAccess.class);
-	private TaxonMatrix taxonMatrix;
+	private Model model;
 	private Character character;
 
-	public NumericalSeriesManager(EventBus eventBus, Window window, Character character, TaxonMatrix taxonMatrix) {
+	public NumericalSeriesManager(EventBus eventBus, Window window, Character character, Model model) {
 		super(eventBus, window);
-		this.taxonMatrix = taxonMatrix;
+		this.model = model;
 		this.character = character;
 		init();
 	}
@@ -101,8 +102,8 @@ public class NumericalSeriesManager extends AbstractWindowManager {
 				dataAccess.id());
 
 		double max = 0.0;
-		for (Taxon taxon : taxonMatrix.list()) {
-			Value value = taxon.get(character);
+		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
+			Value value = model.getTaxonMatrix().getValue(taxon, character);
 			if (!value.getValue().isEmpty()) {
 				double doubleValue = Double.parseDouble(value.getValue());
 				if(doubleValue > max)
@@ -161,7 +162,7 @@ public class NumericalSeriesManager extends AbstractWindowManager {
 		subMatrixEventBus.addHandler(SetValueEvent.TYPE, new SetValueEvent.SetValueEventHandler() {
 			@Override
 			public void onSet(SetValueEvent event) {
-				if(event.getOldValue().getCharacter().equals(character)) {
+				if(model.getTaxonMatrix().getCharacter(event.getOldValue()).equals(character)) {
 					refreshContent();
 				}
 			}

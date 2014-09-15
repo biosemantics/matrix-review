@@ -5,7 +5,7 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.sencha.gxt.data.shared.SortDir;
 
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCharacterEvent.SortTaxaByCharacterEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 
 public class SortTaxaByCharacterEvent extends GwtEvent<SortTaxaByCharacterEventHandler> {
 

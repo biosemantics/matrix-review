@@ -27,5 +27,9 @@ public class Color implements Serializable {
 		this.use = use;
 	}
 	
+	@Override
+	public String toString() {
+		return hex + ":" + use;
+	}
 
 }

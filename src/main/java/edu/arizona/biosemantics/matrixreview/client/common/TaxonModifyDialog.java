@@ -11,21 +11,22 @@ import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyTaxonEvent;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon.Level;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon.Rank;
 
 public class TaxonModifyDialog extends Dialog {
 		
 		private TaxonInformationContainer taxonInformationContainer;
 
-		public TaxonModifyDialog(final EventBus eventBus, final TaxonMatrix taxonMatrix, final Taxon taxon) {
+		public TaxonModifyDialog(final EventBus eventBus, final Model model, final Taxon taxon) {
 			this.setHeadingText("Modify Taxon");
-			taxonInformationContainer = new TaxonInformationContainer(taxonMatrix, taxon.getParent(), taxon);
+			taxonInformationContainer = new TaxonInformationContainer(model, taxon.getParent(), taxon);
 		    this.add(taxonInformationContainer);
 			
 		    final Tree<Taxon, String> taxaTree = taxonInformationContainer.getTaxaTree();
-			final ComboBox<Level> levelCombo = taxonInformationContainer.getLevelComboBox(); 
+			final ComboBox<Rank> levelCombo = taxonInformationContainer.getLevelComboBox(); 
 		    final TextField nameField = taxonInformationContainer.getNameField();
 		    final TextField authorField = taxonInformationContainer.getAuthorField();
 		    final TextField yearField = taxonInformationContainer.getYearField();

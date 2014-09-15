@@ -16,41 +16,42 @@ import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
 import edu.arizona.biosemantics.matrixreview.client.common.CharacterAddDialog;
+import edu.arizona.biosemantics.matrixreview.client.common.ColorSettingsDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.TaxonAddDialog;
 import edu.arizona.biosemantics.matrixreview.client.event.CollapseTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ExpandTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.HideCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.HideTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockMatrixEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.ModelModeEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.MatrixModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowDesktopEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortCharactersByCoverageEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortCharactersByNameEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortCharactersByOrganEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCoverageEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByNameEvent;
-import edu.arizona.biosemantics.matrixreview.client.matrix.ColorSettingsDialog;
-import edu.arizona.biosemantics.matrixreview.client.matrix.MatrixView.ModelMode;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.Organ;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.MatrixMode;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Organ;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
 public class TaxonCharacterMenu extends Menu {
 
 	private EventBus eventBus;
-	private ModelMode modelMode;
+	private MatrixMode matrixMode;
 	private TreeStore<Taxon> treeStore;
-	private TaxonMatrix taxonMatrix;
+	private Model model;
 
-	public TaxonCharacterMenu(final EventBus eventBus, TaxonMatrix taxonMatrix, ModelMode modelMode, TreeStore<Taxon> treeStore) {
-		this.taxonMatrix = taxonMatrix;
+	public TaxonCharacterMenu(final EventBus eventBus, Model model, MatrixMode matrixMode, TreeStore<Taxon> treeStore) {
+		this.model = model;
 		this.eventBus = eventBus;
-		this.modelMode = modelMode;
+		this.matrixMode = matrixMode;
 		this.treeStore = treeStore;
 		
 		add(new HeaderMenuItem("Taxa/Characters"));
 		add(createAddCharacter());
+		add(createAddTaxon());
 		add(createLock());
 		add(new HeaderMenuItem("View"));
 		add(createModelMode());
@@ -58,12 +59,12 @@ public class TaxonCharacterMenu extends Menu {
 		add(createSortCharacters());
 		add(createHideTaxa());
 		add(createHideCharacters());
-		if(modelMode.equals(ModelMode.TAXONOMIC_HIERARCHY)) {
+		if(matrixMode.equals(MatrixMode.HIERARCHY)) {
 			add(createCollapseAll());
 			add(createExpandAll());
 		}
-		add(new HeaderMenuItem("Annotation"));
-		add(createColorSettings());
+		//add(new HeaderMenuItem("Annotation"));
+		//add(createColorSettings());
 		add(new HeaderMenuItem("Analysis"));
 		add(createAnalysisStart());
 	}
@@ -81,29 +82,29 @@ public class TaxonCharacterMenu extends Menu {
 		menu.add(flat);
 		menu.add(hierarchy);
 		//menu.add(custom);
-		switch(modelMode) {
+		switch(matrixMode) {
 		//case CUSTOM_HIERARCHY:
 		//	custom.setChecked(true);
 		//	break;
 		case FLAT:
 			flat.setChecked(true);
 			break;
-		case TAXONOMIC_HIERARCHY:
+		case HIERARCHY:
 			hierarchy.setChecked(true);
 			break;		
 		}
 		flat.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				modelMode = ModelMode.FLAT;
-				eventBus.fireEvent(new ModelModeEvent(ModelMode.FLAT));
+				matrixMode = MatrixMode.FLAT;
+				eventBus.fireEvent(new MatrixModeEvent(MatrixMode.FLAT));
 			}
 		});
 		hierarchy.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				modelMode = ModelMode.TAXONOMIC_HIERARCHY;
-				eventBus.fireEvent(new ModelModeEvent(ModelMode.TAXONOMIC_HIERARCHY));
+				matrixMode = MatrixMode.HIERARCHY;
+				eventBus.fireEvent(new MatrixModeEvent(MatrixMode.HIERARCHY));
 			}
 		});
 		/*custom.addSelectionHandler(new SelectionHandler<Item>() {
@@ -154,7 +155,7 @@ public class TaxonCharacterMenu extends Menu {
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				ColorSettingsDialog dialog = new ColorSettingsDialog(eventBus, taxonMatrix);
+				ColorSettingsDialog dialog = new ColorSettingsDialog(eventBus, model);
 				dialog.show();
 			}
 		});
@@ -168,27 +169,17 @@ public class TaxonCharacterMenu extends Menu {
 		//columns.setData("gxt-columns", "true");
 		
 		final Menu columnMenu = new Menu();
-		for(final Organ organ : taxonMatrix.getOrgans()) {
+		for(final Organ organ : model.getTaxonMatrix().getHierarchyCharacters()) {
 			final CheckMenuItem organItem = new CheckMenuItem(organ.getName());
-			organItem.setHideOnClick(false);
-			organItem.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
-				@Override
-				public void onCheckChange(CheckChangeEvent<CheckMenuItem> event) {
-					for( Character character : organ.getCharacters()) {
-						eventBus.fireEvent(new HideCharacterEvent(character, !organItem.isChecked()));
-					}
-				}
-			});
-			columnMenu.add(organItem);
-			Menu organMenu = new Menu();
-			organItem.setSubMenu(organMenu);
+			
+			final Menu organMenu = new Menu();
 			boolean allCharactersHidden = true;
-			for(final Character character : organ.getCharacters()) {
+			for(final Character character : organ.getFlatCharacters()) {
 				final CheckMenuItem check = new CheckMenuItem();
 				check.setHideOnClick(false);
 				check.setText(character.toString());
-				check.setChecked(!character.isHidden());
-				allCharactersHidden &= character.isHidden();
+				check.setChecked(!model.isHidden(character));
+				allCharactersHidden &= model.isHidden(character);
 				check.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
 					@Override
 					public void onCheckChange(CheckChangeEvent<CheckMenuItem> event) {
@@ -197,7 +188,36 @@ public class TaxonCharacterMenu extends Menu {
 				});
 				organMenu.add(check);
 			}
+			
+			if(!allCharactersHidden && organMenu.getWidgetCount() > 0) {
+				organItem.setSubMenu(organMenu);
+				columnMenu.add(organItem);
+			} 
 			organItem.setChecked(!allCharactersHidden);
+			organItem.setHideOnClick(false);
+			
+			organItem.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
+				@Override
+				public void onCheckChange(CheckChangeEvent<CheckMenuItem> event) {
+					/*if(organItem.isChecked() && organMenu.getWidgetCount() == 0) {
+						for(Taxon child : taxon.getChildren()) {
+							createHideTaxonMenu(child, subMenu);
+						}
+					} else {
+						columnMenu.setActiveItem(null, true);
+						organItem.setSubMenu(null);
+					}*/
+					if(organItem.isChecked() && organMenu.getWidgetCount() > 0) {
+						organItem.setSubMenu(organMenu);
+						columnMenu.setActiveItem(organItem, true);
+					} 
+					if(!organItem.isChecked()) {
+						organMenu.hide();
+						organItem.setSubMenu(null);
+					}
+					eventBus.fireEvent(new HideCharacterEvent(organ.getFlatCharacters(), !organItem.isChecked()));
+				}
+			});
 		}
 		
 		columns.setSubMenu(columnMenu);
@@ -212,13 +232,13 @@ public class TaxonCharacterMenu extends Menu {
 
 		Menu rowMenu = new Menu();
 		
-		switch(modelMode) {
+		/*switch(matrixMode) {
 			case FLAT:
-				for(final Taxon taxon : taxonMatrix.list()) {
+				for(final Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
 					final CheckMenuItem check = new CheckMenuItem();
 					check.setHideOnClick(false);
 					check.setText(taxon.getFullName());
-					check.setChecked(!taxon.isHidden());
+					check.setChecked(!model.isHidden(taxon));
 					check.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
 						@Override
 						public void onCheckChange(CheckChangeEvent<CheckMenuItem> event) {
@@ -228,55 +248,60 @@ public class TaxonCharacterMenu extends Menu {
 					rowMenu.add(check);
 				}
 				break;
-			case CUSTOM_HIERARCHY:
-			case TAXONOMIC_HIERARCHY:
-				for (final Taxon taxon : taxonMatrix.list()) {
+			case HIERARCHY:
+				for (final Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
 					if(!taxon.hasParent()) {
 						createHideTaxonMenu(taxon, rowMenu);
 					}
 				}
 				break;
+		} */
+		for (final Taxon taxon : model.getTaxonMatrix().getHierarchyRootTaxa()) {
+			createHideTaxonMenu(taxon, rowMenu);
 		}
+		
 		if(rowMenu.getWidgetCount() > 0)
 			rows.setSubMenu(rowMenu);
 		return rows;
 	}
 	
 	private void createHideTaxonMenu(final Taxon taxon, final Menu menu) {
-		final CheckMenuItem check = new CheckMenuItem();
-		final Menu subMenu = new Menu();
-		
-		check.setHideOnClick(false);
-		check.setText(taxon.getFullName());
-		check.setChecked(!taxon.isHidden());
-		check.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
-			@Override
-			public void onCheckChange(CheckChangeEvent<CheckMenuItem> event) {
-				if(check.isChecked() && subMenu.getWidgetCount() == 0) {
-					for(Taxon child : taxon.getChildren()) {
-						createHideTaxonMenu(child, subMenu);
+		if(model.getTaxonMatrix().isVisiblyContained(taxon)) {
+			final CheckMenuItem check = new CheckMenuItem();
+			final Menu subMenu = new Menu();
+			
+			check.setHideOnClick(false);
+			check.setText(taxon.getFullName());
+			check.setChecked(!model.isHidden(taxon));
+			check.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
+				@Override
+				public void onCheckChange(CheckChangeEvent<CheckMenuItem> event) {
+					if(check.isChecked() && subMenu.getWidgetCount() == 0) {
+						for(Taxon child : taxon.getChildren()) {
+							createHideTaxonMenu(child, subMenu);
+						}
+					} else {
+						menu.setActiveItem(null, true);
+						check.setSubMenu(null);
 					}
-				} else {
-					menu.setActiveItem(null, true);
-					check.setSubMenu(null);
+					if(check.isChecked() && subMenu.getWidgetCount() > 0) {
+						check.setSubMenu(subMenu);
+						menu.setActiveItem(check, true);
+					}
+					eventBus.fireEvent(new HideTaxaEvent(taxon, !check.isChecked()));
 				}
-				if(check.isChecked() && subMenu.getWidgetCount() > 0) {
+			});
+			
+			if(check.isChecked()) {
+				for(Taxon child : taxon.getChildren()) {
+					createHideTaxonMenu(child, subMenu);
+				}
+				if(subMenu.getWidgetCount() > 0)
 					check.setSubMenu(subMenu);
-					menu.setActiveItem(check, true);
-				}
-				eventBus.fireEvent(new HideTaxaEvent(taxon, !check.isChecked()));
 			}
-		});
-		
-		if(check.isChecked()) {
-			for(Taxon child : taxon.getChildren()) {
-				createHideTaxonMenu(child, subMenu);
-			}
-			if(subMenu.getWidgetCount() > 0)
-				check.setSubMenu(subMenu);
+	
+			menu.add(check);
 		}
-
-		menu.add(check);
 	}
 
 	private MenuItem createSortCharacters() {
@@ -542,14 +567,28 @@ public class TaxonCharacterMenu extends Menu {
 				eventBus.fireEvent(new LockMatrixEvent(false));
 			}
 		});
-		if(!taxonMatrix.isLocked())
+		if(!isLockedEntiredMatrix())
 			unset.setChecked(true);
-		if(taxonMatrix.isLocked())
+		else
 			set.setChecked(true);
 		editMenu.add(set);
 		editMenu.add(unset);
 		add(editMode);
 		return editMode;
+	}
+
+	private boolean isLockedEntiredMatrix() {
+		for(Character character : model.getTaxonMatrix().getVisibleFlatCharacters()) {
+			if(!model.isLocked(character)) {
+				return false;
+			} 
+		}
+		for(Taxon taxon : model.getTaxonMatrix().getVisibleFlatTaxa()) {
+			if(!model.isLocked(taxon)) {
+				return false;
+			} 
+		}
+		return true;
 	}
 
 	private MenuItem createAddCharacter() {
@@ -560,22 +599,24 @@ public class TaxonCharacterMenu extends Menu {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				for (int i = 0; i < 1; i++) {
-					CharacterAddDialog addDialog = new CharacterAddDialog(eventBus, taxonMatrix, null);
+					CharacterAddDialog addDialog = new CharacterAddDialog(eventBus, model, null);
 					addDialog.show();
 					//eventBus.fireEvent(new AddCharacterEvent(new Character("character" + i, new Organ("organ" + i))));
 				}
 			}
 		});
-		add(item);
-
-		item = new MenuItem();
+		return item;
+	}
+		
+	private MenuItem createAddTaxon() {
+		MenuItem item = new MenuItem();
 		item.setText("Add Taxon");
 		// item.setIcon(header.getAppearance().sortAscendingIcon());
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				for (int i = 0; i < 1; i++) {
-					TaxonAddDialog addDialog = new TaxonAddDialog(eventBus, taxonMatrix, null);
+					TaxonAddDialog addDialog = new TaxonAddDialog(eventBus, model, null);
 					addDialog.show();
 					//eventBus.fireEvent(new AddTaxonEvent(new Taxon(Level.SPECIES, "taxon" + Random.nextInt(), "author", "year")));
 				}

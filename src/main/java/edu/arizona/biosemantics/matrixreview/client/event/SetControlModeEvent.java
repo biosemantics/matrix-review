@@ -7,8 +7,8 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent.SetControlModeEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.HasControlMode.ControlMode;
+import edu.arizona.biosemantics.matrixreview.shared.model.ControlMode;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 
 public class SetControlModeEvent extends GwtEvent<SetControlModeEventHandler> {
 

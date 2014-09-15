@@ -4,6 +4,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
@@ -25,10 +27,12 @@ import com.sencha.gxt.widget.core.client.tree.Tree.CheckState;
 import com.sencha.gxt.widget.core.client.tree.Tree.Joint;
 import com.sencha.gxt.widget.core.client.tree.TreeView.TreeViewRenderMode;
 
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
+import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 
 public class TaxonTreeAppearance extends TreeBaseAppearance {
 
@@ -79,13 +83,27 @@ public class TaxonTreeAppearance extends TreeBaseAppearance {
 	private String blackRed = ImageHelper.createModuleBasedUrl("base/images/grid/black_red.gif");
 	private String red = ImageHelper.createModuleBasedUrl("base/images/grid/red.gif");
 	private String black = ImageHelper.createModuleBasedUrl("base/images/grid/black.gif");
+	private EventBus eventBus;
+	private Model model;
 
-	public TaxonTreeAppearance() {
+	public TaxonTreeAppearance(EventBus eventBus) {
 		super((TreeResources) GWT.create(BlueTreeResources.class));
 		this.columnHeaderStyles = GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class).styles();
 		this.taxonTreeBaseStyles = (TaxonTreeBaseStyle) style;
+		this.eventBus = eventBus;
+		
+		bindEvents();
 	}
 	
+	private void bindEvents() {
+		eventBus.addHandler(LoadModelEvent.TYPE, new LoadModelEvent.LoadModelEventHandler() {
+			@Override
+			public void onLoad(LoadModelEvent event) {
+				model = event.getModel();
+			}
+		});
+	}
+
 	public void renderNode(Taxon taxon, SafeHtmlBuilder sb, String id, SafeHtml text,
 			TreeStyle ts, ImageResource icon, boolean checkable,
 			CheckState checked, Joint joint, int level,
@@ -99,13 +117,13 @@ public class TaxonTreeAppearance extends TreeBaseAppearance {
 					+ "\" class=\"" + style.node() + "\">");
 
 			String backgroundImage = "";
-			if(taxon.isDirty() && taxon.isCommented()) {
+			if(model.isDirty(taxon) && model.isCommented(taxon)) {
 				backgroundImage = blackRed.substring(0, blackRed.length()-1);
 			}
-			if(taxon.isDirty() && !taxon.isCommented()) {
+			if(model.isDirty(taxon) && !model.isCommented(taxon)) {
 				backgroundImage = black.substring(0, black.length()-1);
 			}
-			if(taxon.isCommented() && !taxon.isDirty()) {
+			if(model.isCommented(taxon) && !model.isDirty(taxon)) {
 				backgroundImage = red.substring(0, red.length()-1);
 			}
 			
@@ -118,7 +136,7 @@ public class TaxonTreeAppearance extends TreeBaseAppearance {
 		SpanElement coverage = Document.get().createSpanElement();
 		//coverage.setInnerText(dataManager.getCoverage(((CharacterColumnConfig) column).getCharacter()));
 		coverage.setAttribute("style", "position:absolute;right:0px;background-color:#a8d04d;width:35px;");
-		coverage.setInnerText(taxon.getTaxonMatrix().getCoverage(taxon));
+		coverage.setInnerText(model.getTaxonMatrix().getCoverage(taxon));
 		sb.appendHtmlConstant(coverage.getString());
 		
 		if (renderMode == TreeViewRenderMode.ALL
@@ -204,19 +222,19 @@ public class TaxonTreeAppearance extends TreeBaseAppearance {
 		String result = "Taxon: " + taxon.getFullName() + "<br>";
 		result += "Author: " + taxon.getAuthor() + "<br>";
 		result += "Year: " + taxon.getYear() + "<br>";
-		result += "Rank: " + taxon.getLevel().toString() + "<br>";
-		result += "Character coverage: " + taxon.getTaxonMatrix().getCoverage(taxon) + "<br>";
+		result += "Rank: " + taxon.getRank().toString() + "<br>";
+		result += "Character coverage: " + model.getTaxonMatrix().getCoverage(taxon) + "<br>";
 		String ancestors = getAncestor(taxon);
 		if(!ancestors.isEmpty())
 			result += "Ancestors: <br>" + ancestors;
-		if(taxon.hasColor())
-			result += "Color: " + taxon.getColor().getUse() + "<br>";
-		if(taxon.isLocked())
+		if(model.hasColor(taxon))
+			result += "Color: " + model.getColor(taxon).getUse() + "<br>";
+		if(model.isLocked(taxon))
 			result += "Locked<br>";
-		if(taxon.isDirty()) 
+		if(model.isDirty(taxon)) 
 			result += "Dirty<br>";
-		if(taxon.isCommented()) 
-			result += "Comment: " + taxon.getComment();
+		if(model.isCommented(taxon)) 
+			result += "Comment: " + model.getComment(taxon);
 		return result;
 	}
 

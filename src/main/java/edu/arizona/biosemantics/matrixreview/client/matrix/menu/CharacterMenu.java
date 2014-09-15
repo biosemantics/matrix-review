@@ -7,76 +7,40 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
-import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.util.Format;
 import com.sencha.gxt.core.client.util.Params;
-import com.sencha.gxt.data.shared.ListStore;
-import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.messages.client.DefaultMessages;
-import com.sencha.gxt.widget.core.client.Dialog;
-import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
-import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
-import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
-import com.sencha.gxt.widget.core.client.button.TextButton;
-import com.sencha.gxt.widget.core.client.container.MarginData;
-import com.sencha.gxt.widget.core.client.container.SimpleContainer;
-import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
-import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent;
-import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent.DialogHideHandler;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
-import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
-import com.sencha.gxt.widget.core.client.form.ComboBox;
-import com.sencha.gxt.widget.core.client.form.DualListField;
-import com.sencha.gxt.widget.core.client.form.FieldLabel;
-import com.sencha.gxt.widget.core.client.form.FieldSet;
-import com.sencha.gxt.widget.core.client.form.Radio;
-import com.sencha.gxt.widget.core.client.form.TextField;
-import com.sencha.gxt.widget.core.client.form.DualListField.Mode;
-import com.sencha.gxt.widget.core.client.form.validator.EmptyValidator;
 import com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderAppearance;
-import com.sencha.gxt.widget.core.client.grid.filters.ListFilter;
 import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
 import com.sencha.gxt.widget.core.client.menu.HeaderMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
-import com.sencha.gxt.data.shared.Converter;
 
 import edu.arizona.biosemantics.matrixreview.client.common.CharacterAddDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.CharacterModifyDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.SelectCharacterStatesWindow;
-import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent.MergeMode;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent.SetCharacterStatesEventHandler;
-import edu.arizona.biosemantics.matrixreview.client.event.LoadTaxonMatrixEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.ModifyTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MoveCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveCharacterEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent;
@@ -84,34 +48,27 @@ import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.CharacterColumnConfig;
 import edu.arizona.biosemantics.matrixreview.client.matrix.FrozenFirstColumTaxonTreeGrid.CharactersGrid;
-import edu.arizona.biosemantics.matrixreview.client.matrix.filters.CharactersGridFilters.StringValueProvider;
-import edu.arizona.biosemantics.matrixreview.client.matrix.form.AllowFreeTextComboBoxCell;
-import edu.arizona.biosemantics.matrixreview.client.matrix.form.ResetOldValueComboBoxCell;
-import edu.arizona.biosemantics.matrixreview.client.matrix.shared.AllAccessListStore;
-import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
-import edu.arizona.biosemantics.matrixreview.shared.model.Organ;
-import edu.arizona.biosemantics.matrixreview.shared.model.OrganProperties;
-import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.HasControlMode.ControlMode;
-import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
+import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.ControlMode;
 
 public class CharacterMenu extends Menu {
 	
-		
 	private ColumnHeaderAppearance columnHeaderAppearance = GWT.<ColumnHeaderAppearance> create(ColumnHeaderAppearance.class);
 	//private CharacterColumnConfig columnConfig;
 	//private int characterCount;
-	private TaxonMatrix taxonMatrix;
+	private Model model;
 	private Character character;
 	private EventBus eventBus;
 	private CharactersGrid grid;
 	
-	public CharacterMenu(final EventBus eventBus, CharactersGrid grid, TaxonMatrix taxonMatrix, Character character) {
+	public CharacterMenu(final EventBus eventBus, CharactersGrid grid, Model model, Character character) {
 		super();
 		this.eventBus = eventBus;
 		this.grid = grid;
-		this.taxonMatrix = taxonMatrix;
+		this.model = model;
 		this.character = character;
 		//this.columnConfig = columnModel.getColumn(colIndex);
 		//this.characterCount = columnModel.getColumnCount();
@@ -133,7 +90,8 @@ public class CharacterMenu extends Menu {
 		add(createComment());
 		add(createColorize());
 		add(new HeaderMenuItem("Analysis"));
-		add(createAnalysis());
+		add(createSubAnalysis());
+		add(createFullAnalysis());
 	}
 	
 	@Override
@@ -142,8 +100,8 @@ public class CharacterMenu extends Menu {
 			super.add(child);
 	}
 
-	private MenuItem createAnalysis() {
-		MenuItem item = new MenuItem("Start");
+	private MenuItem createFullAnalysis() {
+		MenuItem item = new MenuItem("Full matrix");
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
@@ -152,9 +110,20 @@ public class CharacterMenu extends Menu {
 		});
 		return item;
 	}
+	
+	private MenuItem createSubAnalysis() {
+		MenuItem item = new MenuItem("Selected sub-matrix");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				eventBus.fireEvent(new AnalyzeCharacterEvent(character, model));
+			}
+		});
+		return item;
+	}
 
 	private MenuItem createColorize() {
-		if(taxonMatrix.getColors().isEmpty())
+		if(!model.hasColors())
 			return null;
 		
 		MenuItem item = new MenuItem("Colorize");
@@ -168,7 +137,7 @@ public class CharacterMenu extends Menu {
 			}
 		});
 		colorMenu.add(offItem);
-		for(final Color color : character.getTaxonMatrix().getColors()) {
+		for(final Color color : model.getColors()) {
 			MenuItem colorItem = new MenuItem(color.getUse());
 			colorItem.getElement().getStyle().setProperty("backgroundColor", "#" + color.getHex());
 			colorItem.addSelectionHandler(new SelectionHandler<Item>() {
@@ -189,7 +158,7 @@ public class CharacterMenu extends Menu {
 			public void onSelection(SelectionEvent<Item> event) {
 				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox(
 						"Comment", "");
-				box.getTextArea().setValue(character.getComment());
+				box.getTextArea().setValue(model.getComment(character));
 				box.addHideHandler(new HideHandler() {
 					@Override
 					public void onHide(HideEvent event) {
@@ -255,7 +224,7 @@ public class CharacterMenu extends Menu {
 		off.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				if(!character.getControlMode().equals(ControlMode.OFF)) {
+				if(!model.getControlMode(character).equals(ControlMode.OFF)) {
 					eventBus.fireEvent(new SetControlModeEvent(character, ControlMode.OFF));
 				}
 			}
@@ -263,7 +232,7 @@ public class CharacterMenu extends Menu {
 		automatic.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				final ControlMode controlMode = character.determineControlMode();
+				final ControlMode controlMode = model.determineControlMode(character);
 				
 				if(controlMode.equals(ControlMode.CATEGORICAL)) {
 					selectStatesAndFire();
@@ -274,7 +243,7 @@ public class CharacterMenu extends Menu {
 		numerical.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				if(!character.getControlMode().equals(ControlMode.NUMERICAL)) {
+				if(!model.getControlMode(character).equals(ControlMode.NUMERICAL)) {
 					eventBus.fireEvent(new SetControlModeEvent(character, ControlMode.NUMERICAL));
 				}
 			}
@@ -282,12 +251,12 @@ public class CharacterMenu extends Menu {
 		categorical.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				if(!character.getControlMode().equals(ControlMode.CATEGORICAL)) {
+				if(!model.getControlMode(character).equals(ControlMode.CATEGORICAL)) {
 					selectStatesAndFire();
 				}
 			}
 		});
-		switch(character.getControlMode()) {
+		switch(model.getControlMode(character)) {
 		case CATEGORICAL:
 			categorical.setChecked(true);
 			break;
@@ -304,7 +273,7 @@ public class CharacterMenu extends Menu {
 	protected void selectStatesAndFire() {
 		final CharacterColumnConfig characterColumnConfig = grid.getCharacterColumnConfig(character);
 		final Set<String> values = new HashSet<String>();
-		for (Taxon taxon : taxonMatrix.list()) {
+		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
 			String value = characterColumnConfig.getValueProvider().getValue(taxon).getValue();
 			if(!value.trim().isEmpty()) 
 				values.add(value);
@@ -328,11 +297,11 @@ public class CharacterMenu extends Menu {
 
 	private Widget createLockCharacter() {
 		final CheckMenuItem lockItem = new CheckMenuItem("Lock");
-		lockItem.setChecked(character.isLocked());
+		lockItem.setChecked(model.isLocked(character));
 		lockItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				boolean newValue = !character.isLocked();
+				boolean newValue = !model.isLocked(character);
 				lockItem.setChecked(newValue);
 				eventBus.fireEvent(new LockCharacterEvent(character, newValue));
 			}
@@ -341,7 +310,7 @@ public class CharacterMenu extends Menu {
 	}
 
 	private MenuItem createMoveCharacter() {
-		if(taxonMatrix.getCharacterCount() <= 1)
+		/*if(model.getTaxonMatrix().getCharacterCount() <= 1)
 			return null;
 		
 		MenuItem item = new MenuItem("Move after");
@@ -357,7 +326,7 @@ public class CharacterMenu extends Menu {
 		});
 		moveMenu.add(subItem);
 
-		for (final Character after : taxonMatrix.getCharacters()) {
+		for (final Character after : model.getTaxonMatrix().getVisibleFlatCharacters()) {
 			if (!after.equals(character)) {
 				subItem = new MenuItem(after.toString());
 				subItem.addSelectionHandler(new SelectionHandler<Item>() {
@@ -369,17 +338,18 @@ public class CharacterMenu extends Menu {
 				moveMenu.add(subItem);
 			}
 		}
-		return item;
+		return item;*/
+		return null;
 	}
 
 	private MenuItem createMergeCharacters() {
-		if(taxonMatrix.getCharacterCount() <= 1)
+		if(model.getTaxonMatrix().getCharacterCount() <= 1)
 			return null;
 		
 		MenuItem item = new MenuItem("Merge with");
 		Menu targetMenu = new Menu();
 		item.setSubMenu(targetMenu);
-		for (final Character target : taxonMatrix.getCharacters()) {
+		for (final Character target : model.getTaxonMatrix().getVisibleFlatCharacters()) {
 			if(!target.equals(character)) {
 				MenuItem targetItem = new MenuItem(target.toString());
 				Menu modeMenu = new Menu();
@@ -443,7 +413,7 @@ public class CharacterMenu extends Menu {
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				CharacterModifyDialog modifyDialog = new CharacterModifyDialog(eventBus, taxonMatrix, character);
+				CharacterModifyDialog modifyDialog = new CharacterModifyDialog(eventBus, model, character);
 				modifyDialog.show();
 			}
 		});
@@ -457,7 +427,7 @@ public class CharacterMenu extends Menu {
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				CharacterAddDialog addDialog = new CharacterAddDialog(eventBus, taxonMatrix, null);
+				CharacterAddDialog addDialog = new CharacterAddDialog(eventBus, model, null);
 				addDialog.setAfter(character);
 				addDialog.show();
 			}
