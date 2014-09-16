@@ -54,10 +54,8 @@ import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent.SelectionChangedHandler;
 
 import edu.arizona.biosemantics.matrixreview.client.ModelMerger;
-import edu.arizona.biosemantics.matrixreview.client.common.CategoricalValidator;
-import edu.arizona.biosemantics.matrixreview.client.common.NumericalValidator;
-import edu.arizona.biosemantics.matrixreview.client.common.Validator;
-import edu.arizona.biosemantics.matrixreview.client.common.Validator.ValidationResult;
+import edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator;
+import edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator.ValidationResult;
 import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyOrganEvent;
@@ -93,6 +91,7 @@ public class ManageMatrixView extends VerticalLayoutContainer {
 	protected List<OrganCharacterNode> characterSelection = new LinkedList<OrganCharacterNode>();
 	protected List<Taxon> taxaSelection = new LinkedList<Taxon>();
 	private InputElementVisibleTextField setValueField;
+	private SetValueValidator setValueValidator;
 
 	public ManageMatrixView(final EventBus fullModelBus, final EventBus subModelBus) {
 		this.fullModelBus = fullModelBus;
@@ -100,6 +99,7 @@ public class ManageMatrixView extends VerticalLayoutContainer {
 		
 		taxaView = new ManageTaxaView(fullModelBus, false);
 		charactersView = new ManageCharactersView(fullModelBus, false);
+		setValueValidator = new SetValueValidator(model);
 		
 		HorizontalLayoutContainer horizontalLayoutContainer = new HorizontalLayoutContainer();
 		horizontalLayoutContainer.add(taxaView, new HorizontalLayoutData(0.5, 1.0));
@@ -166,7 +166,7 @@ public class ManageMatrixView extends VerticalLayoutContainer {
 				String value = setValueField.getValue();
 				for(Taxon taxon : taxa) {
 					for(Character character : characters) {
-						ValidationResult validationResult = validValue(value, taxon, character);
+						ValidationResult validationResult = setValueValidator.validValue(value, taxon, character);
 						if(validationResult.isValid()) {
 							fullModelBus.fireEvent(new SetValueEvent(taxon, character, model.getTaxonMatrix().getValue(taxon, character), 
 									new Value(value)));
@@ -310,25 +310,6 @@ public class ManageMatrixView extends VerticalLayoutContainer {
 			colorMenu.add(colorItem);
 		}
 		return colorMenu;
-	}
-
-	protected ValidationResult validValue(String value, Taxon taxon, Character character) {
-		switch(model.getControlMode(character)) {
-		case CATEGORICAL:
-			Set<String> states = new HashSet<String>(model.getStates(character));
-			Validator validator = new CategoricalValidator(states);
-			ValidationResult result = validator.validate(value);
-			return result;
-		case NUMERICAL:
-			validator = new NumericalValidator();
-			result = validator.validate(value);
-			return result;
-		case OFF:
-			break;
-		default:
-			break;
-		}
-		return new ValidationResult(true, "");
 	}
 
 	private void bindEvents() {

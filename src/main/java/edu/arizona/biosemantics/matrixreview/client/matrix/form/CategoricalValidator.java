@@ -9,15 +9,14 @@ import com.google.gwt.editor.client.EditorError;
 import com.sencha.gxt.widget.core.client.form.Validator;
 import com.sencha.gxt.widget.core.client.form.error.DefaultEditorError;
 
-import edu.arizona.biosemantics.matrixreview.client.common.Validator.ValidationResult;
+import edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator.ValidationResult;
 
 public class CategoricalValidator implements Validator<String> {
 
-	private edu.arizona.biosemantics.matrixreview.client.common.CategoricalValidator validator;
+	private edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator.CategoricalValidator validator;
 
 	public CategoricalValidator(Set<String> states) {
-		this.validator = new 
-				edu.arizona.biosemantics.matrixreview.client.common.CategoricalValidator(states);
+		this.validator = new edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator.CategoricalValidator(states);
 	}
 
 	@Override

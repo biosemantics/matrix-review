@@ -1,8 +1,10 @@
 package edu.arizona.biosemantics.matrixreview.client.common;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.editor.client.Editor.Path;
@@ -17,11 +19,17 @@ import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Dialog;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import com.sencha.gxt.widget.core.client.event.CompleteEditEvent;
+import com.sencha.gxt.widget.core.client.event.CompleteEditEvent.CompleteEditHandler;
+import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.grid.CheckBoxSelectionModel;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
+import com.sencha.gxt.widget.core.client.grid.Grid.GridCell;
 import com.sencha.gxt.widget.core.client.grid.GroupingView;
+import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 import com.sencha.gxt.widget.core.client.grid.filters.GridFilters;
 import com.sencha.gxt.widget.core.client.grid.filters.ListFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
@@ -29,20 +37,36 @@ import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
-import edu.arizona.biosemantics.matrixreview.client.common.ColorsDialog.ColorEntry;
+import edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator.ValidationResult;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonCommentEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueCommentEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
 public class CommentsDialog extends Dialog {
-	
-	private final static String taxonCharacterValueType = "Taxon-Character-Value";
-	private final static String characterType = "Character";
-	private final static String taxonType = "Taxon";
+
+	public enum CommentType {
+		taxonType("Taxon"), characterType("Character"), taxonCharacterValueType("Taxon-Character-Value");
+		
+		private String readable;
+
+		private CommentType(String readable) {
+			this.readable = readable;
+		}
+		
+		public String getReadable() {
+			return readable;
+		}
+		
+		@Override
+		public String toString() {
+			return getReadable();
+		}
+	}
 	
 	public class Comment {
 
@@ -50,16 +74,16 @@ public class CommentsDialog extends Dialog {
 		private String source;
 		private String value;
 		private String text;
-		private String type;
+		private CommentType type;
 
 		public Comment(Object object, String source, String value, String text) {
 			this.object = object;
-			if(object instanceof Value)
-				type = "Taxon-Character-Value";
-			if(object instanceof Character)
-				type = "Character";
-			if(object instanceof Taxon)
-				type = "Taxon";
+			if (object instanceof Value)
+				type = CommentType.taxonCharacterValueType;
+			if (object instanceof Character)
+				type = CommentType.characterType;
+			if (object instanceof Taxon)
+				type = CommentType.taxonType;
 			this.source = source;
 			this.value = value;
 			this.text = text;
@@ -81,11 +105,19 @@ public class CommentsDialog extends Dialog {
 			return object;
 		}
 
-		public String getType() {
+		public CommentType getType() {
 			return type;
 		}
+		
+		public void setValue(String value) {
+			if(this.type.equals(CommentType.taxonCharacterValueType))
+				this.value = value;
+		}
+
+		public void setText(String text) {
+			this.text = text;
+		}
 	}
-	
 
 	public interface CommentProperties extends PropertyAccess<Comment> {
 
@@ -94,7 +126,7 @@ public class CommentsDialog extends Dialog {
 
 		@Path("object")
 		ValueProvider<Comment, Object> object();
-		
+
 		@Path("source")
 		ValueProvider<Comment, String> source();
 
@@ -105,7 +137,7 @@ public class CommentsDialog extends Dialog {
 		ValueProvider<Comment, String> text();
 
 		@Path("type")
-		ValueProvider<Comment, String> type();
+		ValueProvider<Comment, CommentType> type();
 
 	}
 
@@ -114,78 +146,139 @@ public class CommentsDialog extends Dialog {
 	private ListStore<Comment> commentStore;
 	private Grid<Comment> grid;
 
-	public CommentsDialog(EventBus eventBus, Model model) {
+	public CommentsDialog(final EventBus eventBus, final Model model) {
 		this.eventBus = eventBus;
 		this.model = model;
-		CommentProperties commentProperties = GWT.create(CommentProperties.class);
+		CommentProperties commentProperties = GWT
+				.create(CommentProperties.class);
 
 		IdentityValueProvider<Comment> identity = new IdentityValueProvider<Comment>();
-	    final CheckBoxSelectionModel<Comment> checkBoxSelectionModel = new CheckBoxSelectionModel<Comment>(identity);
-	    
-	    checkBoxSelectionModel.setSelectionMode(SelectionMode.MULTI);
-	    
-	    ColumnConfig<Comment, String> typeCol = new ColumnConfig<Comment, String>(
+		final CheckBoxSelectionModel<Comment> checkBoxSelectionModel = new CheckBoxSelectionModel<Comment>(
+				identity);
+
+		checkBoxSelectionModel.setSelectionMode(SelectionMode.MULTI);
+
+		ColumnConfig<Comment, CommentType> typeCol = new ColumnConfig<Comment, CommentType>(
 				commentProperties.type(), 0, "Type");
 		ColumnConfig<Comment, String> sourceCol = new ColumnConfig<Comment, String>(
 				commentProperties.source(), 190, "Source");
-		ColumnConfig<Comment, String> valueCol = new ColumnConfig<Comment, String>(
+		final ColumnConfig<Comment, String> valueCol = new ColumnConfig<Comment, String>(
 				commentProperties.value(), 190, "Value(s)");
-		ColumnConfig<Comment, String> textCol = new ColumnConfig<Comment, String>(
+		final ColumnConfig<Comment, String> textCol = new ColumnConfig<Comment, String>(
 				commentProperties.text(), 400, "Comment");
-		
-		List<ColumnConfig<Comment, ?>> columns = new ArrayList<ColumnConfig<Comment, ?>>();
-	      columns.add(checkBoxSelectionModel.getColumn());
-	      columns.add(typeCol);
-	      columns.add(sourceCol);
-	      columns.add(valueCol);
-	      columns.add(textCol);
-	      ColumnModel<Comment> cm = new ColumnModel<Comment>(columns);
-	      
-		commentStore = new ListStore<Comment>(commentProperties.key());
 
+		List<ColumnConfig<Comment, ?>> columns = new ArrayList<ColumnConfig<Comment, ?>>();
+		columns.add(checkBoxSelectionModel.getColumn());
+		columns.add(typeCol);
+		columns.add(sourceCol);
+		columns.add(valueCol);
+		columns.add(textCol);
+		ColumnModel<Comment> cm = new ColumnModel<Comment>(columns);
+
+		commentStore = new ListStore<Comment>(commentProperties.key());
+		commentStore.setAutoCommit(true);
+		
 		List<Comment> comments = createComments();
 		for (Comment comment : comments)
 			commentStore.add(comment);
-		
+
 		final GroupingView<Comment> groupingView = new GroupingView<Comment>();
-	    groupingView.setShowGroupedColumn(false);
-	    groupingView.setForceFit(true);
-	    groupingView.groupBy(typeCol);
-		
+		groupingView.setShowGroupedColumn(false);
+		groupingView.setForceFit(true);
+		groupingView.groupBy(typeCol);
+
 		grid = new Grid<Comment>(commentStore, cm);
 		grid.setView(groupingView);
 		grid.setContextMenu(createContextMenu());
 		grid.setSelectionModel(checkBoxSelectionModel);
 		grid.getView().setAutoExpandColumn(textCol);
 		grid.setBorders(false);
-	    grid.getView().setStripeRows(true);
-	    grid.getView().setColumnLines(true);
+		grid.getView().setStripeRows(true);
+		grid.getView().setColumnLines(true);
 
-	    StringFilter<Comment> textFilter = new StringFilter<Comment>(commentProperties.text());
-	    StringFilter<Comment> sourceFilter = new StringFilter<Comment>(commentProperties.source());
-	    StringFilter<Comment> valueFilter = new StringFilter<Comment>(commentProperties.value());
-	    
-	    ListStore<String> typeFilterStore = new ListStore<String>(new ModelKeyProvider<String>() {
-			@Override
-			public String getKey(String item) {
-				return item;
-			}
-	    });
-	    typeFilterStore.add(taxonType);
-	    typeFilterStore.add(characterType);
-	    typeFilterStore.add(taxonCharacterValueType);
-	    
-	    ListFilter<Comment, String> typeFilter = new ListFilter<Comment, String>(commentProperties.type(), typeFilterStore);
-	    
+		StringFilter<Comment> textFilter = new StringFilter<Comment>(
+				commentProperties.text());
+		StringFilter<Comment> sourceFilter = new StringFilter<Comment>(
+				commentProperties.source());
+		StringFilter<Comment> valueFilter = new StringFilter<Comment>(
+				commentProperties.value());
+
+		ListStore<CommentType> typeFilterStore = new ListStore<CommentType>(
+				new ModelKeyProvider<CommentType>() {
+					@Override
+					public String getKey(CommentType item) {
+						return item.toString();
+					}
+				});
+		for(CommentType type : CommentType.values())
+			typeFilterStore.add(type);
+		ListFilter<Comment, CommentType> typeFilter = new ListFilter<Comment, CommentType>(
+				commentProperties.type(), typeFilterStore);
+
 		GridFilters<Comment> filters = new GridFilters<Comment>();
 		filters.initPlugin(grid);
 		filters.setLocal(true);
-		
+
 		filters.addFilter(textFilter);
 		filters.addFilter(sourceFilter);
 		filters.addFilter(valueFilter);
 		filters.addFilter(typeFilter);
-	    
+
+		GridInlineEditing<Comment> editing = new GridInlineEditing<Comment>(grid);
+		editing.addEditor(textCol, new TextField());
+		editing.addEditor(valueCol, new TextField());
+		final SetValueValidator setValueValidator = new SetValueValidator(model);
+		editing.addCompleteEditHandler(new CompleteEditHandler<Comment>() {
+			@Override
+			public void onCompleteEdit(CompleteEditEvent<Comment> event) {			
+				GridCell cell = event.getEditCell();
+				Comment comment = grid.getStore().get(cell.getRow());
+				ColumnConfig<Comment, String> config = grid.getColumnModel().getColumn(cell.getCol());
+				if(config.equals(valueCol)) {
+					switch(comment.getType()) {
+						case taxonCharacterValueType:
+							Value oldValue = (Value)comment.getObject();
+							Character character = model.getTaxonMatrix().getCharacter(oldValue);
+							Taxon taxon = model.getTaxonMatrix().getTaxon(oldValue);
+							String value = config.getValueProvider().getValue(comment);
+							
+							ValidationResult validationResult = setValueValidator.validValue(value, taxon, character);
+							if(validationResult.isValid()) {
+								eventBus.fireEvent(new SetValueEvent(taxon, character, oldValue, new Value(value)));
+							} else {
+								AlertMessageBox alert = new AlertMessageBox("Set value failed", "Can't set value " +
+										value + " for " + character.getName() + " of " +  taxon.getFullName() + ". Control mode " + 
+										model.getControlMode(character).toString().toLowerCase() + " was selected for " + character.getName());
+								alert.show();
+							}
+							
+							break;
+						default:
+							break;
+					}
+				}
+				if(config.equals(textCol)) {
+					switch(comment.getType()) {
+					case characterType:
+						Character character = (Character)comment.getObject();
+						eventBus.fireEvent(new SetCharacterCommentEvent(character, comment.getText()));
+						break;
+					case taxonCharacterValueType:
+						Value value = (Value)comment.getObject();
+						eventBus.fireEvent(new SetValueCommentEvent(value, comment.getText()));
+						break;
+					case taxonType:
+						Taxon taxon = (Taxon)comment.getObject();
+						eventBus.fireEvent(new SetTaxonCommentEvent(taxon, comment.getText()));
+						break;
+					default:
+						break;
+					
+					}
+				}
+			}
+		});
+
 		setBodyBorder(false);
 		setHeadingText("Comments");
 		setWidth(800);
@@ -204,17 +297,21 @@ public class CommentsDialog extends Dialog {
 		removeItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				for(Comment comment : grid.getSelectionModel().getSelectedItems()) {
+				for (Comment comment : grid.getSelectionModel()
+						.getSelectedItems()) {
 					commentStore.remove(comment);
 					Object object = comment.getObject();
-					if(object instanceof Value) {
-						eventBus.fireEvent(new SetValueCommentEvent((Value)object, ""));
+					if (object instanceof Value) {
+						eventBus.fireEvent(new SetValueCommentEvent(
+								(Value) object, ""));
 					}
-					if(object instanceof Character) {
-						eventBus.fireEvent(new SetCharacterCommentEvent((Character)object, ""));
+					if (object instanceof Character) {
+						eventBus.fireEvent(new SetCharacterCommentEvent(
+								(Character) object, ""));
 					}
-					if(object instanceof Taxon) {
-						eventBus.fireEvent(new SetTaxonCommentEvent((Taxon)object, ""));
+					if (object instanceof Taxon) {
+						eventBus.fireEvent(new SetTaxonCommentEvent(
+								(Taxon) object, ""));
 					}
 				}
 			}
@@ -223,10 +320,10 @@ public class CommentsDialog extends Dialog {
 	}
 
 	private List<Comment> createComments() {
-		for(Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
+		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
 			System.out.println(taxon.getFullName());
 		}
-		
+
 		List<Comment> comments = new LinkedList<Comment>();
 		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
 			if (model.hasComment(taxon))
@@ -236,17 +333,18 @@ public class CommentsDialog extends Dialog {
 		for (Character character : model.getTaxonMatrix()
 				.getHierarchyCharactersBFS()) {
 			if (model.hasComment(character))
-				comments.add(new Comment(character, character.toString(), "", model
-						.getComment(character)));
+				comments.add(new Comment(character, character.toString(), "",
+						model.getComment(character)));
 		}
 		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
 			for (Character character : model.getTaxonMatrix()
 					.getHierarchyCharactersBFS()) {
 				Value value = model.getTaxonMatrix().getValue(taxon, character);
 				if (model.hasComment(value))
-					comments.add(new Comment(value, "Value of " + character.toString()
-							+ " of " + taxon.getFullName(), value.getValue(),
-							model.getComment(value)));
+					comments.add(new Comment(value, "Value of "
+							+ character.toString() + " of "
+							+ taxon.getFullName(), value.getValue(), model
+							.getComment(value)));
 			}
 		}
 		return comments;

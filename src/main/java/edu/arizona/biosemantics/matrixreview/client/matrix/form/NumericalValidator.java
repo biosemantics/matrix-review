@@ -8,12 +8,12 @@ import com.google.gwt.editor.client.EditorError;
 import com.sencha.gxt.widget.core.client.form.Validator;
 import com.sencha.gxt.widget.core.client.form.error.DefaultEditorError;
 
-import edu.arizona.biosemantics.matrixreview.client.common.Validator.ValidationResult;
+import edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator.ValidationResult;
 
 public class NumericalValidator implements Validator<String> {
 
-	private edu.arizona.biosemantics.matrixreview.client.common.NumericalValidator validator = new 
-			edu.arizona.biosemantics.matrixreview.client.common.NumericalValidator();
+	private edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator.NumericalValidator validator = new 
+			edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator.NumericalValidator();
 	
 	@Override
 	public List<EditorError> validate(Editor<String> editor, String value) {
