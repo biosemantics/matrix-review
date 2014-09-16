@@ -14,6 +14,7 @@ import com.google.gwt.editor.client.Editor.Path;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.sencha.gxt.core.client.IdentityValueProvider;
@@ -128,6 +129,10 @@ public class ColorsDialog extends Dialog {
 		public void setColor(Color color) {
 			this.color = color;
 		}
+
+		public void setObject(Object object) {
+			this.object = object;
+		}
 	}
 
 	public interface ColorEntryProperties extends PropertyAccess<ColorEntry> {
@@ -153,6 +158,7 @@ public class ColorsDialog extends Dialog {
 	}
 
 	private EventBus eventBus;
+	private EventBus subModelBus;
 	private Model model;
 	private ListStore<ColorEntry> colorEntriesStore;
 	private Grid<ColorEntry> grid;
@@ -160,11 +166,11 @@ public class ColorsDialog extends Dialog {
 	private ColorProperties colorProperties = GWT.create(ColorProperties.class);
 	private ColorPaletteBaseAppearance appearance = GWT.create(ColorPaletteAppearance.class);
 
-	public ColorsDialog(final EventBus eventBus, final Model model) {
+	public ColorsDialog(final EventBus eventBus, final EventBus subModelBus, final Model model) {
 		this.eventBus = eventBus;
+		this.subModelBus = subModelBus;
 		this.model = model;
 		
-
 		IdentityValueProvider<ColorEntry> identity = new IdentityValueProvider<ColorEntry>();
 	    final CheckBoxSelectionModel<ColorEntry> checkBoxSelectionModel = new CheckBoxSelectionModel<ColorEntry>(identity);
 	    		
@@ -230,34 +236,20 @@ public class ColorsDialog extends Dialog {
 					case taxonCharacterValueType:
 						Value value = (Value)colorEntry.getObject();
 						eventBus.fireEvent(new SetValueColorEvent(value, selectedColor));
-						//grid.getStore().getRecord(colorEntry).addChange(colorEntryProperties.color(), selectedColor);
-						Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-							@Override
-							public void execute() {
-								colorEntriesStore.update(colorEntry);
-							}
-						});
+						subModelBus.fireEvent(new SetValueColorEvent(value, selectedColor));
+						colorEntriesStore.update(colorEntry);
 						break;
 					case characterType:
 						Character character = (Character)colorEntry.getObject();
 						eventBus.fireEvent(new SetCharacterColorEvent(character, selectedColor));
-						//grid.getStore().getRecord(colorEntry).addChange(colorEntryProperties.color(), selectedColor);
-						Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-							@Override
-							public void execute() {
-								colorEntriesStore.update(colorEntry);
-							}
-						});
+						subModelBus.fireEvent(new SetCharacterColorEvent(character, selectedColor));
+						colorEntriesStore.update(colorEntry);
 						break;
 					case taxonType:
 						Taxon taxon = (Taxon)colorEntry.getObject();
 						eventBus.fireEvent(new SetTaxonColorEvent(taxon, selectedColor));
-						Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-							@Override
-							public void execute() {
-								colorEntriesStore.update(colorEntry);
-							}
-						});
+						subModelBus.fireEvent(new SetTaxonColorEvent(taxon, selectedColor));
+						colorEntriesStore.update(colorEntry);
 						break;
 					default:
 						break;
@@ -288,8 +280,12 @@ public class ColorsDialog extends Dialog {
 		colorEntriesStore = new ListStore<ColorEntry>(colorEntryProperties.key());
 		colorEntriesStore.setAutoCommit(true);
 		List<ColorEntry> colorEntries = createColorEntries();
-		for (ColorEntry colorEntry : colorEntries)
+		//final Map<Value, ColorEntry> valueColorEntries = new HashMap<Value, ColorEntry>();
+		for (ColorEntry colorEntry : colorEntries) {
+			//if(colorEntry.getType().equals(ColorEntryType.taxonCharacterValueType))
+			//	valueColorEntries.put((Value)colorEntry.getObject(), colorEntry);
 			colorEntriesStore.add(colorEntry);
+		}
 				
 		final GroupingView<ColorEntry> groupingView = new GroupingView<ColorEntry>();
 	    groupingView.setShowGroupedColumn(false);
@@ -402,9 +398,14 @@ public class ColorsDialog extends Dialog {
 							ValidationResult validationResult = setValueValidator.validValue(value, taxon, character);
 							if(validationResult.isValid()) {
 								Value newValue = new Value(value);
+								//valueColorEntries.remove(oldValue);
+								//valueColorEntries.put(newValue, colorEntry);
+								colorEntry.setObject(newValue);
 								eventBus.fireEvent(new SetValueEvent(taxon, character, oldValue, newValue));
+								subModelBus.fireEvent(new SetValueEvent(taxon, character, oldValue, newValue));
 								//will loose coloring otherwise because in model color tied to old value ref
 								eventBus.fireEvent(new SetValueColorEvent(newValue, colorEntry.getColor()));
+								subModelBus.fireEvent(new SetValueColorEvent(newValue, colorEntry.getColor()));
 							} else {
 								AlertMessageBox alert = new AlertMessageBox("Set value failed", "Can't set value " +
 										value + " for " + character.getName() + " of " +  taxon.getFullName() + ". Control mode " + 
@@ -424,6 +425,7 @@ public class ColorsDialog extends Dialog {
 		setWidth(800);
 		setHeight(600);
 		setHideOnButtonClick(true);
+		setModal(true);
 
 		ContentPanel panel = new ContentPanel();
 		panel.add(grid);
@@ -442,12 +444,15 @@ public class ColorsDialog extends Dialog {
 					Object object = colorEntry.getObject();
 					if(object instanceof Value) {
 						eventBus.fireEvent(new SetValueColorEvent((Value)object, null));
+						subModelBus.fireEvent(new SetValueColorEvent((Value)object, null));
 					}
 					if(object instanceof Character) {
 						eventBus.fireEvent(new SetCharacterColorEvent((Character)object, null));
+						subModelBus.fireEvent(new SetCharacterColorEvent((Character)object, null));
 					}
 					if(object instanceof Taxon) {
 						eventBus.fireEvent(new SetTaxonColorEvent((Taxon)object, null));
+						subModelBus.fireEvent(new SetTaxonColorEvent((Taxon)object, null));
 					}
 				}
 			}
@@ -457,11 +462,7 @@ public class ColorsDialog extends Dialog {
 
 	private List<ColorEntry> createColorEntries() {
 		List<ColorEntry> colorEntries = new LinkedList<ColorEntry>();
-		
-		for(Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
-			System.out.println("taxon " + taxon.getFullName());
-		}
-		
+				
 		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
 			if (model.hasColor(taxon))
 				colorEntries.add(new ColorEntry(taxon, taxon.getFullName(), "", model

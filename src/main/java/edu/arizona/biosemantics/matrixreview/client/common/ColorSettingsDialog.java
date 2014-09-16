@@ -54,6 +54,7 @@ public class ColorSettingsDialog extends Dialog {
 		this.setHeadingText("Colors");
 		this.setWidth(600);
 		this.setHeight(400);
+		this.setModal(true);
 		this.setHideOnButtonClick(true);
 		this.getButton(PredefinedButton.OK).addSelectHandler(new SelectHandler() {
 			@Override

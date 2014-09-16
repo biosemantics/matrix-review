@@ -426,6 +426,8 @@ public class ModelControler implements LoadModelEventHandler, AddTaxonEventHandl
 	@Override
 	public void onSet(SetValueEvent event) {
 		model.getTaxonMatrix().setValue(event.getTaxon(), event.getCharacter(), event.getNewValue());
+		model.setColor(event.getNewValue(), model.getColor(event.getOldValue()));
+		model.setComment(event.getNewValue(), model.getComment(event.getOldValue()));
 	}
 
 	@Override

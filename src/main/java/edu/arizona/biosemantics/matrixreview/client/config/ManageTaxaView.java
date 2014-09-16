@@ -31,6 +31,7 @@ import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.data.shared.TreeStore.TreeNode;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.box.MultiLinePromptMessageBox;
 import com.sencha.gxt.widget.core.client.button.ButtonBar;
@@ -41,6 +42,8 @@ import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutP
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
+import com.sencha.gxt.widget.core.client.event.BeforeShowContextMenuEvent;
+import com.sencha.gxt.widget.core.client.event.BeforeShowContextMenuEvent.BeforeShowContextMenuHandler;
 import com.sencha.gxt.widget.core.client.event.BeforeShowEvent;
 import com.sencha.gxt.widget.core.client.event.BeforeShowEvent.BeforeShowHandler;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
@@ -51,7 +54,10 @@ import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.FieldSet;
 import com.sencha.gxt.widget.core.client.form.TextArea;
+import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.info.Info;
+import com.sencha.gxt.widget.core.client.menu.AdapterMenuItem;
+import com.sencha.gxt.widget.core.client.menu.HeaderMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
@@ -59,6 +65,9 @@ import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent.SelectionChangedHandler;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 
+import edu.arizona.biosemantics.matrixreview.client.common.InputElementVisibleTextField;
+import edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator;
+import edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator.ValidationResult;
 import edu.arizona.biosemantics.matrixreview.client.common.TaxonAddDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.TaxonModifyDialog;
 import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
@@ -74,8 +83,11 @@ import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEve
 import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonCommentEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueColorEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetValueCommentEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.TaxonMenu;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
+import edu.arizona.biosemantics.matrixreview.shared.model.MatrixEntry;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.OrganCharacterNode;
 import edu.arizona.biosemantics.matrixreview.shared.model.OrganCharacterNode.CharacterNode;
@@ -97,9 +109,11 @@ public class ManageTaxaView extends ContentPanel {
 	private TreeStore<Taxon> store = new TreeStore<Taxon>(taxonProperties.key());
 	private Set<SelectionChangedHandler<Taxon>> selectionChangeHandlers = 
 			new HashSet<SelectionChangedHandler<Taxon>>();
+	private ManageMatrixView manageMatrixView;
 	
-	public ManageTaxaView(EventBus eventBus, boolean navigation) {
+	public ManageTaxaView(EventBus eventBus, boolean navigation, ManageMatrixView manageMatrixView) {
 		this.eventBus = eventBus;
+		this.manageMatrixView = manageMatrixView;
 		tree = createTree();
 		
 		this.setTitle("Taxa Management");
@@ -207,6 +221,85 @@ public class ManageTaxaView extends ContentPanel {
 			public void onSet(SetTaxonCommentEvent event) {
 				store.update(event.getTaxon());
 			}
+
+			private void bindEvents() {
+				eventBus.addHandler(LoadModelEvent.TYPE, new LoadModelEvent.LoadModelEventHandler() {
+					@Override
+					public void onLoad(LoadModelEvent event) {
+						model = event.getModel();
+						loadModel();
+					}
+				});
+				eventBus.addHandler(RemoveTaxaEvent.TYPE, new RemoveTaxaEvent.RemoveTaxonEventHandler() {
+					@Override
+					public void onRemove(RemoveTaxaEvent event) {
+						for(Taxon taxon : event.getTaxa()) {
+							store.remove(taxon);
+						}
+					}
+				});
+				eventBus.addHandler(AddTaxonEvent.TYPE, new AddTaxonEvent.AddTaxonEventHandler() {
+					@Override
+					public void onAdd(AddTaxonEvent event) {
+						Taxon taxon = event.getTaxon();
+						if(taxon.hasParent())
+							store.add(taxon.getParent(), taxon);
+						else
+							store.add(taxon);
+					}
+				});
+				eventBus.addHandler(ModifyTaxonEvent.TYPE, new ModifyTaxonEvent.ModifyTaxonEventHandler() {
+					@Override
+					public void onModify(ModifyTaxonEvent event) {
+						Taxon taxon = event.getTaxon();
+						
+						if(event.getParent() == null && taxon.getParent() != null) {
+							store.remove(taxon);
+							store.add(taxon);
+						} else if(event.getParent() != null && 
+								!event.getParent().equals(store.getParent(taxon))) {
+							store.remove(taxon);
+							store.add(event.getParent(), taxon);
+						}
+						store.update(taxon);
+					}
+				});
+				eventBus.addHandler(MoveTaxaUpEvent.TYPE, new MoveTaxaUpEvent.MoveTaxaUpEventHandler() {
+					@Override
+					public void onMove(MoveTaxaUpEvent event) {
+						move(event.getTaxa(), true);
+					}
+				});
+				eventBus.addHandler(MoveTaxaDownEvent.TYPE, new MoveTaxaDownEvent.MoveTaxaDownEventHandler() {
+					@Override
+					public void onMove(MoveTaxaDownEvent event) {
+						move(event.getTaxa(), false);
+					}
+				});
+				eventBus.addHandler(SetTaxonColorEvent.TYPE, new SetTaxonColorEvent.SetTaxonColorEventHandler() {
+					@Override
+					public void onSet(SetTaxonColorEvent event) {
+						store.update(event.getTaxon());
+					}
+				});
+				eventBus.addHandler(SetTaxonCommentEvent.TYPE, new SetTaxonCommentEvent.SetTaxonCommentEventHandler() {
+					@Override
+					public void onSet(SetTaxonCommentEvent event) {
+						store.update(event.getTaxon());
+					}
+				});
+				
+				
+				tree.getSelectionModel().addSelectionChangedHandler(new SelectionChangedHandler<Taxon>() {
+					@Override
+					public void onSelectionChanged(SelectionChangedEvent<Taxon> event) {
+						for(SelectionChangedHandler<Taxon> handler :  selectionChangeHandlers) {
+							handler.onSelectionChanged(new SelectionChangedEvent<Taxon>(event.getSelection()));
+						}
+					}
+				});
+				
+			}
 		});
 		
 		
@@ -288,81 +381,121 @@ public class ManageTaxaView extends ContentPanel {
 		addButton.addSelectHandler(new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {
-				Taxon selected = tree.getSelectionModel().getSelectedItem();
-				TaxonAddDialog addDialog = new TaxonAddDialog(eventBus, model, null);
-				addDialog.show();
-				if(selected != null)
-					addDialog.selectParent(selected);
+				showTaxonAdd();
 			}
 		});
 		TextButton modifyButton = new TextButton("Modify");
 		modifyButton.addSelectHandler(new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {
-				Taxon selected = tree.getSelectionModel().getSelectedItem();
-				TaxonModifyDialog modifyDialog = new TaxonModifyDialog(eventBus, model, selected);
-				modifyDialog.show();
-				if(selected != null && selected.getParent() != null)
-					modifyDialog.selectParent(selected.getParent());
+				showTaxonModify();
 			}
 		});
 		TextButton removeButton = new TextButton("Remove");
 		removeButton.addSelectHandler(new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {
-				List<Taxon> selected = tree.getSelectionModel().getSelectedItems();				
-				for(final Taxon taxon : selected) {
-					if (!taxon.getChildren().isEmpty()) {
-						String childrenString = "";
-						for (Taxon child : taxon.getChildren()) {
-							childrenString += child.getFullName() + ", ";
-						}
-						childrenString = childrenString.substring(0, childrenString.length() - 2);
-						ConfirmMessageBox box = new ConfirmMessageBox(
-								"Remove Taxon",
-								"Removing the taxon will also remove all of it's descendants: "
-										+ childrenString);
-						box.addDialogHideHandler(new DialogHideHandler() {
-							@Override
-							public void onDialogHide(DialogHideEvent event) {
-								if(event.getHideButton().equals(PredefinedButton.YES)) {
-									eventBus.fireEvent(new RemoveTaxaEvent(taxon));
-								}
-							}
-							
-						});
-						box.show();
-					} else {
-						eventBus.fireEvent(new RemoveTaxaEvent(taxon));
-					}
-				}
+				showTaxonRemove();
 			}
 		});
 		TextButton upButton = new TextButton("Move Up");
 		upButton.addSelectHandler(new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {
-				List<Taxon> selected = tree.getSelectionModel().getSelectedItems();
-				eventBus.fireEvent(new MoveTaxaUpEvent(selected));
-				tree.getSelectionModel().setSelection(selected);
+				showTaxonUp();
 			}
 		});
 		TextButton downButton = new TextButton("Move Down");
 		downButton.addSelectHandler(new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {
-				List<Taxon> selected = tree.getSelectionModel().getSelectedItems();
-				eventBus.fireEvent(new MoveTaxaDownEvent(selected));
-				tree.getSelectionModel().setSelection(selected);
+				showTaxonDown();
 			}
 		});
 		
-		taxaButtonBar.add(addButton);
-		taxaButtonBar.add(modifyButton);
-		taxaButtonBar.add(removeButton);
+		//taxaButtonBar.add(addButton);
+		//taxaButtonBar.add(modifyButton);
+		//taxaButtonBar.add(removeButton);
 		taxaButtonBar.add(upButton);
 		taxaButtonBar.add(downButton);
 		return taxaButtonBar;
+	}
+
+	protected void showTaxonUp() {
+		List<Taxon> selected = tree.getSelectionModel().getSelectedItems();
+		eventBus.fireEvent(new MoveTaxaUpEvent(selected));
+		tree.getSelectionModel().setSelection(selected);
+	}
+
+	protected void showTaxonDown() {
+		List<Taxon> selected = tree.getSelectionModel().getSelectedItems();
+		eventBus.fireEvent(new MoveTaxaDownEvent(selected));
+		tree.getSelectionModel().setSelection(selected);
+	}
+
+	protected void showTaxonRemove() {
+		List<Taxon> selected = tree.getSelectionModel().getSelectedItems();				
+		for(final Taxon taxon : selected) {
+			if (!taxon.getChildren().isEmpty()) {
+				String childrenString = "";
+				for (Taxon child : taxon.getChildren()) {
+					childrenString += child.getFullName() + ", ";
+				}
+				childrenString = childrenString.substring(0, childrenString.length() - 2);
+				ConfirmMessageBox box = new ConfirmMessageBox(
+						"Remove Taxon",
+						"Removing the taxon will also remove all of it's descendants: "
+								+ childrenString);
+				box.addDialogHideHandler(new DialogHideHandler() {
+					@Override
+					public void onDialogHide(DialogHideEvent event) {
+						if(event.getHideButton().equals(PredefinedButton.YES)) {
+							eventBus.fireEvent(new RemoveTaxaEvent(taxon));
+						}
+					}
+					
+				});
+				box.show();
+			} else {
+				eventBus.fireEvent(new RemoveTaxaEvent(taxon));
+			}
+		}
+	}
+
+	protected void showTaxonModify() {
+		Taxon selected = tree.getSelectionModel().getSelectedItem();
+		TaxonModifyDialog modifyDialog = new TaxonModifyDialog(eventBus, model, selected);
+		modifyDialog.show();
+		if(selected != null && selected.getParent() != null)
+			modifyDialog.selectParent(selected.getParent());
+	}
+
+	protected void showTaxonAdd() {
+		Taxon selected = tree.getSelectionModel().getSelectedItem();
+		TaxonAddDialog addDialog = new TaxonAddDialog(eventBus, model, null);
+		addDialog.show();
+		if(selected != null)
+			addDialog.selectParent(selected);
+	}
+	
+	protected void setValue(String value) {
+		final List<Taxon> taxa = manageMatrixView.getSelectedTaxa();
+		final List<Character> characters = manageMatrixView.getSelectedCharacters();
+		
+		for(Taxon taxon : taxa) {
+			for(Character character : characters) {
+				SetValueValidator setValueValidator = new SetValueValidator(model);
+				ValidationResult validationResult = setValueValidator.validValue(value, taxon, character);
+				if(validationResult.isValid()) {
+					eventBus.fireEvent(new SetValueEvent(taxon, character, model.getTaxonMatrix().getValue(taxon, character), new Value(value)));
+				} else {
+					AlertMessageBox alert = new AlertMessageBox("Set value failed", "Can't set value " +
+							value + " for " + character.getName() + " of " +  taxon.getFullName() + ". Control mode " + 
+							model.getControlMode(character).toString().toLowerCase() + " was selected for " + character.getName());
+					alert.show();
+				}
+			}
+		}
 	}
 
 	private Tree<Taxon, Taxon> createTree() {
@@ -393,7 +526,185 @@ public class ManageTaxaView extends ContentPanel {
 	private Menu createTreeContextMenu(final Tree<Taxon, Taxon> tree) {
 		final Menu menu = new Menu();
 		
+		menu.add(new HeaderMenuItem("Taxon"));
 		MenuItem item = new MenuItem();
+		item.setText("Add");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				showTaxonAdd();
+			}
+		});
+		menu.add(item);
+		
+		item = new MenuItem();
+		item.setText("Modify");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				showTaxonModify();
+			}
+		});
+		menu.add(item);
+		
+		item = new MenuItem();
+		item.setText("Remove");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				showTaxonRemove();
+			}
+		});
+		menu.add(item);
+		
+		item = new MenuItem();
+		item.setText("Move up");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				showTaxonUp();
+			}
+		});
+		menu.add(item);
+		
+		item = new MenuItem();
+		item.setText("Move down");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				showTaxonDown();
+			}
+		});
+		menu.add(item);
+		
+		final HeaderMenuItem stateHeaderMenuItem = new HeaderMenuItem("State");
+		menu.add(stateHeaderMenuItem);
+		
+		final MenuItem setStateMenuItem = new MenuItem();
+		setStateMenuItem.setText("Set");
+		Menu setMenu = new Menu();
+		setStateMenuItem.setSubMenu(setMenu);
+		
+		final InputElementVisibleTextField valueField = new InputElementVisibleTextField();
+		setMenu.add(new HeaderMenuItem("Value"));
+		setMenu.add(valueField);
+		TextButton setValueButton = new TextButton("Save");
+		setMenu.add(new AdapterMenuItem(setValueButton));
+		setValueButton.addSelectHandler(new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				setValue(valueField.getText());
+				menu.hide();
+			}
+		});
+		setMenu.add(new HeaderMenuItem("Annotation"));
+		menu.add(setStateMenuItem);
+		item = new MenuItem();
+		item.setText("Comment");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox("Comment", "");
+				final List<Character> characters = manageMatrixView.getSelectedCharacters();
+				final List<Taxon> taxa = manageMatrixView.getSelectedTaxa();
+				if(characters.size() == 1 && taxa.size() == 1) {
+					Value value = model.getTaxonMatrix().getValue(taxa.get(0), characters.get(0));
+					box.getTextArea().setValue(model.hasComment(value) ? model.getComment(value) : "");
+				}
+				box.addHideHandler(new HideHandler() {
+					@Override
+					public void onHide(HideEvent event) {
+						for(Taxon taxon : taxa) {
+							for(Character character : characters) {
+								Value value = model.getTaxonMatrix().getValue(taxon, character);
+								eventBus.fireEvent(new SetValueCommentEvent(value, box.getValue()));
+								String comment = Format.ellipse(box.getValue(), 80);
+								String message = Format.substitute("'{0}' saved", new Params(comment));
+								Info.display("Comment", message);
+							}
+						}
+					}
+				});
+				box.show();
+			}
+		});
+		setMenu.add(item);
+		final MenuItem colorizeItem = new MenuItem();
+		colorizeItem.setText("Colorize");
+		final Menu colorMenu = new Menu();
+		colorizeItem.setSubMenu(colorMenu);
+		setMenu.add(colorizeItem);
+		
+		menu.addBeforeShowHandler(new BeforeShowHandler() {
+			@Override
+			public void onBeforeShow(BeforeShowEvent event) {
+				colorizeItem.setVisible(!model.getColors().isEmpty());
+				colorMenu.clear();
+				
+				MenuItem offItem = new MenuItem("None");
+				offItem.addSelectionHandler(new SelectionHandler<Item>() {
+					@Override
+					public void onSelection(SelectionEvent<Item> event) {
+						final List<Character> characters = manageMatrixView.getSelectedCharacters();
+						final List<Taxon> taxa = manageMatrixView.getSelectedTaxa();
+						for(Taxon taxon : taxa) {
+							for(Character character : characters) {
+								Value value = model.getTaxonMatrix().getValue(taxon, character);
+								eventBus.fireEvent(new SetValueColorEvent(value, null));
+							}
+						}
+					}
+				});
+				colorMenu.add(offItem);
+				
+				for(final Color color : model.getColors()) {
+					MenuItem colorItem = new MenuItem(color.getUse());
+					colorItem.getElement().getStyle().setProperty("backgroundColor", "#" + color.getHex());
+					colorItem.addSelectionHandler(new SelectionHandler<Item>() {
+						@Override
+						public void onSelection(SelectionEvent<Item> event) {
+							final List<Character> characters = manageMatrixView.getSelectedCharacters();
+							final List<Taxon> taxa = manageMatrixView.getSelectedTaxa();
+							for(Taxon taxon : taxa) {
+								for(Character character : characters) {
+									Value value = model.getTaxonMatrix().getValue(taxon, character);
+									eventBus.fireEvent(new SetValueColorEvent(value, color));
+								}
+							}
+						}
+					});
+					colorMenu.add(colorItem);
+				}
+				
+				if(manageMatrixView.getCurrentSelectedMatrixEntry() == null) {
+					setStateMenuItem.setVisible(false);
+					stateHeaderMenuItem.setVisible(false);
+				} else {
+					List<Character> characters = manageMatrixView.getSelectedCharacters();
+					List<Taxon> taxa = manageMatrixView.getSelectedTaxa();
+					if(characters.size() == 1 && taxa.size() == 1) {
+						Value value = model.getTaxonMatrix().getValue(taxa.get(0), characters.get(0));
+						valueField.setText(model.getTaxonMatrix().getValue(taxa.get(0), characters.get(0)).getValue());
+						if(model.hasColor(value)) {
+							valueField.getInputEl().getStyle().setBackgroundImage("none");
+							valueField.getInputEl().getStyle().setBackgroundColor("#" + model.getColor(value).getHex());
+						} else {
+							valueField.getInputEl().getStyle().setBackgroundImage("none");
+							valueField.getInputEl().getStyle().setBackgroundColor("");
+						}
+					} else {
+							valueField.setText("");
+							valueField.getInputEl().getStyle().setBackgroundImage("none");
+							valueField.getInputEl().getStyle().setBackgroundColor("");
+					}
+					setStateMenuItem.setVisible(true);
+					stateHeaderMenuItem.setVisible(true);
+				}
+			}
+		});
+		
+		menu.add(new HeaderMenuItem("View"));
+		item = new MenuItem();
 		item.setText("Expand All");
 		// item.setIcon(header.getAppearance().sortAscendingIcon());
 		item.addSelectionHandler(new SelectionHandler<Item>() {
@@ -415,6 +726,7 @@ public class ManageTaxaView extends ContentPanel {
 		});
 		menu.add(item);
 		
+		menu.add(new HeaderMenuItem("Annotation"));
 		item = new MenuItem();
 		item.setText("Comment");
 		// item.setIcon(header.getAppearance().sortAscendingIcon());
@@ -475,6 +787,38 @@ public class ManageTaxaView extends ContentPanel {
 		});
 		return menu;
 	}
+	
+	/*protected void updateValueField() {
+		MatrixEntry matrixEntry = getCurrentSelectedValue();
+		if(matrixEntry != null) {
+			String labeText = "Value of " + matrixEntry.getCharacter() + " of " + matrixEntry.getTaxon().getFullName() + ": ";
+			//setValueFieldLabel.setVisible(true);
+			//setValueFieldLabel.setText(labeText);
+			//setValueFieldLabel.setTitle(labeText);
+			valueLabel.setText(labeText);
+			valueLabel.setTitle(labeText);
+			setValueField.setVisible(true);
+			valueLabel.setVisible(true);
+			setValueButton.setVisible(true);
+			Value value = matrixEntry.getValue();
+			setValueField.setText(value.getValue());
+			if(model.hasColor(value)) {
+				setValueField.getInputEl().getStyle().setBackgroundImage("none");
+				setValueField.getInputEl().getStyle().setBackgroundColor("#" + model.getColor(value).getHex());
+			} else {
+				setValueField.getInputEl().getStyle().setBackgroundImage("none");
+				setValueField.getInputEl().getStyle().setBackgroundColor("");
+			}
+		} else {
+			//setValueFieldLabel.setVisible(false);
+			//setValueField.setVisible(false);
+			//valueLabel.setVisible(false);
+			//setValueButton.setVisible(false);
+			//setValueField.setText("");
+			setValueField.getInputEl().getStyle().setBackgroundImage("none");
+			setValueField.getInputEl().getStyle().setBackgroundColor("");
+		}
+	}*/
 	
 	protected Menu createColorizeMenu() {
 		Menu colorMenu = new Menu();
@@ -575,4 +919,5 @@ public class ManageTaxaView extends ContentPanel {
 	public void removeSelectionChangeHandler(SelectionChangedHandler<Taxon> handler) {
 		this.selectionChangeHandlers.remove(handler);
 	}
+
 }

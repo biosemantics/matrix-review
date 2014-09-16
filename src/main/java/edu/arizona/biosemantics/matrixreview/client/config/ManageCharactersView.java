@@ -22,10 +22,10 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
 import com.sencha.gxt.core.client.IdentityValueProvider;
+import com.sencha.gxt.core.client.Style.SelectionMode;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.core.client.util.Format;
 import com.sencha.gxt.core.client.util.Params;
@@ -56,6 +56,8 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.FieldSet;
 import com.sencha.gxt.widget.core.client.info.Info;
+import com.sencha.gxt.widget.core.client.menu.AdapterMenuItem;
+import com.sencha.gxt.widget.core.client.menu.HeaderMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
@@ -65,8 +67,11 @@ import com.sencha.gxt.widget.core.client.tree.Tree;
 
 import edu.arizona.biosemantics.matrixreview.client.common.CharacterAddDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.CharacterModifyDialog;
+import edu.arizona.biosemantics.matrixreview.client.common.InputElementVisibleTextField;
 import edu.arizona.biosemantics.matrixreview.client.common.MergeDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.SelectCharacterStatesWindow;
+import edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator;
+import edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator.ValidationResult;
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent;
@@ -81,19 +86,21 @@ import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterColorEvent
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonColorEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonCommentEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueColorEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetValueCommentEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent.SetCharacterStatesEventHandler;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.ControlMode;
 import edu.arizona.biosemantics.matrixreview.shared.model.ControlModeProperties;
+import edu.arizona.biosemantics.matrixreview.shared.model.MatrixEntry;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.OrganCharacterNode;
 import edu.arizona.biosemantics.matrixreview.shared.model.OrganCharacterNode.*;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Organ;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
 public class ManageCharactersView extends ContentPanel {
 
@@ -112,21 +119,15 @@ public class ManageCharactersView extends ContentPanel {
 	private HashMap<Character, CharacterNode> characterNodes;
 	private Set<SelectionChangedHandler<OrganCharacterNode>> selectionChangeHandlers = 
 			new HashSet<SelectionChangedHandler<OrganCharacterNode>>();
+	private ComboBox<ControlMode> controlComboBar;
+	private ManageMatrixView manageMatrixView;
+	private ListView<String, String> statesList;
 
 
-	public ManageCharactersView(EventBus eventBus, boolean navigation) {
+	public ManageCharactersView(EventBus eventBus, boolean navigation, ManageMatrixView manageMatrixView) {
 		this.eventBus = eventBus;
+		this.manageMatrixView = manageMatrixView;
 		this.tree = createTree();
-		tree.getSelectionModel().addSelectionChangedHandler(new SelectionChangedHandler<OrganCharacterNode>() {
-
-			@Override
-			public void onSelectionChanged(
-					SelectionChangedEvent<OrganCharacterNode> event) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-		});
 		
 		this.setTitle("Character Management");
 		this.setHeadingText("Character Management");
@@ -453,19 +454,7 @@ public class ManageCharactersView extends ContentPanel {
 		addButton.addSelectHandler(new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {
-				OrganCharacterNode selected = tree.getSelectionModel()
-						.getSelectedItem();
-				Character after = null;
-				Organ organ = null;
-				if (selected instanceof CharacterNode) {
-					after = ((CharacterNode) selected).getCharacter();
-					organ = ((CharacterNode) selected).getCharacter().getOrgan();
-				}
-				if (selected instanceof OrganNode)
-					organ = ((OrganNode) selected).getOrgan();
-				CharacterAddDialog addDialog = new CharacterAddDialog(eventBus,	model, organ);
-				addDialog.setAfter(after);
-				addDialog.show();
+				showCharacterAdd();
 			}
 		});
 
@@ -473,28 +462,7 @@ public class ManageCharactersView extends ContentPanel {
 		modifyButton.addSelectHandler(new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {
-				OrganCharacterNode selected = tree.getSelectionModel()
-						.getSelectedItem();
-				if (selected instanceof CharacterNode) {
-					Character character = ((CharacterNode) selected)
-							.getCharacter();
-					CharacterModifyDialog modifyDialog = new CharacterModifyDialog(
-							eventBus, model, character);
-					modifyDialog.show();
-				}
-				if (selected instanceof OrganNode) {
-					final PromptMessageBox box = new PromptMessageBox("Rename Organ", 
-							"Please enter new organ name:");
-					final Organ organ = ((OrganNode)selected).getOrgan();
-					box.getTextField().setText(organ.getName());
-					box.addHideHandler(new HideHandler() {
-						@Override
-						public void onHide(HideEvent event) {
-							eventBus.fireEvent(new ModifyOrganEvent(organ, organ.getName(), box.getValue()));
-						}
-					});
-					box.show();
-				}
+				showCharacterModify();
 			}
 		});
 
@@ -502,19 +470,7 @@ public class ManageCharactersView extends ContentPanel {
 		removeButton.addSelectHandler(new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {
-				List<OrganCharacterNode> selected = tree.getSelectionModel()
-						.getSelectedItems();
-				List<Character> toRemove = new LinkedList<Character>();
-				for (OrganCharacterNode node : selected) {
-					if (node instanceof CharacterNode) {
-						toRemove.add(((CharacterNode) node).getCharacter());
-					}
-					if (node instanceof OrganNode) {
-						toRemove.addAll(((OrganNode) node).getOrgan()
-								.getFlatCharacters());
-					}
-				}
-				eventBus.fireEvent(new RemoveCharacterEvent(toRemove));
+				showCharacterRemove();
 			}
 		});
 
@@ -522,36 +478,14 @@ public class ManageCharactersView extends ContentPanel {
 				controlModeProperties.key());
 		for (ControlMode mode : ControlMode.values())
 			controlModeStore.add(mode);
-		controlCombo = new ComboBox<ControlMode>(controlModeStore,
+		controlComboBar = new ComboBox<ControlMode>(controlModeStore,
 				controlModeProperties.name());
-		controlCombo.setForceSelection(true);
-		controlCombo.setTriggerAction(TriggerAction.ALL);
-		controlCombo.addSelectionHandler(new SelectionHandler<ControlMode>() {
+		controlComboBar.setForceSelection(true);
+		controlComboBar.setTriggerAction(TriggerAction.ALL);
+		controlComboBar.addSelectionHandler(new SelectionHandler<ControlMode>() {
 			@Override
 			public void onSelection(SelectionEvent<ControlMode> event) {
-				final OrganCharacterNode selected = tree.getSelectionModel()
-						.getSelectedItem();
-				if (selected instanceof CharacterNode) {
-					final Character character = ((CharacterNode) selected).getCharacter();
-					
-					if(event.getSelectedItem().equals(ControlMode.CATEGORICAL)) {
-						List<String> sortValues = getCharacterValues(character);
-						SelectCharacterStatesWindow window = new SelectCharacterStatesWindow(character, sortValues);
-						window.show();
-						window.addSetCharacterStatesEventHandler(new SetCharacterStatesEventHandler() {
-							@Override
-							public void onSet(SetCharacterStatesEvent event) {		
-								eventBus.fireEvent(new SetControlModeEvent(character, ControlMode.CATEGORICAL, event.getStates()));
-								updateControlMode(selected);
-								//updateCategoricalValuesList(character);
-							}
-						});
-					} else { 
-						eventBus.fireEvent(new SetControlModeEvent(character, event.getSelectedItem()));
-						updateControlMode(selected);
-						//updateCategoricalValuesList(character);
-					}
-				}
+				showControlState(event.getSelectedItem());
 			}
 		});
 		
@@ -559,44 +493,14 @@ public class ManageCharactersView extends ContentPanel {
 		upButton.addSelectHandler(new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {
-				List<OrganCharacterNode> selected = tree.getSelectionModel().getSelectedItems();
-				List<Character> characters = new LinkedList<Character>();
-				for(OrganCharacterNode node : selected) {
-					if(node instanceof CharacterNode) {
-						characters.add(((CharacterNode)node).getCharacter());
-					}
-				}
-				List<Organ> organs = new LinkedList<Organ>();
-				for(OrganCharacterNode node : selected) {
-					if(node instanceof OrganNode) {
-						organs.add(((OrganNode)node).getOrgan());
-					}
-				}
-				eventBus.fireEvent(new MoveCharactersUpEvent(characters));
-				eventBus.fireEvent(new MoveOrgansUpEvent(organs));
-				tree.getSelectionModel().setSelection(selected);
+				showCharacterUp();
 			}
 		});
 		TextButton downButton = new TextButton("Move Down");
 		downButton.addSelectHandler(new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {
-				List<OrganCharacterNode> selected = tree.getSelectionModel().getSelectedItems();
-				List<Character> characters = new LinkedList<Character>();
-				for(OrganCharacterNode node : selected) {
-					if(node instanceof CharacterNode) {
-						characters.add(((CharacterNode)node).getCharacter());
-					}
-				}
-				List<Organ> organs = new LinkedList<Organ>();
-				for(OrganCharacterNode node : selected) {
-					if(node instanceof OrganNode) {
-						organs.add(((OrganNode)node).getOrgan());
-					}
-				}
-				eventBus.fireEvent(new MoveCharactersDownEvent(characters));
-				eventBus.fireEvent(new MoveOrgansDownEvent(organs));
-				tree.getSelectionModel().setSelection(selected);
+				showCharacterDown();
 			}
 		});	 
 		
@@ -604,38 +508,165 @@ public class ManageCharactersView extends ContentPanel {
 		mergeButton.addSelectHandler(new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {
-				List<OrganCharacterNode> selected = tree.getSelectionModel().getSelectedItems();
-				List<Character> characters = new LinkedList<Character>();
-				for(OrganCharacterNode node : selected) {
-					if(node instanceof CharacterNode) {
-						characters.add(((CharacterNode)node).getCharacter());
-					}
-				}
-				List<Organ> organs = new LinkedList<Organ>();
-				for(OrganCharacterNode node : selected) {
-					if(node instanceof OrganNode) {
-						characters.addAll(((OrganNode)node).getOrgan().getCharacters());
-					}
-				}
-				if(characters.size() >= 2) {
-					MergeDialog mergeDialog = new MergeDialog(eventBus, model, characters.get(0), characters.subList(1, characters.size()));
-					mergeDialog.show();
-				} else {
-					AlertMessageBox box = new AlertMessageBox("Character selection", "You have to select at least two charaters to merge");
-					box.show();
-				}
+				showCharacterMerge();
 			}
 		});	 
 
-		charactersButtonBar.add(addButton);
-		charactersButtonBar.add(modifyButton);
-		charactersButtonBar.add(removeButton);
+		//charactersButtonBar.add(addButton);
+		//charactersButtonBar.add(modifyButton);
+		//charactersButtonBar.add(removeButton);
 		charactersButtonBar.add(upButton);
 		charactersButtonBar.add(downButton);
-		charactersButtonBar.add(new Label("Control Mode"));
-		charactersButtonBar.add(controlCombo);
-		charactersButtonBar.add(mergeButton);
+		//charactersButtonBar.add(new Label("Control Mode"));
+		//charactersButtonBar.add(controlCombo);
+		//charactersButtonBar.add(mergeButton);
 		return charactersButtonBar;
+	}
+
+	protected void showCharacterMerge() {
+		List<OrganCharacterNode> selected = tree.getSelectionModel().getSelectedItems();
+		List<Character> characters = new LinkedList<Character>();
+		for(OrganCharacterNode node : selected) {
+			if(node instanceof CharacterNode) {
+				characters.add(((CharacterNode)node).getCharacter());
+			}
+		}
+		List<Organ> organs = new LinkedList<Organ>();
+		for(OrganCharacterNode node : selected) {
+			if(node instanceof OrganNode) {
+				characters.addAll(((OrganNode)node).getOrgan().getCharacters());
+			}
+		}
+		if(characters.size() >= 2) {
+			MergeDialog mergeDialog = new MergeDialog(eventBus, model, characters.get(0), characters.subList(1, characters.size()));
+			mergeDialog.show();
+		} else {
+			AlertMessageBox box = new AlertMessageBox("Character selection", "You have to select at least two charaters to merge");
+			box.show();
+		}
+	}
+
+	protected void showCharacterDown() {
+		List<OrganCharacterNode> selected = tree.getSelectionModel().getSelectedItems();
+		List<Character> characters = new LinkedList<Character>();
+		for(OrganCharacterNode node : selected) {
+			if(node instanceof CharacterNode) {
+				characters.add(((CharacterNode)node).getCharacter());
+			}
+		}
+		List<Organ> organs = new LinkedList<Organ>();
+		for(OrganCharacterNode node : selected) {
+			if(node instanceof OrganNode) {
+				organs.add(((OrganNode)node).getOrgan());
+			}
+		}
+		eventBus.fireEvent(new MoveCharactersDownEvent(characters));
+		eventBus.fireEvent(new MoveOrgansDownEvent(organs));
+		tree.getSelectionModel().setSelection(selected);
+	}
+
+	protected void showCharacterUp() {
+		List<OrganCharacterNode> selected = tree.getSelectionModel().getSelectedItems();
+		List<Character> characters = new LinkedList<Character>();
+		for(OrganCharacterNode node : selected) {
+			if(node instanceof CharacterNode) {
+				characters.add(((CharacterNode)node).getCharacter());
+			}
+		}
+		List<Organ> organs = new LinkedList<Organ>();
+		for(OrganCharacterNode node : selected) {
+			if(node instanceof OrganNode) {
+				organs.add(((OrganNode)node).getOrgan());
+			}
+		}
+		eventBus.fireEvent(new MoveCharactersUpEvent(characters));
+		eventBus.fireEvent(new MoveOrgansUpEvent(organs));
+		tree.getSelectionModel().setSelection(selected);
+	}
+
+	protected void showControlState(ControlMode controlMode) {
+		final OrganCharacterNode selected = tree.getSelectionModel()
+				.getSelectedItem();
+		if (selected instanceof CharacterNode) {
+			final Character character = ((CharacterNode) selected).getCharacter();
+			
+			if(controlMode.equals(ControlMode.CATEGORICAL)) {
+				List<String> sortValues = getCharacterValues(character);
+				SelectCharacterStatesWindow window = new SelectCharacterStatesWindow(character, sortValues);
+				window.show();
+				window.addSetCharacterStatesEventHandler(new SetCharacterStatesEventHandler() {
+					@Override
+					public void onSet(SetCharacterStatesEvent event) {		
+						eventBus.fireEvent(new SetControlModeEvent(character, ControlMode.CATEGORICAL, event.getStates()));
+						updateControlMode(controlCombo, selected);
+						updateControlMode(controlComboBar, selected);
+						//updateCategoricalValuesList(character);
+					}
+				});
+			} else { 
+				eventBus.fireEvent(new SetControlModeEvent(character, controlMode));
+				updateControlMode(controlCombo, selected);
+				updateControlMode(controlComboBar, selected);
+				//updateCategoricalValuesList(character);
+			}
+		}
+	}
+
+	protected void showCharacterRemove() {
+		List<OrganCharacterNode> selected = tree.getSelectionModel()
+				.getSelectedItems();
+		List<Character> toRemove = new LinkedList<Character>();
+		for (OrganCharacterNode node : selected) {
+			if (node instanceof CharacterNode) {
+				toRemove.add(((CharacterNode) node).getCharacter());
+			}
+			if (node instanceof OrganNode) {
+				toRemove.addAll(((OrganNode) node).getOrgan()
+						.getFlatCharacters());
+			}
+		}
+		eventBus.fireEvent(new RemoveCharacterEvent(toRemove));
+	}
+
+	protected void showCharacterModify() {
+		OrganCharacterNode selected = tree.getSelectionModel()
+				.getSelectedItem();
+		if (selected instanceof CharacterNode) {
+			Character character = ((CharacterNode) selected)
+					.getCharacter();
+			CharacterModifyDialog modifyDialog = new CharacterModifyDialog(
+					eventBus, model, character);
+			modifyDialog.show();
+		}
+		if (selected instanceof OrganNode) {
+			final PromptMessageBox box = new PromptMessageBox("Rename Organ", 
+					"Please enter new organ name:");
+			final Organ organ = ((OrganNode)selected).getOrgan();
+			box.getTextField().setText(organ.getName());
+			box.addHideHandler(new HideHandler() {
+				@Override
+				public void onHide(HideEvent event) {
+					eventBus.fireEvent(new ModifyOrganEvent(organ, organ.getName(), box.getValue()));
+				}
+			});
+			box.show();
+		}
+	}
+
+	protected void showCharacterAdd() {
+		OrganCharacterNode selected = tree.getSelectionModel()
+				.getSelectedItem();
+		Character after = null;
+		Organ organ = null;
+		if (selected instanceof CharacterNode) {
+			after = ((CharacterNode) selected).getCharacter();
+			organ = ((CharacterNode) selected).getCharacter().getOrgan();
+		}
+		if (selected instanceof OrganNode)
+			organ = ((OrganNode) selected).getOrgan();
+		CharacterAddDialog addDialog = new CharacterAddDialog(eventBus,	model, organ);
+		addDialog.setAfter(after);
+		addDialog.show();
 	}
 
 	protected List<String> getCharacterValues(Character character) {
@@ -672,7 +703,8 @@ public class ManageCharactersView extends ContentPanel {
 						//if(selection instanceof OrganNode)
 						//	tree.getSelectionModel().select(store.getChildren(selection), true);		
 						updateInfo(selection);
-						updateControlMode(selection);
+						updateControlMode(controlCombo, selection);
+						updateControlMode(controlComboBar, selection);
 					}
 				});
 		tree.setContextMenu(createTreeContextMenu(tree));
@@ -722,9 +754,204 @@ public class ManageCharactersView extends ContentPanel {
 	private Menu createTreeContextMenu(final Tree<OrganCharacterNode, OrganCharacterNode> tree) {
 		final Menu menu = new Menu();
 		
+		menu.add(new HeaderMenuItem("Character"));
 		MenuItem item = new MenuItem();
+		item.setText("Add");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				showCharacterAdd();
+			}
+		});
+		menu.add(item);
+		
+		item = new MenuItem();
+		item.setText("Modify");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				showCharacterModify();
+			}
+		});
+		menu.add(item);
+		
+		item = new MenuItem();
+		item.setText("Remove");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				showCharacterRemove();
+			}
+		});
+		menu.add(item);
+		
+		item = new MenuItem();
+		item.setText("Move Up");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				showCharacterUp();
+			}
+		});
+		menu.add(item);
+		
+		item = new MenuItem();
+		item.setText("Move Up");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				showCharacterDown();
+			}
+		});
+		menu.add(item);
+		
+		menu.add(new HeaderMenuItem("State"));
+		item = new MenuItem();
+		item.setText("Control Mode");
+		Menu subMenu = new Menu();
+		item.setSubMenu(subMenu);
+		ListStore<ControlMode> controlModeStore = new ListStore<ControlMode>(
+				controlModeProperties.key());
+		for (ControlMode mode : ControlMode.values())
+			controlModeStore.add(mode);
+		controlCombo = new ComboBox<ControlMode>(controlModeStore,
+				controlModeProperties.name());
+		controlCombo.setForceSelection(true);
+		controlCombo.setTriggerAction(TriggerAction.ALL);
+		controlCombo.addSelectionHandler(new SelectionHandler<ControlMode>() {
+			@Override
+			public void onSelection(SelectionEvent<ControlMode> event) {
+				showControlState(event.getSelectedItem());
+			}
+		});
+		subMenu.add(controlCombo);
+		menu.add(item);
+		
+				
+		final MenuItem setStateMenuItem = new MenuItem();
+		setStateMenuItem.setText("Set");
+		Menu setMenu = new Menu();
+		setStateMenuItem.setSubMenu(setMenu);
+		
+		final InputElementVisibleTextField valueField = new InputElementVisibleTextField();
+		setMenu.add(new HeaderMenuItem("Value"));
+		setMenu.add(valueField);
+		TextButton setValueButton = new TextButton("Save");
+		setMenu.add(new AdapterMenuItem(setValueButton));
+		setValueButton.addSelectHandler(new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				setValue(valueField.getText());
+				menu.hide();
+			}
+		});
+		setMenu.add(new HeaderMenuItem("Annotation"));
+		menu.add(setStateMenuItem);
+		item = new MenuItem();
+		item.setText("Comment");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				final MultiLinePromptMessageBox box = new MultiLinePromptMessageBox("Comment", "");
+				final List<Character> characters = manageMatrixView.getSelectedCharacters();
+				final List<Taxon> taxa = manageMatrixView.getSelectedTaxa();
+				if(characters.size() == 1 && taxa.size() == 1) {
+					Value value = model.getTaxonMatrix().getValue(taxa.get(0), characters.get(0));
+					box.getTextArea().setValue(model.hasComment(value) ? model.getComment(value) : "");
+				}
+				box.addHideHandler(new HideHandler() {
+					@Override
+					public void onHide(HideEvent event) {
+						for(Taxon taxon : taxa) {
+							for(Character character : characters) {
+								Value value = model.getTaxonMatrix().getValue(taxon, character);
+								eventBus.fireEvent(new SetValueCommentEvent(value, box.getValue()));
+								String comment = Format.ellipse(box.getValue(), 80);
+								String message = Format.substitute("'{0}' saved", new Params(comment));
+								Info.display("Comment", message);
+							}
+						}
+					}
+				});
+				box.show();
+			}
+		});
+		setMenu.add(item);
+		final MenuItem colorizeItem = new MenuItem();
+		colorizeItem.setText("Colorize");
+		final Menu colorMenu = new Menu();
+		colorizeItem.setSubMenu(colorMenu);
+		setMenu.add(colorizeItem);
+		
+		menu.addBeforeShowHandler(new BeforeShowHandler() {
+			@Override
+			public void onBeforeShow(BeforeShowEvent event) {
+				colorizeItem.setVisible(!model.getColors().isEmpty());
+				colorMenu.clear();
+				
+				MenuItem offItem = new MenuItem("None");
+				offItem.addSelectionHandler(new SelectionHandler<Item>() {
+					@Override
+					public void onSelection(SelectionEvent<Item> event) {
+						final List<Character> characters = manageMatrixView.getSelectedCharacters();
+						final List<Taxon> taxa = manageMatrixView.getSelectedTaxa();
+						for(Taxon taxon : taxa) {
+							for(Character character : characters) {
+								Value value = model.getTaxonMatrix().getValue(taxon, character);
+								eventBus.fireEvent(new SetValueColorEvent(value, null));
+							}
+						}
+					}
+				});
+				colorMenu.add(offItem);
+				
+				for(final Color color : model.getColors()) {
+					MenuItem colorItem = new MenuItem(color.getUse());
+					colorItem.getElement().getStyle().setProperty("backgroundColor", "#" + color.getHex());
+					colorItem.addSelectionHandler(new SelectionHandler<Item>() {
+						@Override
+						public void onSelection(SelectionEvent<Item> event) {
+							final List<Character> characters = manageMatrixView.getSelectedCharacters();
+							final List<Taxon> taxa = manageMatrixView.getSelectedTaxa();
+							for(Taxon taxon : taxa) {
+								for(Character character : characters) {
+									Value value = model.getTaxonMatrix().getValue(taxon, character);
+									eventBus.fireEvent(new SetValueColorEvent(value, color));
+								}
+							}
+						}
+					});
+					colorMenu.add(colorItem);
+				}
+				
+				if(manageMatrixView.getCurrentSelectedMatrixEntry() == null) {
+					setStateMenuItem.setVisible(false);
+				} else {
+					List<Character> characters = manageMatrixView.getSelectedCharacters();
+					List<Taxon> taxa = manageMatrixView.getSelectedTaxa();
+					if(characters.size() == 1 && taxa.size() == 1) {
+						Value value = model.getTaxonMatrix().getValue(taxa.get(0), characters.get(0));
+						valueField.setText(model.getTaxonMatrix().getValue(taxa.get(0), characters.get(0)).getValue());
+						if(model.hasColor(value)) {
+							valueField.getInputEl().getStyle().setBackgroundImage("none");
+							valueField.getInputEl().getStyle().setBackgroundColor("#" + model.getColor(value).getHex());
+						} else {
+							valueField.getInputEl().getStyle().setBackgroundImage("none");
+							valueField.getInputEl().getStyle().setBackgroundColor("");
+						}
+					} else {
+							valueField.setText("");
+							valueField.getInputEl().getStyle().setBackgroundImage("none");
+							valueField.getInputEl().getStyle().setBackgroundColor("");
+					}
+					setStateMenuItem.setVisible(true);
+				}
+			}
+		});
+		
+		menu.add(new HeaderMenuItem("View"));
+		item = new MenuItem();
 		item.setText("Expand All");
-		// item.setIcon(header.getAppearance().sortAscendingIcon());
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
@@ -744,6 +971,7 @@ public class ManageCharactersView extends ContentPanel {
 		});
 		menu.add(item);
 		
+		menu.add(new HeaderMenuItem("Annotation"));
 		item = new MenuItem();
 		item.setText("Comment");
 		item.addSelectionHandler(new SelectionHandler<Item>() {
@@ -805,6 +1033,26 @@ public class ManageCharactersView extends ContentPanel {
 		});
 		
 		return menu;
+	}
+	
+	protected void setValue(String value) {
+		final List<Taxon> taxa = manageMatrixView.getSelectedTaxa();
+		final List<Character> characters = manageMatrixView.getSelectedCharacters();
+		
+		for(Taxon taxon : taxa) {
+			for(Character character : characters) {
+				SetValueValidator setValueValidator = new SetValueValidator(model);
+				ValidationResult validationResult = setValueValidator.validValue(value, taxon, character);
+				if(validationResult.isValid()) {
+					eventBus.fireEvent(new SetValueEvent(taxon, character, model.getTaxonMatrix().getValue(taxon, character), new Value(value)));
+				} else {
+					AlertMessageBox alert = new AlertMessageBox("Set value failed", "Can't set value " +
+							value + " for " + character.getName() + " of " +  taxon.getFullName() + ". Control mode " + 
+							model.getControlMode(character).toString().toLowerCase() + " was selected for " + character.getName());
+					alert.show();
+				}
+			}
+		}
 	}
 	
 	protected Menu createColorizeMenu() {
@@ -904,8 +1152,9 @@ public class ManageCharactersView extends ContentPanel {
 						});
 				valuesStore.addAll(sortValues);
 
-				ListView<String, String> statesList = new ListView<String, String>(
+				statesList = new ListView<String, String>(
 						valuesStore, new IdentityValueProvider<String>());
+				statesList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 				valuesView.setWidget(statesList);
 			} else
 				valuesView.clear();
@@ -982,7 +1231,7 @@ public class ManageCharactersView extends ContentPanel {
 		}
 	}
 
-	protected void updateControlMode(OrganCharacterNode organCharacterNode) {
+	protected void updateControlMode(ComboBox<ControlMode> controlCombo, OrganCharacterNode organCharacterNode) {
 		if (organCharacterNode instanceof CharacterNode) {
 			Character character = ((CharacterNode) organCharacterNode)
 					.getCharacter();
@@ -1046,6 +1295,13 @@ public class ManageCharactersView extends ContentPanel {
 	
 	public void removeSelectionChangeHandler(SelectionChangedHandler<OrganCharacterNode> handler) {
 		this.selectionChangeHandlers.remove(handler);
+	}
+
+	public void setMatrixEntry(MatrixEntry entry) {
+		List<String> selection = new LinkedList<String>();
+		if(entry != null && entry.getValue() != null) 
+			selection.add(entry.getValue().getValue());
+		statesList.getSelectionModel().setSelection(selection);
 	}
 
 }

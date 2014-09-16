@@ -11,6 +11,7 @@ import com.google.gwt.editor.client.Editor.Path;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.Style.SelectionMode;
 import com.sencha.gxt.core.client.ValueProvider;
@@ -117,6 +118,10 @@ public class CommentsDialog extends Dialog {
 		public void setText(String text) {
 			this.text = text;
 		}
+
+		public void setObject(Object object) {
+			this.object = object;
+		}
 	}
 
 	public interface CommentProperties extends PropertyAccess<Comment> {
@@ -142,12 +147,14 @@ public class CommentsDialog extends Dialog {
 	}
 
 	private EventBus eventBus;
+	private EventBus subModelBus;
 	private Model model;
 	private ListStore<Comment> commentStore;
 	private Grid<Comment> grid;
 
-	public CommentsDialog(final EventBus eventBus, final Model model) {
+	public CommentsDialog(final EventBus eventBus, final EventBus subModelBus, final Model model) {
 		this.eventBus = eventBus;
+		this.subModelBus = subModelBus;
 		this.model = model;
 		CommentProperties commentProperties = GWT
 				.create(CommentProperties.class);
@@ -244,7 +251,10 @@ public class CommentsDialog extends Dialog {
 							
 							ValidationResult validationResult = setValueValidator.validValue(value, taxon, character);
 							if(validationResult.isValid()) {
-								eventBus.fireEvent(new SetValueEvent(taxon, character, oldValue, new Value(value)));
+								Value newValue = new Value(value);
+								comment.setObject(newValue);
+								eventBus.fireEvent(new SetValueEvent(taxon, character, oldValue, newValue));
+								subModelBus.fireEvent(new SetValueEvent(taxon, character, oldValue, newValue));
 							} else {
 								AlertMessageBox alert = new AlertMessageBox("Set value failed", "Can't set value " +
 										value + " for " + character.getName() + " of " +  taxon.getFullName() + ". Control mode " + 
@@ -262,14 +272,17 @@ public class CommentsDialog extends Dialog {
 					case characterType:
 						Character character = (Character)comment.getObject();
 						eventBus.fireEvent(new SetCharacterCommentEvent(character, comment.getText()));
+						subModelBus.fireEvent(new SetCharacterCommentEvent(character, comment.getText()));
 						break;
 					case taxonCharacterValueType:
 						Value value = (Value)comment.getObject();
 						eventBus.fireEvent(new SetValueCommentEvent(value, comment.getText()));
+						subModelBus.fireEvent(new SetValueCommentEvent(value, comment.getText()));
 						break;
 					case taxonType:
 						Taxon taxon = (Taxon)comment.getObject();
 						eventBus.fireEvent(new SetTaxonCommentEvent(taxon, comment.getText()));
+						subModelBus.fireEvent(new SetTaxonCommentEvent(taxon, comment.getText()));
 						break;
 					default:
 						break;
@@ -284,6 +297,7 @@ public class CommentsDialog extends Dialog {
 		setWidth(800);
 		setHeight(600);
 		setHideOnButtonClick(true);
+		setModal(true);
 
 		ContentPanel panel = new ContentPanel();
 		panel.add(grid);
@@ -304,13 +318,19 @@ public class CommentsDialog extends Dialog {
 					if (object instanceof Value) {
 						eventBus.fireEvent(new SetValueCommentEvent(
 								(Value) object, ""));
+						subModelBus.fireEvent(new SetValueCommentEvent(
+								(Value) object, ""));
 					}
 					if (object instanceof Character) {
 						eventBus.fireEvent(new SetCharacterCommentEvent(
 								(Character) object, ""));
+						subModelBus.fireEvent(new SetCharacterCommentEvent(
+								(Character) object, ""));
 					}
 					if (object instanceof Taxon) {
 						eventBus.fireEvent(new SetTaxonCommentEvent(
+								(Taxon) object, ""));
+						subModelBus.fireEvent(new SetTaxonCommentEvent(
 								(Taxon) object, ""));
 					}
 				}
@@ -320,10 +340,6 @@ public class CommentsDialog extends Dialog {
 	}
 
 	private List<Comment> createComments() {
-		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
-			System.out.println(taxon.getFullName());
-		}
-
 		List<Comment> comments = new LinkedList<Comment>();
 		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
 			if (model.hasComment(taxon))
