@@ -333,6 +333,18 @@ public class ManageMatrixView extends VerticalLayoutContainer {
 				updateValueField();
 			}
 		});
+		fullModelBus.addHandler(SetValueEvent.TYPE, new SetValueEvent.SetValueEventHandler() {
+			@Override
+			public void onSet(SetValueEvent event) {
+				updateValueField();
+			}
+		});
+		fullModelBus.addHandler(SetValueColorEvent.TYPE, new SetValueColorEvent.SetValueColorEventHandler() {
+			@Override
+			public void onSet(SetValueColorEvent event) {
+				updateValueField();
+			}
+		});
 	}
 
 	protected void updateValueField() {
