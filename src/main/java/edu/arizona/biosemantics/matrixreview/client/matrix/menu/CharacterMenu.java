@@ -33,7 +33,7 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
 import edu.arizona.biosemantics.matrixreview.client.common.CharacterAddDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.CharacterModifyDialog;
-import edu.arizona.biosemantics.matrixreview.client.common.SelectCharacterStatesWindow;
+import edu.arizona.biosemantics.matrixreview.client.common.SelectCharacterStatesDialog;
 import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent;
@@ -285,7 +285,7 @@ public class CharacterMenu extends Menu {
 				return o1.compareTo(o2);
 			}
 		});
-		SelectCharacterStatesWindow window = new SelectCharacterStatesWindow(character, sortValues);
+		SelectCharacterStatesDialog window = new SelectCharacterStatesDialog(character, sortValues);
 		window.show();
 		window.addSetCharacterStatesEventHandler(new SetCharacterStatesEventHandler() {
 			@Override

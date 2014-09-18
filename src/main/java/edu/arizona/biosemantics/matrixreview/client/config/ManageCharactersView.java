@@ -69,7 +69,7 @@ import edu.arizona.biosemantics.matrixreview.client.common.CharacterAddDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.CharacterModifyDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.InputElementVisibleTextField;
 import edu.arizona.biosemantics.matrixreview.client.common.MergeDialog;
-import edu.arizona.biosemantics.matrixreview.client.common.SelectCharacterStatesWindow;
+import edu.arizona.biosemantics.matrixreview.client.common.SelectCharacterStatesDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator;
 import edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator.ValidationResult;
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent;
@@ -592,7 +592,7 @@ public class ManageCharactersView extends ContentPanel {
 			
 			if(controlMode.equals(ControlMode.CATEGORICAL)) {
 				List<String> sortValues = getCharacterValues(character);
-				SelectCharacterStatesWindow window = new SelectCharacterStatesWindow(character, sortValues);
+				SelectCharacterStatesDialog window = new SelectCharacterStatesDialog(character, sortValues);
 				window.show();
 				window.addSetCharacterStatesEventHandler(new SetCharacterStatesEventHandler() {
 					@Override
