@@ -82,13 +82,15 @@ public class ColorsDialog extends Dialog {
 	
 	public class ColorEntry {
 
+		private String id;
 		private String source;
 		private String value;
 		private Color color;
 		private Object object;
 		private ColorEntryType type;
 
-		public ColorEntry(Object object, String source, String value, Color color) {
+		public ColorEntry(String id, Object object, String source, String value, Color color) {
+			this.id = id;
 			this.object = object;
 			if (object instanceof Value)
 				type = ColorEntryType.taxonCharacterValueType;
@@ -133,11 +135,15 @@ public class ColorsDialog extends Dialog {
 		public void setObject(Object object) {
 			this.object = object;
 		}
+		
+		public String getId() {
+			return id;
+		}
 	}
 
 	public interface ColorEntryProperties extends PropertyAccess<ColorEntry> {
 
-		@Path("source")
+		@Path("id")
 		ModelKeyProvider<ColorEntry> key();
 
 		@Path("object")
@@ -465,13 +471,13 @@ public class ColorsDialog extends Dialog {
 				
 		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
 			if (model.hasColor(taxon))
-				colorEntries.add(new ColorEntry(taxon, taxon.getFullName(), "", model
+				colorEntries.add(new ColorEntry("taxon-" + taxon.getId(), taxon, taxon.getFullName(), "", model
 						.getColor(taxon)));
 		}
 		for (Character character : model.getTaxonMatrix()
 				.getHierarchyCharactersBFS()) {
 			if (model.hasColor(character))
-				colorEntries.add(new ColorEntry(character, character.toString(), "", model
+				colorEntries.add(new ColorEntry("character-" + character.getId(), character, character.toString(), "", model
 						.getColor(character)));
 		}
 		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
@@ -479,7 +485,7 @@ public class ColorsDialog extends Dialog {
 					.getHierarchyCharactersBFS()) {
 				Value value = model.getTaxonMatrix().getValue(taxon, character);
 				if (model.hasColor(value))
-					colorEntries.add(new ColorEntry(value, "Value of " + character.toString()
+					colorEntries.add(new ColorEntry("value-" + taxon.getId() + "-" + character.getId(), value, "Value of " + character.toString()
 							+ " of " + taxon.getFullName(), value.getValue(),
 							model.getColor(value)));
 			}

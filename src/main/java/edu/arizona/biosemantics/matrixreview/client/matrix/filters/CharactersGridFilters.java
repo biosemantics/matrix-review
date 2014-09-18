@@ -123,8 +123,8 @@ public class CharactersGridFilters extends GridFilters<Taxon> {
 		
 		setLocal(true);
 		for(CharacterColumnConfig characterColumnConfig : charactersGrid.getColumnModel().getCharacterColumns()) {
-			StringFilter<Taxon> stringFilter = new StringFilter<Taxon>(new StringValueProvider(characterColumnConfig));
-			setFilter(characterColumnConfig, stringFilter);
+			Character character = characterColumnConfig.getCharacter();
+			setControlMode(characterColumnConfig, model.getControlMode(character), model.getStates(character));
 		}
 		
 		addEventHandlers();
@@ -139,6 +139,14 @@ public class CharactersGridFilters extends GridFilters<Taxon> {
 			}
 		});
 	}
+
+	protected void loadModel() {
+		for(CharacterColumnConfig characterColumnConfig : charactersGrid.getColumnModel().getCharacterColumns()) {
+			Character character = characterColumnConfig.getCharacter();
+			setControlMode(character, model.getControlMode(character), model.getStates(character));
+		}
+	}
+
 
 	protected void onContextMenu(HeaderContextMenuEvent event) {
 		int column = event.getColumnIndex();
@@ -179,7 +187,12 @@ public class CharactersGridFilters extends GridFilters<Taxon> {
 	
 	public void setControlMode(Character character, ControlMode controlMode, List<String> states) {
 		final CharacterColumnConfig characterColumnConfig = charactersGrid.getCharacterColumnConfig(character);
-		removeFilter(characterColumnConfig.getFilter());
+		this.setControlMode(characterColumnConfig, controlMode, states);
+	}
+	
+	public void setControlMode(CharacterColumnConfig config, ControlMode controlMode, List<String> states) {
+		if(config.hasFilter())
+			removeFilter(config.getFilter());
 		switch (controlMode) {
 		case CATEGORICAL:
 			AllAccessListStore<String> valueStore = new AllAccessListStore<String>(new ModelKeyProvider<String>() {
@@ -189,14 +202,16 @@ public class CharactersGridFilters extends GridFilters<Taxon> {
 				}
 			});
 			valueStore.addAll(states);
-			setFilter(characterColumnConfig, new ListFilter<Taxon, String>(new StringValueProvider(characterColumnConfig), valueStore));
+			setFilter(config, new ListFilter<Taxon, String>(new StringValueProvider(config), valueStore));
 			break;
 		case NUMERICAL:
-			setFilter(characterColumnConfig, new RemoveEmptyNumericFilter<Taxon, Double>(new NumericValueProvider(characterColumnConfig), new DoublePropertyEditor()));
+			setFilter(config, new RemoveEmptyNumericFilter<Taxon, Double>(new NumericValueProvider(config), new DoublePropertyEditor()));
 			break;
 		case OFF:
-			setFilter(characterColumnConfig, new StringFilter<Taxon>(new StringValueProvider(characterColumnConfig)));
-			break;					
+			setFilter(config, new StringFilter<Taxon>(new StringValueProvider(config)));
+			break;	
+		default:
+			setFilter(config, new StringFilter<Taxon>(new StringValueProvider(config)));
 		}
 	}
 	

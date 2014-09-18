@@ -94,6 +94,11 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 			
 			public TaxonTreeGridView(EventBus eventBus) {
 				this.eventBus = eventBus;
+			}
+			
+			public TaxonTreeGridView(EventBus eventBus, GridAppearance appearance) {
+				super(appearance);
+				this.eventBus = eventBus;
 				addEventHandlers();
 			}
 
@@ -176,10 +181,10 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 		
 		public TaxaTreeGrid(TaxonStore store, TaxaColumnModel cm, TaxaColumnConfig treeColumn, 
 				TreeAppearance appearance) {
-			super(store, cm, treeColumn, GWT.<GridAppearance> create(GridAppearance.class), 
+			super(store, cm, treeColumn, GWT.<TaxonGridAppearance> create(TaxonGridAppearance.class), 
 					appearance);
 				//GWT.<TreeAppearance> create(TaxonTreeAppearance.class));
-			this.setView(new TaxonTreeGridView(eventBus));
+			this.setView(new TaxonTreeGridView(eventBus, GWT.<TaxonGridAppearance> create(TaxonGridAppearance.class)));
 			this.taxonStore = store;
 			this.setAutoExpand(true);
 			this.setExpandOnFilter(true);
@@ -285,7 +290,10 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 		public CharactersGrid(TreeStore<Taxon> treeStore, ListStore<Taxon> listStore,
 				CharactersColumnModel columnModel, final CharactersGridView gridView) {
 			super(listStore, columnModel, gridView);
-			this.setColumnReordering(true);
+			
+			//TODO: Still wanted? With "config" view's reordering capabilities? At least needs to be verified to reorder in model also
+			//to leave consistent model
+			//this.setColumnReordering(true);
 			treeStore.addStoreFilterHandler(gridView.getScrollStateMaintainer());			
 		}
 		
@@ -347,10 +355,11 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 		super.init(otherColumnConfigs, gridView);
 		getGrid().setCharacterConfigMap(characterConfigMap);
 		
-		UpdateModelDragSource dragSource = new UpdateModelDragSource(super.getTreeGrid());		
-		UpdateModelDropTarget dropTarget = new UpdateModelDropTarget(eventBus, super.getTreeGrid(), model, getTaxonStore());
+		//TODO: Still wanted, Row Drag and Drop?
+		//UpdateModelDragSource dragSource = new UpdateModelDragSource(super.getTreeGrid());		
+		//UpdateModelDropTarget dropTarget = new UpdateModelDropTarget(eventBus, super.getTreeGrid(), model, getTaxonStore());
 		//let event handling take care of "move" behaviour
-		dropTarget.setOperation(Operation.COPY);
+		//dropTarget.setOperation(Operation.COPY);
 	}
 
 	@Override

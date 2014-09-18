@@ -74,4 +74,8 @@ public class CharacterColumnConfig extends ColumnConfig<Taxon, Value> {
 		this.filter = filter;
 	}
 
+	public boolean hasFilter() {
+		return filter != null;
+	}
+
 }

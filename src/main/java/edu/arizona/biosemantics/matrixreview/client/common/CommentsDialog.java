@@ -71,13 +71,15 @@ public class CommentsDialog extends Dialog {
 	
 	public class Comment {
 
+		private String id;
 		private Object object;
 		private String source;
 		private String value;
 		private String text;
 		private CommentType type;
 
-		public Comment(Object object, String source, String value, String text) {
+		public Comment(String id, Object object, String source, String value, String text) {
+			this.id = id;
 			this.object = object;
 			if (object instanceof Value)
 				type = CommentType.taxonCharacterValueType;
@@ -122,11 +124,15 @@ public class CommentsDialog extends Dialog {
 		public void setObject(Object object) {
 			this.object = object;
 		}
+		
+		public String getId() {
+			return id;
+		}
 	}
 
 	public interface CommentProperties extends PropertyAccess<Comment> {
 
-		@Path("source")
+		@Path("id")
 		ModelKeyProvider<Comment> key();
 
 		@Path("object")
@@ -343,13 +349,13 @@ public class CommentsDialog extends Dialog {
 		List<Comment> comments = new LinkedList<Comment>();
 		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
 			if (model.hasComment(taxon))
-				comments.add(new Comment(taxon, taxon.getFullName(), "", model
+				comments.add(new Comment("taxon-" + taxon.getId(), taxon, taxon.getFullName(), "", model
 						.getComment(taxon)));
 		}
 		for (Character character : model.getTaxonMatrix()
 				.getHierarchyCharactersBFS()) {
 			if (model.hasComment(character))
-				comments.add(new Comment(character, character.toString(), "",
+				comments.add(new Comment("character-" + character.getId(), character, character.toString(), "",
 						model.getComment(character)));
 		}
 		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
@@ -357,7 +363,7 @@ public class CommentsDialog extends Dialog {
 					.getHierarchyCharactersBFS()) {
 				Value value = model.getTaxonMatrix().getValue(taxon, character);
 				if (model.hasComment(value))
-					comments.add(new Comment(value, "Value of "
+					comments.add(new Comment("value-" + taxon.getId() + "-" + character.getId(), value, "Value of "
 							+ character.toString() + " of "
 							+ taxon.getFullName(), value.getValue(), model
 							.getComment(value)));

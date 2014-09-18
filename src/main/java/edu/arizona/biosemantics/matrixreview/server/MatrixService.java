@@ -96,9 +96,13 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		t1.addChild(t2);
 		t2.addChild(t3);
 		t2.addChild(t4);
-		
 		List<Taxon> hierarchyTaxa = new LinkedList<Taxon>();
 		hierarchyTaxa.add(t1);
+		for(int i=0; i<100; i++) {
+			Taxon t = new Taxon(Rank.FAMILY, "rosacea1", "author1", "1979", "this is the description about t1");
+			hierarchyTaxa.add(t);
+		}
+			
 		TaxonMatrix taxonMatrix = new TaxonMatrix(hierarhicalCharacters, hierarchyTaxa);
 		
 		Random random = new Random();
