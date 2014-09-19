@@ -1,5 +1,6 @@
 package edu.arizona.biosemantics.matrixreview.client.desktop;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.event.shared.EventBus;
@@ -70,16 +71,18 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 		}
 				
 		protected void onAnalyzeCharacter(AnalyzeCharacterEvent event) {
+			List<Taxon> taxaToConsider = event.getTaxaToConsider() == null ? 
+					new ArrayList<Taxon>(fullModel.getTaxonMatrix().getTaxa()) : event.getTaxaToConsider();
 			Character character = event.getCharacter();
 			switch(fullModel.getControlMode(character)) {
 			case CATEGORICAL:
-				showTermFrequencyChart(character, event.getTaxaToConsider());
+				showTermFrequencyChart(character, taxaToConsider);
 				break;
 			case NUMERICAL:
-				showNumericalDistribution(character, event.getTaxaToConsider());
+				showNumericalDistribution(character, taxaToConsider);
 				break;
 			case OFF:
-				showTermFrequencyChart(character, event.getTaxaToConsider());
+				showTermFrequencyChart(character, taxaToConsider);
 				break;
 			default:
 				break;

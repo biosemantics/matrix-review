@@ -7,6 +7,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.editor.client.Editor.Path;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.GwtEvent.Type;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.chart.client.chart.Chart;
 import com.sencha.gxt.chart.client.chart.Legend;
@@ -170,7 +171,13 @@ public class NumericalSeriesManager extends AbstractWindowManager {
 				@Override
 				public void onSet(SetValueEvent event) {
 					if(event.getCharacters().contains(character)) {
-						refreshContent();
+						Timer timer = new Timer() {
+							@Override
+							public void run() {
+								refreshContent();
+							}
+						};
+						timer.schedule(10);
 					}
 				}
 			});

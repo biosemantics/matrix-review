@@ -89,7 +89,7 @@ public class MatrixReviewView extends SplitLayoutPanel {
 			@Override
 			public void onShow(ShowModifyEvent event) {
 				//modelMerger.mergeToFullModel(fullModel, subModel, subModelOriginal);
-				modelMerger.commitEvents();
+				//modelMerger.commitEvents();
 				fullModelBus.fireEvent(new LoadModelEvent(fullModel));
 				setContent(manageMatrixView);
 				setMenu(manageMenuView);
