@@ -481,21 +481,36 @@ public class ManageTaxaView extends ContentPanel {
 	protected void setValue(String value) {
 		final List<Taxon> taxa = manageMatrixView.getSelectedTaxa();
 		final List<Character> characters = manageMatrixView.getSelectedCharacters();
-		
-		for(Taxon taxon : taxa) {
-			for(Character character : characters) {
-				SetValueValidator setValueValidator = new SetValueValidator(model);
-				ValidationResult validationResult = setValueValidator.validValue(value, taxon, character);
-				if(validationResult.isValid()) {
-					eventBus.fireEvent(new SetValueEvent(taxon, character, model.getTaxonMatrix().getValue(taxon, character), new Value(value)));
-				} else {
-					AlertMessageBox alert = new AlertMessageBox("Set value failed", "Can't set value " +
-							value + " for " + character.getName() + " of " +  taxon.getFullName() + ". Control mode " + 
-							model.getControlMode(character).toString().toLowerCase() + " was selected for " + character.getName());
-					alert.show();
-				}
+	
+		SetValueValidator setValueValidator = new SetValueValidator(model);
+		Set<Character> charactersToSet = new HashSet<Character>();
+		for(Character character : characters) {
+			ValidationResult validationResult = setValueValidator.validValue(value, character);
+			if(validationResult.isValid()) {
+				charactersToSet.add(character);
+			} else {
+				AlertMessageBox alert = new AlertMessageBox("Set value failed", "Can't set value " +
+						value + " for " + character.getName() + ". Control mode " + 
+						model.getControlMode(character).toString().toLowerCase() + " was selected for " + character.getName());
+				alert.show();
 			}
 		}
+		Set<Taxon> taxaToSet = new HashSet<Taxon>(taxa);
+		Map<Taxon, Map<Character, Value>> oldValues = new HashMap<Taxon, Map<Character, Value>>();
+		Map<Taxon, Map<Character, Value>> newValues = new HashMap<Taxon, Map<Character, Value>>();
+		for(Taxon taxonToSet : taxaToSet) {
+			oldValues.put(taxonToSet, new HashMap<Character, Value>());
+			for(Character characterToSet : charactersToSet) {
+				oldValues.get(taxonToSet).put(characterToSet, model.getTaxonMatrix().getValue(taxonToSet, characterToSet));
+			}
+		}
+		for(Taxon taxonToSet : taxaToSet) {
+			newValues.put(taxonToSet, new HashMap<Character, Value>());
+			for(Character characterToSet : charactersToSet) {
+				newValues.get(taxonToSet).put(characterToSet, new Value(value));
+			}
+		}
+		eventBus.fireEvent(new SetValueEvent(taxaToSet, charactersToSet, oldValues, newValues));
 	}
 
 	private Tree<Taxon, Taxon> createTree() {

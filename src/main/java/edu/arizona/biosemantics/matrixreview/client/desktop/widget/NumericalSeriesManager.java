@@ -1,5 +1,7 @@
 package edu.arizona.biosemantics.matrixreview.client.desktop.widget;
 
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.editor.client.Editor.Path;
@@ -35,6 +37,7 @@ import com.sencha.gxt.widget.core.client.event.ExpandEvent;
 import com.sencha.gxt.widget.core.client.event.ExpandEvent.ExpandHandler;
 
 import edu.arizona.biosemantics.matrixreview.client.desktop.Window;
+import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
@@ -87,11 +90,13 @@ public class NumericalSeriesManager extends AbstractWindowManager {
 			.create(NameNumericalAccess.class);
 	private Model model;
 	private Character character;
+	private List<Taxon> taxa;
 
-	public NumericalSeriesManager(EventBus eventBus, Window window, Character character, Model model) {
-		super(eventBus, window);
+	public NumericalSeriesManager(EventBus fullModelEventBus, EventBus subModelEventBus, Window window, Character character, Model model, List<Taxon> taxa) {
+		super(fullModelEventBus, subModelEventBus, window);
 		this.model = model;
 		this.character = character;
+		this.taxa = taxa;
 		init();
 	}
 
@@ -102,7 +107,7 @@ public class NumericalSeriesManager extends AbstractWindowManager {
 				dataAccess.id());
 
 		double max = 0.0;
-		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
+		for (Taxon taxon : taxa) {
 			Value value = model.getTaxonMatrix().getValue(taxon, character);
 			if (!value.getValue().isEmpty()) {
 				double doubleValue = Double.parseDouble(value.getValue());
@@ -159,22 +164,25 @@ public class NumericalSeriesManager extends AbstractWindowManager {
 
 	@Override
 	protected void addEventHandlers() {
-		subMatrixEventBus.addHandler(SetValueEvent.TYPE, new SetValueEvent.SetValueEventHandler() {
-			@Override
-			public void onSet(SetValueEvent event) {
-				if(model.getTaxonMatrix().getCharacter(event.getOldValue()).equals(character)) {
-					refreshContent();
+		EventBus[] busses = { this.fullMatrixEventBus, this.subMatrixEventBus };
+		for(EventBus bus : busses) {
+			bus.addHandler(SetValueEvent.TYPE, new SetValueEvent.SetValueEventHandler() {
+				@Override
+				public void onSet(SetValueEvent event) {
+					if(event.getCharacters().contains(character)) {
+						refreshContent();
+					}
 				}
-			}
-		});
-		subMatrixEventBus.addHandler(ModifyCharacterEvent.TYPE, new ModifyCharacterEvent.ModifyCharacterEventHandler() {
-			@Override
-			public void onModify(ModifyCharacterEvent event) {
-				if(event.getOldCharacter().equals(character)) {
-					refreshTitle();
+			});
+			bus.addHandler(ModifyCharacterEvent.TYPE, new ModifyCharacterEvent.ModifyCharacterEventHandler() {
+				@Override
+				public void onModify(ModifyCharacterEvent event) {
+					if(event.getOldCharacter().equals(character)) {
+						refreshTitle();
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	@Override

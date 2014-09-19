@@ -1,5 +1,6 @@
 package edu.arizona.biosemantics.matrixreview.client.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -24,7 +25,6 @@ public class ManageMenuView extends MenuView {
 	
 	private ManageMatrixView manageMatrixView;
 	private ModelMerger modelMerger;
-	private Model model;
 
 	public ManageMenuView(EventBus fullModelBus, EventBus subModelBus, ManageMatrixView manageMatrixView) {
 		super(fullModelBus, subModelBus);
@@ -62,8 +62,7 @@ public class ManageMenuView extends MenuView {
 					alert.show();
 				}
 				for (Character character : characters)
-					fullModelBus.fireEvent(new AnalyzeCharacterEvent(character,
-							model));
+					fullModelBus.fireEvent(new AnalyzeCharacterEvent(character, new ArrayList<Taxon>(model.getTaxonMatrix().getTaxa())));
 			}
 		});
 		subMatrixItem.addSelectionHandler(new SelectionHandler<Item>() {
@@ -79,10 +78,8 @@ public class ManageMenuView extends MenuView {
 					alert.show();
 				} else {
 					if (!taxa.isEmpty()) {
-						Model subModel = modelMerger.getSubModel(characters, taxa);
 						for (Character character : characters)
-							fullModelBus.fireEvent(new AnalyzeCharacterEvent(
-									character, subModel));
+							fullModelBus.fireEvent(new AnalyzeCharacterEvent(character, taxa));
 					} else {
 						AlertMessageBox alert = new AlertMessageBox(
 								"No Taxa selected",

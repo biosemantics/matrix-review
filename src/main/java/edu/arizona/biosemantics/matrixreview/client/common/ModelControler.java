@@ -425,9 +425,20 @@ public class ModelControler implements LoadModelEventHandler, AddTaxonEventHandl
 
 	@Override
 	public void onSet(SetValueEvent event) {
-		model.getTaxonMatrix().setValue(event.getTaxon(), event.getCharacter(), event.getNewValue());
-		model.setColor(event.getNewValue(), model.getColor(event.getOldValue()));
-		model.setComment(event.getNewValue(), model.getComment(event.getOldValue()));
+		for(Taxon taxon : event.getTaxa()) {
+			for(Character character : event.getCharacters()) {
+				if(event.getOldValues().containsKey(taxon) && event.getNewValues().containsKey(taxon)) {
+					if(event.getOldValues().get(taxon).containsKey(character) && event.getNewValues().get(taxon).containsKey(character)) {
+						Value oldValue = event.getOldValues().get(taxon).get(character);
+						Value newValue = event.getNewValues().get(taxon).get(character);
+						model.getTaxonMatrix().setValue(taxon, character, newValue);
+						model.setColor(newValue, model.getColor(oldValue));
+						model.setComment(newValue, model.getComment(oldValue));
+					}
+				}
+			}
+		}
+		
 	}
 
 	@Override

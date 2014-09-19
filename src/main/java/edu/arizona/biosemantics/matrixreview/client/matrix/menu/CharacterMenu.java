@@ -116,7 +116,7 @@ public class CharacterMenu extends Menu {
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				eventBus.fireEvent(new AnalyzeCharacterEvent(character, model));
+				eventBus.fireEvent(new AnalyzeCharacterEvent(character, new ArrayList<Taxon>(model.getTaxonMatrix().getTaxa())));
 			}
 		});
 		return item;

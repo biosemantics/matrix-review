@@ -69,8 +69,7 @@ public class SetValueValidator {
 		this.model = model;
 	}
 
-	public ValidationResult validValue(String value, Taxon taxon,
-			Character character) {
+	public ValidationResult validValue(String value, Character character) {
 		switch(model.getControlMode(character)) {
 		case CATEGORICAL:
 			Set<String> states = new HashSet<String>(model.getStates(character));

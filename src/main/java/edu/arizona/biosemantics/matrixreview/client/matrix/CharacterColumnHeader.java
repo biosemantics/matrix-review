@@ -203,7 +203,7 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 			eventBus.addHandler(SetValueEvent.TYPE, new SetValueEvent.SetValueEventHandler() {
 				@Override
 				public void onSet(SetValueEvent event) {
-					if(model.getTaxonMatrix().getCharacter(event.getNewValue()).equals(getColumnConfig().getCharacter()))
+					if(event.getCharacters().contains(getColumnConfig().getCharacter()))
 						refresh();
 				}
 			});

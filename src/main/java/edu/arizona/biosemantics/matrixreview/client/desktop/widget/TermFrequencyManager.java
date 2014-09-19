@@ -1,11 +1,15 @@
 package edu.arizona.biosemantics.matrixreview.client.desktop.widget;
 
+import java.util.List;
 import java.util.TreeMap;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.editor.client.Editor.Path;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.chart.client.chart.Chart;
@@ -71,11 +75,13 @@ public class TermFrequencyManager extends AbstractWindowManager {
 	
 	private Model model;
 	private Character character;
+	private List<Taxon> taxa;
 
-	public TermFrequencyManager(EventBus eventBus, Window window, Model model, Character character) {
-		super(eventBus, window);
+	public TermFrequencyManager(EventBus fullModelEventBus, EventBus subModelEventBus, Window window, Model model, Character character, List<Taxon> taxa) {
+		super(fullModelEventBus, subModelEventBus, window);
 		this.model = model;
 		this.character = character;
+		this.taxa = taxa;
 		init();
 	}
 
@@ -84,7 +90,7 @@ public class TermFrequencyManager extends AbstractWindowManager {
 		// draw bar chart for categorical values and free-text
 		// draw curve for numerical values
 		TreeMap<String, Integer> counts = new TreeMap<String, Integer>();
-		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
+		for (Taxon taxon : taxa) {
 			Value value = model.getTaxonMatrix().getValue(taxon, character);
 			if (!counts.containsKey(value.toString()))
 				counts.put(value.toString(), 0);
@@ -142,22 +148,51 @@ public class TermFrequencyManager extends AbstractWindowManager {
 
 	@Override
 	protected void addEventHandlers() {
-		subMatrixEventBus.addHandler(SetValueEvent.TYPE, new SetValueEvent.SetValueEventHandler() {
-			@Override
-			public void onSet(SetValueEvent event) {
-				if(model.getTaxonMatrix().getCharacter(event.getOldValue()).equals(character)) {
-					refreshContent();
+		EventBus[] busses = { fullMatrixEventBus, subMatrixEventBus };
+		for(EventBus bus : busses) {
+			bus.addHandler(SetValueEvent.TYPE, new SetValueEvent.SetValueEventHandler() {
+				@Override
+				public void onSet(SetValueEvent event) {
+					if(event.getCharacters().contains(character)) {
+						/*Scheduler.get().scheduleFinally(new ScheduledCommand() {
+
+							@Override
+							public void execute() {
+								refreshContent();
+							}
+							
+						});
+						Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+							@Override
+							public void execute() {
+								refreshContent();
+							}
+							
+						});*/
+						//simple refresh or deferred won't do it when multiple values are set at the same time for some reason
+						//therefore timer
+						Timer timer = new Timer() {
+
+							@Override
+							public void run() {
+								refreshContent();
+							}
+							
+						};
+						timer.schedule(10);
+					}
 				}
-			}
-		});
-		subMatrixEventBus.addHandler(ModifyCharacterEvent.TYPE, new ModifyCharacterEvent.ModifyCharacterEventHandler() {
-			@Override
-			public void onModify(ModifyCharacterEvent event) {
-				if(event.getOldCharacter().equals(character)) {
-					refreshTitle();
+			});
+			bus.addHandler(ModifyCharacterEvent.TYPE, new ModifyCharacterEvent.ModifyCharacterEventHandler() {
+				@Override
+				public void onModify(ModifyCharacterEvent event) {
+					if(event.getOldCharacter().equals(character)) {
+						refreshTitle();
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	@Override

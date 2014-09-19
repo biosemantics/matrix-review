@@ -12,6 +12,7 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import edu.arizona.biosemantics.matrixreview.client.desktop.Window;
 import edu.arizona.biosemantics.matrixreview.client.event.*;
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent.AddCharacterEventHandler;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
 public class ConsoleManager extends AbstractWindowManager {
@@ -42,48 +43,51 @@ public class ConsoleManager extends AbstractWindowManager {
 		private void addEventHandlers() {
 			//TODO
 			//fullMatrixEventBus.addHandler(type, handler)
+			EventBus[] busses = { fullMatrixEventBus, subMatrixEventBus };
+			for(EventBus bus : busses) {
+				bus.addHandler(AddCharacterEvent.TYPE, this);
+				bus.addHandler(SetColorsEvent.TYPE, this);
+				bus.addHandler(AddTaxonEvent.TYPE, this);
+				bus.addHandler(AnalyzeCharacterEvent.TYPE, this);
+				bus.addHandler(HideCharacterEvent.TYPE, this);
+				bus.addHandler(HideTaxaEvent.TYPE, this);
+				bus.addHandler(LoadModelEvent.TYPE, this);
+				bus.addHandler(LockCharacterEvent.TYPE, this);
+				bus.addHandler(LockMatrixEvent.TYPE, this);
+				bus.addHandler(MergeCharactersEvent.TYPE, this);
+				bus.addHandler(MoveCharacterEvent.TYPE, this);
+				bus.addHandler(MoveTaxonFlatEvent.TYPE, this);
+				bus.addHandler(RemoveCharacterEvent.TYPE, this);
+				bus.addHandler(RemoveTaxaEvent.TYPE, this);
+				bus.addHandler(SetColorsEvent.TYPE, this);
+				bus.addHandler(ModifyCharacterEvent.TYPE, this);
+				bus.addHandler(ModifyTaxonEvent.TYPE, this);
+				bus.addHandler(SetCharacterColorEvent.TYPE, this);
+				bus.addHandler(SetCharacterCommentEvent.TYPE, this);
+				bus.addHandler(SetControlModeEvent.TYPE, this);
+				bus.addHandler(SetTaxonColorEvent.TYPE, this);
+				bus.addHandler(SetTaxonCommentEvent.TYPE, this);
+				bus.addHandler(ShowDesktopEvent.TYPE, this);
+				bus.addHandler(ShowNumericalDistributionEvent.TYPE, this);
+				bus.addHandler(ShowTermFrequencyEvent.TYPE, this);
+				bus.addHandler(SortCharactersByCoverageEvent.TYPE, this);
+				bus.addHandler(SortCharactersByNameEvent.TYPE, this);
+				bus.addHandler(SortCharactersByOrganEvent.TYPE, this);
+				bus.addHandler(SortTaxaByCharacterEvent.TYPE, this);
+				bus.addHandler(SortTaxaByCoverageEvent.TYPE, this);
+				bus.addHandler(SortTaxaByNameEvent.TYPE, this);
+				bus.addHandler(ToggleDesktopEvent.TYPE, this);
+				bus.addHandler(SetValueColorEvent.TYPE, this);
+				bus.addHandler(SetValueCommentEvent.TYPE, this);
+				bus.addHandler(AnalyzeTaxonEvent.TYPE, this);
+				bus.addHandler(LockTaxonEvent.TYPE, this);
+				bus.addHandler(ShowDescriptionEvent.TYPE, this);	
+				bus.addHandler(SetValueEvent.TYPE, this);
+				bus.addHandler(MatrixModeEvent.TYPE, this);
+				bus.addHandler(CollapseTaxaEvent.TYPE, this);
+				bus.addHandler(ExpandTaxaEvent.TYPE, this);
+			}
 			
-			subMatrixEventBus.addHandler(AddCharacterEvent.TYPE, this);
-			subMatrixEventBus.addHandler(SetColorsEvent.TYPE, this);
-			subMatrixEventBus.addHandler(AddTaxonEvent.TYPE, this);
-			subMatrixEventBus.addHandler(AnalyzeCharacterEvent.TYPE, this);
-			subMatrixEventBus.addHandler(HideCharacterEvent.TYPE, this);
-			subMatrixEventBus.addHandler(HideTaxaEvent.TYPE, this);
-			subMatrixEventBus.addHandler(LoadModelEvent.TYPE, this);
-			subMatrixEventBus.addHandler(LockCharacterEvent.TYPE, this);
-			subMatrixEventBus.addHandler(LockMatrixEvent.TYPE, this);
-			subMatrixEventBus.addHandler(MergeCharactersEvent.TYPE, this);
-			subMatrixEventBus.addHandler(MoveCharacterEvent.TYPE, this);
-			subMatrixEventBus.addHandler(MoveTaxonFlatEvent.TYPE, this);
-			subMatrixEventBus.addHandler(RemoveCharacterEvent.TYPE, this);
-			subMatrixEventBus.addHandler(RemoveTaxaEvent.TYPE, this);
-			subMatrixEventBus.addHandler(SetColorsEvent.TYPE, this);
-			subMatrixEventBus.addHandler(ModifyCharacterEvent.TYPE, this);
-			subMatrixEventBus.addHandler(ModifyTaxonEvent.TYPE, this);
-			subMatrixEventBus.addHandler(SetCharacterColorEvent.TYPE, this);
-			subMatrixEventBus.addHandler(SetCharacterCommentEvent.TYPE, this);
-			subMatrixEventBus.addHandler(SetControlModeEvent.TYPE, this);
-			subMatrixEventBus.addHandler(SetTaxonColorEvent.TYPE, this);
-			subMatrixEventBus.addHandler(SetTaxonCommentEvent.TYPE, this);
-			subMatrixEventBus.addHandler(ShowDesktopEvent.TYPE, this);
-			subMatrixEventBus.addHandler(ShowNumericalDistributionEvent.TYPE, this);
-			subMatrixEventBus.addHandler(ShowTermFrequencyEvent.TYPE, this);
-			subMatrixEventBus.addHandler(SortCharactersByCoverageEvent.TYPE, this);
-			subMatrixEventBus.addHandler(SortCharactersByNameEvent.TYPE, this);
-			subMatrixEventBus.addHandler(SortCharactersByOrganEvent.TYPE, this);
-			subMatrixEventBus.addHandler(SortTaxaByCharacterEvent.TYPE, this);
-			subMatrixEventBus.addHandler(SortTaxaByCoverageEvent.TYPE, this);
-			subMatrixEventBus.addHandler(SortTaxaByNameEvent.TYPE, this);
-			subMatrixEventBus.addHandler(ToggleDesktopEvent.TYPE, this);
-			subMatrixEventBus.addHandler(SetValueColorEvent.TYPE, this);
-			subMatrixEventBus.addHandler(SetValueCommentEvent.TYPE, this);
-			subMatrixEventBus.addHandler(AnalyzeTaxonEvent.TYPE, this);
-			subMatrixEventBus.addHandler(LockTaxonEvent.TYPE, this);
-			subMatrixEventBus.addHandler(ShowDescriptionEvent.TYPE, this);	
-			subMatrixEventBus.addHandler(SetValueEvent.TYPE, this);
-			subMatrixEventBus.addHandler(MatrixModeEvent.TYPE, this);
-			subMatrixEventBus.addHandler(CollapseTaxaEvent.TYPE, this);
-			subMatrixEventBus.addHandler(ExpandTaxaEvent.TYPE, this);
 		}
 
 		@Override
@@ -299,12 +303,9 @@ public class ConsoleManager extends AbstractWindowManager {
 		}
 		
 	}
-
-	private EventBus fullMatrixEventBus;
 	
-	public ConsoleManager(EventBus fullMatrixEventBus, EventBus subMatrixEventBus, Window window) {
-		super(subMatrixEventBus, window);
-		this.fullMatrixEventBus = fullMatrixEventBus;
+	public ConsoleManager(EventBus fullModelEventBus, EventBus subModelEventBus, Window window) {
+		super(fullModelEventBus, subModelEventBus, window);
 		init();
 	}
 

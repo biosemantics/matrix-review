@@ -255,7 +255,7 @@ public class CommentsDialog extends Dialog {
 							Taxon taxon = model.getTaxonMatrix().getTaxon(oldValue);
 							String value = config.getValueProvider().getValue(comment);
 							
-							ValidationResult validationResult = setValueValidator.validValue(value, taxon, character);
+							ValidationResult validationResult = setValueValidator.validValue(value, character);
 							if(validationResult.isValid()) {
 								Value newValue = new Value(value);
 								comment.setObject(newValue);

@@ -1,11 +1,14 @@
 package edu.arizona.biosemantics.matrixreview.client.event;
 
+import java.util.List;
+
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeCharacterEvent.AnalyzeCharacterEventHandler;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
 public class AnalyzeCharacterEvent extends GwtEvent<AnalyzeCharacterEventHandler> {
 
@@ -15,15 +18,15 @@ public class AnalyzeCharacterEvent extends GwtEvent<AnalyzeCharacterEventHandler
 	
 	public static Type<AnalyzeCharacterEventHandler> TYPE = new Type<AnalyzeCharacterEventHandler>();
 	private Character character;
-	private Model model = null; //null will use the entire model
+	private List<Taxon> taxaToConsider; //null or empty will use all
 	
 	public AnalyzeCharacterEvent(Character character) {
 		this.character = character;
 	}
 	
-	public AnalyzeCharacterEvent(Character character, Model model) {
+	public AnalyzeCharacterEvent(Character character, List<Taxon> taxaToConsider) {
 		this.character = character;
-		this.model = model;
+		this.taxaToConsider = taxaToConsider;
 	}
 	
 	@Override
@@ -44,8 +47,8 @@ public class AnalyzeCharacterEvent extends GwtEvent<AnalyzeCharacterEventHandler
 		return character;
 	}
 
-	public Model getModel() {
-		return model;
+	public List<Taxon> getTaxaToConsider() {
+		return taxaToConsider;
 	}
 	
 }

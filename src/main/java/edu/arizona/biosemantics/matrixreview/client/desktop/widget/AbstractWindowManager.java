@@ -14,10 +14,12 @@ public abstract class AbstractWindowManager implements WindowManager {
 	
 	protected Menu contextMenu = null;
 	protected EventBus subMatrixEventBus;
+	protected EventBus fullMatrixEventBus;
 	protected Window window;
 	
-	public AbstractWindowManager(EventBus subMatrixEventBus, Window window) {
+	public AbstractWindowManager(EventBus fullMatrixEventBus, EventBus subMatrixEventBus, Window window) {
 		this.subMatrixEventBus = subMatrixEventBus;
+		this.fullMatrixEventBus = fullMatrixEventBus;
 		this.window = window;		
 		addEventHandlers();
 	}

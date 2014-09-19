@@ -301,7 +301,8 @@ public abstract class MatrixViewControler implements LoadModelEventHandler,
 
 	@Override
 	public void onSet(SetValueEvent event) {
-		taxonStore.update(event.getTaxon());
+		for(Taxon taxon : event.getTaxa())
+			taxonStore.update(taxon);
 	}
 	
 	@Override
