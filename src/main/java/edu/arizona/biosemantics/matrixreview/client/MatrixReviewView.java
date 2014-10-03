@@ -5,6 +5,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
@@ -14,6 +15,8 @@ import edu.arizona.biosemantics.matrixreview.client.config.ManageMenuView;
 import edu.arizona.biosemantics.matrixreview.client.config.ModelControler;
 import edu.arizona.biosemantics.matrixreview.client.desktop.DesktopView;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SaveEvent.SaveHandler;
+import edu.arizona.biosemantics.matrixreview.client.event.SaveEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowDesktopEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowModifyEvent;
@@ -38,6 +41,7 @@ public class MatrixReviewView extends SplitLayoutPanel {
 	private int desktopHeight = 300;
 	private ModelMerger modelMerger;
 	private ModelControler modelControler;
+	private HandlerRegistration saveHandlerRegistration;
 
 	public MatrixReviewView() {	
 		subModelBus = new SimpleEventBus();
@@ -151,6 +155,13 @@ public class MatrixReviewView extends SplitLayoutPanel {
 	public void setFullModel(Model model) {
 		this.fullModel = model;
 		fullModelBus.fireEvent(new LoadModelEvent(fullModel));
+	}
+
+	public void setSaveHandler(SaveHandler saveHandler) {
+		if(saveHandlerRegistration != null)
+			saveHandlerRegistration.removeHandler();
+		saveHandlerRegistration = 
+				fullModelBus.addHandler(SaveEvent.TYPE, saveHandler);
 	}
 	
 }

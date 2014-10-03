@@ -16,6 +16,7 @@ import edu.arizona.biosemantics.matrixreview.client.common.ColorSettingsDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.ColorsDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.CommentsDialog;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SaveEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowModifyEvent;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 
@@ -81,10 +82,11 @@ public class MenuView extends MenuBar {
 			}
 		});
 
-		MenuItem exportItem = new MenuItem("Export");
+		MenuItem exportItem = new MenuItem("Save");
 		exportItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
+				fullModelBus.fireEvent(new SaveEvent(model));
 			}
 		});
 
