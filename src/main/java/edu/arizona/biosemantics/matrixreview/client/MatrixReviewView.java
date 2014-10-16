@@ -5,6 +5,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
+import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
@@ -155,6 +156,7 @@ public class MatrixReviewView extends SplitLayoutPanel {
 	public void setFullModel(Model model) {
 		this.fullModel = model;
 		fullModelBus.fireEvent(new LoadModelEvent(fullModel));
+		fullModelBus.fireEvent(new ShowModifyEvent(fullModel));
 	}
 
 	public void setSaveHandler(SaveHandler saveHandler) {
@@ -163,7 +165,15 @@ public class MatrixReviewView extends SplitLayoutPanel {
 		saveHandlerRegistration = 
 				fullModelBus.addHandler(SaveEvent.TYPE, saveHandler);
 	}
+		
+	public EventBus getFullModelBus() {
+		return fullModelBus;
+	}
 	
+	public EventBus getSubModelBus() {
+		return subModelBus;
+	}
+		
 }
 
 
