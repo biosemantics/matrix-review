@@ -19,7 +19,7 @@ import edu.arizona.biosemantics.matrixreview.shared.model.core.Organ;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon.Rank;
+import edu.arizona.biosemantics.common.taxonomy.Rank;
 
 @SuppressWarnings("serial")
 public class MatrixService extends RemoteServiceServlet implements IMatrixService {

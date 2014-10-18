@@ -12,63 +12,14 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.data.shared.TreeStore.TreeNode;
 
+import edu.arizona.biosemantics.common.taxonomy.Rank;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
 public class Taxon implements Serializable, Comparable<Taxon> {
-	
-	public enum Rank implements Serializable  {
-		LIFE(0), 
-		SUPERDOMAIN(1), DOMAIN(1), SUBDOMAIN(2), 
-		SUPERKINGDOM(3), KINGDOM(4), SUBKINGDOM(5), 
-		SUPERPHYLUM(6), PHYLUM(7), SUBPHYLUM(8),
-		SUPERCLASS(9), CLASS(10), SUBCLASS(11),
-		SUPERORDER(12), ORDER(13), SUBORDER(14),
-		SUPERFAMILY(15), FAMILY(16), SUBFAMILY(17),
-		SUPERTRIBE(18), TRIBE(19), SUBTRIBE(20),
-		SUPERGENUS(21), GENUS(22), SUBGENUS(23),
-		SUPERSECTION(24), SECTION(25), SUBSECTION(26),
-		SUPERSERIES(27), SERIES(28), SUBSERIES(29), 
-		SUPERSPECIES(30), SPECIES(31), SUBSPECIES(32),
-		SUPERVARIETY(33), VARIETY(34), SUBVARIETAS(35),
-		SUPERFORMA(36), FORMA(37), SUBFORMA(38),
-		SUPERGROUP(39), GROUP(40), SUBGROUP(41),
-		UNRANKED(42);
 		
-		private int id;
-		
-		Rank() { }
-	
-		Rank(int id) {
-			this.id = id;
-		}
-		
-		public int getId() {
-			return id;
-		}
-		
-		
-		public static boolean isValidParentChild(Rank parent, Rank child) {
-			int parentLevelId = parent == null? -1 : parent.getId();
-			int childLevelId = child == null? -1 : child.getId();
-			//special case group allows children of itself as it is the lowest rank
-			if(parent != null && child != null && parent.equals(UNRANKED) && child.equals(UNRANKED))
-				return true;
-			return parentLevelId < childLevelId;
-		}
-		
-		public static boolean equalOrBelowGenus(Rank level) {
-			return level.getId() >= GENUS.getId();
-		}
-		
-		public static boolean aboveGenus(Rank level) {
-			return level.getId() < GENUS.getId();
-		}
-	}
-	
-
 	public static int ID = 0;	
 	private int id = ID++;
 	

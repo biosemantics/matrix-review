@@ -82,8 +82,8 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Organ;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon.Rank;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
+import edu.arizona.biosemantics.common.taxonomy.Rank;
 
 public class ModelControler implements LoadModelEventHandler, AddTaxonEventHandler, RemoveTaxonEventHandler, 
 	ModifyTaxonEventHandler, MoveTaxaUpEventHandler, MoveTaxaDownEventHandler, MoveCharactersUpEventHandler, 

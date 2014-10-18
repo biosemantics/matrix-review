@@ -14,7 +14,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.ModifyTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon.Rank;
+import edu.arizona.biosemantics.common.taxonomy.Rank;
 
 public class TaxonModifyDialog extends Dialog {
 		
