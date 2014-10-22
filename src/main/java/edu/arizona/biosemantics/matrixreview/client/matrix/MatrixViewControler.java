@@ -104,8 +104,8 @@ public abstract class MatrixViewControler implements LoadModelEventHandler,
 	protected EditEventsHandler editEventsHandler;
 	protected CharactersGridFilters charactersFilters;
 	
-	protected Set<HandlerRegistration> handlerRegistrations = new HashSet<HandlerRegistration>();
 	private ValueCell valueCell;
+	protected Set<HandlerRegistration> handlerRegistrations = new HashSet<HandlerRegistration>();
 
 	
 	public MatrixViewControler(EventBus eventBus, FrozenFirstColumTaxonTreeGrid taxonTreeGrid) {
@@ -271,6 +271,10 @@ public abstract class MatrixViewControler implements LoadModelEventHandler,
 		for(HandlerRegistration handlerRegistration : handlerRegistrations)
 			handlerRegistration.removeHandler();
 		handlerRegistrations.clear();
+		
+		charactersFilters.removeAll();
+		charactersFilters.clearFilters();
+		editing.clearEditors();
 	}
 	
 	@Override
