@@ -34,9 +34,9 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 
 		Organ o1 = new Organ("stem");
 		List<Character> flatCharactersO1 = new LinkedList<Character>();
-		Character a1 = new Character("length", o1, 0);
-		Character a2 = new Character("shape", o1, 1);
-		Character a3 = new Character("architecture", o1, 2);
+		Character a1 = new Character("length", "of", o1, 0);
+		Character a2 = new Character("shape", "of", o1, 1);
+		Character a3 = new Character("architecture", "of", o1, 2);
 		flatCharactersO1.add(a1);
 		flatCharactersO1.add(a2);
 		flatCharactersO1.add(a3);
@@ -44,9 +44,9 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		
 		Organ o2 = new Organ("leaf");
 		List<Character> flatCharactersO2 = new LinkedList<Character>();
-		Character b1 = new Character("width", o2, 0);
-		Character b2 = new Character("shape", o2, 1);
-		Character b3 = new Character("pubescence", o2, 2);
+		Character b1 = new Character("width", "of", o2, 0);
+		Character b2 = new Character("shape", "of", o2, 1);
+		Character b3 = new Character("pubescence", "of", o2, 2);
 		flatCharactersO2.add(b1);
 		flatCharactersO2.add(b2);
 		flatCharactersO2.add(b3);
@@ -54,9 +54,9 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		
 		Organ o3 = new Organ("head");
 		List<Character> flatCharactersO3 = new LinkedList<Character>();
-		Character c1 = new Character("size", o3, 0);
-		Character c2 = new Character("color", o3, 1);
-		Character c3 = new Character("architecture", o3, 2);
+		Character c1 = new Character("size", "of", o3, 0);
+		Character c2 = new Character("color", "of", o3, 1);
+		Character c3 = new Character("architecture", "of", o3, 2);
 		flatCharactersO3.add(c1);
 		flatCharactersO3.add(c2);
 		flatCharactersO3.add(c3);

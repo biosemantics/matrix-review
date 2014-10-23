@@ -12,6 +12,7 @@ public class Character implements Serializable {
 	private int id = ID++;
 	
 	private String name = "";
+	private String connector = "of";
 	private Organ organ = null;
 	
 	public Character() { }
@@ -20,7 +21,7 @@ public class Character implements Serializable {
 		this.name = name;
 	}
 	
-	public Character(String name, Organ organ, int flatIndex) {
+	public Character(String name, String connector, Organ organ, int flatIndex) {
 		this.name = name;
 		this.organ = organ;
 		organ.ensureContained(this, flatIndex);
@@ -34,6 +35,14 @@ public class Character implements Serializable {
 		this.name = name;
 	}
 	
+	public String getConnector() {
+		return connector;
+	}
+
+	public void setConnector(String connector) {
+		this.connector = connector;
+	}
+
 	public Organ getOrgan() {
 		return organ;
 	}
@@ -55,7 +64,7 @@ public class Character implements Serializable {
 			return name;
 		if(organ.toString().trim().isEmpty())
 			return name;
-		return name + " of " + organ.toString();
+		return name + " " + connector + " " + organ.toString();
 	}
 	
 	public int getId() {

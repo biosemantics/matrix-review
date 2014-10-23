@@ -47,7 +47,7 @@ public class CharacterAddDialog extends Dialog {
 				int afterIndex = organ.getFlatCharacters().indexOf(after) ;
 				int organindex = afterIndex == -1 ? 0 : afterIndex + 1;
 				Character newCharacter = new Character(characterNameField
-						.getText(), organ, organindex);
+						.getText(), "of", organ, organindex);
 				eventBus.fireEvent(new AddCharacterEvent(organ, newCharacter, after));
 				//eventBus.fireEvent(new some move event that moves "after");
 				CharacterAddDialog.this.hide();
