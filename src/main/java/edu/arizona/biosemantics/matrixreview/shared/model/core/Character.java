@@ -23,6 +23,7 @@ public class Character implements Serializable {
 	
 	public Character(String name, String connector, Organ organ, int flatIndex) {
 		this.name = name;
+		this.connector = connector;
 		this.organ = organ;
 		organ.ensureContained(this, flatIndex);
 	}

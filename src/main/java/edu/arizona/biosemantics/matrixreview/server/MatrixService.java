@@ -34,7 +34,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 
 		Organ o1 = new Organ("stem");
 		List<Character> flatCharactersO1 = new LinkedList<Character>();
-		Character a1 = new Character("length", "of", o1, 0);
+		Character a1 = new Character("length of something", "at", o1, 0);
 		Character a2 = new Character("shape", "of", o1, 1);
 		Character a3 = new Character("architecture", "of", o1, 2);
 		flatCharactersO1.add(a1);
