@@ -68,6 +68,12 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 					showDescription(event.getTaxon());
 				}
 			});
+			fullModelBus.addHandler(ShowDescriptionEvent.TYPE, new ShowDescriptionEvent.ShowDescriptionEventHandler() {
+				@Override
+				public void onShow(ShowDescriptionEvent event) {
+					showDescription(event.getTaxon());
+				}
+			});
 		}
 				
 		protected void onAnalyzeCharacter(AnalyzeCharacterEvent event) {
