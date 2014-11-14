@@ -6,6 +6,7 @@ import java.util.List;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Format;
 import com.sencha.gxt.core.client.util.Params;
@@ -66,7 +67,20 @@ public class TaxonMenu extends Menu {
 		add(createColorize());
 		add(new HeaderMenuItem("Analysis"));
 		add(createShowDescription());
+		add(createSearchImages());
 		//add(createAnalysis());	
+	}
+
+	private Widget createSearchImages() {
+		MenuItem item = new MenuItem("Search Images");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				String fullName = taxon.getFullName();
+				Window.open("http://www.google.com/search?tbm=isch&q=" + fullName, "_blank", "");
+			}
+		});
+		return item;
 	}
 
 	@Override
@@ -109,7 +123,7 @@ public class TaxonMenu extends Menu {
 	}
 
 	private MenuItem createShowDescription() {
-		MenuItem item = new MenuItem("Show description");
+		MenuItem item = new MenuItem("Show Description");
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {

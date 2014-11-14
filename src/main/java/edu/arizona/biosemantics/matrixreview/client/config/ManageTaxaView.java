@@ -18,8 +18,10 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
@@ -85,6 +87,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonCommentEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueCommentEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.ShowDescriptionEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.TaxonMenu;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.MatrixEntry;
@@ -800,6 +803,27 @@ public class ManageTaxaView extends ContentPanel {
 				}
 			}
 		});
+		
+		menu.add(new HeaderMenuItem("Analysis"));
+		item = new MenuItem("Show Description");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				Taxon selected = tree.getSelectionModel().getSelectedItem();
+				eventBus.fireEvent(new ShowDescriptionEvent(selected));
+			}
+		});
+		item = new MenuItem("Search Images");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				Taxon selected = tree.getSelectionModel().getSelectedItem();
+				String fullName = selected.getFullName();
+				Window.open("http://www.google.com/search?tbm=isch&q=" + fullName, "_blank", "");
+			}
+		});
+		menu.add(item);
+		
 		return menu;
 	}
 	
