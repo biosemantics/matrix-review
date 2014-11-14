@@ -276,7 +276,7 @@ public class ModelControler implements LoadModelEventHandler, AddTaxonEventHandl
 		model.getTaxonMatrix().renameOrgan(organ, name);
 	}
 	
-	public void modifyCharacter(Character character, String newName, String oldName, Organ oldOrgan, Organ newOrgan) {
+	public void modifyCharacter(Character character, String oldName, String newName, Organ oldOrgan, Organ newOrgan) {
 		character.setName(newName);
 		if(newOrgan != null && !newOrgan.equals(oldOrgan)) {
 			character.setOrgan(newOrgan, 0);
