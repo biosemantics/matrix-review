@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -89,7 +90,9 @@ public class FrozenFirstColumnTreeGrid<M> extends HorizontalLayoutContainer {
 			}
 		});		
 		
-		getScrollSupport().setScrollMode(ScrollMode.AUTO);
+		// remove possibly  undesirable scroll bars 
+		//this.getElement().getStyle().setOverflow(Overflow.HIDDEN);
+		//getScrollSupport().setScrollMode(ScrollMode.AUTO);
 
 		// add locked column, only 300px wide (in this example, use layouts
 		// to change how this works
