@@ -813,6 +813,7 @@ public class ManageTaxaView extends ContentPanel {
 				eventBus.fireEvent(new ShowDescriptionEvent(selected));
 			}
 		});
+		menu.add(item); 
 		item = new MenuItem("Search Images");
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
