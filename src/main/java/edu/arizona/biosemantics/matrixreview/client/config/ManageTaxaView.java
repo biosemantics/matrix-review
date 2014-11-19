@@ -932,7 +932,7 @@ public class ManageTaxaView extends ContentPanel {
 				"<p><b>Author:&nbsp;</b>" + taxon.getAuthor() + "</p>" +
 				"<p><b>Year:&nbsp;</b>" + taxon.getYear() + "</p>" +
 				"<p><b>Taxonomy:&nbsp;</b>" + taxonomy + "</p>" +
-				"<p><b>Description:&nbsp;</b>" + taxon.getDescription() + "</p>";
+				"<p><b>Description:&nbsp;</b>" + taxon.getDescription().replaceAll("\n", "</br>") + "</p>";
 		if(model.hasComment(taxon))
 			infoText +=	"<p><b>Comment:&nbsp;</b>" + model.getComment(taxon) + "</p>";
 		if(model.hasColor(taxon))
