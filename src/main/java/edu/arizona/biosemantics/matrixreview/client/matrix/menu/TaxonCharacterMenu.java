@@ -70,12 +70,12 @@ public class TaxonCharacterMenu extends Menu {
 	}
 
 	private Widget createModelMode() {
-		MenuItem item = new MenuItem("Taxon Concept Presentation");
+		MenuItem item = new MenuItem("Matrix Views");
 		Menu menu = new Menu();
 		item.setSubMenu(menu);
 		CheckMenuItem flat = new CheckMenuItem("Matrix");
 		flat.setGroup("mode");
-		CheckMenuItem hierarchy = new CheckMenuItem("Taxonomy");
+		CheckMenuItem hierarchy = new CheckMenuItem("Taxonomy Hierarchy");
 		hierarchy.setGroup("mode");
 		//CheckMenuItem custom = new CheckMenuItem("Custom");
 		//custom.setGroup("mode");
@@ -140,7 +140,7 @@ public class TaxonCharacterMenu extends Menu {
 	}
 
 	private MenuItem createAnalysisStart() {
-		MenuItem item = new MenuItem("Show Desktop");
+		MenuItem item = new MenuItem("Show Analysis Desktop");
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
@@ -309,17 +309,17 @@ public class TaxonCharacterMenu extends Menu {
 		item.setText("Sort Characters");
 		Menu sortMenu = new Menu();
 		item.setSubMenu(sortMenu);
-		MenuItem coverageSortDesc = new MenuItem("Coverage Desc");
+		MenuItem coverageSortDesc = new MenuItem("Coverage (Descending)");
 		sortMenu.add(coverageSortDesc);
-		MenuItem coverageSortAsc = new MenuItem("Coverage Asc");
+		MenuItem coverageSortAsc = new MenuItem("Coverage (Ascending)");
 		sortMenu.add(coverageSortAsc);
-		MenuItem nameSortDesc = new MenuItem("Character Name Desc");
+		MenuItem nameSortDesc = new MenuItem("Character Name (Descending)");
 		sortMenu.add(nameSortDesc);
-		MenuItem nameSortAsc = new MenuItem("Character Name Asc");
+		MenuItem nameSortAsc = new MenuItem("Character Name (Ascending)");
 		sortMenu.add(nameSortAsc);
-		MenuItem organSortDesc = new MenuItem("Character Organ Desc");
+		MenuItem organSortDesc = new MenuItem("Character Organ (Descending)");
 		sortMenu.add(organSortDesc);
-		MenuItem organSortAsc = new MenuItem("Character Organ Asc");
+		MenuItem organSortAsc = new MenuItem("Character Organ (Ascending)");
 		sortMenu.add(organSortAsc);
 		
 		coverageSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
@@ -366,13 +366,13 @@ public class TaxonCharacterMenu extends Menu {
 		item.setText("Sort Taxa");
 		Menu sortMenu = new Menu();
 		item.setSubMenu(sortMenu);
-		MenuItem coverageSortDesc = new MenuItem("Coverage Desc");
+		MenuItem coverageSortDesc = new MenuItem("Coverage (Descending)");
 		sortMenu.add(coverageSortDesc);
-		MenuItem coverageSortAsc = new MenuItem("Coverage Asc");
+		MenuItem coverageSortAsc = new MenuItem("Coverage (Ascending)");
 		sortMenu.add(coverageSortAsc);
-		MenuItem nameSortDesc = new MenuItem("Taxon Name Desc");
+		MenuItem nameSortDesc = new MenuItem("Taxon Name (Descending)");
 		sortMenu.add(nameSortDesc);
-		MenuItem nameSortAsc = new MenuItem("Taxon Name Asc");
+		MenuItem nameSortAsc = new MenuItem("Taxon Name (Ascending)");
 		sortMenu.add(nameSortAsc);
 		coverageSortAsc.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
@@ -551,9 +551,9 @@ public class TaxonCharacterMenu extends Menu {
 		MenuItem editMode = new MenuItem("Lock all");
 		Menu editMenu = new Menu();
 		editMode.setSubMenu(editMenu);
-		CheckMenuItem set = new CheckMenuItem("Set");
+		CheckMenuItem set = new CheckMenuItem("Set lock");
 		set.setGroup("editMode");
-		CheckMenuItem unset = new CheckMenuItem("Unset");
+		CheckMenuItem unset = new CheckMenuItem("Unset lock");
 		unset.setGroup("editMode");
 		set.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override

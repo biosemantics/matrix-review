@@ -57,7 +57,7 @@ public class ManageMatrixView extends VerticalLayoutContainer {
 		buttonBar.setMinButtonWidth(75);
 		buttonBar.setPack(BoxLayoutPack.CENTER);
 		TextButton loadButton = new TextButton("Load");
-		loadButton.setTitle("Load Selected Taxa and Characters into a Spreadsheet");
+		loadButton.setTitle("Load Selected Taxa and Characters in a matrix");
 		loadButton.addSelectHandler(new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {
@@ -74,7 +74,7 @@ public class ManageMatrixView extends VerticalLayoutContainer {
 					 });
 			         box.show();
 				} else {
-					AlertMessageBox alert = new AlertMessageBox("Load impossible", "You have to select at least one taxon and character");
+					AlertMessageBox alert = new AlertMessageBox("Nothing to Load", "You need to select at least one taxon and one character");
 					alert.show();
 				}
 			}
@@ -102,7 +102,7 @@ public class ManageMatrixView extends VerticalLayoutContainer {
 		buttonBar.add(loadButton);
 		
 		ContentPanel contentPanel = new ContentPanel();
-		contentPanel.setHeadingText("Load Sub-Matrix");
+		contentPanel.setHeadingText("Load Selected Taxa and Characters");
 		contentPanel.add(buttonBar);
 		add(contentPanel, new VerticalLayoutData(1.0, -1.0));
 		
@@ -165,7 +165,7 @@ public class ManageMatrixView extends VerticalLayoutContainer {
 	}
 
 	protected String getLoadMessage(List<Taxon> taxa, List<Character> characters, LinkedHashSet<Organ> organs) {
-		return "Do you want to continue loading a sub-matrix with the following dimensions?</br></br>" +
+		return "Continue loading a matrix with the selected taxa and characters?</br></br>" +
 				"<table><tr><td><p><b>Selected Taxa: </b></td><td>" + taxa.size() + "</p></td></tr>" +
 		"<tr><td><p><b>Selected Characters: </b></td><td>" + characters.size() + " (of " + organs.size() + " organ(s))</p></tr></td>" +
 		"<tr><td><p><b>Matrix values: </b></td><td>" + taxa.size() * characters.size() + "</p></tr></td>";

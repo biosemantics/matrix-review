@@ -119,8 +119,8 @@ public class ManageTaxaView extends ContentPanel {
 		this.manageMatrixView = manageMatrixView;
 		tree = createTree();
 		
-		this.setTitle("Taxa Management");
-		this.setHeadingText("Taxa Management");this.setHeadingText("Taxa Management");this.setHeadingText("Taxa Management");
+		this.setTitle("Right-clicks on taxa to bring up more taxa management functions");
+		this.setHeadingText("Select Taxa for the Matrix");
 		
 		FieldSet taxaFieldSet = new FieldSet();
 		//taxonFieldSet.setCollapsible(true);
@@ -419,8 +419,8 @@ public class ManageTaxaView extends ContentPanel {
 		//taxaButtonBar.add(addButton);
 		//taxaButtonBar.add(modifyButton);
 		//taxaButtonBar.add(removeButton);
-		taxaButtonBar.add(upButton);
-		taxaButtonBar.add(downButton);
+		//taxaButtonBar.add(upButton);
+		//taxaButtonBar.add(downButton);
 		return taxaButtonBar;
 	}
 
@@ -447,7 +447,7 @@ public class ManageTaxaView extends ContentPanel {
 				childrenString = childrenString.substring(0, childrenString.length() - 2);
 				ConfirmMessageBox box = new ConfirmMessageBox(
 						"Remove Taxon",
-						"Removing the taxon will also remove all of it's descendants: "
+						"Remove the taxon will also remove all of it's descendants: "
 								+ childrenString);
 				box.addDialogHideHandler(new DialogHideHandler() {
 					@Override

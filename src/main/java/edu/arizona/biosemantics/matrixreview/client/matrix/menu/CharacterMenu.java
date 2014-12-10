@@ -101,7 +101,7 @@ public class CharacterMenu extends Menu {
 	}
 
 	private MenuItem createFullAnalysis() {
-		MenuItem item = new MenuItem("Full matrix");
+		MenuItem item = new MenuItem("All Taxa/Characters");
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
@@ -112,7 +112,7 @@ public class CharacterMenu extends Menu {
 	}
 	
 	private MenuItem createSubAnalysis() {
-		MenuItem item = new MenuItem("Selected sub-matrix");
+		MenuItem item = new MenuItem("Selected Taxa/Characters");
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
@@ -206,18 +206,18 @@ public class CharacterMenu extends Menu {
 	}
 
 	private MenuItem createControlMode() {
-		final MenuItem controlItem = new MenuItem("Control input");
+		final MenuItem controlItem = new MenuItem("Control State Values");
 		final Menu controlSelectMenu = new Menu();			
 		controlItem.setSubMenu(controlSelectMenu);
-		final MenuItem automatic = new MenuItem("Automatic");
-		//automatic.setGroup("Controlled");
-		controlSelectMenu.add(automatic);
 		final CheckMenuItem numerical = new CheckMenuItem("Numerical");
 		numerical.setGroup("Controlled");
 		controlSelectMenu.add(numerical);
 		final CheckMenuItem categorical = new CheckMenuItem("Categorical");
 		categorical.setGroup("Controlled");
 		controlSelectMenu.add(categorical);
+		final MenuItem automatic = new MenuItem("Automatic");
+		//automatic.setGroup("Controlled");
+		controlSelectMenu.add(automatic);
 		final CheckMenuItem off = new CheckMenuItem("Off");
 		off.setGroup("Controlled");
 		controlSelectMenu.add(off);
