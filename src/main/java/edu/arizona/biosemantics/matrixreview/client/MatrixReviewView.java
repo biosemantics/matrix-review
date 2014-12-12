@@ -16,8 +16,8 @@ import edu.arizona.biosemantics.matrixreview.client.config.ManageMenuView;
 import edu.arizona.biosemantics.matrixreview.client.config.ModelControler;
 import edu.arizona.biosemantics.matrixreview.client.desktop.DesktopView;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.SaveEvent.SaveHandler;
-import edu.arizona.biosemantics.matrixreview.client.event.SaveEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.DownloadEvent.DownloadHandler;
+import edu.arizona.biosemantics.matrixreview.client.event.DownloadEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowDesktopEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowModifyEvent;
@@ -157,13 +157,6 @@ public class MatrixReviewView extends SplitLayoutPanel {
 		this.fullModel = model;
 		fullModelBus.fireEvent(new LoadModelEvent(fullModel));
 		fullModelBus.fireEvent(new ShowModifyEvent(fullModel));
-	}
-
-	public void setSaveHandler(SaveHandler saveHandler) {
-		if(saveHandlerRegistration != null)
-			saveHandlerRegistration.removeHandler();
-		saveHandlerRegistration = 
-				fullModelBus.addHandler(SaveEvent.TYPE, saveHandler);
 	}
 		
 	public EventBus getFullModelBus() {
