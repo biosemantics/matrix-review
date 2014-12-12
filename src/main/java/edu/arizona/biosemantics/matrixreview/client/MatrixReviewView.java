@@ -80,7 +80,7 @@ public class MatrixReviewView extends SplitLayoutPanel {
 	}
 
 	private void addKeyHandling() {
-		this.addDomHandler(new KeyDownHandler() {
+		/*this.addDomHandler(new KeyDownHandler() {
 			@Override
 			public void onKeyDown(KeyDownEvent event) {
 				if(event.isControlKeyDown() && event.getNativeKeyCode() == KeyCodes.KEY_S) {
@@ -88,7 +88,7 @@ public class MatrixReviewView extends SplitLayoutPanel {
 					//System.out.println("fire save");
 				}
 			}
-		}, KeyDownEvent.getType());
+		}, KeyDownEvent.getType());*/
 	}
 
 	private void setMenu(MenuView menuView) {
