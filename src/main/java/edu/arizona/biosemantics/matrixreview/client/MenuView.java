@@ -6,6 +6,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.resources.ThemeStyles;
 import com.sencha.gxt.widget.core.client.Dialog;
+import com.sencha.gxt.widget.core.client.menu.HeaderMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuBar;
@@ -75,7 +76,7 @@ public class MenuView extends MenuBar {
 		 * });
 		 */
 
-		MenuItem modifyMatrixItem = new MenuItem("Configure");
+		MenuItem modifyMatrixItem = new MenuItem("Go to Taxon/Character Selection Page");
 		modifyMatrixItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
@@ -91,7 +92,7 @@ public class MenuView extends MenuBar {
 			}
 		});
 		
-		MenuItem downloadItem = new MenuItem("Download");
+		MenuItem downloadItem = new MenuItem("Download Matrix (with all taxa and characters) as .csv");
 		downloadItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
@@ -109,6 +110,7 @@ public class MenuView extends MenuBar {
 	protected Widget createAnnotationsItem() {
 		Menu sub = new Menu();
 		MenuBarItem annotationsItem = new MenuBarItem("Annotation", sub);
+		sub.add(new HeaderMenuItem("Configure"));
 		MenuItem colorSettingsItem = new MenuItem("Color Settings");
 		colorSettingsItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
@@ -119,7 +121,8 @@ public class MenuView extends MenuBar {
 			}
 		});
 		sub.add(colorSettingsItem);
-		MenuItem colorsItem = new MenuItem("Colorations");
+		sub.add(new HeaderMenuItem("Show"));
+		MenuItem colorsItem = new MenuItem("Color Use on Taxa/Characters");
 		colorsItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> arg0) {
@@ -144,7 +147,7 @@ public class MenuView extends MenuBar {
 
 	protected Widget createQuestionItem() {
 		Menu sub = new Menu();
-		MenuBarItem questionsItem = new MenuBarItem("?", sub);
+		MenuBarItem questionsItem = new MenuBarItem("Instructions", sub);
 		MenuItem helpItem = new MenuItem("Help");
 		helpItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
