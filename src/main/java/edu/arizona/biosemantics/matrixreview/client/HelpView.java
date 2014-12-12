@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.TabItemConfig;
 import com.sencha.gxt.widget.core.client.TabPanel;
 
+
 public class HelpView implements IsWidget {
 
 	@Override
@@ -13,14 +14,12 @@ public class HelpView implements IsWidget {
 		TabPanel panel = new TabPanel();
 		panel.setBorders(false);
 
-		Label label1 = new Label("Help1");
-		label1.addStyleName("pad-text");
+		InstructionsText text = new InstructionsText();
+		InstructionsVideo video = new InstructionsVideo();
 
-		Label label2 = new Label("Help2");
-		label2.addStyleName("pad-text");
 
-		panel.add(label1, new TabItemConfig("Help1"));
-		panel.add(label2, new TabItemConfig("Help2"));
+		panel.add(text, new TabItemConfig("Instructions:Text"));
+		panel.add(video, new TabItemConfig("Instructions:Videos"));
 		return panel;
 	}
 

@@ -168,6 +168,3 @@ public class MatrixReviewView extends SplitLayoutPanel {
 	}
 		
 }
-
-
-

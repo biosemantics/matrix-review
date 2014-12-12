@@ -129,8 +129,8 @@ public class ManageCharactersView extends ContentPanel {
 		this.manageMatrixView = manageMatrixView;
 		this.tree = createTree();
 		
-		this.setTitle("Character Management");
-		this.setHeadingText("Character Management");
+		this.setTitle("Right-clicks on characters to bring up more character management functions");
+		this.setHeadingText("Select Characters for the Matrix");
 
 		FieldSet charactersFieldSet = new FieldSet();
 		// taxonFieldSet.setCollapsible(true);
@@ -515,8 +515,8 @@ public class ManageCharactersView extends ContentPanel {
 		//charactersButtonBar.add(addButton);
 		//charactersButtonBar.add(modifyButton);
 		//charactersButtonBar.add(removeButton);
-		charactersButtonBar.add(upButton);
-		charactersButtonBar.add(downButton);
+		//charactersButtonBar.add(upButton);
+		//charactersButtonBar.add(downButton);
 		//charactersButtonBar.add(new Label("Control Mode"));
 		//charactersButtonBar.add(controlCombo);
 		//charactersButtonBar.add(mergeButton);
@@ -796,7 +796,7 @@ public class ManageCharactersView extends ContentPanel {
 		menu.add(item);
 		
 		item = new MenuItem();
-		item.setText("Move Up");
+		item.setText("Move Down");
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {

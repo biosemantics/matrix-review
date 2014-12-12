@@ -51,7 +51,7 @@ public class ColorSettingsDialog extends Dialog {
 		final LinkedList<Color> colorsCopy = new LinkedList<Color>(model.getColors());
 
 		this.setBodyBorder(false);
-		this.setHeadingText("Colors");
+		this.setHeadingText("Configure Color Usages");
 		this.setWidth(600);
 		this.setHeight(400);
 		this.setModal(true);
@@ -68,7 +68,7 @@ public class ColorSettingsDialog extends Dialog {
 
 		// Layout - west
 		ContentPanel westPanel = new ContentPanel();
-		westPanel.setHeadingText("Create Color");
+		westPanel.setHeadingText("Select Color");
 		BorderLayoutData data = new BorderLayoutData(302);
 		data.setMargins(new Margins(0, 5, 0, 0));
 		westPanel.setLayoutData(data);
@@ -125,7 +125,7 @@ public class ColorSettingsDialog extends Dialog {
 					boolean exists = false;
 					for(Color color : colorsCopy) {
 						if(color.getHex().equals(hexField.getText())) {
-							AlertMessageBox alert = new AlertMessageBox("Duplicate color", "This color exists already");
+							AlertMessageBox alert = new AlertMessageBox("Duplicate color", "This color is being used");
 							alert.show();
 							exists = true;
 						}
@@ -136,7 +136,7 @@ public class ColorSettingsDialog extends Dialog {
 						colorsTable.setRowData(colorsCopy);
 					}
 				} else {
-					AlertMessageBox alert = new AlertMessageBox("Not a valid color", "Can't add invalid color code");
+					AlertMessageBox alert = new AlertMessageBox("Not a valid color", "invalid color code");
 					alert.show();
 				}
 			}
@@ -151,7 +151,7 @@ public class ColorSettingsDialog extends Dialog {
 
 		// Layout - center
 		ContentPanel centerPanel = new ContentPanel();
-		centerPanel.setHeadingText("Available colors");
+		centerPanel.setHeadingText("Available color usages");
 		layout.setCenterWidget(centerPanel);
 
 		final CheckboxCell checkboxCell = new CheckboxCell();

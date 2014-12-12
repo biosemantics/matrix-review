@@ -118,7 +118,7 @@ public class SelectMatrixView extends ContentPanel {
 		if(!getSelectedCharacters().isEmpty() && !getSelectedRootTaxa().isEmpty())
 			super.hide();
 		else {
-			AlertMessageBox alert = new AlertMessageBox("Load impossible", "You have to select at least one taxon and character");
+			AlertMessageBox alert = new AlertMessageBox("Nothing to Load", "You have to select at least one taxon and character");
 			alert.show();
 		}
 	}

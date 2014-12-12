@@ -49,8 +49,8 @@ public class ManageMenuView extends MenuView {
 		sub.add(characterItem);
 		characterItem.setSubMenu(characterSub);
 
-		MenuItem fullMatrixItem = new MenuItem("Full Matrix");
-		MenuItem subMatrixItem = new MenuItem("Selected Sub-Matrix");
+		MenuItem fullMatrixItem = new MenuItem("All Taxa and Characters");
+		MenuItem subMatrixItem = new MenuItem("Selected Taxa and Characters");
 		fullMatrixItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> arg0) {
@@ -58,7 +58,7 @@ public class ManageMenuView extends MenuView {
 				if (characters.isEmpty()) {
 					AlertMessageBox alert = new AlertMessageBox(
 							"No Characters selected",
-							"You have to select one or more characters to analze");
+							"You have to select one or more characters to analyze");
 					alert.show();
 				}
 				for (Character character : characters)
@@ -74,7 +74,7 @@ public class ManageMenuView extends MenuView {
 				if (characters.isEmpty()) {
 					AlertMessageBox alert = new AlertMessageBox(
 							"No Characters selected",
-							"You have to select one or more characters to analze");
+							"You need to select one or more characters to analyze");
 					alert.show();
 				} else {
 					if (!taxa.isEmpty()) {
@@ -83,7 +83,7 @@ public class ManageMenuView extends MenuView {
 					} else {
 						AlertMessageBox alert = new AlertMessageBox(
 								"No Taxa selected",
-								"You have to select one or more taxa which provide the data "
+								"You need to select one or more taxa which provide the data "
 										+ "to analyze the selected characters");
 						alert.show();
 					}
