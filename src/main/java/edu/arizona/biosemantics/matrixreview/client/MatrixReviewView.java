@@ -2,6 +2,9 @@ package edu.arizona.biosemantics.matrixreview.client;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
@@ -18,6 +21,7 @@ import edu.arizona.biosemantics.matrixreview.client.desktop.DesktopView;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.DownloadEvent.DownloadHandler;
 import edu.arizona.biosemantics.matrixreview.client.event.DownloadEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.SaveEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowDesktopEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowMatrixEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowModifyEvent;
@@ -64,6 +68,7 @@ public class MatrixReviewView extends SplitLayoutPanel {
 		addSouth(desktopView, 0);
 		add(verticalLayoutContainer);
 		
+		addKeyHandling();
 		addEventHandlers();
 		
 		/*desktopView.addClickHandler(new ClickHandler() {
@@ -72,6 +77,18 @@ public class MatrixReviewView extends SplitLayoutPanel {
 			toggleFooter();
 		}
 		});*/
+	}
+
+	private void addKeyHandling() {
+		this.addDomHandler(new KeyDownHandler() {
+			@Override
+			public void onKeyDown(KeyDownEvent event) {
+				if(event.isControlKeyDown() && event.getNativeKeyCode() == KeyCodes.KEY_S) {
+					//fullModelBus.fireEvent(new SaveEvent(fullModel));
+					//System.out.println("fire save");
+				}
+			}
+		}, KeyDownEvent.getType());
 	}
 
 	private void setMenu(MenuView menuView) {
