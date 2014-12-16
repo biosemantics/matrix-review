@@ -4,6 +4,7 @@ import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
+
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 
 /**
@@ -13,7 +14,7 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Character;
  * @author Andrew Stockton
  */
 
-public class CharacterTreeNode {
+public class CharacterTreeNode implements CellIdentifier.CellIdentifierObject{
 	private Object data;
 	
 	public CharacterTreeNode(Object data){
@@ -29,6 +30,11 @@ public class CharacterTreeNode {
 		if (o instanceof CharacterTreeNode)
 			return ((CharacterTreeNode)o).getData().equals(data);
 		return false;
+	}
+
+	@Override
+	public boolean matches(Object other) {
+		return this.equals(other);
 	}
 }
 class CharacterTreeNodeProperties implements PropertyAccess<CharacterTreeNode>{

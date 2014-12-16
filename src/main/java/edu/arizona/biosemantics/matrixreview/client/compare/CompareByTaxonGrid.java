@@ -26,11 +26,11 @@ import edu.arizona.biosemantics.matrixreview.shared.model.HasControlMode.Control
  * @author Andrew Stockton
  */
 
-public class CompareByTaxonGrid extends ComparisonGrid<Taxon, CharacterTreeNode>{
+public class CompareByTaxonGrid extends ComparisonGrid<TaxonTreeNode, CharacterTreeNode>{
 
 	private TreeStore<CharacterTreeNode> characterStore;
 	
-	public CompareByTaxonGrid(EventBus eventBus, List<SimpleMatrixVersion> oldVersions, MatrixVersion currentVersion, Taxon selectedConstant, TreeStore<CharacterTreeNode> store) {
+	public CompareByTaxonGrid(EventBus eventBus, List<SimpleMatrixVersion> oldVersions, MatrixVersion currentVersion, TaxonTreeNode selectedConstant, TreeStore<CharacterTreeNode> store) {
 		super(eventBus, oldVersions, currentVersion, selectedConstant);
 		this.characterStore = store;
 		this.init();
@@ -48,16 +48,16 @@ public class CompareByTaxonGrid extends ComparisonGrid<Taxon, CharacterTreeNode>
 		eventBus.addHandler(ChangeComparingSelectionEvent.TYPE, new ChangeComparingSelectionEvent.ChangeComparingSelectionEventHandler() {
 			@Override
 			public void onChange(ChangeComparingSelectionEvent event) {
-				if (event.getSelection() instanceof Taxon){
-					updateSelectedConstant((Taxon)event.getSelection());
+				if (event.getSelection() instanceof TaxonTreeNode){
+					updateSelectedConstant((TaxonTreeNode)event.getSelection());
 				}
 			}
 		});
 	}
 
 	@Override
-	protected void setHeading(Taxon subject) {
-		this.setHeadingText("Viewing Taxon: " + subject);
+	protected void setHeading(TaxonTreeNode subject) {
+		this.setHeadingText("Viewing Taxon: " + subject.getData());
 	}
 
 	@Override
@@ -68,13 +68,13 @@ public class CompareByTaxonGrid extends ComparisonGrid<Taxon, CharacterTreeNode>
 	@Override
 	protected ValueProvider<CharacterTreeNode, String> getSimpleVersionValueProvider(SimpleMatrixVersion version) {
 		SimpleMatrixVersionProperties versionProperties = new SimpleMatrixVersionProperties(version);
-		return versionProperties.valueOfTaxon(selectedConstant);
+		return versionProperties.valueOfTaxon(selectedConstant.getData());
 	}
 
 	@Override
 	protected ValueProvider<CharacterTreeNode, String> getVersionValueProvider(MatrixVersion version){
 		MatrixVersionProperties versionProperties = new MatrixVersionProperties(version);
-		return versionProperties.valueOfTaxon(selectedConstant);
+		return versionProperties.valueOfTaxon(selectedConstant.getData());
 	}
 	
 	@Override
@@ -101,8 +101,8 @@ public class CompareByTaxonGrid extends ComparisonGrid<Taxon, CharacterTreeNode>
 					if (!value1.getValue().equals(value2.getValue())){
 						CharacterTreeNodeProperties props = new CharacterTreeNodeProperties();
 						String key = props.key().getKey(new CharacterTreeNode(character2));
-						changedCells.add(new CellIdentifier(taxon2, key));
-						//System.out.println("Added a changed cell: character " + selectedConstant.getData() + " at column " + (i+1) + " with key " + key);
+						changedCells.add(new CellIdentifier(new TaxonTreeNode(taxon2), key));
+						//System.out.println("Added a changed cell: taxon " + taxon2 + " with key " + key);
 						//System.out.println(taxon1 + "/" + character1 + ": " + value1.getValue() + " to " + value2.getValue());
 					}
 				}
@@ -118,10 +118,10 @@ public class CompareByTaxonGrid extends ComparisonGrid<Taxon, CharacterTreeNode>
 			TaxonMatrix matrix = currentVersion.getTaxonMatrix();
 			
 			//make sure that this taxon and character exist in the current version. 
-			Taxon t = matrix.getTaxonById(selectedConstant.getId()); 
+			Taxon t = matrix.getTaxonById(selectedConstant.getData().getId()); 
 			if (t == null)
 				return;
-			if (!allowEditMovedTaxon && t.getParent() != null && selectedConstant.getParent() != null && !t.getParent().getId().equals(selectedConstant.getParent().getId()))
+			if (!allowEditMovedTaxon && t.getParent() != null && selectedConstant.getData().getParent() != null && !t.getParent().getId().equals(selectedConstant.getData().getParent().getId()))
 				return; //this taxon exists but has been moved - do not allow edit from this 'old' location. 
 			Character c = matrix.getCharacterById(selectedCharacter.getId());
 			if (c == null)
@@ -138,12 +138,12 @@ public class CompareByTaxonGrid extends ComparisonGrid<Taxon, CharacterTreeNode>
 	}
 
 	@Override
-	protected Value getValue(SimpleMatrixVersion version, Taxon selectedTaxon, CharacterTreeNode node) {
+	protected Value getValue(SimpleMatrixVersion version, TaxonTreeNode selectedTaxon, CharacterTreeNode node) {
 		//make sure that this taxon and character exist in the current version.
-		Taxon t = version.getMatrix().getTaxonById(selectedTaxon.getId()); 
+		Taxon t = version.getMatrix().getTaxonById(selectedTaxon.getData().getId()); 
 		if (t == null)
 			return null;
-		if (t.getParent() != null && selectedTaxon.getParent() != null && !t.getParent().getId().equals(selectedTaxon.getParent().getId()))
+		if (t.getParent() != null && selectedTaxon.getData().getParent() != null && !t.getParent().getId().equals(selectedTaxon.getData().getParent().getId()))
 			return null; //this taxon exists but has been moved. 
 		if (node.getData() instanceof Character){
 			Character c = version.getMatrix().getCharacterById(((Character)node.getData()).getId());
@@ -156,11 +156,7 @@ public class CompareByTaxonGrid extends ComparisonGrid<Taxon, CharacterTreeNode>
 	public String getQuickTip(CellIdentifier cell, int versionIndex) {
 		try{
 			SimpleMatrixVersion version = oldVersions.get(versionIndex);
-			if (cell.getSelectedConstant() instanceof CharacterTreeNode){
-				//System.out.println("Weird things are happening: " + cell.getKey() + ", " + ((CharacterTreeNode)cell.getSelectedConstant()).getData());
-				return "errer";
-			}
-			Taxon selectedTaxon = (Taxon)cell.getSelectedConstant();
+			Taxon selectedTaxon = ((TaxonTreeNode)cell.getSelectedConstant()).getData();
 			CharacterTreeNode node = characterStore.findModelWithKey((String)cell.getKey());
 			if (!(node.getData() instanceof Character)){
 				return "";

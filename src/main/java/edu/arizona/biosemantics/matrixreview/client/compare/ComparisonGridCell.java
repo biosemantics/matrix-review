@@ -37,14 +37,14 @@ public class ComparisonGridCell extends AbstractCell<String> {
 	public void render(com.google.gwt.cell.client.Cell.Context context,
 			String value, SafeHtmlBuilder sb) {
 		
-		Object key = context.getKey();
+		String key = (String)context.getKey();
 		
 		/**TODO: 
 		 * Find out what is triggering all these NullPointerExceptions in getToolTip. It seems that
 		 * sometimes the key in the cell is null? (Verify.)
 		 */
 		//System.out.println("Parent " + parent.getClass() + " has constant: " + parent.getSelectedConstant());
-		CellIdentifier cell = new CellIdentifier(parent.getSelectedConstant(), key);
+		CellIdentifier cell = new CellIdentifier((CellIdentifier.CellIdentifierObject)parent.getSelectedConstant(), key);
 		boolean cellChanged = changedCells.contains(cell);
 		
 		if (value.equals("")){ //TODO: is there a better way to ensure that the row size does not shrink down for rows with only empty cells?

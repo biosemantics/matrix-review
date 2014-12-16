@@ -170,14 +170,14 @@
 }
 
 .movedCell {
-	background-color: #cacada !important;
-	border-color: #cacada !important;
+	background-color: #cccadc !important;
+	border-color: #cccadc !important;
 }
 
 .movedCellShowValue {
-	background-color: #cacada !important;
+	background-color: #cccadc !important;
 	color: #6A6A72;
-	border-color: #cacada !important;
+	border-color: #cccadc !important;
 }
 
 .cellHeight {

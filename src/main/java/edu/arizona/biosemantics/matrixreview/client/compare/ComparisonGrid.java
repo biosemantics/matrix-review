@@ -48,6 +48,7 @@ import edu.arizona.biosemantics.matrixreview.client.matrix.shared.MatrixVersion;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleMatrixVersion;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.SimpleTaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.client.matrix.shared.VersionInfo;
+import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
 /**
@@ -427,26 +428,27 @@ public abstract class ComparisonGrid<T, C> extends ContentPanel{
 }
 
 class CellIdentifier{
-	private Object selectedConstant;
-	private Object key;
+	private CellIdentifierObject selectedConstant;
+	private String key;
 	
-	public CellIdentifier(Object selectedConstant, Object key) {
+	public CellIdentifier(CellIdentifierObject selectedConstant, String key) {
 		super();
+		if (selectedConstant instanceof Taxon){
+			int a = 1;
+		}
 		this.selectedConstant = selectedConstant;
 		this.key = key;
 	}
 	
-	public Object getSelectedConstant(){
-		if (selectedConstant == null)
-			System.out.println("Wohoooo.");
+	public CellIdentifierObject getSelectedConstant(){
 		return selectedConstant;
 	}
 
-	public Object getKey() {
+	public String getKey() {
 		return key;
 	}
 
-	public void setKey(Object key) {
+	public void setKey(String key) {
 		this.key = key;
 	}
 	
@@ -454,11 +456,15 @@ class CellIdentifier{
 	public boolean equals(Object o){
 		try{
 			CellIdentifier other = (CellIdentifier)o;
-			if (other.getSelectedConstant().equals(this.selectedConstant) && other.getKey().equals(this.key))
+			if (other.getSelectedConstant().matches(this.selectedConstant) && other.getKey().equals(this.key))
 					return true;
 		}catch(Exception e){ 
 			return false;
 		}
 		return false;
+	}
+	
+	interface CellIdentifierObject{
+		public boolean matches(Object other);
 	}
 }

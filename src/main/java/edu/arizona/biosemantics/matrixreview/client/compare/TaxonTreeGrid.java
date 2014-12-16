@@ -20,6 +20,7 @@ import edu.arizona.biosemantics.matrixreview.client.matrix.shared.MatrixVersion;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonProperties;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonPropertiesByLocation;
+import edu.arizona.biosemantics.matrixreview.shared.model.TaxonTreeNodeProperties;
 
 /**
  * A single-column TreeGrid that shows a hierarchy of Taxons.
@@ -27,25 +28,25 @@ import edu.arizona.biosemantics.matrixreview.shared.model.TaxonPropertiesByLocat
  * @author Andrew Stockton
  */
 
-public class TaxonTreeGrid extends MaintainListStoreTreeGrid<Taxon>{
+public class TaxonTreeGrid extends MaintainListStoreTreeGrid<TaxonTreeNode>{
 	
-	private TaxonTreeGrid(TreeStore<Taxon> treeStore, ColumnModel<Taxon> model, ColumnConfig<Taxon, String> column){
+	private TaxonTreeGrid(TreeStore<TaxonTreeNode> treeStore, ColumnModel<TaxonTreeNode> model, ColumnConfig<TaxonTreeNode, String> column){
 		super(treeStore, model, column);
 	}
 	
-	private TaxonTreeGrid(TreeStore<Taxon> treeStore, ColumnModel<Taxon> model, ColumnConfig<Taxon, String> column, GridAppearance app, ControllerGridAppearance treeApp){
+	private TaxonTreeGrid(TreeStore<TaxonTreeNode> treeStore, ColumnModel<TaxonTreeNode> model, ColumnConfig<TaxonTreeNode, String> column, GridAppearance app, ControllerGridAppearance treeApp){
 		super(treeStore, model, column, app, treeApp);
 	}
 	
-	public static TaxonTreeGrid createNew(final EventBus eventBus, TreeStore<Taxon> store, boolean useHeaderStyle, MatrixVersion currentVersion){
-		final TaxonPropertiesByLocation taxonProperties = new TaxonPropertiesByLocation(currentVersion);
-		ColumnConfig<Taxon, String> column = new ColumnConfig<Taxon, String>(taxonProperties.currentTaxonName(), 200);
+	public static TaxonTreeGrid createNew(final EventBus eventBus, TreeStore<TaxonTreeNode> store, boolean useHeaderStyle, MatrixVersion currentVersion){
+		final TaxonTreeNodeProperties taxonProperties = new TaxonTreeNodeProperties(currentVersion);
+		ColumnConfig<TaxonTreeNode, String> column = new ColumnConfig<TaxonTreeNode, String>(taxonProperties.currentTaxonName(), 200);
 		column.setHeader("Taxon Concept / Character");
 		column.setMenuDisabled(true);
 		
-		List<ColumnConfig<Taxon, ?>> columns = new ArrayList<ColumnConfig<Taxon, ?>>();
+		List<ColumnConfig<TaxonTreeNode, ?>> columns = new ArrayList<ColumnConfig<TaxonTreeNode, ?>>();
 		columns.add(column);
-		ColumnModel<Taxon> columnModel = new ColumnModel<Taxon>(columns);
+		ColumnModel<TaxonTreeNode> columnModel = new ColumnModel<TaxonTreeNode>(columns);
 		
 		TaxonTreeGrid grid;
 		if (useHeaderStyle){

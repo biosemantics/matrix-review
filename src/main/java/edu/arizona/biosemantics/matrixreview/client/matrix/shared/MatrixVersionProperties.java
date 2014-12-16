@@ -5,26 +5,27 @@ import com.sencha.gxt.data.shared.PropertyAccess;
 
 import edu.arizona.biosemantics.matrixreview.client.compare.CharacterTreeNode;
 import edu.arizona.biosemantics.matrixreview.client.compare.ComparisonGridCell;
+import edu.arizona.biosemantics.matrixreview.client.compare.TaxonTreeNode;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
-public class MatrixVersionProperties implements PropertyAccess<Taxon>{
+public class MatrixVersionProperties implements PropertyAccess<TaxonTreeNode>{
 		private MatrixVersion version;
 		
 		public MatrixVersionProperties(MatrixVersion version){
 			this.version = version;
 		}
 		
-		public ValueProvider<Taxon, String> valueOfCharacter(final Character character){
-			return new ValueProvider<Taxon, String>(){
+		public ValueProvider<TaxonTreeNode, String> valueOfCharacter(final Character character){
+			return new ValueProvider<TaxonTreeNode, String>(){
 				
 				@Override
-				public String getValue(Taxon taxon) {
-					Taxon t = version.getTaxonMatrix().getTaxonById(taxon.getId());
+				public String getValue(TaxonTreeNode taxon) {
+					Taxon t = version.getTaxonMatrix().getTaxonById(taxon.getData().getId());
 					if (t == null)
 						return ComparisonGridCell.CELL_BLOCKED;
-					if (t.getParent() != null && taxon.getParent() != null && !t.getParent().getId().equals(taxon.getParent().getId()))
+					if (t.getParent() != null && taxon.getData().getParent() != null && !t.getParent().getId().equals(taxon.getData().getParent().getId()))
 						return ComparisonGridCell.CELL_MOVED;
 					Value result = t.get(character);
 					if (result == null)
@@ -33,7 +34,7 @@ public class MatrixVersionProperties implements PropertyAccess<Taxon>{
 				}
 
 				@Override
-				public void setValue(Taxon object, String value) {}
+				public void setValue(TaxonTreeNode object, String value) {}
 
 				@Override
 				public String getPath() {

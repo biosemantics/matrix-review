@@ -41,6 +41,7 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonPropertiesByLocation;
+import edu.arizona.biosemantics.matrixreview.shared.model.TaxonTreeNodeProperties;
 
 /**
  * A window that holds a comparison grid and a selection grid. 
@@ -64,7 +65,7 @@ public class MatrixCompareView extends Composite {
 	private List<SimpleMatrixVersion> oldVersions;
 	private MatrixVersion currentVersion;
 	
-	private TreeStore<Taxon> taxonStore;
+	private TreeStore<TaxonTreeNode> taxonStore;
 	private TreeStore<CharacterTreeNode> characterStore;
 	
 	private SimpleContainer content;
@@ -154,8 +155,8 @@ public class MatrixCompareView extends Composite {
 	private void createTaxonStore(){
 		TaxonMatrix currentMatrix = currentVersion.getTaxonMatrix();
 		//Create store and populate with taxon list.
-		final TaxonPropertiesByLocation taxonProperties = new TaxonPropertiesByLocation(currentVersion);
-		taxonStore = new TreeStore<Taxon>(taxonProperties.key()); 
+		final TaxonTreeNodeProperties taxonProperties = new TaxonTreeNodeProperties(currentVersion);
+		taxonStore = new TreeStore<TaxonTreeNode>(taxonProperties.key()); 
 		for (Taxon root: currentMatrix.getRootTaxa()){
 			addTaxonAndChildrenToStore(root, null, 0);
 		}
@@ -166,15 +167,16 @@ public class MatrixCompareView extends Composite {
 			}
 		}
 	}
-	private void addTaxonAndChildrenToStore(Taxon taxon, Taxon parent, int depth){
+	private void addTaxonAndChildrenToStore(Taxon taxon, TaxonTreeNode parent, int depth){
 		/*for (int i = 0; i < depth; i++)
 			System.out.print("  ");
 		System.out.print("Try to add " + taxon.getId() + " " + taxon.getFullName() + ", parent " + parent + ": ");*/
-		if (taxonStore.findModel(taxon) == null){
+		TaxonTreeNode node = new TaxonTreeNode(taxon);
+		if (taxonStore.findModel(node) == null){
 			if (parent == null)
-				taxonStore.add(taxon);
+				taxonStore.add(node);
 			else
-				taxonStore.add(parent, taxon);
+				taxonStore.add(parent, node);
 			//System.out.println("ADDED.");
 		}
 		else{
@@ -182,7 +184,7 @@ public class MatrixCompareView extends Composite {
 		}
 			
 		for (Taxon child: taxon.getChildren()){
-			addTaxonAndChildrenToStore(child, taxon, depth+1);
+			addTaxonAndChildrenToStore(child, node, depth+1);
 		}
 	}
 	
@@ -227,24 +229,24 @@ public class MatrixCompareView extends Composite {
 		centerContent.clear();
 		
 		if (this.compareMode == CompareMode.BY_TAXON){
-			final Taxon preselectedNode = getPreselectedTaxon();
+			final TaxonTreeNode preselectedNode = getPreselectedTaxon();
 			if (taxonGrid == null){
 				taxonGrid = TaxonTreeGrid.createNew(eventBus,  taxonStore, false, currentVersion);				
 				taxonGrid.addViewReadyHandler(new ViewReadyHandler(){
 					@Override
 					public void onViewReady(ViewReadyEvent event) {
 						//Expand all parent nodes of the selected one. 
-						Taxon parent = preselectedNode.getParent();
-						if (parent != null){
+						TaxonTreeNode parent = new TaxonTreeNode(preselectedNode.getData().getParent());
+						if (parent.getData() != null){
 							taxonGrid.setExpanded(parent, true);
 						}
 						taxonGrid.getSelectionModel().select(false, preselectedNode);
 					}
 				});
-				taxonGrid.getSelectionModel().addSelectionHandler(new SelectionHandler<Taxon>(){
+				taxonGrid.getSelectionModel().addSelectionHandler(new SelectionHandler<TaxonTreeNode>(){
 					@Override
-					public void onSelection(SelectionEvent<Taxon> event) {
-						Taxon taxonSelected = event.getSelectedItem();
+					public void onSelection(SelectionEvent<TaxonTreeNode> event) {
+						TaxonTreeNode taxonSelected = event.getSelectedItem();
 						eventBus.fireEvent(new ChangeComparingSelectionEvent(taxonSelected));
 					}
 				});
@@ -318,9 +320,9 @@ public class MatrixCompareView extends Composite {
 		});
 	}
 	
-	private Taxon getPreselectedTaxon() {
-		Taxon taxon = taxonStore.getAll().get(0);
-		return taxon;
+	private TaxonTreeNode getPreselectedTaxon() {
+		TaxonTreeNode node = taxonStore.getAll().get(0);
+		return node;
 	}
 
 	private CharacterTreeNode getPreselectedCharacter() {

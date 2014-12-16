@@ -25,6 +25,7 @@ import edu.arizona.biosemantics.matrixreview.shared.model.HasControlMode.Control
 import edu.arizona.biosemantics.matrixreview.shared.model.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.TaxonPropertiesByLocation;
+import edu.arizona.biosemantics.matrixreview.shared.model.TaxonTreeNodeProperties;
 import edu.arizona.biosemantics.matrixreview.shared.model.Value;
 
 /**
@@ -33,11 +34,11 @@ import edu.arizona.biosemantics.matrixreview.shared.model.Value;
  * @author Andrew Stockton
  */
 
-public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Taxon>{
+public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, TaxonTreeNode>{
 
-	private TreeStore<Taxon> taxonStore;
+	private TreeStore<TaxonTreeNode> taxonStore;
 	
-	public CompareByCharacterGrid(EventBus eventBus, List<SimpleMatrixVersion> oldVersions, MatrixVersion currentVersion, CharacterTreeNode selectedConstant, TreeStore<Taxon> taxonStore2) {
+	public CompareByCharacterGrid(EventBus eventBus, List<SimpleMatrixVersion> oldVersions, MatrixVersion currentVersion, CharacterTreeNode selectedConstant, TreeStore<TaxonTreeNode> taxonStore2) {
 		super(eventBus, oldVersions, currentVersion, selectedConstant);
 		this.taxonStore = taxonStore2;
 		this.init();
@@ -81,8 +82,8 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 	}
 
 	@Override
-	protected Grid<Taxon> createOldVersionsGrid(MaintainListStoreTreeGrid<Taxon> controlColumn, List<SimpleMatrixVersion> oldVersions){
-		Grid<Taxon> grid = super.createOldVersionsGrid(controlColumn, oldVersions);
+	protected Grid<TaxonTreeNode> createOldVersionsGrid(MaintainListStoreTreeGrid<TaxonTreeNode> controlColumn, List<SimpleMatrixVersion> oldVersions){
+		Grid<TaxonTreeNode> grid = super.createOldVersionsGrid(controlColumn, oldVersions);
 		grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		return grid;
 	}
@@ -93,7 +94,7 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 	}
 
 	@Override
-	protected MaintainListStoreTreeGrid<Taxon> createControllerGrid() {
+	protected MaintainListStoreTreeGrid<TaxonTreeNode> createControllerGrid() {
 		return TaxonTreeGrid.createNew(this.eventBus, this.taxonStore, true, currentVersion);
 	}
 	
@@ -109,7 +110,7 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 	}
 
 	@Override
-	protected ValueProvider<Taxon, String> getSimpleVersionValueProvider(SimpleMatrixVersion version) {
+	protected ValueProvider<TaxonTreeNode, String> getSimpleVersionValueProvider(SimpleMatrixVersion version) {
 		SimpleMatrixVersionProperties versionProperties = new SimpleMatrixVersionProperties(version);
 		try{
 			Character character = (Character)selectedConstant.getData(); //selectedSubject is guaranteed to have a Character and not an Organ. See overridden updateSelectedSubject method.
@@ -117,18 +118,18 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 			
 		} catch(Exception e){
 			e.printStackTrace(); //surround in a try-catch just in case selectedSubject, for some reason, is not a 'Character' node.
-			return new ValueProvider<Taxon, String>(){ //if something went wrong, show an "error" label.
-				public String getValue(Taxon object) {
+			return new ValueProvider<TaxonTreeNode, String>(){ //if something went wrong, show an "error" label.
+				public String getValue(TaxonTreeNode object) {
 					return "ERROR";
 				}
-				public void setValue(Taxon object, String value) {}
+				public void setValue(TaxonTreeNode object, String value) {}
 				public String getPath() { return null; }
 			};
 		}
 	}
 
 	@Override
-	protected ValueProvider<Taxon, String> getVersionValueProvider(
+	protected ValueProvider<TaxonTreeNode, String> getVersionValueProvider(
 			MatrixVersion version) {
 		MatrixVersionProperties versionProperties = new MatrixVersionProperties(version);
 		try{
@@ -137,11 +138,11 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 			
 		} catch(Exception e){
 			e.printStackTrace(); //surround in a try-catch just in case selectedSubject, for some reason, is not a 'Character' node.
-			return new ValueProvider<Taxon, String>(){ //if something went wrong, show an "error" label.
-				public String getValue(Taxon object) {
+			return new ValueProvider<TaxonTreeNode, String>(){ //if something went wrong, show an "error" label.
+				public String getValue(TaxonTreeNode object) {
 					return "ERROR";
 				}
-				public void setValue(Taxon object, String value) {}
+				public void setValue(TaxonTreeNode object, String value) {}
 				public String getPath() { return null; }
 			};
 		}
@@ -170,8 +171,8 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 					
 					//compare value from version1 and value from version2. If they differ, set the version 2 cell to changed.
 					if (!value1.getValue().equals(value2.getValue())){
-						TaxonPropertiesByLocation props = new TaxonPropertiesByLocation(currentVersion);
-						String key = props.key().getKey(taxon2);
+						TaxonTreeNodeProperties props = new TaxonTreeNodeProperties(currentVersion);
+						String key = props.key().getKey(new TaxonTreeNode(taxon2));
 						changedCells.add(new CellIdentifier(new CharacterTreeNode(character2), key));
 						//System.out.println("Added a changed cell: character " + selectedConstant.getData() + " at column " + (i+1) + " with key " + key);
 						//System.out.println(taxon1 + "/" + character1 + ": " + value1.getValue() + " to " + value2.getValue());
@@ -183,15 +184,15 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 	}
 
 	@Override
-	protected void changeMatrixValue(Taxon taxon, String value, boolean allowEditMovedTaxon) {
+	protected void changeMatrixValue(TaxonTreeNode node, String value, boolean allowEditMovedTaxon) {
 		Character selectedCharacter = (Character)selectedConstant.getData(); //selectedSubject is guaranteed to have a Character and not an Organ. See overridden updateSelectedSubject method.
 		TaxonMatrix matrix = currentVersion.getTaxonMatrix();
 		
 		//make sure that this taxon and character exist in the current version. 
-		Taxon t = matrix.getTaxonById(taxon.getId()); 
+		Taxon t = matrix.getTaxonById(node.getData().getId()); 
 		if (t == null)
 			return;
-		if (!allowEditMovedTaxon && t.getParent() != null && taxon.getParent() != null && !t.getParent().getId().equals(taxon.getParent().getId()))
+		if (!allowEditMovedTaxon && t.getParent() != null && node.getData().getParent() != null && !t.getParent().getId().equals(node.getData().getParent().getId()))
 			return; //this taxon exists but has been moved - do not allow edit from this 'old' location. 
 		Character c = matrix.getCharacterById(selectedCharacter.getId());
 		if (c == null)
@@ -207,12 +208,12 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 	}
 	
 	@Override
-	protected Value getValue(SimpleMatrixVersion version, CharacterTreeNode selectedNode, Taxon taxon) {
+	protected Value getValue(SimpleMatrixVersion version, CharacterTreeNode selectedNode, TaxonTreeNode taxonNode) {
 		//make sure that this taxon and character exist in the current version.
-		Taxon t = version.getMatrix().getTaxonById(taxon.getId()); 
+		Taxon t = version.getMatrix().getTaxonById(taxonNode.getData().getId()); 
 		if (t == null)
 			return null;
-		if (t.getParent() != null && taxon.getParent() != null && !t.getParent().getId().equals(taxon.getParent().getId()))
+		if (t.getParent() != null && taxonNode.getData().getParent() != null && !t.getParent().getId().equals(taxonNode.getData().getParent().getId()))
 			return null; //this taxon exists but has been moved. 
 		if (selectedNode.getData() instanceof Character){
 			Character c = version.getMatrix().getCharacterById(((Character)selectedNode.getData()).getId());
@@ -225,7 +226,8 @@ public class CompareByCharacterGrid extends ComparisonGrid<CharacterTreeNode, Ta
 	public String getQuickTip(CellIdentifier cell, int versionIndex) {
 		try{
 			SimpleMatrixVersion version = oldVersions.get(versionIndex);
-			Taxon taxon = taxonStore.findModelWithKey((String)cell.getKey());
+			TaxonTreeNode taxonNode = taxonStore.findModelWithKey((String)cell.getKey());
+			Taxon taxon = taxonNode.getData();
 			Character selectedCharacter = (Character)((CharacterTreeNode)cell.getSelectedConstant()).getData();
 			
 			Taxon versionTaxon = version.getMatrix().getTaxonById(taxon.getId());
