@@ -81,7 +81,7 @@ public class MenuView extends MenuBar {
 		 * });
 		 */
 
-		MenuItem modifyMatrixItem = new MenuItem("Go to Taxon/Character Selection Page");
+		MenuItem modifyMatrixItem = new MenuItem("Go to Preview and Selection Interface");
 		modifyMatrixItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
@@ -97,7 +97,8 @@ public class MenuView extends MenuBar {
 			}
 		});
 		
-		MenuItem downloadItem = new MenuItem("Download Matrix (with all taxa and characters) as .csv");
+		MenuItem downloadItem = new MenuItem("Download Matrix (with all existing taxa and characters) as .csv");
+		downloadItem.setTitle("please set your browser to allow popup windows to use this function");
 		downloadItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
