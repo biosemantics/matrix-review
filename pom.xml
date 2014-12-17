@@ -4,7 +4,7 @@
 	<groupId>edu.arizona.biosemantics.etcsite</groupId>
 	<artifactId>matrix-review</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.31-SNAPSHOT</version>
+	<version>0.0.33-SNAPSHOT</version>
 	
 	<properties>
 		<gwtVersion>2.6.1</gwtVersion>
@@ -73,6 +73,12 @@
 		  <version>0.0.10-SNAPSHOT</version>
 		  <classifier>sources</classifier>
 		</dependency>
+		<dependency>
+			<groupId>com.google.gwt.eventbinder</groupId>
+			<artifactId>eventbinder</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+
 	</dependencies>
 
 	
