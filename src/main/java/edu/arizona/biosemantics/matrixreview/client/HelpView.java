@@ -13,7 +13,6 @@ public class HelpView implements IsWidget {
 	public Widget asWidget() {
 		TabPanel panel = new TabPanel();
 		panel.setBorders(false);
-
 		InstructionsText text = new InstructionsText();
 		InstructionsVideo video = new InstructionsVideo();
 

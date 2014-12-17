@@ -89,7 +89,7 @@ public class MenuView extends MenuBar {
 			}
 		});
 
-		MenuItem saveItem = new MenuItem("Save");
+		MenuItem saveItem = new MenuItem("Save Progress");
 		saveItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
@@ -165,7 +165,7 @@ public class MenuView extends MenuBar {
 				dialog.setWidget(new HelpView());
 				dialog.setWidth(400);
 				dialog.setHeight(225);
-				dialog.setResizable(false);
+				dialog.setResizable(true);
 				dialog.setShadow(true);
 				dialog.show();
 			}
