@@ -78,7 +78,7 @@ public class ValueCell extends MenuExtendedCell<Value> {
 			quickTipText += "<br>Colorized: " + color.getUse();
 		}
 		if(model.isDirty(value)) {
-			quickTipText += "<br>Dirty";
+			quickTipText += "<br>Edited";
 		}
 		
 		String backgroundImage = "";

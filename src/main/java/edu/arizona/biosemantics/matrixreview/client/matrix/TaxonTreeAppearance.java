@@ -232,7 +232,7 @@ public class TaxonTreeAppearance extends TreeBaseAppearance {
 		if(model.isLocked(taxon))
 			result += "Locked<br>";
 		if(model.isDirty(taxon)) 
-			result += "Dirty<br>";
+			result += "Edited<br>";
 		if(model.isCommented(taxon)) 
 			result += "Comment: " + model.getComment(taxon);
 		return result;

@@ -239,7 +239,7 @@ public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 			if(model.isLocked(character))
 				result += "Locked<br>";
 			if(model.isDirty(character)) 
-				result += "Dirty<br>";
+				result += "Edited<br>";
 			if(model.isCommented(character)) 
 				result += "Comment: " + model.getComment(character);
 			return result;
