@@ -206,7 +206,7 @@ public class CharacterMenu extends Menu {
 	}
 
 	private MenuItem createControlMode() {
-		final MenuItem controlItem = new MenuItem("Control State Values");
+		final MenuItem controlItem = new MenuItem("Define Valid States");
 		final Menu controlSelectMenu = new Menu();			
 		controlItem.setSubMenu(controlSelectMenu);
 		final CheckMenuItem numerical = new CheckMenuItem("Numerical");
@@ -218,7 +218,7 @@ public class CharacterMenu extends Menu {
 		final MenuItem automatic = new MenuItem("Automatic");
 		//automatic.setGroup("Controlled");
 		controlSelectMenu.add(automatic);
-		final CheckMenuItem off = new CheckMenuItem("Off");
+		final CheckMenuItem off = new CheckMenuItem("Turn Off the Control");
 		off.setGroup("Controlled");
 		controlSelectMenu.add(off);
 		off.addSelectionHandler(new SelectionHandler<Item>() {
