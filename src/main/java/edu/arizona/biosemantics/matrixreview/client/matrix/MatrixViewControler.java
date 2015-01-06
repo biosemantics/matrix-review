@@ -385,6 +385,7 @@ public abstract class MatrixViewControler implements LoadModelEventHandler,
 		List<CharacterColumnConfig> characterColumnConfigs = taxonTreeGrid.getColumnModel().getCharacterColumns();
 		Collections.sort(characterColumnConfigs, comparator);
 		taxonTreeGrid.reconfigure(characterColumnConfigs);
+		valueCell.setColumnModel(taxonTreeGrid.getColumnModel());
 	}
 
 	@Override
