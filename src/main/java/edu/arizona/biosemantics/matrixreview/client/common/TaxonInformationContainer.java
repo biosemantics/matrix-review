@@ -134,6 +134,7 @@ public class TaxonInformationContainer extends SimpleContainer {
 	    
 	    TaxonProperties taxonProperties = GWT.create(TaxonProperties.class);
 	    taxaTree = new Tree<Taxon, String>(taxonStore, taxonProperties.fullName());
+	    taxaTree.setIconProvider(new TaxonIconProvider());
 	    //SelectionModel.SINGLE doesnt deselect upon second click (also not with CTRL), see TreeSelectionModel impl.
 	    //SelectionModel.SIMPLE doesnt restrict to a single selection, hence custom implementation
 	    //taxaTree.getSelectionModel().setSelectionMode(SelectionMode.SIMPLE);

@@ -71,6 +71,7 @@ import edu.arizona.biosemantics.matrixreview.client.common.InputElementVisibleTe
 import edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator;
 import edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator.ValidationResult;
 import edu.arizona.biosemantics.matrixreview.client.common.TaxonAddDialog;
+import edu.arizona.biosemantics.matrixreview.client.common.TaxonIconProvider;
 import edu.arizona.biosemantics.matrixreview.client.common.TaxonModifyDialog;
 import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
@@ -518,6 +519,7 @@ public class ManageTaxaView extends ContentPanel {
 
 	private Tree<Taxon, Taxon> createTree() {
 		final Tree<Taxon, Taxon> tree = new Tree<Taxon, Taxon>(store, new IdentityValueProvider<Taxon>());	
+		tree.setIconProvider(new TaxonIconProvider());
 		tree.getSelectionModel().addSelectionHandler(new SelectionHandler<Taxon>() {
 			@Override
 			public void onSelection(SelectionEvent<Taxon> event) {
