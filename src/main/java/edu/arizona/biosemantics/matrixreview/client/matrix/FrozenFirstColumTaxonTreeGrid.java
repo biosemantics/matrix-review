@@ -43,6 +43,7 @@ import com.sencha.gxt.widget.core.client.tree.Tree.TreeNode;
 import com.sencha.gxt.widget.core.client.tree.TreeView.TreeViewRenderMode;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGridView;
 
+import edu.arizona.biosemantics.matrixreview.client.common.TaxonIconProvider;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MatrixModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCharacterEvent;
@@ -188,6 +189,7 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 			this.taxonStore = store;
 			this.setAutoExpand(true);
 			this.setExpandOnFilter(true);
+			this.setIconProvider(new TaxonIconProvider());
 			
 			eventBus.addHandler(MatrixModeEvent.TYPE, new MatrixModeEvent.MatrixModeEventHandler() {
 				@Override
