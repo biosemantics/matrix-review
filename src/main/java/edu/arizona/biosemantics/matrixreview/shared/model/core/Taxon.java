@@ -19,6 +19,8 @@ import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
 public class Taxon implements Serializable, Comparable<Taxon> {
+
+	private static final long serialVersionUID = 1L;
 		
 	public static int ID = 0;	
 	private int id = ID++;

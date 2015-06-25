@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class Color implements Serializable, Comparable<Color> {
 
+	private static final long serialVersionUID = 1L;
+
 	private static int ID = 0;
 	
 	private int id = ID++;

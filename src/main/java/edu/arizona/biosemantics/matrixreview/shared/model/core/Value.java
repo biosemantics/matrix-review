@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class Value implements Serializable, Comparable<Value> {
 
+	private static final long serialVersionUID = 1L;
+
 	private String value;
 
 	public Value() { }

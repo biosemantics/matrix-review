@@ -20,6 +20,8 @@ import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
  */
 public class TaxonMatrix implements Serializable {
 
+	private static final long serialVersionUID = 1L;
+
 	public class DFSTaxaList extends ArrayList<Taxon> implements Serializable {
 
 		public DFSTaxaList() {

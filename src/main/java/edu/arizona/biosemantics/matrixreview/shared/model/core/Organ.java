@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Set;
 
 public class Organ implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	
 	//organ has to have id. Using name as an identifier is not sufficient. When renamed they keying info in map is lost
 	private static int ID = 0;

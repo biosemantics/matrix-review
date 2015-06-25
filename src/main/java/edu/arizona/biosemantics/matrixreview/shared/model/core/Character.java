@@ -8,6 +8,8 @@ import java.util.Set;
 
 public class Character implements Serializable {
 
+	private static final long serialVersionUID = 1L;
+
 	private static int ID = 0;
 	private int id = ID++;
 	

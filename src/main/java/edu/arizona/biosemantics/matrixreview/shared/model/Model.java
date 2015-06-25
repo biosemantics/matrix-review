@@ -13,6 +13,8 @@ import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
 public class Model implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	
 	private TaxonMatrix taxonMatrix;
 	private MatrixMode matrixMode = MatrixMode.HIERARCHY;
