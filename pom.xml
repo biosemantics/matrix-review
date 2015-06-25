@@ -4,8 +4,8 @@
 	<groupId>edu.arizona.biosemantics.etcsite</groupId>
 	<artifactId>matrix-review</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.38-SNAPSHOT</version>
-	
+	<version>0.0.39-SNAPSHOT</version>
+
 	<properties>
 		<gwtVersion>2.6.1</gwtVersion>
 		<!-- GWT needs at least java 1.5 -->
@@ -29,17 +29,17 @@
 	</repositories>
 
 	<dependencies>
-	    <dependency>
-		  <groupId>edu.arizona.biosemantics</groupId>
-		  <artifactId>gxt</artifactId>
-		  <version>0.0.10-SNAPSHOT</version>
+		<dependency>
+			<groupId>edu.arizona.biosemantics</groupId>
+			<artifactId>gxt</artifactId>
+			<version>0.0.10-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-		  <groupId>edu.arizona.biosemantics</groupId>
-		  <artifactId>gxt</artifactId>
-		  <version>0.0.10-SNAPSHOT</version>
-		  <classifier>sources</classifier>
-		</dependency> 
+			<groupId>edu.arizona.biosemantics</groupId>
+			<artifactId>gxt</artifactId>
+			<version>0.0.10-SNAPSHOT</version>
+			<classifier>sources</classifier>
+		</dependency>
 		<dependency>
 			<groupId>com.sencha.gxt</groupId>
 			<artifactId>gxt-chart</artifactId>
@@ -65,13 +65,13 @@
 		<dependency>
 			<groupId>edu.arizona.biosemantics.common</groupId>
 			<artifactId>taxonomy</artifactId>
-			<version>0.0.14-SNAPSHOT</version>
+			<version>0.0.17-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-		  <groupId>edu.arizona.biosemantics.common</groupId>
-		  <artifactId>taxonomy</artifactId>
-		  <version>0.0.10-SNAPSHOT</version>
-		  <classifier>sources</classifier>
+			<groupId>edu.arizona.biosemantics.common</groupId>
+			<artifactId>taxonomy</artifactId>
+			<version>0.0.17-SNAPSHOT</version>
+			<classifier>sources</classifier>
 		</dependency>
 		<dependency>
 			<groupId>com.google.gwt.eventbinder</groupId>
@@ -81,7 +81,7 @@
 
 	</dependencies>
 
-	
+
 	<build>
 		<!-- Generate compiled stuff in the folder used for developing mode -->
 		<outputDirectory>${webappDirectory}/WEB-INF/classes</outputDirectory>
