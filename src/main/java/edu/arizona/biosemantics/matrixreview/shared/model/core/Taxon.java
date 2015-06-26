@@ -215,4 +215,8 @@ public class Taxon implements Serializable, Comparable<Taxon> {
 		return taxonIdentification;
 	}
 
+	public void setTaxonIdentification(TaxonIdentification taxonIdentification) {
+		this.taxonIdentification = taxonIdentification;
+	}
+	
 }
