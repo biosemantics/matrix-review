@@ -13,6 +13,8 @@ import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.data.shared.TreeStore.TreeNode;
 
 import edu.arizona.biosemantics.common.taxonomy.Rank;
+import edu.arizona.biosemantics.common.taxonomy.RankData;
+import edu.arizona.biosemantics.common.taxonomy.TaxonIdentification;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
@@ -28,17 +30,10 @@ public class Taxon implements Serializable, Comparable<Taxon> {
 	/**
 	 * Taxon hierarchy
 	 */
-	private Rank rank;
 	private Taxon parent;
+	private TaxonIdentification taxonIdentification;
 	private List<Taxon> children = new LinkedList<Taxon>();
-	
-	/**
-	 * Taxon concept
-	 */
-	private String name;
-	private String author;
-	private String year;
-	
+		
 	/**
 	 * Description
 	 */
@@ -46,22 +41,15 @@ public class Taxon implements Serializable, Comparable<Taxon> {
 	
 	public Taxon() { }
 	
-	public Taxon(Rank rank, String name, String author, String year) {
-		this.rank = rank;
-		this.name = name;
-		this.author = author;
-		this.year = year;
+	public Taxon(TaxonIdentification taxonIdentification) {
+		this.taxonIdentification = taxonIdentification;
 	}
 	
-	public Taxon(Rank rank, String name, String author, String year, String description) {
-		this(rank, name, author, year);
+	public Taxon(TaxonIdentification taxonIdentification, String description) {
+		this(taxonIdentification);
 		this.description = description;
 	}
-	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
+		
 	public void addChild(Taxon child) {
 		child.setParent(this);
 		children.add(child);
@@ -100,19 +88,7 @@ public class Taxon implements Serializable, Comparable<Taxon> {
 	public void setChildren(List<Taxon> children) {
 		this.children = children;
 	}
-	
-	public void setAuthor(String author) {
-		this.author = author;
-	}
-	
-	public void setYear(String year) {
-		this.year = year;
-	}
-
-	public void setRank(Rank rank) {
-		this.rank = rank;
-	}
-	
+		
 	public void setDescription(String description) {
 		this.description = description;
 	}
@@ -120,19 +96,6 @@ public class Taxon implements Serializable, Comparable<Taxon> {
 	public int getId() {
 		return id;
 	}
-
-	public Rank getRank() {
-		return rank;
-	}
-
-	public String getAuthor() {
-		return author;
-	}
-
-	public String getYear() {
-		return year;
-	}
-
 	
 	public List<Taxon> getChildren() {
 		return children;
@@ -147,19 +110,27 @@ public class Taxon implements Serializable, Comparable<Taxon> {
 	}
 	
 	public String getName() {
-		//by scientific convention
-		if(rank.equals(Rank.GENUS)) {
+		//by convention
+		String name = taxonIdentification.getRankData().getLast().getName();
+		if(getRank().equals(Rank.GENUS)) {
 			return java.lang.Character.toUpperCase(name.charAt(0)) + name.substring(1);
 		}
 		return name;
 	}
 	
 	public String getFullName() {
-		if(hasParent() && Rank.equalOrBelowGenus(getParent().getRank())) {
-			return getParent().getFullName() + " " + getName();
-		} else {
-			return getName();
+		LinkedList<RankData> rankDatas = taxonIdentification.getRankData();
+		String name = getName();
+		LinkedList<RankData> parentRankDatas = new LinkedList<RankData>(rankDatas);
+		while(parentRankDatas.size() > 1) {
+			parentRankDatas.removeLast();
+			if(Rank.equalOrBelowGenus(parentRankDatas.getLast().getRank())) {
+				name = parentRankDatas.getLast().getName() + " " + name;
+			} else {
+				break;
+			}
 		}
+		return name;
 	}
 	
 	public String getDescription() {
@@ -210,6 +181,38 @@ public class Taxon implements Serializable, Comparable<Taxon> {
 		if (id != other.id)
 			return false;
 		return true;
+	}
+
+	public Rank getRank() {
+		return taxonIdentification.getRankData().getLast().getRank();
+	}
+
+	public void setRank(Rank rank) {
+		taxonIdentification.getRankData().getLast().setRank(rank);
+	}
+
+	public void setName(String name) {
+		taxonIdentification.getRankData().getLast().setName(name);
+	}
+
+	public void setAuthor(String author) {
+		taxonIdentification.getRankData().getLast().setAuthor(author);
+	}
+
+	public void setYear(String year) {
+		taxonIdentification.getRankData().getLast().setDate(year);
+	}
+
+	public String getAuthor() {
+		return taxonIdentification.getRankData().getLast().getAuthor();
+	}
+
+	public String getYear() {
+		return taxonIdentification.getRankData().getLast().getDate();
+	}
+
+	public TaxonIdentification getTaxonIdentification() {
+		return taxonIdentification;
 	}
 
 }

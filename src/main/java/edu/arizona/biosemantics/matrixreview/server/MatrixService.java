@@ -20,6 +20,8 @@ import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 import edu.arizona.biosemantics.common.taxonomy.Rank;
+import edu.arizona.biosemantics.common.taxonomy.RankData;
+import edu.arizona.biosemantics.common.taxonomy.TaxonIdentification;
 
 @SuppressWarnings("serial")
 public class MatrixService extends RemoteServiceServlet implements IMatrixService {
@@ -68,11 +70,20 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		hierarhicalCharacters.add(o3);		
 		
 
+		LinkedList<RankData> rankData = new LinkedList<RankData>();
+		rankData.add(new RankData(Rank.FAMILY, "rosacea", null, "", ""));
+		TaxonIdentification taxonIdentification = new TaxonIdentification(rankData, "author1", "1979");
+		Taxon t1 = new Taxon(taxonIdentification, "this is the description about t1");
 		
-		Taxon t1 = new Taxon(Rank.FAMILY, "rosacea", "author1", "1979", "this is the description about t1");
-		Taxon t2 = new Taxon(Rank.GENUS, "rosa", "author2", "1985",  "this is the description about t2");
-		Taxon t3 = new Taxon(Rank.SPECIES,
-				"example", "author3", "2002", 
+		rankData = new LinkedList<RankData>();
+		rankData.add(new RankData(Rank.GENUS, "rosa", null, "", ""));
+		taxonIdentification = new TaxonIdentification(rankData, "author2", "1985");
+		Taxon t2 = new Taxon(taxonIdentification, "this is the description about t2");
+		
+		rankData = new LinkedList<RankData>();
+		rankData.add(new RankData(Rank.SPECIES, "example", null, "", ""));
+		taxonIdentification = new TaxonIdentification(rankData, "author3", "2002");
+		Taxon t3 = new Taxon(taxonIdentification,
 				"Lorem ipsum dolor sit amet, consectetuer adipiscing elit. "
 						+ "Sed metus nibh, sodales a, porta at, vulputate eget, dui. Pellentesque ut nisl. "
 						+ "Maecenas tortor turpis, interdum non, sodales non, iaculis ac, lacus. Vestibulum auctor, "
@@ -82,8 +93,10 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 						+ "porttitor laoreet. Aenean lacus dui, consequat eu, adipiscing eget, nonummy non, nisi. "
 						+ "Morbi nunc est, dignissim non, ornare sed, luctus eu, massa. Vivamus eget quam. Vivamus "
 						+ "tincidunt diam nec urna. Curabitur velit.");
-		Taxon t4 = new Taxon(Rank.VARIETY,
-				"prototype", "author4", "2014", 
+		rankData = new LinkedList<RankData>();
+		rankData.add(new RankData(Rank.VARIETY, "prototype", null, "", ""));
+		taxonIdentification = new TaxonIdentification(rankData, "author4", "2014");
+		Taxon t4 = new Taxon(taxonIdentification,
 				"Lorem ipsum dolor sit amet, consectetuer adipiscing elit. "
 						+ "Sed metus nibh, sodales a, porta at, vulputate eget, dui. Pellentesque ut nisl. "
 						+ "Maecenas tortor turpis, interdum non, sodales non, iaculis ac, lacus. Vestibulum auctor, "
@@ -99,7 +112,11 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		List<Taxon> hierarchyTaxa = new LinkedList<Taxon>();
 		hierarchyTaxa.add(t1);
 		for(int i=0; i<100; i++) {
-			Taxon t = new Taxon(Rank.FAMILY, "rosacea1", "author1", "1979", "this is the description about t1");
+			rankData = new LinkedList<RankData>();
+			rankData.add(new RankData(Rank.FAMILY, "rosacea1", null, "", ""));
+			taxonIdentification = new TaxonIdentification(rankData, "author1", "1979");
+			Taxon t = new Taxon(taxonIdentification, "this is the description about t1");
+			
 			hierarchyTaxa.add(t);
 		}
 			
