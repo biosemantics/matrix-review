@@ -191,7 +191,7 @@ public class ModelMerger { //extends ModelControler {
 	private List<GwtEvent<?>> adaptMerge(MergeCharactersEvent mergeEvent) {
 		List<GwtEvent<?>> result = new LinkedList<GwtEvent<?>>();
 		Set<Taxon> affectedTaxa = new HashSet<Taxon>(fullModel.getTaxonMatrix().getTaxa());
-		affectedTaxa.removeAll(subModel.getTaxonMatrix().getTaxa());
+		//affectedTaxa.removeAll(subModel.getTaxonMatrix().getTaxa());
 		
 		MergeCharactersEvent merge = new MergeCharactersEvent(mergeEvent.getCharacter(), mergeEvent.getTarget(), mergeEvent.getMergeMode(), affectedTaxa);
 		RemoveCharacterEvent remove = new RemoveCharacterEvent(mergeEvent.getTarget());
