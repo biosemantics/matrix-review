@@ -510,6 +510,7 @@ public class ModelControler implements LoadModelEventHandler, AddTaxonEventHandl
 
 	private void mergeCharacters(Character characterA, Character characterB,
 			MergeMode mergeMode, boolean mergeAll, Set<Taxon> toMerge) {
+		model.setControlMode(characterA, ControlMode.OFF);
 		if(mergeAll) {
 			String mergedName = mergeName(characterA.getName(), characterB.getName(), mergeMode);
 			Organ mergedOrgan = mergeOrgan(characterA.getOrgan(), characterB.getOrgan(), mergeMode);
