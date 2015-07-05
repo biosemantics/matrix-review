@@ -37,7 +37,8 @@ public class ValueCell extends MenuExtendedCell<Value> {
 		SafeHtml cell(String grandParentStyleClass, String parentStyleClass,
 				String aStyleClass, String value, String quickTipText, String colorHex, String backgroundImage);
 	}
-	
+
+	private static ValueCellImages valueCellImages = GWT.create(ValueCellImages.class);
 	protected static Templates templates = GWT.create(Templates.class);
 	private EventBus eventBus;
 	private Model model;
@@ -84,12 +85,12 @@ public class ValueCell extends MenuExtendedCell<Value> {
 		String backgroundImage = "";
 		if(model.isDirty(value)) {
 			if(!model.isCommented(value)) {
-				backgroundImage = ImageHelper.createModuleBasedUrl("base/images/grid/black.gif");
+				backgroundImage = "url(" + valueCellImages.black().getSafeUri().asString() + ")"; //ImageHelper.createModuleBasedUrl("base/images/grid/black.gif");
 			} else {
-				backgroundImage = ImageHelper.createModuleBasedUrl("base/images/grid/black_red.gif");
+				backgroundImage = "url(" + valueCellImages.blackRed().getSafeUri().asString() + ")"; //ImageHelper.createModuleBasedUrl("base/images/grid/black_red.gif");
 			}
 		} else if(model.isCommented(value)) {
-			backgroundImage = ImageHelper.createModuleBasedUrl("base/images/grid/red.gif");
+			backgroundImage = "url(" + valueCellImages.red().getSafeUri().asString() + ")"; //ImageHelper.createModuleBasedUrl("base/images/grid/red.gif");
 		}		
 		
 		SafeHtml rendered = templates.cell("", columnHeaderStyles.headInner(),

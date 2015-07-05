@@ -23,7 +23,7 @@ public class CategoricalValidator implements Validator<String> {
 	public List<EditorError> validate(Editor<String> editor, String value) {
 		List<EditorError> result = new LinkedList<EditorError>();
 		ValidationResult validationResult = validator.validate(value);
-		if (validationResult.isValid()) {
+		if (!validationResult.isValid()) {
 			result.add(new DefaultEditorError(editor, validationResult.getReason(), value));
 		}
 		return result;
