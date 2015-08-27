@@ -23,11 +23,9 @@ import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
 public class ManageMenuView extends MenuView {
 	
-	private ManageMatrixView manageMatrixView;
 
-	public ManageMenuView(EventBus fullModelBus, EventBus subModelBus, ManageMatrixView manageMatrixView) {
-		super(fullModelBus, subModelBus);
-		this.manageMatrixView = manageMatrixView;
+	public ManageMenuView(EventBus fullModelBus, EventBus subModelBus, ManageMatrixView manageMatrixView, ModelMerger modelMerger) {
+		super(fullModelBus, subModelBus, modelMerger, manageMatrixView);
 	}
 
 	@Override

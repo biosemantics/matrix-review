@@ -57,8 +57,8 @@ public class MatrixReviewView extends SplitLayoutPanel {
 		manageMatrixView = new ManageMatrixView(fullModelBus, subModelBus);
 		matrixView = new MatrixView(subModelBus);
 		desktopView = new DesktopView(fullModelBus, subModelBus);
-		manageMenuView = new ManageMenuView(fullModelBus, subModelBus, manageMatrixView);
-		matrixMenuView = new MatrixMenuView(fullModelBus, subModelBus);
+		manageMenuView = new ManageMenuView(fullModelBus, subModelBus, manageMatrixView, modelMerger);
+		matrixMenuView = new MatrixMenuView(fullModelBus, subModelBus, manageMatrixView, modelMerger);
 
 		VerticalLayoutContainer verticalLayoutContainer = new VerticalLayoutContainer();
 		verticalLayoutContainer.add(menuContainer, new VerticalLayoutData(1,-1));

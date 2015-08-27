@@ -21,6 +21,7 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import edu.arizona.biosemantics.matrixreview.client.common.ColorSettingsDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.ColorsDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.CommentsDialog;
+import edu.arizona.biosemantics.matrixreview.client.config.ManageMatrixView;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.DownloadEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SaveEvent;
@@ -32,10 +33,14 @@ public class MenuView extends MenuBar {
 	protected Model model;
 	protected EventBus fullModelBus;
 	protected EventBus subModelBus;
+	protected ModelMerger modelMerger;
+	protected ManageMatrixView manageMatrixView;
 
-	public MenuView(EventBus fullModelBus, EventBus subModelBus) {
+	public MenuView(EventBus fullModelBus, EventBus subModelBus, ModelMerger modelMerger, ManageMatrixView manageMatrixView) {
 		this.fullModelBus = fullModelBus;
 		this.subModelBus = subModelBus;
+		this.modelMerger = modelMerger;
+		this.manageMatrixView = manageMatrixView;
 		addStyleName(ThemeStyles.get().style().borderBottom());
 		addItems();
 		
@@ -105,11 +110,21 @@ public class MenuView extends MenuBar {
 				fullModelBus.fireEvent(new DownloadEvent(model));
 			}
 		});
+		MenuItem downloadSelectionItem = new MenuItem("Download Selected Part of Matrix as .csv");
+		downloadSelectionItem.setTitle("please set your browser to allow popup windows to use this function");
+		downloadSelectionItem.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				Model subModel = modelMerger.getSubModel(manageMatrixView.getSelectedCharacters(), manageMatrixView.getSelectedTaxa());
+				fullModelBus.fireEvent(new DownloadEvent(subModel));
+			}
+		});
 
 		// sub.add(subMatrixItem);
 		sub.add(modifyMatrixItem);
 		sub.add(saveItem);
 		sub.add(downloadItem);
+		sub.add(downloadSelectionItem);
 		return matrixItem;
 	}
 
