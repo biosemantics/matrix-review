@@ -443,7 +443,7 @@ public class ManageTaxaView extends ContentPanel {
 			if (!taxon.getChildren().isEmpty()) {
 				String childrenString = "";
 				for (Taxon child : taxon.getChildren()) {
-					childrenString += child.getFullName() + ", ";
+					childrenString += child.getBiologicalName() + ", ";
 				}
 				childrenString = childrenString.substring(0, childrenString.length() - 2);
 				ConfirmMessageBox box = new ConfirmMessageBox(
@@ -537,7 +537,7 @@ public class ManageTaxaView extends ContentPanel {
 					if(model.hasColor(taxon))
 						colorHex = model.getColor(taxon).getHex();
 					sb.append(SafeHtmlUtils.fromTrustedString("<div style='background-color:#" + colorHex + "'>" + 
-							taxon.getFullName() + "</div>"));
+							taxon.getBiologicalName() + "</div>"));
 			}
 		});
 		return tree;
@@ -821,7 +821,7 @@ public class ManageTaxaView extends ContentPanel {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				Taxon selected = tree.getSelectionModel().getSelectedItem();
-				String fullName = selected.getFullName();
+				String fullName = selected.getBiologicalName();
 				Window.open("http://www.google.com/search?tbm=isch&q=" + fullName, "_blank", "");
 			}
 		});

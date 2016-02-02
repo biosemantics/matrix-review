@@ -121,7 +121,7 @@ public class DescriptionManager extends AbstractWindowManager {
 
 	@Override
 	public void refreshTitle() {
-		window.setHeadingText("Description of " + taxon.getFullName());
+		window.setHeadingText("Description of " + taxon.getBiologicalName());
 	}
 	
 }

@@ -30,7 +30,7 @@ public class TaxaByCoverageComparator implements Comparator<Taxon> {
 	private int doCompare(Taxon o1, Taxon o2) {
 		int diff = model.getTaxonMatrix().getTaxonValueCount(o1) - model.getTaxonMatrix().getTaxonValueCount(o2);
 		if(diff == 0)
-			diff = o1.getFullName().compareTo(o2.getFullName());
+			diff = o1.getBiologicalName().compareTo(o2.getBiologicalName());
 		return diff;
 	}
 }

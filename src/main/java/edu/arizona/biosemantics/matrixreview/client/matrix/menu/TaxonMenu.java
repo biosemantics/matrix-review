@@ -76,7 +76,7 @@ public class TaxonMenu extends Menu {
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				String fullName = taxon.getFullName();
+				String fullName = taxon.getBiologicalName();
 				Window.open("http://www.google.com/search?tbm=isch&q=" + fullName, "_blank", "");
 			}
 		});
@@ -224,7 +224,7 @@ public class TaxonMenu extends Menu {
 			
 			for(final Taxon after : taxonStore.getRootItems()) {
 				if(!after.equals(taxon)) {
-					subItem = new MenuItem(after.getFullName());
+					subItem = new MenuItem(after.getBiologicalName());
 					subItem.addSelectionHandler(new SelectionHandler<Item>() {
 						@Override
 						public void onSelection(SelectionEvent<Item> event) {
@@ -255,7 +255,7 @@ public class TaxonMenu extends Menu {
 				return null;
 			
 			for(final Taxon after : moveLocations) {
-				subItem = new MenuItem(after.getFullName());
+				subItem = new MenuItem(after.getBiologicalName());
 				subItem.addSelectionHandler(new SelectionHandler<Item>() {
 					@Override
 					public void onSelection(SelectionEvent<Item> event) {

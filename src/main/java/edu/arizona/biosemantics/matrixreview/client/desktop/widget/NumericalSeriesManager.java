@@ -114,7 +114,7 @@ public class NumericalSeriesManager extends AbstractWindowManager {
 				double doubleValue = Double.parseDouble(value.getValue());
 				if(doubleValue > max)
 					max = doubleValue;
-				store.add(new NameNumerical(taxon.getId(), taxon.getFullName(), doubleValue));
+				store.add(new NameNumerical(taxon.getId(), taxon.getBiologicalName(), doubleValue));
 			}
 		}
 

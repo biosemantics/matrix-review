@@ -60,7 +60,7 @@ public class ValueCell extends MenuExtendedCell<Value> {
 		Character character = model.getTaxonMatrix().getCharacter(value);
 		
 		if(character != null) {
-			quickTipText = character.toString() + " of " + taxon.getFullName() + " is " + value.getValue(); 
+			quickTipText = character.toString() + " of " + taxon.getBiologicalName() + " is " + value.getValue(); 
 		}
 		
 		String comment = model.getComment(value);
