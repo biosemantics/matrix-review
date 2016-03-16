@@ -14,7 +14,7 @@ public class Value implements Serializable, Comparable<Value> {
 		super();
 		this.value = value;
 	}
-
+	
 	public String getValue() {
 		if(value == null)
 			return "";

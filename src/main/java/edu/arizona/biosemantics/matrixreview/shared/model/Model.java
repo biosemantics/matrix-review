@@ -191,6 +191,8 @@ public class Model implements Serializable {
 		return result;
 	}
 
-
+	public void setTaxonMatrix(TaxonMatrix taxonMatrix) {
+		this.taxonMatrix = taxonMatrix;
+	}
 	
 }
