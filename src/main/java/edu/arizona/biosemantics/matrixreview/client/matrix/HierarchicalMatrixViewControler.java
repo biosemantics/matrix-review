@@ -117,7 +117,7 @@ public class HierarchicalMatrixViewControler extends MatrixViewControler impleme
 			if (!taxon.getChildren().isEmpty()) {
 				String childrenString = "";
 				for (Taxon child : taxon.getChildren()) {
-					childrenString += child.getFullName() + ", ";
+					childrenString += child.getBiologicalName() + ", ";
 				}
 				childrenString = childrenString.substring(0, childrenString.length() - 2);
 				ConfirmMessageBox box = new ConfirmMessageBox(

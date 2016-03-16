@@ -33,7 +33,7 @@ public class TaxaByCharacterComparator implements Comparator<Taxon> {
 		int diff = model.getTaxonMatrix().getValue(o1, character).compareTo(
 				model.getTaxonMatrix().getValue(o2, character));
 		if(diff == 0)
-			diff = o1.getFullName().compareTo(o2.getFullName());
+			diff = o1.getBiologicalName().compareTo(o2.getBiologicalName());
 		return diff;
 	}
 }

@@ -28,7 +28,7 @@ public class TaxaByNameComparator implements Comparator<Taxon> {
 	private int doCompare(Taxon o1, Taxon o2) {
 		int diff = o1.getName().compareTo(o2.getName());
 		if(diff == 0)
-			diff = o1.getFullName().compareTo(o2.getFullName());
+			diff = o1.getBiologicalName().compareTo(o2.getBiologicalName());
 		return diff;
 	}
 }

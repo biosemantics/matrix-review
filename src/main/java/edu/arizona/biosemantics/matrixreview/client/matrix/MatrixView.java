@@ -45,7 +45,7 @@ public class MatrixView implements IsWidget {
 		taxaColumnConfig.setCell(new AbstractCell<Taxon>() {
 			@Override
 			public void render(Context context,	Taxon value, SafeHtmlBuilder sb) {
-				sb.append(SafeHtmlUtils.fromTrustedString("<i>" + value.getFullName() + "</i>"));
+				sb.append(SafeHtmlUtils.fromTrustedString("<i>" + value.getBiologicalName() + "</i>"));
 			}
 		});
 		return taxaColumnConfig;

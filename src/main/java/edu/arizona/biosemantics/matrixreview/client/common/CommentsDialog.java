@@ -263,7 +263,7 @@ public class CommentsDialog extends Dialog {
 								subModelBus.fireEvent(new SetValueEvent(taxon, character, oldValue, newValue));
 							} else {
 								AlertMessageBox alert = new AlertMessageBox("Set value failed", "Can't set value " +
-										value + " for " + character.getName() + " of " +  taxon.getFullName() + ". Control mode " + 
+										value + " for " + character.getName() + " of " +  taxon.getBiologicalName() + ". Control mode " + 
 										model.getControlMode(character).toString().toLowerCase() + " was selected for " + character.getName());
 								alert.show();
 							}
@@ -349,7 +349,7 @@ public class CommentsDialog extends Dialog {
 		List<Comment> comments = new LinkedList<Comment>();
 		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
 			if (model.hasComment(taxon))
-				comments.add(new Comment("taxon-" + taxon.getId(), taxon, taxon.getFullName(), "", model
+				comments.add(new Comment("taxon-" + taxon.getId(), taxon, taxon.getBiologicalName(), "", model
 						.getComment(taxon)));
 		}
 		for (Character character : model.getTaxonMatrix()
@@ -365,7 +365,7 @@ public class CommentsDialog extends Dialog {
 				if (model.hasComment(value))
 					comments.add(new Comment("value-" + taxon.getId() + "-" + character.getId(), value, "Value of "
 							+ character.toString() + " of "
-							+ taxon.getFullName(), value.getValue(), model
+							+ taxon.getBiologicalName(), value.getValue(), model
 							.getComment(value)));
 			}
 		}

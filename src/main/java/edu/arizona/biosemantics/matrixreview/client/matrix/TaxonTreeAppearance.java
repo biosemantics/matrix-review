@@ -219,7 +219,7 @@ public class TaxonTreeAppearance extends TreeBaseAppearance {
 	}
 	
 	private String getQuickTip(Taxon taxon) {
-		String result = "Taxon: " + taxon.getFullName() + "<br>";
+		String result = "Taxon: " + taxon.getBiologicalName() + "<br>";
 		result += "Author: " + taxon.getAuthor() + "<br>";
 		result += "Year: " + taxon.getYear() + "<br>";
 		result += "Rank: " + taxon.getRank().toString() + "<br>";
@@ -241,7 +241,7 @@ public class TaxonTreeAppearance extends TreeBaseAppearance {
 	private String getAncestor(Taxon taxon) {
 		String result = "";
 		while(taxon.hasParent()) {
-			result += "- " + taxon.getParent().getFullName() + "<br>";
+			result += "- " + taxon.getParent().getBiologicalName() + "<br>";
 			taxon = taxon.getParent();
 		}
 		return result;

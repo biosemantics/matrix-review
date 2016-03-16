@@ -271,7 +271,7 @@ public class TaxonCharacterMenu extends Menu {
 			final Menu subMenu = new Menu();
 			
 			check.setHideOnClick(false);
-			check.setText(taxon.getFullName());
+			check.setText(taxon.getBiologicalName());
 			check.setChecked(!model.isHidden(taxon));
 			check.addCheckChangeHandler(new CheckChangeHandler<CheckMenuItem>() {
 				@Override

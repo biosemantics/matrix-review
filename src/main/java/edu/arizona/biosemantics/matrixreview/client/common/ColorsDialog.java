@@ -414,7 +414,7 @@ public class ColorsDialog extends Dialog {
 								subModelBus.fireEvent(new SetValueColorEvent(newValue, colorEntry.getColor()));
 							} else {
 								AlertMessageBox alert = new AlertMessageBox("Set value failed", "Can't set value " +
-										value + " for " + character.getName() + " of " +  taxon.getFullName() + ". Control mode " + 
+										value + " for " + character.getName() + " of " +  taxon.getBiologicalName() + ". Control mode " + 
 										model.getControlMode(character).toString().toLowerCase() + " was selected for " + character.getName());
 								alert.show();
 							}
@@ -471,7 +471,7 @@ public class ColorsDialog extends Dialog {
 				
 		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
 			if (model.hasColor(taxon))
-				colorEntries.add(new ColorEntry("taxon-" + taxon.getId(), taxon, taxon.getFullName(), "", model
+				colorEntries.add(new ColorEntry("taxon-" + taxon.getId(), taxon, taxon.getBiologicalName(), "", model
 						.getColor(taxon)));
 		}
 		for (Character character : model.getTaxonMatrix()
@@ -486,7 +486,7 @@ public class ColorsDialog extends Dialog {
 				Value value = model.getTaxonMatrix().getValue(taxon, character);
 				if (model.hasColor(value))
 					colorEntries.add(new ColorEntry("value-" + taxon.getId() + "-" + character.getId(), value, "Value of " + character.toString()
-							+ " of " + taxon.getFullName(), value.getValue(),
+							+ " of " + taxon.getBiologicalName(), value.getValue(),
 							model.getColor(value)));
 			}
 		}

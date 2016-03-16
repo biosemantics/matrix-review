@@ -118,7 +118,7 @@ public class Taxon implements Serializable, Comparable<Taxon> {
 		return name;
 	}
 	
-	public String getFullName() {
+	public String getBiologicalName() {
 		LinkedList<RankData> rankDatas = taxonIdentification.getRankData();
 		String name = getName();
 		LinkedList<RankData> parentRankDatas = new LinkedList<RankData>(rankDatas);
@@ -143,7 +143,7 @@ public class Taxon implements Serializable, Comparable<Taxon> {
 	
 	@Override 
 	public String toString() {
-		return this.getFullName();
+		return this.getBiologicalName();
 	}
 	
 	public String print(int ident) {
