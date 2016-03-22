@@ -336,7 +336,7 @@ public class TaxonMatrix implements Serializable {
 		result += "Visible Taxa: " + visibleTaxa.toString() + "\n";
 		result += "Hierarchical Characters: " + hierarchyCharacters.toString()  + "\n";
 		result += "FlatCharacters: " + flatCharacters.toString()  + "\n";
-		result += "Visible Charaters: " + visibleCharacters.toString()  + "\n";
+		result += "Visible Characters: " + visibleCharacters.toString()  + "\n";
 		result += "Organs: " + organs.toString()  + "\n";
 		result += "Values: " + values.toString()  + "\n";
 		return result;

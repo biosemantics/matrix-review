@@ -541,7 +541,7 @@ public class ManageCharactersView extends ContentPanel {
 			MergeDialog mergeDialog = new MergeDialog(eventBus, model, characters.get(0), characters.subList(1, characters.size()));
 			mergeDialog.show();
 		} else {
-			AlertMessageBox box = new AlertMessageBox("Character selection", "You have to select at least two charaters to merge");
+			AlertMessageBox box = new AlertMessageBox("Character selection", "You have to select at least two characters to merge");
 			box.show();
 		}
 	}
