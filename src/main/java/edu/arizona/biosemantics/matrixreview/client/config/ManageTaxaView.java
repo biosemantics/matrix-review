@@ -19,9 +19,11 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
@@ -70,6 +72,7 @@ import com.sencha.gxt.widget.core.client.tree.Tree;
 import edu.arizona.biosemantics.matrixreview.client.common.InputElementVisibleTextField;
 import edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator;
 import edu.arizona.biosemantics.matrixreview.client.common.SetValueValidator.ValidationResult;
+import edu.arizona.biosemantics.matrixreview.client.common.Alerter;
 import edu.arizona.biosemantics.matrixreview.client.common.TaxonAddDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.TaxonIconProvider;
 import edu.arizona.biosemantics.matrixreview.client.common.TaxonModifyDialog;
@@ -90,6 +93,8 @@ import edu.arizona.biosemantics.matrixreview.client.event.SetValueCommentEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowDescriptionEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.menu.TaxonMenu;
+import edu.arizona.biosemantics.matrixreview.shared.IMatrixService;
+import edu.arizona.biosemantics.matrixreview.shared.IMatrixServiceAsync;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.MatrixEntry;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
@@ -105,6 +110,7 @@ import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
 public class ManageTaxaView extends ContentPanel {
 
+	private IMatrixServiceAsync matrixService = GWT.create(IMatrixService.class);
 	private TaxonProperties taxonProperties = GWT.create(TaxonProperties.class);
 	private HTML infoHtml = new HTML();
 	private Model model;
@@ -908,7 +914,7 @@ public class ManageTaxaView extends ContentPanel {
 		});
 	}
 
-	protected void updateTextArea(Taxon taxon) {
+	protected void updateTextArea(final Taxon taxon) {
 		List<Taxon> ancestors = new LinkedList<Taxon>();
 		Taxon parent = taxon.getParent();
 		while(parent != null) {
@@ -928,19 +934,31 @@ public class ManageTaxaView extends ContentPanel {
 					anchestor.getYear() + 
 					"</p>";
 		}
-					
-		String infoText = "<p><b>Rank:&nbsp;</b>" + taxon.getRank().name() + "</p>" +
-				"<p><b>Name:&nbsp;</b>" + taxon.getName() + "</p>" +
-				"<p><b>Author:&nbsp;</b>" + taxon.getAuthor() + "</p>" +
-				"<p><b>Year:&nbsp;</b>" + taxon.getYear() + "</p>" +
-				"<p><b>Taxonomy:&nbsp;</b>" + taxonomy + "</p>" +
-				"<p><b>Description:&nbsp;</b>" + taxon.getDescription().replaceAll("\n", "</br>") + "</p>";
-		if(model.hasComment(taxon))
-			infoText +=	"<p><b>Comment:&nbsp;</b>" + model.getComment(taxon) + "</p>";
-		if(model.hasColor(taxon))
-			infoText += "<p><b>Color:&nbsp;</b>" + model.getColor(taxon).getUse() + "</p>";
 		
-		infoHtml.setHTML(SafeHtmlUtils.fromSafeConstant(infoText));
+		final String finalTaxonomy = taxonomy;
+		matrixService.getHighlighted(taxon.getDescription(), model.getTaxonMatrix().getCharacters(), model.getTaxonMatrix().getValues(taxon),
+				new AsyncCallback<SafeHtml>() {
+			@Override
+			public void onFailure(Throwable caught) {
+				Alerter.showAlert("Get Description", "Get description failed");
+			}
+			@Override
+			public void onSuccess(SafeHtml result) {
+				String infoText = "<p><b>Rank:&nbsp;</b>" + taxon.getRank().name() + "</p>" +
+						"<p><b>Name:&nbsp;</b>" + taxon.getName() + "</p>" +
+						"<p><b>Author:&nbsp;</b>" + taxon.getAuthor() + "</p>" +
+						"<p><b>Year:&nbsp;</b>" + taxon.getYear() + "</p>" +
+						"<p><b>Taxonomy:&nbsp;</b>" + finalTaxonomy + "</p>" +
+						"<p><b>Description:&nbsp;</b>" + result.asString() + "</p>";
+				if(model.hasComment(taxon))
+					infoText +=	"<p><b>Comment:&nbsp;</b>" + model.getComment(taxon) + "</p>";
+				if(model.hasColor(taxon))
+					infoText += "<p><b>Color:&nbsp;</b>" + model.getColor(taxon).getUse() + "</p>";
+				
+				infoHtml.setHTML(SafeHtmlUtils.fromSafeConstant(infoText));
+			}
+		});
+		
 	}
 
 	private void addToStoreRecursively(TreeStore<Taxon> store, Taxon taxon) {

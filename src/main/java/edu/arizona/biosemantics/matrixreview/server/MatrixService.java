@@ -1,17 +1,30 @@
 package edu.arizona.biosemantics.matrixreview.server;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.parser.Tag;
 
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
+import edu.arizona.biosemantics.matrixreview.shared.Highlight;
 import edu.arizona.biosemantics.matrixreview.shared.IMatrixService;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
@@ -44,7 +57,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		flatCharactersO1.add(a3);
 		o1.setFlatCharacters(flatCharactersO1);
 		
-		Organ o2 = new Organ("leaf");
+		Organ o2 = new Organ("leaf / stem");
 		List<Character> flatCharactersO2 = new LinkedList<Character>();
 		Character b1 = new Character("width", "of", o2, 0);
 		Character b2 = new Character("shape", "of", o2, 1);
@@ -73,7 +86,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		LinkedList<RankData> rankData = new LinkedList<RankData>();
 		rankData.add(new RankData(Rank.FAMILY, "rosacea", null, "", ""));
 		TaxonIdentification taxonIdentification = new TaxonIdentification(rankData, "author1", "1979");
-		Taxon t1 = new Taxon(taxonIdentification, "this is the description about t1");
+		Taxon t1 = new Taxon(taxonIdentification, "this is the stem description width about t1");
 		
 		rankData = new LinkedList<RankData>();
 		rankData.add(new RankData(Rank.GENUS, "rosa", null, "", ""));
@@ -123,10 +136,10 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		TaxonMatrix taxonMatrix = new TaxonMatrix(hierarhicalCharacters, hierarchyTaxa);
 		
 		Random random = new Random();
-		taxonMatrix.setValue(t1, b1, new Value(String.valueOf(random.nextInt(50))));
-		taxonMatrix.setValue(t2, b1, new Value(String.valueOf(random.nextInt(50))));
-		taxonMatrix.setValue(t3, b1, new Value(String.valueOf(random.nextInt(50))));
-		taxonMatrix.setValue(t4, b1, new Value(String.valueOf(random.nextInt(50))));
+		taxonMatrix.setValue(t1, b1, new Value(String.valueOf(random.nextInt(50)) + " / " + String.valueOf(random.nextInt(50))));
+		taxonMatrix.setValue(t2, b1, new Value(String.valueOf(random.nextInt(50)) + " / " + String.valueOf(random.nextInt(50))));
+		taxonMatrix.setValue(t3, b1, new Value(String.valueOf(random.nextInt(50)) + " / " + String.valueOf(random.nextInt(50))));
+		taxonMatrix.setValue(t4, b1, new Value(String.valueOf(random.nextInt(50)) + " / " + String.valueOf(random.nextInt(50))));
 		
 		taxonMatrix.setValue(t1, b2, new Value(String.valueOf(random.nextInt(50))));
 		taxonMatrix.setValue(t2, b2, new Value(String.valueOf(random.nextInt(50))));
@@ -206,5 +219,93 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		}
 		return null;
 	}*/
+	
+	
+	@Override
+	public SafeHtml getHighlighted(String content, Collection<Character> characters, Collection<Value> values) {
+		content = content.replaceAll("\n", "</br>");
+		
+		Set<Highlight> highlights = new HashSet<Highlight>();
+		Set<String> usedOrgans = new HashSet<String>();
+		Set<String> usedCharacters = new HashSet<String>();
+		Set<String> usedValues = new HashSet<String>();
+		for(Character character : characters) {
+			if(!usedOrgans.contains(character.getOrgan().getName())) {
+				usedOrgans.add(character.getOrgan().getName());
+				highlights.add(new Highlight(character.getOrgan().getName(), "ff3300"));
+			}
+			if(!usedCharacters.contains(character.getName())) {
+				usedCharacters.add(character.getName());
+				highlights.add(new Highlight(character.getName(), "0033cc"));
+			}
+		}
+		System.out.println(highlights);
+		for(Value value : values) {
+			if(!usedValues.contains(value.getValue())) {
+				usedValues.add(value.getValue());
+				highlights.add(new Highlight(value.getValue(), "009933"));
+			}
+		}
+		System.out.println(highlights);
+		for(Highlight highlight : highlights) {
+			org.jsoup.nodes.Document document = Jsoup.parseBodyFragment(content);
+			List<Node> result = new ArrayList<Node>();
+			for(Node node : document.body().childNodes()) {
+				if(node instanceof TextNode) {
+					TextNode textNode = ((TextNode)node);
+					String regex = createRegex(highlight);
+					if(regex == null) {
+						result.add(node);
+					} else {
+						List<Node> newNodes = createHighlightedNodes(textNode, regex, highlight.getColorHex());
+						result.addAll(newNodes);
+					}
+				} else {
+					result.add(node);
+				}
+			}
+			org.jsoup.nodes.Element body = new org.jsoup.nodes.Element(Tag.valueOf("body"), "");
+			for(Node newNode : result)
+				body.appendChild(newNode);
+			content = body.toString();
+		}
+		return SafeHtmlUtils.fromTrustedString(content);
+	}
+	
+
+	private String createRegex(Highlight highlight) {
+		System.out.println(highlight.getText());
+		String parts = "";
+		for(String part : highlight.getText().trim().split(" ")) {
+			if(!part.isEmpty())
+				parts += Pattern.quote(part) + "|";
+		}
+		if(!parts.isEmpty())
+			parts = parts.substring(0, parts.length() - 1);
+		if(!parts.isEmpty())
+			return "\\b(" + parts + ")\\b";
+		return null;
+	}
+
+	private List<Node> createHighlightedNodes(TextNode textNode, String regex, String colorHex) {
+		List<Node> result = new ArrayList<Node>();
+		String text = textNode.text();
+		StringBuilder textBuilder = new StringBuilder(text);
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(text);
+		if(!matcher.find()) {
+			result.add(textNode);
+			return result;
+		}
+		StringBuilder beforeReplaceText = new StringBuilder(textBuilder.substring(0, matcher.start(1)));
+		String afterReplaceText = textBuilder.substring(matcher.end(1), textBuilder.length());
+		result.add(new TextNode(beforeReplaceText.toString(), ""));
+		org.jsoup.nodes.Element fontElement = new org.jsoup.nodes.Element(Tag.valueOf("font"), "");
+		fontElement.attr("color", "#" + colorHex);
+		fontElement.text(text.substring(matcher.start(1), matcher.end(1)));
+		result.add(fontElement);
+		result.addAll(createHighlightedNodes(new TextNode(afterReplaceText, ""), regex, colorHex));
+		return result;
+	}
 
 }

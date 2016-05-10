@@ -370,4 +370,11 @@ public class TaxonMatrix implements Serializable {
 	private boolean hasOrgan(String name) {
 		return this.getOrgan(name) != null;
 	}
+
+	public List<Value> getValues(Taxon taxon) {
+		List<Value> result = new ArrayList<Value>();
+		for (Character character : this.getCharacters())
+			result.add(this.getValue(taxon, character));
+		return result;
+	}
 }
