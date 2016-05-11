@@ -936,7 +936,21 @@ public class ManageTaxaView extends ContentPanel {
 		}
 		
 		final String finalTaxonomy = taxonomy;
-		matrixService.getHighlighted(taxon.getDescription(), model.getTaxonMatrix().getCharacters(), model.getTaxonMatrix().getValues(taxon),
+		
+		String infoText = "<p><b>Rank:&nbsp;</b>" + taxon.getRank().name() + "</p>" +
+				"<p><b>Name:&nbsp;</b>" + taxon.getName() + "</p>" +
+				"<p><b>Author:&nbsp;</b>" + taxon.getAuthor() + "</p>" +
+				"<p><b>Year:&nbsp;</b>" + taxon.getYear() + "</p>" +
+				"<p><b>Taxonomy:&nbsp;</b>" + finalTaxonomy + "</p>" +
+				"<p><b>Description:&nbsp;</b>" + taxon.getDescription() + "</p>";
+		if(model.hasComment(taxon))
+			infoText +=	"<p><b>Comment:&nbsp;</b>" + model.getComment(taxon) + "</p>";
+		if(model.hasColor(taxon))
+			infoText += "<p><b>Color:&nbsp;</b>" + model.getColor(taxon).getUse() + "</p>";
+		
+		infoHtml.setHTML(SafeHtmlUtils.fromSafeConstant(infoText));
+		
+		/*matrixService.getHighlighted(taxon.getDescription(), model.getTaxonMatrix().getCharacters(), model.getTaxonMatrix().getValues(taxon),
 				new AsyncCallback<SafeHtml>() {
 			@Override
 			public void onFailure(Throwable caught) {
@@ -957,7 +971,7 @@ public class ManageTaxaView extends ContentPanel {
 				
 				infoHtml.setHTML(SafeHtmlUtils.fromSafeConstant(infoText));
 			}
-		});
+		});*/
 		
 	}
 

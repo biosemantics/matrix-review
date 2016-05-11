@@ -1,5 +1,10 @@
 package edu.arizona.biosemantics.matrixreview.server;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,6 +37,7 @@ import edu.arizona.biosemantics.matrixreview.shared.model.core.Organ;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
+import edu.arizona.biosemantics.common.ling.transform.IInflector;
 import edu.arizona.biosemantics.common.taxonomy.Rank;
 import edu.arizona.biosemantics.common.taxonomy.RankData;
 import edu.arizona.biosemantics.common.taxonomy.TaxonIdentification;
@@ -41,7 +47,16 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 
 	@Override
 	public Model getMatrix() {
-		return createSampleModel();
+		Model model = null;
+		try(ObjectInput input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(
+				new File("C:/Users/rodenhausen.CATNET/Desktop/etcsite/data/matrixGeneration/239/TaxonMatrix.ser"))))) {
+			model = (Model)input.readObject();
+			return model;
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+		//return createSampleModel();
 	}
 	
 	private Model createSampleModel() {
@@ -223,6 +238,8 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 	
 	@Override
 	public SafeHtml getHighlighted(String content, Collection<Character> characters, Collection<Value> values) {
+		//IPOSKnowledgeBase posKnowledgeBase = new 
+		//IInflector inflector = new edu.arizona.biosemantics.common.ling.transform.lib.SomeInflector(posKnowledgeBase, singulars, plurals)
 		content = content.replaceAll("\n", "</br>");
 		
 		Set<Highlight> highlights = new HashSet<Highlight>();
@@ -239,14 +256,12 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 				highlights.add(new Highlight(character.getName(), "0033cc"));
 			}
 		}
-		System.out.println(highlights);
 		for(Value value : values) {
 			if(!usedValues.contains(value.getValue())) {
 				usedValues.add(value.getValue());
 				highlights.add(new Highlight(value.getValue(), "009933"));
 			}
 		}
-		System.out.println(highlights);
 		for(Highlight highlight : highlights) {
 			org.jsoup.nodes.Document document = Jsoup.parseBodyFragment(content);
 			List<Node> result = new ArrayList<Node>();
