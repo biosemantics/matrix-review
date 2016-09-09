@@ -21,12 +21,14 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import edu.arizona.biosemantics.matrixreview.client.common.ColorSettingsDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.ColorsDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.CommentsDialog;
+import edu.arizona.biosemantics.matrixreview.client.common.UnitNormalizationDialog;
 import edu.arizona.biosemantics.matrixreview.client.config.ManageMatrixView;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.DownloadEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SaveEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowModifyEvent;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
+import edu.arizona.biosemantics.oto2.oto.client.common.SelectOntologiesDialog;
 
 public class MenuView extends MenuBar {
 
@@ -59,7 +61,7 @@ public class MenuView extends MenuBar {
 	protected void addItems() {
 		add(createMatrixItem());
 		add(createAnnotationsItem());
-		add(createQuestionItem());
+		add(createNormalizationItem());
 	}
 
 	protected Widget createMatrixItem() {
@@ -116,6 +118,7 @@ public class MenuView extends MenuBar {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				Model subModel = modelMerger.getSubModel(manageMatrixView.getSelectedCharacters(), manageMatrixView.getSelectedTaxa());
+				//subModel.getTaxonMatrix().
 				fullModelBus.fireEvent(new DownloadEvent(subModel));
 			}
 		});
@@ -165,27 +168,22 @@ public class MenuView extends MenuBar {
 		sub.add(commentsItem);
 		return annotationsItem;
 	}
-
-	protected Widget createQuestionItem() {
+	
+	protected Widget createNormalizationItem() {
 		Menu sub = new Menu();
-		MenuBarItem questionsItem = new MenuBarItem("Instructions", sub);
-		MenuItem helpItem = new MenuItem("Help");
-		helpItem.addSelectionHandler(new SelectionHandler<Item>() {
-			@Override
-			public void onSelection(SelectionEvent<Item> arg0) {
-				final Dialog dialog = new Dialog();
-				dialog.setBodyBorder(false);
-				dialog.setHeadingText("Help");
-				dialog.setHideOnButtonClick(true);
-				dialog.setWidget(new HelpView());
-				dialog.setWidth(400);
-				dialog.setHeight(225);
-				dialog.setResizable(true);
-				dialog.setShadow(true);
-				dialog.show();
-			}
-		});
-		sub.add(helpItem);
-		return questionsItem;
+		MenuBarItem normalizationItem = new MenuBarItem("Normalization", sub);
+		sub.add(new HeaderMenuItem("Unit Normalization"));
+		MenuItem normalizationSelectedItem = new MenuItem("Select Characters to be Normalized");
+		normalizationSelectedItem.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					Model subModel = modelMerger.getSubModel(manageMatrixView.getSelectedCharacters(), manageMatrixView.getSelectedTaxa());
+					UnitNormalizationDialog dialog = new UnitNormalizationDialog(fullModelBus,
+							subModelBus, subModel,model,manageMatrixView);
+					dialog.show();
+				}
+			});
+		sub.add(normalizationSelectedItem);
+		return normalizationItem;
 	}
 }

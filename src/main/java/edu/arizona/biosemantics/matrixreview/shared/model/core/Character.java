@@ -70,6 +70,10 @@ public class Character implements Serializable {
 		return name + " " + connector + " " + organ.toString();
 	}
 	
+	public String complete() {
+		return this.toString();
+	}
+	
 	public int getId() {
 		return id;
 	}

@@ -9,6 +9,13 @@ import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.box.MessageBox;
 
 public class Alerter {
+	
+	public static class InfoMessageBox extends MessageBox {
+		public InfoMessageBox(String title, String message) {
+			super(title, message);
+			setIcon(ICONS.info());
+		}
+	}
 		
 	public static MessageBox startLoading() {
 		AutoProgressMessageBox box = new AutoProgressMessageBox("Loading", "Loading your data, please wait...");
@@ -34,10 +41,34 @@ public class Alerter {
 		return alert;
 	}
 	
+	public static MessageBox failedNormalization() {
+		AlertMessageBox alert = new AlertMessageBox("Unit Normalization", "Please don't normalize \"All listed characters\" and some other characters at the same time!");
+		alert.show();
+		return alert;
+	}
+	
 	public static MessageBox showConfirm(String title, String message) {
 		 ConfirmMessageBox confirm = new ConfirmMessageBox(title, message);
 		 confirm.show();
          return confirm;
+	}
+	
+	public static MessageBox finishAllNormalization(){
+		
+		InfoMessageBox info = new InfoMessageBox("Unit Normalization", "All listed characters are normarlized with select unit!");
+		info.show();
+		return info;
+	}
+	
+public static MessageBox finishNormalization(List<Normalization> gridNormAll){
+	    String characterList ="";
+	    for (Normalization item: gridNormAll){
+	    	characterList = "\"" + item.getCharacter().toString() + "\", " + characterList;
+	    }
+		
+		InfoMessageBox info = new InfoMessageBox("Unit Normalization", "Character(s) "+ characterList +  "are/is normarlized with select unit(s)!");
+		info.show();
+		return info;
 	}
 
 	public static MessageBox showYesNoCancelConfirm(String title, String message) {
@@ -46,6 +77,13 @@ public class Alerter {
         box.setIcon(MessageBox.ICONS.question());
         box.show();
         return box;
+	}
+
+	public static MessageBox sleclecUnitSets() {
+		InfoMessageBox info = new InfoMessageBox("Unit Normalization", "Please select units first!");
+		info.show();
+		return info;
+		
 	}
 	
 }

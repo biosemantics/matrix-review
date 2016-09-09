@@ -33,7 +33,7 @@ public class ManageMenuView extends MenuView {
 		add(createMatrixItem());
 		add(createAnnotationsItem());
 		add(createAnalyzeItem());
-		add(createQuestionItem());
+		//add(createQuestionItem());
 	}
 
 	public Widget createAnalyzeItem() {

@@ -6,21 +6,23 @@ import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 
-public abstract class CharacterProperties implements PropertyAccess<Character> {
+public interface CharacterProperties extends PropertyAccess<Character> {
 
-	@Path("name")
-	ModelKeyProvider<Character> key() {
-		return new ModelKeyProvider<Character>() {
-			@Override
-			public String getKey(Character item) {
-				return item.toString();
-			}
-		};
+	//@Path("complete")
+	public class KeyProvider implements ModelKeyProvider<Character> {
+		@Override
+		public String getKey(Character item) {
+			return item.toString();
+		}
 	}
 
 	@Path("name")
-	abstract LabelProvider<Character> nameLabel();
-
-	abstract ValueProvider<Character, String> name();
+	LabelProvider<Character> nameLabel();
+	
+	ValueProvider<Character, String> organ();
+	
+	ValueProvider<Character, String> name();
+	
+	ValueProvider<Character, String> complete();
 
 }
