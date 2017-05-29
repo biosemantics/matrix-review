@@ -49,7 +49,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 	public Model getMatrix() {
 		Model model = null;
 		try(ObjectInput input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(
-				new File("C:/Users/rodenhausen.CATNET/Desktop/etcsite/data/matrixGeneration/239/TaxonMatrix.ser"))))) {
+				new File("F:/ETC/Matrix Generator/TaxonMatrix.ser"))))) {
 			model = (Model)input.readObject();
 			return model;
 		} catch(Exception e) {

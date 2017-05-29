@@ -102,6 +102,10 @@ import edu.arizona.biosemantics.matrixreview.shared.model.core.Organ;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
+/**
+ * Right Section:Select Characters for the Matrix
+ *
+ */
 public class ManageCharactersView extends ContentPanel {
 
 	private OrganCharacterNodeProperties organCharacterNodeProperties = new OrganCharacterNodeProperties();
@@ -109,7 +113,9 @@ public class ManageCharactersView extends ContentPanel {
 	private EventBus eventBus;
 	private HTML infoHtml = new HTML();
 	private SimpleContainer valuesView = new SimpleContainer();
+	private SimpleContainer valueSentView = new SimpleContainer();
 	private SimpleContainer categoricalValuesView = new SimpleContainer();
+	private SimpleContainer categoricalValueSentView = new SimpleContainer();
 	private Tree<OrganCharacterNode, OrganCharacterNode> tree;
 	private Model model;
 	private TreeStore<OrganCharacterNode> store = new TreeStore<OrganCharacterNode>(
@@ -132,11 +138,19 @@ public class ManageCharactersView extends ContentPanel {
 		this.setTitle("Right-clicks on characters to bring up more character management functions");
 		this.setHeadingText("Select Characters for the Matrix");
 
+		
+
+		HorizontalLayoutContainer horizontalLayoutContainer = new HorizontalLayoutContainer();
+		//left part: character tree
 		FieldSet charactersFieldSet = new FieldSet();
 		// taxonFieldSet.setCollapsible(true);
 		charactersFieldSet.setHeadingText("Characters");
 		charactersFieldSet.setWidget(tree);
-
+		horizontalLayoutContainer.add(charactersFieldSet,
+				new HorizontalLayoutData(0.5, 1.0));
+		
+		//right part:character value information
+		VerticalLayoutContainer infoContainer = new VerticalLayoutContainer();
 		FieldSet infoFieldSet = new FieldSet();
 		// taxonFieldSet.setCollapsible(true);
 		infoFieldSet.setHeadingText("Character Details");
@@ -144,21 +158,26 @@ public class ManageCharactersView extends ContentPanel {
 		flowInfoHtml.add(infoHtml);
 		flowInfoHtml.getScrollSupport().setScrollMode(ScrollMode.AUTO);
 		infoFieldSet.setWidget(flowInfoHtml);
-
+		infoContainer.add(infoFieldSet, new VerticalLayoutData(1.0, 0.3));
+		//values
+		HorizontalLayoutContainer valuesContainer = new HorizontalLayoutContainer();
 		FieldSet valuesFieldSet = new FieldSet();
 		// taxonFieldSet.setCollapsible(true);
 		valuesFieldSet.setHeadingText("Character Values");
 		valuesFieldSet.setWidget(valuesView);
+		valuesContainer.add(valuesFieldSet, new HorizontalLayoutData(1.0, 1.0));
+		valuesContainer.add(categoricalValuesView, new HorizontalLayoutData(1.0, 1.0));
 		
-		HorizontalLayoutContainer horizontalLayoutContainer = new HorizontalLayoutContainer();
-		horizontalLayoutContainer.add(charactersFieldSet,
-				new HorizontalLayoutData(0.5, 1.0));
-		VerticalLayoutContainer infoContainer = new VerticalLayoutContainer();
-		infoContainer.add(infoFieldSet, new VerticalLayoutData(1.0, 0.5));
-		HorizontalLayoutContainer valuesContainer = new HorizontalLayoutContainer();
-		valuesContainer.add(valuesFieldSet, new HorizontalLayoutData(0.5, 1.0));
-		valuesContainer.add(categoricalValuesView, new HorizontalLayoutData(0.5, 1.0));
-		infoContainer.add(valuesContainer, new VerticalLayoutData(1.0, 0.5));
+		//sentences
+		HorizontalLayoutContainer valueSentContainer = new HorizontalLayoutContainer();
+		FieldSet valueSentFieldSet = new FieldSet();
+		valueSentFieldSet.setHeadingText("Sentence of the value");
+		valueSentFieldSet.setWidget(valueSentView);//
+		valueSentContainer.add(valueSentFieldSet, new HorizontalLayoutData(1.0, 1.0));
+		valueSentContainer.add(categoricalValueSentView, new HorizontalLayoutData(1.0, 1.0));
+		
+		infoContainer.add(valuesContainer, new VerticalLayoutData(1.0, 0.3));
+		infoContainer.add(valueSentContainer, new VerticalLayoutData(1.0, 0.4));
 		horizontalLayoutContainer.add(infoContainer, new HorizontalLayoutData(
 				0.5, 1.0));
 

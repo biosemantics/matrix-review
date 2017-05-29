@@ -108,6 +108,10 @@ import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonProperties;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
+/**
+ * Left Section: Select Taxa for the Matrix
+ *
+ */
 public class ManageTaxaView extends ContentPanel {
 
 	private IMatrixServiceAsync matrixService = GWT.create(IMatrixService.class);

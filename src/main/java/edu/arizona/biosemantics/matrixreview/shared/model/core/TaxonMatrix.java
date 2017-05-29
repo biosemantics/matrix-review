@@ -90,7 +90,12 @@ public class TaxonMatrix implements Serializable {
 
 	private Map<Taxon, Map<Character, Value>> values = new HashMap<Taxon, Map<Character, Value>>();
 
+	//value sentences
+	private Map<Taxon, Map<Character, Map<Value, String>>> sentences = 
+			new HashMap<Taxon, Map<Character, Map<Value, String>>>();
+	
 	public TaxonMatrix() {
+		
 	}
 
 	public TaxonMatrix(List<Organ> hierarchyCharacters, List<Taxon> hierarchyTaxa) {
