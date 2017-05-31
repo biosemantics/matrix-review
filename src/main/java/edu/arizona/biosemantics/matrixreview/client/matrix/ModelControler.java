@@ -20,7 +20,7 @@ import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 
 /**
- * TODO: maintain a map character -> charactercolumnconfig? to avoid iterating over configs to get the one corresponding to a given character
+ * TODO: maintain a map character - charactercolumnconfig? to avoid iterating over configs to get the one corresponding to a given character
  * this is done a couple of times in this class and could potentially be avoided
  * @author rodenhausen
  */

@@ -65,6 +65,7 @@ import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent.SelectionChangedHandler;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 
+import edu.arizona.biosemantics.matrixreview.client.common.Alerter;
 import edu.arizona.biosemantics.matrixreview.client.common.CharacterAddDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.CharacterModifyDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.InputElementVisibleTextField;
@@ -115,7 +116,8 @@ public class ManageCharactersView extends ContentPanel {
 	private SimpleContainer valuesView = new SimpleContainer();
 	private SimpleContainer valueSentView = new SimpleContainer();
 	private SimpleContainer categoricalValuesView = new SimpleContainer();
-	private SimpleContainer categoricalValueSentView = new SimpleContainer();
+	//private SimpleContainer statementView = new SimpleContainer();
+	private HTML statementView = new HTML();
 	private Tree<OrganCharacterNode, OrganCharacterNode> tree;
 	private Model model;
 	private TreeStore<OrganCharacterNode> store = new TreeStore<OrganCharacterNode>(
@@ -127,7 +129,8 @@ public class ManageCharactersView extends ContentPanel {
 			new HashSet<SelectionChangedHandler<OrganCharacterNode>>();
 	private ComboBox<ControlMode> controlComboBar;
 	private ManageMatrixView manageMatrixView;
-	private ListView<String, String> statesList;
+	private ListView<Value, String> statesList;
+	//private ListView<String, String> statesList;
 
 
 	public ManageCharactersView(EventBus eventBus, boolean navigation, ManageMatrixView manageMatrixView) {
@@ -158,7 +161,7 @@ public class ManageCharactersView extends ContentPanel {
 		flowInfoHtml.add(infoHtml);
 		flowInfoHtml.getScrollSupport().setScrollMode(ScrollMode.AUTO);
 		infoFieldSet.setWidget(flowInfoHtml);
-		infoContainer.add(infoFieldSet, new VerticalLayoutData(1.0, 0.3));
+		infoContainer.add(infoFieldSet, new VerticalLayoutData(1.0, 0.3));//character details
 		//values
 		HorizontalLayoutContainer valuesContainer = new HorizontalLayoutContainer();
 		FieldSet valuesFieldSet = new FieldSet();
@@ -167,17 +170,18 @@ public class ManageCharactersView extends ContentPanel {
 		valuesFieldSet.setWidget(valuesView);
 		valuesContainer.add(valuesFieldSet, new HorizontalLayoutData(1.0, 1.0));
 		valuesContainer.add(categoricalValuesView, new HorizontalLayoutData(1.0, 1.0));
+		infoContainer.add(valuesContainer, new VerticalLayoutData(1.0, 0.3));//character values
 		
 		//sentences
-		HorizontalLayoutContainer valueSentContainer = new HorizontalLayoutContainer();
-		FieldSet valueSentFieldSet = new FieldSet();
-		valueSentFieldSet.setHeadingText("Sentence of the value");
-		valueSentFieldSet.setWidget(valueSentView);//
-		valueSentContainer.add(valueSentFieldSet, new HorizontalLayoutData(1.0, 1.0));
-		valueSentContainer.add(categoricalValueSentView, new HorizontalLayoutData(1.0, 1.0));
+		FieldSet sentenceFieldSet = new FieldSet();
+		sentenceFieldSet.setHeadingText("Sentence of the value");
+		FlowLayoutContainer sentenceInfoHtml = new FlowLayoutContainer();
+		sentenceInfoHtml.add(statementView);
+		sentenceInfoHtml.getScrollSupport().setScrollMode(ScrollMode.AUTO);
+		sentenceFieldSet.setWidget(sentenceInfoHtml);
 		
-		infoContainer.add(valuesContainer, new VerticalLayoutData(1.0, 0.3));
-		infoContainer.add(valueSentContainer, new VerticalLayoutData(1.0, 0.4));
+		infoContainer.add(sentenceFieldSet, new VerticalLayoutData(1.0, 0.4));//sentences
+		
 		horizontalLayoutContainer.add(infoContainer, new HorizontalLayoutData(
 				0.5, 1.0));
 
@@ -610,7 +614,8 @@ public class ManageCharactersView extends ContentPanel {
 			final Character character = ((CharacterNode) selected).getCharacter();
 			
 			if(controlMode.equals(ControlMode.CATEGORICAL)) {
-				List<String> sortValues = getCharacterValues(character);
+				//List<String> sortValues = getCharacterValues(character);
+				List<String> sortValues = getCharacterValuesString(character);
 				SelectCharacterStatesDialog window = new SelectCharacterStatesDialog(character, sortValues);
 				window.show();
 				window.addSetCharacterStatesEventHandler(new SetCharacterStatesEventHandler() {
@@ -688,7 +693,34 @@ public class ManageCharactersView extends ContentPanel {
 		addDialog.show();
 	}
 
+	protected String getStatements(Character character){
+		final StringBuffer sb = new StringBuffer();
+		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
+			String value = model.getTaxonMatrix().getValue(taxon, character).getStatements();
+			sb.append(value);
+		}
+		return sb.toString();
+	}
+	
+	/*
 	protected List<String> getCharacterValues(Character character) {
+		final Set<String> values = new HashSet<String>();
+		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
+			String value = model.getTaxonMatrix().getValue(taxon, character).getValue();
+			if (!value.trim().isEmpty())
+				values.add(value);
+		}
+		List<String> sortValues = new ArrayList<String>(values);
+		Collections.sort(sortValues, new Comparator<String>() {
+			@Override
+			public int compare(String o1, String o2) {
+				return o1.compareTo(o2);
+			}
+		});
+		return sortValues;
+	}*/
+	
+	protected List<String> getCharacterValuesString(Character character) {
 		final Set<String> values = new HashSet<String>();
 		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
 			String value = model.getTaxonMatrix().getValue(taxon, character).getValue();
@@ -705,6 +737,23 @@ public class ManageCharactersView extends ContentPanel {
 		return sortValues;
 	}
 
+	protected List<Value> getCharacterValues(Character character) {
+		final Set<Value> values = new HashSet<Value>();
+		for (Taxon taxon : model.getTaxonMatrix().getHierarchyTaxaDFS()) {
+			Value value = model.getTaxonMatrix().getValue(taxon, character);
+			if (value!=null&&!value.getValue().isEmpty())
+				values.add(value);
+		}
+		List<Value> sortValues = new ArrayList<Value>(values);
+		Collections.sort(sortValues, new Comparator<Value>() {
+			@Override
+			public int compare(Value o1, Value o2) {
+				return o1.getValue().compareTo(o2.getValue());
+			}
+		});
+		return sortValues;
+	}
+	
 	private Tree<OrganCharacterNode, OrganCharacterNode> createTree() {
 		final Tree<OrganCharacterNode, OrganCharacterNode> tree = new Tree<OrganCharacterNode, OrganCharacterNode>(
 				store, new IdentityValueProvider<OrganCharacterNode>());
@@ -1170,6 +1219,31 @@ public class ManageCharactersView extends ContentPanel {
 		updateValuesList(organCharacterNode);
 	}
 
+	private void updateStatements(OrganCharacterNode organCharacterNode) {
+		if (organCharacterNode instanceof CharacterNode) {
+			Character character = ((CharacterNode) organCharacterNode)
+					.getCharacter();
+			String allStatements = this.getStatements(character);
+			//List<String> sortValues = this.getCharacterValues(character);
+			//if(!"".equals(allStatements)) {
+			statementView.setHTML(allStatements);
+			//} else
+			//	statementView.clear();
+		}
+	}
+	
+	private void updateStatements(Value value) {
+		String allStatements = value.getStatements();
+		//Alerter.showAlert("sent", allStatements);
+		//List<String> sortValues = this.getCharacterValues(character);
+		//if(!"".equals(allStatements)) {
+		statementView.setHTML(allStatements);
+		//} else
+		//	statementView.clear();
+	}
+
+	//update the character values view
+	/*
 	private void updateValuesList(OrganCharacterNode organCharacterNode) {
 		if (organCharacterNode instanceof CharacterNode) {
 			Character character = ((CharacterNode) organCharacterNode)
@@ -1189,6 +1263,48 @@ public class ManageCharactersView extends ContentPanel {
 				statesList = new ListView<String, String>(
 						valuesStore, new IdentityValueProvider<String>());
 				statesList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+				
+				statesList.getSelectionModel().addSelectionHandler(new SelectionChangedHandler<String>() {
+			        @Override
+			        public void onSelectionChanged(SelectionChangedEvent<String> event) {
+			        	updateStatements(organCharacterNode);
+			        }
+			      });
+				
+				valuesView.setWidget(statesList);
+			} else
+				valuesView.clear();
+		}
+	}
+	*/
+	
+	//update the character values view
+	private void updateValuesList(OrganCharacterNode organCharacterNode) {
+		if (organCharacterNode instanceof CharacterNode) {
+			Character character = ((CharacterNode) organCharacterNode)
+					.getCharacter();
+
+			List<Value> sortValues = this.getCharacterValues(character);
+			if(!sortValues.isEmpty()) {
+				ListStore<Value> valuesStore = new ListStore<Value>(
+						new ModelKeyProvider<Value>() {
+							@Override
+							public String getKey(Value item) {
+								return item.getValue();
+							}
+						});
+				valuesStore.addAll(sortValues);
+
+				statesList = new ListView<Value, String>(valuesStore, new IdentityValueProvider());
+				statesList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+				/**/
+				statesList.getSelectionModel().addSelectionChangedHandler(new SelectionChangedHandler<Value>() {
+			        @Override
+			        public void onSelectionChanged(SelectionChangedEvent<Value> event) {
+			        	updateStatements(event.getSource().getSelectedItem());
+			        }
+			      });
+				
 				valuesView.setWidget(statesList);
 			} else
 				valuesView.clear();
@@ -1219,6 +1335,7 @@ public class ManageCharactersView extends ContentPanel {
 		}
 	}
 
+	//update character info
 	private void updateHtml(OrganCharacterNode organCharacterNode) {
 		if (organCharacterNode instanceof CharacterNode) {
 			Character character = ((CharacterNode) organCharacterNode)
@@ -1332,9 +1449,11 @@ public class ManageCharactersView extends ContentPanel {
 	}
 
 	public void setMatrixEntry(MatrixEntry entry) {
-		List<String> selection = new LinkedList<String>();
+		//List<String> selection = new LinkedList<String>();
+		List<Value> selection = new LinkedList<Value>();
 		if(entry != null && entry.getValue() != null) 
-			selection.add(entry.getValue().getValue());
+			selection.add(entry.getValue());
+			//selection.add(entry.getValue().getValue());
 		statesList.getSelectionModel().setSelection(selection);
 	}
 

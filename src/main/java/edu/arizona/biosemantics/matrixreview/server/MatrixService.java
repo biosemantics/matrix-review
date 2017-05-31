@@ -47,6 +47,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 
 	@Override
 	public Model getMatrix() {
+		/*
 		Model model = null;
 		try(ObjectInput input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(
 				new File("F:/ETC/Matrix Generator/TaxonMatrix.ser"))))) {
@@ -55,8 +56,9 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		return null;
-		//return createSampleModel();
+		*/
+		//return null;
+		return createSampleModel();
 	}
 	
 	private Model createSampleModel() {
@@ -139,7 +141,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		t2.addChild(t4);
 		List<Taxon> hierarchyTaxa = new LinkedList<Taxon>();
 		hierarchyTaxa.add(t1);
-		for(int i=0; i<100; i++) {
+		for(int i=0; i<1; i++) {
 			rankData = new LinkedList<RankData>();
 			rankData.add(new RankData(Rank.FAMILY, "rosacea1", null, "", ""));
 			taxonIdentification = new TaxonIdentification(rankData, "author1", "1979");
@@ -189,8 +191,15 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		taxonMatrix.setValue(t1, c2, new Value("red"));
 		taxonMatrix.setValue(t2, c2, new Value("redish"));
 		
-		taxonMatrix.setValue(t3, c3, new Value("wide"));
-		taxonMatrix.setValue(t4, c3, new Value("spreading"));
+		
+		Value wideValue = new Value("wide");
+		wideValue.addValueStatement("wide", "To open to a fuller extent or wide range; stretch: spread out the tablecloth; a bird spreading its wings. ");
+		taxonMatrix.setValue(t3, c3, wideValue);
+		
+		Value v = new Value("spreading|highlighting");
+		v.addValueStatement("spreading", "To open to a fuller extent or wide range; stretch: spread out the tablecloth; a bird spreading its wings. ");
+		v.addValueStatement("highlighting", "The highlighting of misinformation online.");
+		taxonMatrix.setValue(t4, c3, v);
 			
 		return new Model(taxonMatrix);
 	}

@@ -4,7 +4,7 @@
 	<groupId>edu.arizona.biosemantics.etcsite</groupId>
 	<artifactId>matrix-review</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.50-SNAPSHOT</version>
+	<version>0.0.51-SNAPSHOT</version>
 
 	<properties>
 		<gwtVersion>2.6.1</gwtVersion>
@@ -179,12 +179,11 @@
 						<goals>
 							<goal>jar</goal>
 						</goals>
-						<configuration>
-		                    <!--<additionalparam>${javadoc.opts}</additionalparam>  -->
-		                    <additionalparam>-Xdoclint:none</additionalparam>
-		                </configuration>
 					</execution>
 				</executions>
+				<configuration>
+		          <additionalparam>-Xdoclint:none</additionalparam>
+		        </configuration>
 			</plugin>
 		</plugins>
 		<pluginManagement>
