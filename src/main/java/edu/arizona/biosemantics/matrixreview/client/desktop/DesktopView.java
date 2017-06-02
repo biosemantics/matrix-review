@@ -1,7 +1,9 @@
 package edu.arizona.biosemantics.matrixreview.client.desktop;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.event.shared.EventBus;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
@@ -20,6 +22,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.*;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
+import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
 public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 	
@@ -74,6 +77,18 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 					showDescription(event.getTaxon());
 				}
 			});
+			subModelBus.addHandler(ShowSentenceEvent.TYPE, new ShowSentenceEvent.ShowSentenceEventHandler() {
+				@Override
+				public void onShow(ShowSentenceEvent event) {
+					showSentence(event.getTaxon(), event.getValue());
+				}
+			});
+			fullModelBus.addHandler(ShowSentenceEvent.TYPE, new ShowSentenceEvent.ShowSentenceEventHandler() {
+				@Override
+				public void onShow(ShowSentenceEvent event) {
+					showSentence(event.getTaxon(), event.getValue());
+				}
+			});
 		}
 				
 		protected void onAnalyzeCharacter(AnalyzeCharacterEvent event) {
@@ -96,13 +111,48 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 		}
 
 		protected void showDescription(Taxon taxon) {
-			Window descriptionWindow = new Window(false);
-			DescriptionManager manager = new DescriptionManager(fullModelBus, subModelBus, descriptionWindow, taxon, fullModel, subModel);
-			descriptionWindow.setWindowManager(manager);
-			addWindow(descriptionWindow);		
+			
+			String taxonName = taxon.getName();
+			DescriptionManager manager = descriptionViews.get(taxonName);
+			if(manager==null){
+				Window descriptionWindow = new Window(false);
+				manager = new DescriptionManager(fullModelBus, subModelBus, descriptionWindow, taxon, fullModel, subModel);
+				descriptionWindow.setWindowManager(manager);
+				addWindow(descriptionWindow);
+				
+				descriptionViews.put(taxonName,manager);
+			}else{
+				Window descriptionWindow  = manager.getWindow();
+				addWindow(descriptionWindow);
+			}
+			manager.resetContent(taxon.getDescription());
 			subModelBus.fireEvent(new ShowDesktopEvent());
 		}
 		
+		/**
+		 * show the description and highlight the values.
+		 * @param taxon
+		 * @param value
+		 */
+		protected void showSentence(Taxon taxon, Value value) {
+			String taxonName = taxon.getName();
+			DescriptionManager manager = descriptionViews.get(taxonName);
+			if(manager==null){
+				Window descriptionWindow = new Window(false);
+				manager = new DescriptionManager(fullModelBus, subModelBus, descriptionWindow, taxon, fullModel, subModel);
+				descriptionWindow.setWindowManager(manager);
+				addWindow(descriptionWindow);
+				
+				descriptionViews.put(taxonName,manager);
+			}else{
+				Window descriptionWindow  = manager.getWindow();
+				addWindow(descriptionWindow);
+			}
+			manager.resetContent(taxon, value);
+			subModelBus.fireEvent(new ShowDesktopEvent());
+		}
+
+
 		protected void showTermFrequencyChart(Character character, List<Taxon> taxa) {
 			Window termFrequencyWindow = new Window(true);
 			TermFrequencyManager manager = new TermFrequencyManager(fullModelBus, subModelBus, termFrequencyWindow, fullModel, character, taxa);
@@ -128,6 +178,8 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 	private int defaultMargin = 5;
 	private int widgetId = 0;
 	private int marginIncrement = 20;
+	
+	private Map<String, DescriptionManager> descriptionViews = new HashMap();
 
 	public DesktopView(EventBus fullModelBus, EventBus subModelBus) {
 		this.fullModelBus = fullModelBus;
@@ -164,5 +216,9 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 			}
 		});*/
 		return window;
+	}
+	
+	public void closeWindow(Window window){
+		window.clear();
 	}
 }

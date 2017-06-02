@@ -1,9 +1,20 @@
 package edu.arizona.biosemantics.matrixreview.client.desktop.widget;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import com.bfr.client.selection.Selection;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.GwtEvent.Type;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.dnd.core.client.DndDragStartEvent;
 import com.sencha.gxt.dnd.core.client.DragSource;
@@ -15,6 +26,7 @@ import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
+import edu.arizona.biosemantics.matrixreview.client.common.Alerter;
 import edu.arizona.biosemantics.matrixreview.client.desktop.Window;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
@@ -27,13 +39,16 @@ import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
+
 public class DescriptionManager extends AbstractWindowManager {
 
 	private Taxon taxon;
 	private Model fullModel;
 	private Model subModel;
-	private TextArea textArea;
+	//private TextArea textArea;
+	private HTML textArea;
 	private Model displayedModel;
+	private String selectedText;
 
 	public DescriptionManager(EventBus fullModelEventBus, EventBus subModelEventBus, Window window, Taxon taxon, 
 			Model fullModel, Model subModel) {
@@ -47,9 +62,15 @@ public class DescriptionManager extends AbstractWindowManager {
 	
 	@Override
 	public void refreshContent() {
-		textArea = new TextArea();
-		textArea.setText(taxon.getDescription());
-		//textArea.setEnabled(false);
+		
+		textArea = new HTML();
+		//textArea.setWidth("100px");
+		//textArea.setHeight("100px");
+		//textArea = new TextArea();//TextBox
+		//textArea.setText(taxon.getDescription());
+		//textArea.setReadOnly(true);
+		//textArea.addBeforeShowContextMenuHandler(handler)
+		/*
 		DragSource source = new DragSource(textArea);
 		source.addDragStartHandler(new DndDragStartHandler() {
 			@Override
@@ -57,7 +78,53 @@ public class DescriptionManager extends AbstractWindowManager {
 				event.setData(textArea.getSelectedText());
 			}
 		});
-		window.setWidget(textArea);
+		*/
+		textArea.sinkEvents(Event.ONCONTEXTMENU);
+		textArea.addHandler(
+	      new ContextMenuHandler() {
+			@Override
+			public void onContextMenu(ContextMenuEvent event) {
+				selectedText = Selection.getBrowserRange().getText();
+				//Alerter.showAlert("selected", selectedText);
+				refreshContextMenu();
+			}
+	    }, ContextMenuEvent.getType());
+		ScrollPanel sp = new ScrollPanel(textArea);
+		//sp.setSize("150px", "150px");
+		window.setWidget(sp);
+	}
+	
+	public void resetContent(Taxon taxon, Value value){
+		String description = taxon.getDescription();
+		String valueStr = value.getValue();
+		String[] values = valueStr.split("\\|");
+		
+		Map<String, String> replaceSents = new HashMap();
+		for(String aValue:values){
+			aValue = aValue.trim();
+			if(aValue==null||"".equals(aValue)) continue;
+			String sentence = value.getStatements(aValue);
+			String toSentence = replaceSents.get(sentence);
+			if(toSentence==null){
+				replaceSents.put(sentence, sentence);
+				toSentence = sentence;
+			}
+			if(sentence!=null&&toSentence!=null){
+				toSentence = toSentence.replace(aValue, "<span style='background:yellow'>"+aValue+"</span>");
+				replaceSents.put(sentence, toSentence);
+			}else{
+				replaceSents.put(aValue, "<span style='background:yellow'>"+aValue+"</span>");
+			}
+		}
+		
+		for(Entry<String, String> entry : replaceSents.entrySet()){
+			if(entry.getKey()!=null&&entry.getValue()!=null) description=description.replace(entry.getKey().trim(), entry.getValue().trim());
+		}
+		textArea.setHTML(description);
+	}
+	
+	public void resetContent(String description){
+		textArea.setHTML(description);
 	}
 
 	@Override
@@ -105,7 +172,7 @@ public class DescriptionManager extends AbstractWindowManager {
 								@Override
 								public void onSelection(SelectionEvent<Item> event) {
 									subMatrixEventBus.fireEvent(new SetValueEvent(taxon, character, 
-											displayedModel.getTaxonMatrix().getValue(taxon, character), new Value(textArea.getSelectedText())));
+											displayedModel.getTaxonMatrix().getValue(taxon, character), new Value(selectedText)));//textArea.getSelectedText()
 								}
 							});
 						}

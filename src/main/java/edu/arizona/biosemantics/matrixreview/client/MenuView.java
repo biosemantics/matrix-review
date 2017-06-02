@@ -112,6 +112,16 @@ public class MenuView extends MenuBar {
 				fullModelBus.fireEvent(new DownloadEvent(model));
 			}
 		});
+		
+		MenuItem downloadMCCSVItem = new MenuItem("Download Matrix (with all existing taxa and characters) as MatrixConverter csv");
+		downloadMCCSVItem.setTitle("please set your browser to allow popup windows to use this function");
+		downloadMCCSVItem.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				fullModelBus.fireEvent(new DownloadEvent(model, "mc"));
+			}
+		});
+		
 		MenuItem downloadSelectionItem = new MenuItem("Download Selected Part of Matrix as .csv");
 		downloadSelectionItem.setTitle("please set your browser to allow popup windows to use this function");
 		downloadSelectionItem.addSelectionHandler(new SelectionHandler<Item>() {
@@ -120,6 +130,17 @@ public class MenuView extends MenuBar {
 				Model subModel = modelMerger.getSubModel(manageMatrixView.getSelectedCharacters(), manageMatrixView.getSelectedTaxa());
 				//subModel.getTaxonMatrix().
 				fullModelBus.fireEvent(new DownloadEvent(subModel));
+			}
+		});
+		
+		MenuItem downloadSelectionItemAsMC = new MenuItem("Download Selected Part of Matrix as  MatrixConverter csv");
+		downloadSelectionItemAsMC.setTitle("please set your browser to allow popup windows to use this function");
+		downloadSelectionItemAsMC.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				Model subModel = modelMerger.getSubModel(manageMatrixView.getSelectedCharacters(), manageMatrixView.getSelectedTaxa());
+				//subModel.getTaxonMatrix().
+				fullModelBus.fireEvent(new DownloadEvent(subModel, "mc"));
 			}
 		});
 

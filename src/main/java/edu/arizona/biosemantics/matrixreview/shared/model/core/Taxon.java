@@ -1,6 +1,7 @@
 package edu.arizona.biosemantics.matrixreview.shared.model.core;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,6 +39,8 @@ public class Taxon implements Serializable, Comparable<Taxon> {
 	 * Description
 	 */
 	private String description = "";
+	//Jin add May, 2017
+	private List<String> statements = new ArrayList();
 	
 	public Taxon() { }
 	
@@ -219,4 +222,15 @@ public class Taxon implements Serializable, Comparable<Taxon> {
 		this.taxonIdentification = taxonIdentification;
 	}
 	
+	public void addStatement(String statement) {
+		this.statements.add(statement);		
+	}
+	
+	public List<String> getStatement(){
+		return this.statements;
+	}
+
+	public void setStatements(List<String> statements) {
+		this.statements = statements;
+	}
 }

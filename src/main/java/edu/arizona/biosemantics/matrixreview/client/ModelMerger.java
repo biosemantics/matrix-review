@@ -11,6 +11,7 @@ import java.util.Set;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.GwtEvent;
 
+import edu.arizona.biosemantics.matrixreview.client.common.Alerter;
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;

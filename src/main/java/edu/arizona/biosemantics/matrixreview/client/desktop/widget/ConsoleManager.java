@@ -82,6 +82,7 @@ public class ConsoleManager extends AbstractWindowManager {
 				bus.addHandler(AnalyzeTaxonEvent.TYPE, this);
 				bus.addHandler(LockTaxonEvent.TYPE, this);
 				bus.addHandler(ShowDescriptionEvent.TYPE, this);	
+				//bus.addHandler(ShowSentenceEvent.TYPE, this);
 				bus.addHandler(SetValueEvent.TYPE, this);
 				bus.addHandler(MatrixModeEvent.TYPE, this);
 				bus.addHandler(CollapseTaxaEvent.TYPE, this);

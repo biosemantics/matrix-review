@@ -15,8 +15,11 @@ import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
+import edu.arizona.biosemantics.matrixreview.client.common.Alerter;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueCommentEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.ShowDescriptionEvent;
+import edu.arizona.biosemantics.matrixreview.client.event.ShowSentenceEvent;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
@@ -41,6 +44,7 @@ public class ValueMenu extends Menu {
 		add(new HeaderMenuItem("Annotation"));
 		add(createComment());
 		add(createColorize());
+		add(showSentence(value));
 	}
 	
 	@Override
@@ -100,4 +104,16 @@ public class ValueMenu extends Menu {
 		return item;
 	}
 	
+	
+	private Widget showSentence(final Value value) {
+		MenuItem item = new MenuItem("Show sentence");
+		item.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				Alerter.showAlert("Show sentence","Show sentence in "+taxon.getName()+" VALUE="+value.getValue());
+				eventBus.fireEvent(new ShowSentenceEvent(taxon,value));
+			}
+		});
+		return item;
+	}
 }

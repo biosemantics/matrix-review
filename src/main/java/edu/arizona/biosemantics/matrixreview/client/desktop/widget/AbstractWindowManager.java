@@ -53,6 +53,10 @@ public abstract class AbstractWindowManager implements WindowManager {
 		});
 		window.setContextMenu(menu);
 	}
+	
+	public Window getWindow(){
+		return window;
+	}
 
 	protected abstract void addEventHandlers();	
 }

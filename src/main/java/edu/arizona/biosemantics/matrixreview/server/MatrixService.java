@@ -127,7 +127,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		rankData.add(new RankData(Rank.VARIETY, "prototype", null, "", ""));
 		taxonIdentification = new TaxonIdentification(rankData, "author4", "2014");
 		Taxon t4 = new Taxon(taxonIdentification,
-				"Lorem ipsum dolor sit amet, consectetuer adipiscing elit. "
+				"Lorem ipsum dolor sit amet, consectetuer adipiscing elit. The highlighting of misinformation online."
 						+ "Sed metus nibh, sodales a, porta at, vulputate eget, dui. Pellentesque ut nisl. "
 						+ "Maecenas tortor turpis, interdum non, sodales non, iaculis ac, lacus. Vestibulum auctor, "
 						+ "tortor quis iaculis malesuada, libero lectus bibendum purus, sit amet tincidunt quam turpis "
@@ -135,7 +135,23 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 						+ "fringilla vel, urna.<br/><br/>Aliquam commodo ullamcorper erat. Nullam vel justo in neque "
 						+ "porttitor laoreet. Aenean lacus dui, consequat eu, adipiscing eget, nonummy non, nisi. "
 						+ "Morbi nunc est, dignissim non, ornare sed, luctus eu, massa. Vivamus eget quam. Vivamus "
-						+ "tincidunt diam nec urna. Curabitur velit.");
+						+ "tincidunt diam nec urna. Curabitur velit. To open to a fuller extent or wide range; stretch: spread out the tablecloth; a bird spreading its wings.");
+		t4.addStatement("Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");
+		t4.addStatement("The highlighting of misinformation online.");
+		t4.addStatement("Sed metus nibh, sodales a, porta at, vulputate eget, dui. Pellentesque ut nisl.");
+		t4.addStatement("Maecenas tortor turpis, interdum non, sodales non, iaculis ac, lacus.");
+		t4.addStatement("Vestibulum auctor, "
+						+ "tortor quis iaculis malesuada, libero lectus bibendum purus, sit amet tincidunt quam turpis "
+						+ "vel lacus.");
+		t4.addStatement("In pellentesque nisl non sem. ");
+		t4.addStatement("Suspendisse nunc sem, pretium eget, cursus a, "
+						+ "fringilla vel, urna.<br/><br/>Aliquam commodo ullamcorper erat. Nullam vel justo in neque "
+						+ "porttitor laoreet.");
+		t4.addStatement("Aenean lacus dui, consequat eu, adipiscing eget, nonummy non, nisi.");
+		t4.addStatement("Morbi nunc est, dignissim non, ornare sed, luctus eu, massa. Vivamus eget quam.");
+		t4.addStatement("Vivamus "
+						+ "tincidunt diam nec urna. Curabitur velit. ");
+		t4.addStatement("To open to a fuller extent or wide range; stretch: spread out the tablecloth; a bird spreading its wings.");
 		t1.addChild(t2);
 		t2.addChild(t3);
 		t2.addChild(t4);
@@ -190,7 +206,6 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		
 		taxonMatrix.setValue(t1, c2, new Value("red"));
 		taxonMatrix.setValue(t2, c2, new Value("redish"));
-		
 		
 		Value wideValue = new Value("wide");
 		wideValue.addValueStatement("wide", "To open to a fuller extent or wide range; stretch: spread out the tablecloth; a bird spreading its wings. ");

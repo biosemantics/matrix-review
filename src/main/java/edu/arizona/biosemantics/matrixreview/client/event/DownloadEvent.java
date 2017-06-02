@@ -14,10 +14,17 @@ public class DownloadEvent extends GwtEvent<DownloadHandler> {
 	
     public static Type<DownloadHandler> TYPE = new Type<DownloadHandler>();
 	private Model model;
+	private String format;
 
     public DownloadEvent(Model model) {
     	this.model = model;
     }
+    
+    public DownloadEvent(Model model, String format) {
+    	this.model = model;
+    	this.format = format;
+    }
+    
     
 	@Override
 	public Type<DownloadHandler> getAssociatedType() {
@@ -33,4 +40,7 @@ public class DownloadEvent extends GwtEvent<DownloadHandler> {
 		return model;
 	}
 	
+	public String getFormat(){
+		return format;
+	}
 }
