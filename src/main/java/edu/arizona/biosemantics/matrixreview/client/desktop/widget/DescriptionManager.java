@@ -3,6 +3,8 @@ package edu.arizona.biosemantics.matrixreview.client.desktop.widget;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.bfr.client.selection.Selection;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
@@ -11,6 +13,8 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.GwtEvent.Type;
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -104,16 +108,33 @@ public class DescriptionManager extends AbstractWindowManager {
 			aValue = aValue.trim();
 			if(aValue==null||"".equals(aValue)) continue;
 			String sentence = value.getStatements(aValue);
+			Alerter.showAlert(aValue+" sources:", sentence);
 			String toSentence = replaceSents.get(sentence);
 			if(toSentence==null){
 				replaceSents.put(sentence, sentence);
 				toSentence = sentence;
 			}
 			if(sentence!=null&&toSentence!=null){
-				toSentence = toSentence.replace(aValue, "<span style='background:yellow'>"+aValue+"</span>");
-				replaceSents.put(sentence, toSentence);
-			}else{
-				replaceSents.put(aValue, "<span style='background:yellow'>"+aValue+"</span>");
+				//if(toSentence)
+				String replacedSentence = highlighter(aValue, toSentence);
+				if(replacedSentence==null){
+					String[] avalueItems = aValue.split("[\\s]+");
+					if(avalueItems.length>1){
+						for(String item:avalueItems){
+							replacedSentence =  highlighter(item, toSentence);
+							if(replacedSentence!=null) toSentence = replacedSentence;
+						}
+					}
+				}else{
+					toSentence = replacedSentence;
+				}
+				if(toSentence!=null) replaceSents.put(sentence, toSentence);
+			}else{//replace the description
+				//replaceSents.put(aValue, "<span style='background:yellow'>"+aValue+"</span>");
+				String replacedSentence = highlighter(aValue, description);
+				if(replacedSentence!=null){
+					description = replacedSentence;
+				}
 			}
 		}
 		
@@ -121,6 +142,24 @@ public class DescriptionManager extends AbstractWindowManager {
 			if(entry.getKey()!=null&&entry.getValue()!=null) description=description.replace(entry.getKey().trim(), entry.getValue().trim());
 		}
 		textArea.setHTML(description);
+	}
+	
+	public String highlighter(String keywordString, String text){
+		String patternString = "^"+keywordString+"\\s|\\s"+keywordString+"\\s|[\\s\\(]"+keywordString+"[$\\).?,;:-]|^"+keywordString+"$";// regular expression pattern
+		//Pattern pattern = Pattern.compile(patternString);
+		//Matcher matcher = pattern.matcher(text);
+		RegExp regExp = RegExp.compile(patternString);
+		MatchResult matcher = regExp.exec(text);
+		while(matcher!=null){
+            //int end = matcher.end();
+           // int start = matcher.start();
+            //String matchedString = text.substring(start, end);
+			for (int i = 0; i < matcher.getGroupCount(); i++) {
+		        String matchedString = matcher.getGroup(i);
+	            return text.replace(matchedString, matchedString.replace(keywordString, "<span style='background:yellow'>"+keywordString+"</span>"));
+		    }
+        }
+		return null;
 	}
 	
 	public void resetContent(String description){
@@ -150,10 +189,10 @@ public class DescriptionManager extends AbstractWindowManager {
 	@Override
 	public void refreshContextMenu() {
 		Menu contextMenu = new Menu();
-		MenuItem setStateItem = new MenuItem("Set State");
-		contextMenu.add(setStateItem);	
+		MenuItem addStateItem = new MenuItem("Add State");
+		contextMenu.add(addStateItem);	
 		final Menu characterMenu = new Menu();
-		setStateItem.setSubMenu(characterMenu);
+		addStateItem.setSubMenu(characterMenu);
 		
 		contextMenu.addBeforeShowHandler(new BeforeShowHandler() {
 
@@ -161,7 +200,59 @@ public class DescriptionManager extends AbstractWindowManager {
 			public void onBeforeShow(BeforeShowEvent event) {
 				characterMenu.clear();
 				for(Organ organ : displayedModel.getTaxonMatrix().getHierarchyCharacters()) {
-					MenuItem organItem = new MenuItem(organ.getName());
+					String organName = organ.getName();
+					if(organName==null||"".equals(organName)) organName = "whole_organism";
+					MenuItem organItem = new MenuItem(organName);
+					Menu sub = new Menu();
+					organItem.setSubMenu(sub);
+					for(final Character character : organ.getFlatCharacters()) {
+						if(displayedModel.getTaxonMatrix().isVisiblyContained(character)) {
+							MenuItem characterItem = new MenuItem(character.getName());
+							sub.add(characterItem);
+							characterItem.addSelectionHandler(new SelectionHandler<Item>() {
+								@Override
+								public void onSelection(SelectionEvent<Item> event) {
+									//subMatrixEventBus.fireEvent(new SetValueEvent(taxon, character, 
+									//		displayedModel.getTaxonMatrix().getValue(taxon, character), new Value(selectedText)));//textArea.getSelectedText()
+									Value newValue = displayedModel.getTaxonMatrix().getValue(taxon, character);
+									if(newValue ==null){
+										newValue = new Value(selectedText); 
+									}else{
+										String valueStr = newValue.getValue();
+										if(valueStr==null||"".equals(valueStr)){
+											newValue.setValue(selectedText);
+										}else{
+											newValue.setValue(valueStr+"|"+selectedText);
+										}
+									}
+									
+									subMatrixEventBus.fireEvent(new SetValueEvent(taxon, character, 
+											displayedModel.getTaxonMatrix().getValue(taxon, character), newValue));//textArea.getSelectedText()
+									
+								}
+							});
+						}
+					}
+					characterMenu.add(organItem);
+				}
+			}
+			
+		});
+		
+		MenuItem setStateItem = new MenuItem("Set State");
+		contextMenu.add(setStateItem);	
+		final Menu setCharacterMenu = new Menu();
+		setStateItem.setSubMenu(setCharacterMenu);
+		
+		setCharacterMenu.addBeforeShowHandler(new BeforeShowHandler() {
+
+			@Override
+			public void onBeforeShow(BeforeShowEvent event) {
+				setCharacterMenu.clear();
+				for(Organ organ : displayedModel.getTaxonMatrix().getHierarchyCharacters()) {
+					String organName = organ.getName();
+					if(organName==null||"".equals(organName)) organName = "whole_organism";
+					MenuItem organItem = new MenuItem(organName);
 					Menu sub = new Menu();
 					organItem.setSubMenu(sub);
 					for(final Character character : organ.getFlatCharacters()) {
@@ -177,10 +268,9 @@ public class DescriptionManager extends AbstractWindowManager {
 							});
 						}
 					}
-					characterMenu.add(organItem);
+					setCharacterMenu.add(organItem);
 				}
 			}
-			
 		});
 		
 		window.setContextMenu(contextMenu);

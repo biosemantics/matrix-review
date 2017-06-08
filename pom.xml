@@ -88,6 +88,14 @@
 			<artifactId>jsoup</artifactId>
 			<version>1.8.3</version>
 		</dependency>
+		<!-- for com.bfr.client.Selection in gwt.xml -->
+	   <dependency>
+	     <groupId>gwt-selection</groupId>
+	     <artifactId>selection</artifactId>
+	     <scope>system</scope>
+	     <version>1.1</version>
+	     <systemPath>${basedir}\src\main\resources\Selection_1_1.jar</systemPath>
+	   </dependency>
 	</dependencies>
 
 

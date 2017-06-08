@@ -31,7 +31,7 @@ public class Value implements Serializable, Comparable<Value> {
 		return value;
 	}
 
-	protected void setValue(String value) {
+	public void setValue(String value) {
 		this.value = value;
 	}
 	

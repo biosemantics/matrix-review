@@ -47,18 +47,18 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 
 	@Override
 	public Model getMatrix() {
-		/*
+		/**/
 		Model model = null;
 		try(ObjectInput input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(
-				new File("F:/ETC/Matrix Generator/TaxonMatrix.ser"))))) {
+				new File("C:/etcsitebase/etcsite/data/matrixGeneration/347/TaxonMatrix.ser"))))) {
 			model = (Model)input.readObject();
 			return model;
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		*/
-		//return null;
-		return createSampleModel();
+		
+		return null;
+		//return createSampleModel();
 	}
 	
 	private Model createSampleModel() {
