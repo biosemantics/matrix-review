@@ -106,11 +106,11 @@ public class ValueMenu extends Menu {
 	
 	
 	private Widget showSentence(final Value value) {
-		MenuItem item = new MenuItem("Show sentence");
+		MenuItem item = new MenuItem("Show context");
 		item.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				Alerter.showAlert("Show sentence","Show sentence in "+taxon.getName()+" VALUE="+value.getValue());
+				//Alerter.showAlert("Show sentence","Show sentence in "+taxon.getName()+" VALUE="+value.getValue());
 				eventBus.fireEvent(new ShowSentenceEvent(taxon,value));
 			}
 		});

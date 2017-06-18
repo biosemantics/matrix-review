@@ -27,6 +27,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.DownloadEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SaveEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowModifyEvent;
+import edu.arizona.biosemantics.matrixreview.client.matrix.MatrixFormat;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.oto2.oto.client.common.SelectOntologiesDialog;
 
@@ -104,7 +105,7 @@ public class MenuView extends MenuBar {
 			}
 		});
 		
-		MenuItem downloadItem = new MenuItem("Download Matrix (with all existing taxa and characters) as .csv");
+		MenuItem downloadItem = new MenuItem("Download Matrix (with all existing taxa and characters)");
 		downloadItem.setTitle("please set your browser to allow popup windows to use this function");
 		downloadItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
@@ -113,16 +114,16 @@ public class MenuView extends MenuBar {
 			}
 		});
 		
-		MenuItem downloadMCCSVItem = new MenuItem("Download Matrix (with all existing taxa and characters) as MatrixConverter csv");
+		MenuItem downloadMCCSVItem = new MenuItem("Download MatrixConverter Matrix (with all existing taxa and characters)");
 		downloadMCCSVItem.setTitle("please set your browser to allow popup windows to use this function");
 		downloadMCCSVItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				fullModelBus.fireEvent(new DownloadEvent(model, "mc"));
+				fullModelBus.fireEvent(new DownloadEvent(model, MatrixFormat.MCCSV));
 			}
 		});
 		
-		MenuItem downloadSelectionItem = new MenuItem("Download Selected Part of Matrix as .csv");
+		MenuItem downloadSelectionItem = new MenuItem("Download Selected Part of Matrix");
 		downloadSelectionItem.setTitle("please set your browser to allow popup windows to use this function");
 		downloadSelectionItem.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
@@ -133,14 +134,14 @@ public class MenuView extends MenuBar {
 			}
 		});
 		
-		MenuItem downloadSelectionItemAsMC = new MenuItem("Download Selected Part of Matrix as  MatrixConverter csv");
+		MenuItem downloadSelectionItemAsMC = new MenuItem("Download Selected Part of MatrixConverter Matrix");
 		downloadSelectionItemAsMC.setTitle("please set your browser to allow popup windows to use this function");
 		downloadSelectionItemAsMC.addSelectionHandler(new SelectionHandler<Item>() {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				Model subModel = modelMerger.getSubModel(manageMatrixView.getSelectedCharacters(), manageMatrixView.getSelectedTaxa());
 				//subModel.getTaxonMatrix().
-				fullModelBus.fireEvent(new DownloadEvent(subModel, "mc"));
+				fullModelBus.fireEvent(new DownloadEvent(subModel, MatrixFormat.MCCSV));
 			}
 		});
 
@@ -148,7 +149,9 @@ public class MenuView extends MenuBar {
 		sub.add(modifyMatrixItem);
 		sub.add(saveItem);
 		sub.add(downloadItem);
+		sub.add(downloadMCCSVItem);
 		sub.add(downloadSelectionItem);
+		sub.add(downloadSelectionItemAsMC);
 		return matrixItem;
 	}
 
