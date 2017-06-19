@@ -4,10 +4,10 @@
 	<groupId>edu.arizona.biosemantics.etcsite</groupId>
 	<artifactId>matrix-review</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.51-SNAPSHOT</version>
+	<version>0.0.51-SNAPSHOT-debug</version>
 
 	<properties>
-		<gwtVersion>2.6.1</gwtVersion>
+		<gwtVersion>2.7.0</gwtVersion>
 		<!-- GWT needs at least java 1.5 -->
 		<!-- But we need at least java 1.6 -->
 		<maven.compiler.source>1.7</maven.compiler.source>
@@ -32,12 +32,12 @@
 		<dependency>
 			<groupId>edu.arizona.biosemantics</groupId>
 			<artifactId>gxt</artifactId>
-			<version>0.0.10-SNAPSHOT</version>
+			<version>0.0.11-SNAPSHOT-debug</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.arizona.biosemantics</groupId>
 			<artifactId>gxt</artifactId>
-			<version>0.0.10-SNAPSHOT</version>
+			<version>0.0.11-SNAPSHOT-debug</version>
 			<classifier>sources</classifier>
 		</dependency>
 		<dependency>
@@ -65,18 +65,18 @@
 		<dependency>
 			<groupId>edu.arizona.biosemantics.common</groupId>
 			<artifactId>taxonomy</artifactId>
-			<version>0.0.22-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>edu.arizona.biosemantics.common</groupId>
-			<artifactId>ling</artifactId>
-			<version>0.0.9-SNAPSHOT</version>
+			<version>0.0.24-SNAPSHOT-debug</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.arizona.biosemantics.common</groupId>
 			<artifactId>taxonomy</artifactId>
-			<version>0.0.22-SNAPSHOT</version>
+			<version>0.0.24-SNAPSHOT-debug</version>
 			<classifier>sources</classifier>
+		</dependency>
+		<dependency>
+			<groupId>edu.arizona.biosemantics.common</groupId>
+			<artifactId>ling</artifactId>
+			<version>0.0.19-SNAPSHOT-debug</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.gwt.eventbinder</groupId>
@@ -94,7 +94,7 @@
 	     <artifactId>selection</artifactId>
 	     <scope>system</scope>
 	     <version>1.1</version>
-	     <systemPath>${basedir}\src\main\resources\Selection_1_1.jar</systemPath>
+	     <systemPath>C:\Users\hongcui\git\etc-site\lib\Selection_1_1.jar</systemPath>
 	   </dependency>
 	</dependencies>
 
@@ -109,7 +109,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>gwt-maven-plugin</artifactId>
-				<version>2.6.1</version>
+				<version>${gwtVersion}</version>
 				<executions>
 					<execution>
 						<goals>
@@ -139,7 +139,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>2.4</version>
+				<version>3.1.0</version>
 				<executions>
 					<execution>
 						<phase>compile</phase>
@@ -156,10 +156,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<version>3.6.1</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
 				</configuration>
 			</plugin>
 
