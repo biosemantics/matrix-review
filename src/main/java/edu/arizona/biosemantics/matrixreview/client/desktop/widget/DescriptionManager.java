@@ -108,7 +108,7 @@ public class DescriptionManager extends AbstractWindowManager {
 			aValue = aValue.trim();
 			if(aValue==null||"".equals(aValue)) continue;
 			String sentence = value.getStatements(aValue);
-			Alerter.showAlert(aValue+" sources:", sentence);
+			//Alerter.showAlert(aValue+" sources:", sentence);
 			String toSentence = replaceSents.get(sentence);
 			if(toSentence==null){
 				replaceSents.put(sentence, sentence);

@@ -4,7 +4,8 @@
 	<groupId>edu.arizona.biosemantics.etcsite</groupId>
 	<artifactId>matrix-review</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.51-SNAPSHOT-debug</version>
+	<version>0.0.52-SNAPSHOT-debug</version>
+
 
 	<properties>
 		<gwtVersion>2.7.0</gwtVersion>
