@@ -145,7 +145,7 @@ public class DescriptionManager extends AbstractWindowManager {
 	}
 	
 	public String highlighter(String keywordString, String text){
-		String patternString = "^"+keywordString+"\\s|\\s"+keywordString+"\\s|[\\s\\(]"+keywordString+"[$\\).?,;:-]|^"+keywordString+"$";// regular expression pattern
+		String patternString = "^"+keywordString+"\\s|\\s"+keywordString+"\\s|[\\s\\(.?,;:-×]"+keywordString+"[$\\)\\s.?,;:×-]|^"+keywordString+"$";// regular expression pattern
 		//Pattern pattern = Pattern.compile(patternString);
 		//Matcher matcher = pattern.matcher(text);
 		RegExp regExp = RegExp.compile(patternString);
@@ -281,4 +281,24 @@ public class DescriptionManager extends AbstractWindowManager {
 		window.setHeadingText("Description of " + taxon.getBiologicalName());
 	}
 	
+	
+	public static void main(String[] args){
+		String keywordString ="99.9";
+		String patternString = "^"+keywordString+"\\s|[\\s-]"+keywordString+"[\\s-]|[\\s\\(.?,;:-]"+keywordString+"[$\\)\\s.?,;:-]|^"+keywordString+"$";// regular expression pattern
+		//Pattern pattern = Pattern.compile(patternString);
+		//Matcher matcher = pattern.matcher(text);
+		String text = "99.4-99.9 ";
+		RegExp regExp = RegExp.compile(patternString);
+		MatchResult matcher = regExp.exec(text);
+		while(matcher!=null){
+            //int end = matcher.end();
+           // int start = matcher.start();
+            //String matchedString = text.substring(start, end);
+			for (int i = 0; i < matcher.getGroupCount(); i++) {
+		        String matchedString = matcher.getGroup(i);
+	            text =  text.replace(matchedString, matchedString.replace(keywordString, "<span style='background:yellow'>"+keywordString+"</span>"));
+		    }
+        }
+		System.out.println(text);
+	}
 }
