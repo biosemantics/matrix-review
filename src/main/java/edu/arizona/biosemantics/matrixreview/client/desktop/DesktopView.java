@@ -221,6 +221,8 @@ public class DesktopView extends FlowLayoutContainer { //CssFloatLayoutContainer
 
 		this.setContextMenu(contextMenu);
 		this.setScrollMode(ScrollMode.AUTOY);
+		
+		this.setToolTip("Right click to close all description windows");
 	}
 		
 	public Window addWindow(Window window) {
