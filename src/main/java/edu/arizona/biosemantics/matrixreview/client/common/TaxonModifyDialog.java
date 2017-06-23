@@ -21,7 +21,7 @@ public class TaxonModifyDialog extends Dialog {
 		private TaxonInformationContainer taxonInformationContainer;
 
 		public TaxonModifyDialog(final EventBus eventBus, final Model model, final Taxon taxon) {
-			this.setHeadingText("Modify Taxon");
+			this.setHeading("Modify Taxon");
 			taxonInformationContainer = new TaxonInformationContainer(model, taxon.getParent(), taxon);
 		    this.add(taxonInformationContainer);
 			

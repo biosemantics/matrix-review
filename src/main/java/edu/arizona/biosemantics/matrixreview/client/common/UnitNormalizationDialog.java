@@ -105,7 +105,7 @@ public class UnitNormalizationDialog extends Dialog {
 		this.subModel = subModel;
 		this.characters = subModel.getTaxonMatrix().getVisibleCharacters();//getCharacters();
 		this.taxa=manageMatrixView.getSelectedTaxa();
-		setHeadingText("Unit Normalization");
+		setHeading("Unit Normalization");
 		setPredefinedButtons(PredefinedButton.OK);
 		setBodyStyleName("pad-text");
 		setHideOnButtonClick(false);

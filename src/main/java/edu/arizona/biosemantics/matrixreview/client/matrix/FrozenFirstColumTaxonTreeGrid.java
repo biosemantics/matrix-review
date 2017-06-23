@@ -135,7 +135,7 @@ public class FrozenFirstColumTaxonTreeGrid extends FrozenFirstColumnTreeGrid<Tax
 			
 			private SortDir sortDir = null;
 			
-			@Override
+			//@Override
 			protected void onHeaderClick(int column) {
 				this.headerColumnIndex = column;
 				if (!headerDisabled && cm.isSortable(column)) {

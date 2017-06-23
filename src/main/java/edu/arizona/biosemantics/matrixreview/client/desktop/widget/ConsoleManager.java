@@ -348,7 +348,7 @@ public class ConsoleManager extends AbstractWindowManager {
 
 	@Override
 	public void refreshTitle() {
-		window.setHeadingText("Activity Log");
+		window.setHeading("Activity Log");
 	}
 
 }

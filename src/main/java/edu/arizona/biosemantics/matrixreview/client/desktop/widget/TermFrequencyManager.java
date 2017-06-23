@@ -197,7 +197,7 @@ public class TermFrequencyManager extends AbstractWindowManager {
 
 	@Override
 	public void refreshTitle() {
-		window.setHeadingText("State Frequency: " + character.toString());
+		window.setHeading("State Frequency: " + character.toString());
 	}
 
 }

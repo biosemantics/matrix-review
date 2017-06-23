@@ -21,7 +21,7 @@ public class CharacterAddDialog extends Dialog {
 
 	public CharacterAddDialog(final EventBus eventBus, Model model,
 			Organ initialOrgan) {
-		this.setHeadingText("Add Character");
+		this.setHeading("Add Character");
 		CharacterInformationContainer characterInformationContainer = new CharacterInformationContainer(
 				model, "", initialOrgan);
 		this.add(characterInformationContainer);

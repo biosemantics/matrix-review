@@ -92,7 +92,7 @@ public class CharactersGridFilters extends GridFilters<Taxon> {
 		}
 	}
 	
-	public class RemoveEmptyNumericFilter<M, V extends Number> extends NumericFilter<M, V> {
+	public class RemoveEmptyNumericFilter<M, V extends Number& Comparable<V>> extends NumericFilter<M, V> {
 
 		public RemoveEmptyNumericFilter(
 				ValueProvider<? super M, V> valueProvider,

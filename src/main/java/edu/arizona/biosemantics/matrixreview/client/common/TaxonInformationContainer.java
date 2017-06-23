@@ -107,7 +107,7 @@ public class TaxonInformationContainer extends SimpleContainer {
 		this.model = model; 
 		
 		FieldSet fieldSet = new FieldSet();
-	    fieldSet.setHeadingText("Taxon Information");
+	    fieldSet.setHeading("Taxon Information");
 	    fieldSet.setCollapsible(false);
 	    this.add(fieldSet, new MarginData(10));
 	 

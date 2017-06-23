@@ -44,7 +44,7 @@ public class SelectMatrixDialog extends Dialog {
 			}
 		});
 		setBodyBorder(false);
-		setHeadingText("Select Taxa/Characters to show");
+		setHeading("Select Taxa/Characters to show");
 		setWidth(600);
 		setHeight(600);
 		setPredefinedButtons();

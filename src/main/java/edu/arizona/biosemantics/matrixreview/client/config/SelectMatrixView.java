@@ -85,17 +85,17 @@ public class SelectMatrixView extends ContentPanel {
 		
 		FieldSet taxonFieldSet = new FieldSet();
 		//taxonFieldSet.setCollapsible(true);
-		taxonFieldSet.setHeadingText("Select Taxa to Show");
+		taxonFieldSet.setHeading("Select Taxa to Show");
 		taxonFieldSet.setWidget(taxaField);
 		
 		FieldSet characterFieldSet = new FieldSet();
 		//characterFieldSet.setCollapsible(true);
-		characterFieldSet.setHeadingText("Select Characters to Show");
+		characterFieldSet.setHeading("Select Characters to Show");
 		characterFieldSet.setWidget(organCharacterField);
 		
 		FieldSet resultFieldSet = new FieldSet();
 		//resultFieldSet.setCollapsible(true);
-		resultFieldSet.setHeadingText("Resulting Sub-Matrix");
+		resultFieldSet.setHeading("Resulting Sub-Matrix");
 		resultFieldSet.setWidget(selectedHtml);
 		
 		verticalLayoutContainer.add(taxonFieldSet, new VerticalLayoutData(1.0, 0.5));

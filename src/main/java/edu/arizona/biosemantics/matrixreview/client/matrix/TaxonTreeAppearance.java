@@ -428,7 +428,7 @@ public class TaxonTreeAppearance extends TreeBaseAppearance {
 	        e = getImage(ts.getJointOpenIcon() == null ? resources.jointExpandedIcon() : ts.getJointOpenIcon());
 	        break;
 	      default:
-	        e = XDOM.create("<img src=\"" + GXT.getBlankImageUrl() + "\" width=\"16px\"/>");
+	        e = XDOM.create(SafeHtmlUtils.fromString("<img src=\"" + GXT.getBlankImageUrl() + "\" width=\"16px\"/>"));
 	    }
 
 	    e.addClassName(style.joint());

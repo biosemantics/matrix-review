@@ -131,16 +131,16 @@ public class ManageTaxaView extends ContentPanel {
 		tree = createTree();
 		
 		this.setTitle("Right-clicks on taxa to bring up more taxa management functions");
-		this.setHeadingText("Select Taxa for the Matrix");
+		this.setHeading("Select Taxa for the Matrix");
 		
 		FieldSet taxaFieldSet = new FieldSet();
 		//taxonFieldSet.setCollapsible(true);
-		taxaFieldSet.setHeadingText("Taxa");
+		taxaFieldSet.setHeading("Taxa");
 		taxaFieldSet.setWidget(tree);
 		
 		FieldSet infoFieldSet = new FieldSet();
 		//taxonFieldSet.setCollapsible(true);
-		infoFieldSet.setHeadingText("Taxon Details");
+		infoFieldSet.setHeading("Taxon Details");
 		FlowLayoutContainer flowInfoHtml = new FlowLayoutContainer();
 		flowInfoHtml.add(infoHtml);
 		flowInfoHtml.getScrollSupport().setScrollMode(ScrollMode.AUTO);

@@ -270,7 +270,7 @@ public class CharactersGridView extends GridView<Taxon> {
 	
 	private SortInfo sortInfo;
 	
-	@Override
+	//@Override
 	protected void onHeaderClick(int column) {
 		this.headerColumnIndex = column;
 		if (!headerDisabled && cm.isSortable(column)) {

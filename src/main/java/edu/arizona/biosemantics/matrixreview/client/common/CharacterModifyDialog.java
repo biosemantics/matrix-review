@@ -18,7 +18,7 @@ import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 public class CharacterModifyDialog extends Dialog {
 			
 		public CharacterModifyDialog(final EventBus eventBus, Model model, final Character character) {
-			this.setHeadingText("Modify Character");	
+			this.setHeading("Modify Character");	
 			CharacterInformationContainer characterInformationContainer = new CharacterInformationContainer(model, character.getName(), character.getOrgan());
 		    this.add(characterInformationContainer);
 		 

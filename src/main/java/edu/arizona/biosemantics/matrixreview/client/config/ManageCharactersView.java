@@ -139,7 +139,7 @@ public class ManageCharactersView extends ContentPanel {
 		this.tree = createTree();
 		
 		this.setTitle("Right-clicks on characters to bring up more character management functions");
-		this.setHeadingText("Select Characters for the Matrix");
+		this.setHeading("Select Characters for the Matrix");
 
 		
 
@@ -147,7 +147,7 @@ public class ManageCharactersView extends ContentPanel {
 		//left part: character tree
 		FieldSet charactersFieldSet = new FieldSet();
 		// taxonFieldSet.setCollapsible(true);
-		charactersFieldSet.setHeadingText("Characters");
+		charactersFieldSet.setHeading("Characters");
 		charactersFieldSet.setWidget(tree);
 		horizontalLayoutContainer.add(charactersFieldSet,
 				new HorizontalLayoutData(0.5, 1.0));
@@ -156,7 +156,7 @@ public class ManageCharactersView extends ContentPanel {
 		VerticalLayoutContainer infoContainer = new VerticalLayoutContainer();
 		FieldSet infoFieldSet = new FieldSet();
 		// taxonFieldSet.setCollapsible(true);
-		infoFieldSet.setHeadingText("Character Details");
+		infoFieldSet.setHeading("Character Details");
 		FlowLayoutContainer flowInfoHtml = new FlowLayoutContainer();
 		flowInfoHtml.add(infoHtml);
 		flowInfoHtml.getScrollSupport().setScrollMode(ScrollMode.AUTO);
@@ -166,7 +166,7 @@ public class ManageCharactersView extends ContentPanel {
 		HorizontalLayoutContainer valuesContainer = new HorizontalLayoutContainer();
 		FieldSet valuesFieldSet = new FieldSet();
 		// taxonFieldSet.setCollapsible(true);
-		valuesFieldSet.setHeadingText("Character Values");
+		valuesFieldSet.setHeading("Character Values");
 		valuesFieldSet.setWidget(valuesView);
 		valuesContainer.add(valuesFieldSet, new HorizontalLayoutData(1.0, 1.0));
 		valuesContainer.add(categoricalValuesView, new HorizontalLayoutData(1.0, 1.0));
@@ -175,7 +175,7 @@ public class ManageCharactersView extends ContentPanel {
 		//sentences
 		/*
 		FieldSet sentenceFieldSet = new FieldSet();
-		sentenceFieldSet.setHeadingText("Sentence of the value");
+		sentenceFieldSet.setHeading("Sentence of the value");
 		FlowLayoutContainer sentenceInfoHtml = new FlowLayoutContainer();
 		sentenceInfoHtml.add(statementView);
 		sentenceInfoHtml.getScrollSupport().setScrollMode(ScrollMode.AUTO);
@@ -1321,7 +1321,7 @@ public class ManageCharactersView extends ContentPanel {
 			
 			FieldSet categoricalValuesFieldSet = new FieldSet();
 			// taxonFieldSet.setCollapsible(true);
-			categoricalValuesFieldSet.setHeadingText("Categorical Character Values");
+			categoricalValuesFieldSet.setHeading("Categorical Character Values");
 			categoricalValuesFieldSet.setWidget(statesList);
 			categoricalValuesView.setWidget(categoricalValuesFieldSet);
 		}

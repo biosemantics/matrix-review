@@ -83,7 +83,7 @@ public class MergeDialog extends Dialog {
 		});
 		
 		FieldSet fieldSet = new FieldSet();
-	    fieldSet.setHeadingText("Merge Mode");
+	    fieldSet.setHeading("Merge Mode");
 	    fieldSet.setCollapsible(false);
 	    this.add(fieldSet, new MarginData(10));
 	    
@@ -93,7 +93,7 @@ public class MergeDialog extends Dialog {
 	    p.add(controlModeCombo);
 		
 		setBodyBorder(false);
-		setHeadingText("Merge");
+		setHeading("Merge");
 		setHideOnButtonClick(true);
 		this.setPredefinedButtons(PredefinedButton.OK, PredefinedButton.CANCEL);
 		this.getButton(PredefinedButton.OK).addSelectHandler(new SelectHandler() {

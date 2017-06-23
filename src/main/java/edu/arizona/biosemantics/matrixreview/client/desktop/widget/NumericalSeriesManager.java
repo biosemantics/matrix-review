@@ -194,7 +194,7 @@ public class NumericalSeriesManager extends AbstractWindowManager {
 
 	@Override
 	public void refreshTitle() {
-		window.setHeadingText("Numerical Distribution: " + character.toString());
+		window.setHeading("Numerical Distribution: " + character.toString());
 	}
 
 }

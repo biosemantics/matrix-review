@@ -42,7 +42,7 @@ public class SelectCharacterStatesDialog extends Dialog {
 	public SelectCharacterStatesDialog(final Character character,
 			List<String> states) {
 		setBodyBorder(false);
-		setHeadingText("Categorical States");
+		setHeading("Categorical States");
 		setWidth(500);
 		setHeight(240);
 		setHideOnButtonClick(true);

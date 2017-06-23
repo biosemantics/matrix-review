@@ -102,7 +102,7 @@ public class ManageMatrixView extends VerticalLayoutContainer {
 		buttonBar.add(loadButton);
 		
 		ContentPanel contentPanel = new ContentPanel();
-		contentPanel.setHeadingText("Load Selected Taxa and Characters");
+		contentPanel.setHeading("Load Selected Taxa and Characters");
 		contentPanel.add(buttonBar);
 		add(contentPanel, new VerticalLayoutData(1.0, -1.0));
 		

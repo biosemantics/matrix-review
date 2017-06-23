@@ -29,7 +29,7 @@ public class CharacterInformationContainer extends SimpleContainer {
 
 		public CharacterInformationContainer(final Model model, String initialName, Organ initialOrgan) {
 			FieldSet fieldSet = new FieldSet();
-		    fieldSet.setHeadingText("Character Information");
+		    fieldSet.setHeading("Character Information");
 		    fieldSet.setCollapsible(false);
 		    this.add(fieldSet, new MarginData(10));
 		 

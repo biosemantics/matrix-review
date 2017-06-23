@@ -407,7 +407,7 @@ public class TaxonCharacterMenu extends Menu {
 		
 		final Dialog dialog = new Dialog();
 		dialog.setBodyBorder(false);
-		dialog.setHeadingText("BorderLayout Dialog");
+		dialog.setHeading("BorderLayout Dialog");
 		dialog.setWidth(600);
 		dialog.setHeight(275);
 		dialog.setHideOnButtonClick(true);
@@ -417,7 +417,7 @@ public class TaxonCharacterMenu extends Menu {
 
 		// Layout - west
 		ContentPanel westPanel = new ContentPanel();
-		westPanel.setHeadingText("Create Color");
+		westPanel.setHeading("Create Color");
 		BorderLayoutData data = new BorderLayoutData(150);
 		data.setMargins(new Margins(0, 5, 0, 0));
 		westPanel.setLayoutData(data);
@@ -481,7 +481,7 @@ public class TaxonCharacterMenu extends Menu {
 
 		// Layout - center
 		ContentPanel centerPanel = new ContentPanel();
-		centerPanel.setHeadingText("Available colors");
+		centerPanel.setHeading("Available colors");
 		layout.setCenterWidget(centerPanel);
 		
 		final CheckboxCell checkboxCell = new CheckboxCell();
