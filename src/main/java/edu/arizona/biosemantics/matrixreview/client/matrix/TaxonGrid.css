@@ -7,7 +7,7 @@
  */
 @eval dirty com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/dirty.gif");
 @eval invalidLine com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/invalid_line.gif");
-@eval dirty com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/grid/dirty.gif");
+
 
 @external x-treegrid x-treegrid-column;
 
