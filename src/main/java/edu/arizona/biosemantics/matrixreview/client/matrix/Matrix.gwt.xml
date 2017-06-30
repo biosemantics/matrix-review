@@ -8,6 +8,7 @@
 
 -->
 <module>
+  <set-configuration-property name="CssResource.conversionMode"    value="lenient" />
   <inherits name="com.sencha.gxt.theme.base.Base" />
 
   <extend-property name="gxt.theme" values="matrix" />
