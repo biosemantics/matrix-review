@@ -19,7 +19,8 @@ public interface CharacterProperties extends PropertyAccess<Character> {
 	@Path("name")
 	LabelProvider<Character> nameLabel();
 	
-	ValueProvider<Character, String> organ();
+	//ValueProvider<Character, String> organ(); Hong 618
+	ValueProvider<Character, Organ> organ();
 	
 	ValueProvider<Character, String> name();
 	

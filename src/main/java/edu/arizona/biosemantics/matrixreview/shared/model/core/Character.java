@@ -62,6 +62,21 @@ public class Character implements Serializable {
 		}
 	}
 	
+	/**
+	 * Hong 618
+	 * required by gen\edu\arizona\biosemantics\matrixreview\shared\model\core\Character_organ_ValueProviderImpl.java
+	 * organ needs a set and a get method 
+	 * @param organ
+	 * @param flatIndex
+	 */
+	public void setOrgan(Organ organ) {
+		if(this.organ != null && !this.organ.equals(organ)) {
+			this.organ.remove(this);
+			organ.ensureContained(this, 0);
+			this.organ = organ;
+		}
+	}
+	
 	public String toString() {
 		if(organ == null)
 			return name;
