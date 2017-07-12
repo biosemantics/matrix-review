@@ -50,7 +50,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		/**/
 		Model model = null;
 		try(ObjectInput input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(
-				new File("C:/etcsitebase/etcsite/data/matrixGeneration/347/TaxonMatrix.ser"))))) {
+				new File("C:/Users/hongcui/Downloads/TaxonMatrix.ser"))))) {
 			model = (Model)input.readObject();
 			return model;
 		} catch(Exception e) {

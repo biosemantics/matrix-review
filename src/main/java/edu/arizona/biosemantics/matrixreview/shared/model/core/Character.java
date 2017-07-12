@@ -54,6 +54,13 @@ public class Character implements Serializable {
 		return organ != null;
 	}
 	
+	/**
+	 * see also setOrgan(Organ organ)
+	 * flatIndex does not seem to be important: methods used setOrgan is applied on characters in sequence
+	 * , therefore setOrgan(Organ organ) seem to be sufficient.
+	 * @param organ
+	 * @param flatIndex
+	 */
 	public void setOrgan(Organ organ, int flatIndex) {
 		if(this.organ != null && !this.organ.equals(organ)) {
 			this.organ.remove(this);
@@ -66,6 +73,8 @@ public class Character implements Serializable {
 	 * Hong 618
 	 * required by gen\edu\arizona\biosemantics\matrixreview\shared\model\core\Character_organ_ValueProviderImpl.java
 	 * organ needs a set and a get method 
+	 * 
+	 * 
 	 * @param organ
 	 * @param flatIndex
 	 */
