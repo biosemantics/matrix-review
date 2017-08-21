@@ -5,6 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.sencha.gxt.core.shared.ExpandedHtmlSanitizer;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
@@ -65,7 +68,8 @@ public class ManageMatrixView extends VerticalLayoutContainer {
 				final List<Character> characters = charactersView.getSelectedCharacters();
 				final LinkedHashSet<Organ> organs = charactersView.getSelectedOrgans();
 				if(!taxa.isEmpty() && !characters.isEmpty()) {
-					 ConfirmMessageBox box = new ConfirmMessageBox("Loading Matrix", getLoadMessage(taxa, characters, organs));
+					 ConfirmMessageBox box = new ConfirmMessageBox(SafeHtmlUtils.fromString("Loading Matrix")
+							 , getLoadMessage(taxa, characters, organs));
 					 box.getButton(PredefinedButton.YES).addSelectHandler(new SelectHandler() {
 						@Override
 						public void onSelect(SelectEvent event) {
@@ -164,11 +168,19 @@ public class ManageMatrixView extends VerticalLayoutContainer {
 		return null;
 	}
 
-	protected String getLoadMessage(List<Taxon> taxa, List<Character> characters, LinkedHashSet<Organ> organs) {
-		return "Continue loading a matrix with the selected taxa and characters?</br></br>" +
+	protected SafeHtml getLoadMessage(List<Taxon> taxa, List<Character> characters, LinkedHashSet<Organ> organs) {
+		StringBuffer sb = new StringBuffer("Continue loading a matrix with the selected taxa and characters?</br></br>");
+		sb.append("<ol>");
+		sb.append("<li><b>Selected Taxa: </b>"+ taxa.size() +"</li>");
+		sb.append("<li><b>Selected Characters: </b>"+ characters.size() + " (of " + organs.size() + " organ(s))</li>");
+		sb.append("<li><b>Matrix values: </b>"+ taxa.size() * characters.size()+"</li>");
+		sb.append("</ol>");
+		return ExpandedHtmlSanitizer.sanitizeHtml(sb.toString());
+		/*return "" +
 				"<table><tr><td><p><b>Selected Taxa: </b></td><td>" + taxa.size() + "</p></td></tr>" +
 		"<tr><td><p><b>Selected Characters: </b></td><td>" + characters.size() + " (of " + organs.size() + " organ(s))</p></tr></td>" +
 		"<tr><td><p><b>Matrix values: </b></td><td>" + taxa.size() * characters.size() + "</p></tr></td>";
+		*/
 	}
 
 	public List<Character> getSelectedCharacters() {

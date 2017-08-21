@@ -118,7 +118,7 @@
 	     <artifactId>selection</artifactId>
 	     <scope>system</scope>
 	     <version>1.1</version>
-	     <systemPath>C:\Users\maojin\git\etc-site-dongfang\lib\Selection_1_1.jar</systemPath>
+	     <systemPath>E:\git2\etc-site2.80\lib\Selection_1_1.jar</systemPath>
 	   </dependency>
 	</dependencies>
 
