@@ -37,7 +37,7 @@ import edu.arizona.biosemantics.matrixreview.shared.model.core.Organ;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
-import edu.arizona.biosemantics.common.ling.transform.IInflector;
+//import edu.arizona.biosemantics.common.ling.transform.IInflector;
 import edu.arizona.biosemantics.common.taxonomy.Rank;
 import edu.arizona.biosemantics.common.taxonomy.RankData;
 import edu.arizona.biosemantics.common.taxonomy.TaxonIdentification;
@@ -50,7 +50,10 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		/**/
 		Model model = null;
 		try(ObjectInput input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(
-				new File("C:/Users/hongcui/Downloads/TaxonMatrix.ser"))))) {
+
+				//new File("C:/Users/hongcui/Downloads/TaxonMatrix.ser"))))) {
+
+				new File("C:/etcsitebase/etcsite/data/matrixGeneration/443/TaxonMatrix.ser"))))) {
 			model = (Model)input.readObject();
 			return model;
 		} catch(Exception e) {
@@ -122,7 +125,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 						+ "fringilla vel, urna.<br/><br/>Aliquam commodo ullamcorper erat. Nullam vel justo in neque "
 						+ "porttitor laoreet. Aenean lacus dui, consequat eu, adipiscing eget, nonummy non, nisi. "
 						+ "Morbi nunc est, dignissim non, ornare sed, luctus eu, massa. Vivamus eget quam. Vivamus "
-						+ "tincidunt diam nec urna. Curabitur velit.");
+						+ "tincidunt diam nec urna. Curabitur velit.To open to a fuller extent or wide range 11-99; stretch: spread out the tablecloth; a bird -spreading its wings.");
 		rankData = new LinkedList<RankData>();
 		rankData.add(new RankData(Rank.VARIETY, "prototype", null, "", ""));
 		taxonIdentification = new TaxonIdentification(rankData, "author4", "2014");
@@ -135,7 +138,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 						+ "fringilla vel, urna.<br/><br/>Aliquam commodo ullamcorper erat. Nullam vel justo in neque "
 						+ "porttitor laoreet. Aenean lacus dui, consequat eu, adipiscing eget, nonummy non, nisi. "
 						+ "Morbi nunc est, dignissim non, ornare sed, luctus eu, massa. Vivamus eget quam. Vivamus "
-						+ "tincidunt diam nec urna. Curabitur velit. To open to a fuller extent or wide range; stretch: spread out the tablecloth; a bird spreading its wings.");
+						+ "tincidunt diam nec urna. Curabitur velit. To open to a fuller extent or wide range 11-99; stretch: spread out the tablecloth; a bird -spreading its wings");
 		t4.addStatement("Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");
 		t4.addStatement("The highlighting of misinformation online.");
 		t4.addStatement("Sed metus nibh, sodales a, porta at, vulputate eget, dui. Pellentesque ut nisl.");
@@ -151,7 +154,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		t4.addStatement("Morbi nunc est, dignissim non, ornare sed, luctus eu, massa. Vivamus eget quam.");
 		t4.addStatement("Vivamus "
 						+ "tincidunt diam nec urna. Curabitur velit. ");
-		t4.addStatement("To open to a fuller extent or wide range; stretch: spread out the tablecloth; a bird spreading its wings.");
+		t4.addStatement("To open to a fuller extent or wide range 11-99; stretch: spread out the tablecloth; a bird -spreading its wings");
 		t1.addChild(t2);
 		t2.addChild(t3);
 		t2.addChild(t4);
@@ -207,12 +210,12 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		taxonMatrix.setValue(t1, c2, new Value("red"));
 		taxonMatrix.setValue(t2, c2, new Value("redish"));
 		
-		Value wideValue = new Value("wide");
-		wideValue.addValueStatement("wide", "To open to a fuller extent or wide range; stretch: spread out the tablecloth; a bird spreading its wings. ");
+		Value wideValue = new Value("99");
+		wideValue.addValueStatement("99", "To open to a fuller extent or wide range 11-99; stretch: spread out the tablecloth; a bird -spreading its wings. ");
 		taxonMatrix.setValue(t3, c3, wideValue);
 		
 		Value v = new Value("spreading|highlighting");
-		v.addValueStatement("spreading", "To open to a fuller extent or wide range; stretch: spread out the tablecloth; a bird spreading its wings. ");
+		v.addValueStatement("spreading", "To open to a fuller extent or wide range 11-99; stretch: spread out the tablecloth; a bird -spreading its wings. ");
 		v.addValueStatement("highlighting", "The highlighting of misinformation online.");
 		taxonMatrix.setValue(t4, c3, v);
 			
@@ -313,7 +316,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 	
 
 	private String createRegex(Highlight highlight) {
-		System.out.println(highlight.getText());
+		//System.out.println(highlight.getText());
 		String parts = "";
 		for(String part : highlight.getText().trim().split(" ")) {
 			if(!part.isEmpty())

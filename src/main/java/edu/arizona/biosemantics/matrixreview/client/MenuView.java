@@ -114,6 +114,7 @@ public class MenuView extends MenuBar {
 			}
 		});
 		
+		/*no significant difference from simple csv
 		MenuItem downloadMCCSVItem = new MenuItem("Download MatrixConverter Matrix (with all existing taxa and characters)");
 		downloadMCCSVItem.setTitle("please set your browser to allow popup windows to use this function");
 		downloadMCCSVItem.addSelectionHandler(new SelectionHandler<Item>() {
@@ -122,6 +123,7 @@ public class MenuView extends MenuBar {
 				fullModelBus.fireEvent(new DownloadEvent(model, MatrixFormat.MCCSV));
 			}
 		});
+		*/
 		
 		MenuItem downloadSelectionItem = new MenuItem("Download Selected Part of Matrix");
 		downloadSelectionItem.setTitle("please set your browser to allow popup windows to use this function");
@@ -134,6 +136,7 @@ public class MenuView extends MenuBar {
 			}
 		});
 		
+		/*
 		MenuItem downloadSelectionItemAsMC = new MenuItem("Download Selected Part of MatrixConverter Matrix");
 		downloadSelectionItemAsMC.setTitle("please set your browser to allow popup windows to use this function");
 		downloadSelectionItemAsMC.addSelectionHandler(new SelectionHandler<Item>() {
@@ -144,14 +147,15 @@ public class MenuView extends MenuBar {
 				fullModelBus.fireEvent(new DownloadEvent(subModel, MatrixFormat.MCCSV));
 			}
 		});
+		*/
 
 		// sub.add(subMatrixItem);
 		sub.add(modifyMatrixItem);
 		sub.add(saveItem);
 		sub.add(downloadItem);
-		sub.add(downloadMCCSVItem);
+		//sub.add(downloadMCCSVItem);
 		sub.add(downloadSelectionItem);
-		sub.add(downloadSelectionItemAsMC);
+		//sub.add(downloadSelectionItemAsMC);
 		return matrixItem;
 	}
 
