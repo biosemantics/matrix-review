@@ -118,8 +118,8 @@
 	     <artifactId>selection</artifactId>
 	     <scope>system</scope>
 	     <version>1.1</version>
-	     <systemPath>${webappDirectory}/WEB-INF/lib/Selection_1_1.jar</systemPath>
-	     <!-- systemPath should be  ...\etc-site-0.0.1-SNAPSHOT\WEB-INF\-->
+	     <!-- on the server <systemPath>${webappDirectory}\WEB-INF\lib\Selection_1_1.jar</systemPath>-->
+	     <systemPath>C:\Users\hongcui\git\etc-site\lib\Selection_1_1.jar</systemPath>
 	   </dependency>
 	</dependencies>
 
