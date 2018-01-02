@@ -110,7 +110,6 @@
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
-			<version>1.8.3</version>
 		</dependency>
 		<!-- for com.bfr.client.Selection in gwt.xml -->
 	   <dependency>
@@ -118,8 +117,8 @@
 	     <artifactId>selection</artifactId>
 	     <scope>system</scope>
 	     <version>1.1</version>
-	     <!-- on the server <systemPath>${webappDirectory}\WEB-INF\lib\Selection_1_1.jar</systemPath>-->
-	     <systemPath>C:\Users\hongcui\git\etc-site\lib\Selection_1_1.jar</systemPath>
+	     <!-- on the server etcsite-0.0.1-SNAPSHOT\WEB-INF\lib\Selection_1_1.jar-->
+	     <systemPath>C:/Users/hongcui/git/etc-site/lib/Selection_1_1.jar</systemPath>
 	   </dependency>
 	</dependencies>
 

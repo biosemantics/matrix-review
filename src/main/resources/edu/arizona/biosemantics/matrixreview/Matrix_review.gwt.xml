@@ -34,7 +34,7 @@
   <stylesheet src="reset.css" />
 
   <!-- Specify the app entry point class.                         --> 
-  <!-- <entry-point class='edu.arizona.biosemantics.matrixreview.client.MatrixReview'/>>
+  <!-- <entry-point class='edu.arizona.biosemantics.matrixreview.client.MatrixReview'/> -->
 
   <!-- Specify the paths for translatable code                    -->
   <source path='client'/>
