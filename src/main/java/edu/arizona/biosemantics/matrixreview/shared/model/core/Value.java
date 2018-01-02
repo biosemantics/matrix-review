@@ -50,7 +50,7 @@ public class Value implements Serializable, Comparable<Value> {
 	
 	public String getStatements(){
 		String allStatements = "";
-		for( String statement : valueStatement.values()) allStatements+= " "+statement;
+		for(String statement : valueStatement.values()) allStatements+= " "+statement;
 		return allStatements;
 	}
 	

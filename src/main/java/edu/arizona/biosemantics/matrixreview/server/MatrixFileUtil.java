@@ -21,10 +21,58 @@ import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 
 /**
  * convert matrix model to multiple format of CSVs
- * @author maojin
+ * @author maojin, hong
  *
  */
 public class MatrixFileUtil {
+	
+	public void generateSimpleCSVwithSentences(String filePath, TaxonMatrix matrix) throws Exception{
+		File file = new File(filePath);
+		file.getParentFile().mkdirs();
+		try {
+			file.createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new Exception();
+		}
+		
+		int columns = matrix.getCharacterCount()*2 + 1;
+		String[] characters = new String[columns];
+		List<Character> flatCharacters = matrix.getFlatCharacters();
+		characters[0] = "Taxa/Characters";
+		int i=1;
+		for(Character character : flatCharacters) {
+			if(matrix.isVisiblyContained(character)) 
+				characters[i++] = character.toString();
+			    characters[i++] = "source sentence"; //add header
+		}
+		
+		FileOutputStream outputStream = new FileOutputStream(file,false);
+		CSVWriter csvWriter = new CSVWriter(new BufferedWriter(new OutputStreamWriter(outputStream, "UTF8")), ',','"',CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);	
+		
+		outputStream.write(239);
+		outputStream.write(187);
+		outputStream.write(191);
+		
+		csvWriter.writeNext(characters);
+		for(Taxon taxon : matrix.getFlatTaxa()) {
+			String[] line = new String[columns];
+			line[0] = taxon.getBiologicalName();
+			i = 1;
+			for(Character character : flatCharacters) {
+				if(matrix.isVisiblyContained(character)) 
+					line[i++] = matrix.getValue(taxon, character).toString();
+				    System.out.println("value="+matrix.getValue(taxon, character).toString());
+				    line[i++] = matrix.getValue(taxon, character).getStatements(); //add sentence
+				    System.out.println("sentence="+matrix.getValue(taxon, character).getStatements());
+			}
+			csvWriter.writeNext(line);
+		}
+		
+		csvWriter.flush();
+		csvWriter.close();
+	}
+	
 	
 	/**
 	 * generate simple csv file with UTF-8
@@ -56,7 +104,7 @@ public class MatrixFileUtil {
 		}
 		
 		FileOutputStream outputStream = new FileOutputStream(file,false);
-		CSVWriter csvWriter = new CSVWriter(new BufferedWriter(new OutputStreamWriter(outputStream, "UTF8")), ',',CSVWriter.NO_QUOTE_CHARACTER);	
+		CSVWriter csvWriter = new CSVWriter(new BufferedWriter(new OutputStreamWriter(outputStream, "UTF8")), ',','"', CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);	
 		
 		outputStream.write(239);
 		outputStream.write(187);
@@ -81,6 +129,7 @@ public class MatrixFileUtil {
 	
 	
 	/**
+	 * This is no longer called or used Jan 2018
 	 * generate a format of csv that could be used by MatrixConverter
 	 * MatrixConverter has a conversion UI.
 	 * 
@@ -106,12 +155,12 @@ public class MatrixFileUtil {
 		int i=1;
 		for(Character character : flatCharacters) {
 			if(matrix.isVisiblyContained(character)) 
-				characters[i++] = character.toString().replace(",", " ");
+				characters[i++] = character.toString();
 		}
 		
 		FileOutputStream outputStream = new FileOutputStream(file,false);
-		CSVWriter csvWriter = new CSVWriter(new BufferedWriter(new OutputStreamWriter(outputStream, "UTF8")));	
-		
+		CSVWriter csvWriter = new CSVWriter(new BufferedWriter(new OutputStreamWriter(outputStream, "UTF8")), ',','"', CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);	
+			
 		outputStream.write(239);
 		outputStream.write(187);
 		outputStream.write(191);
@@ -138,13 +187,14 @@ public class MatrixFileUtil {
 	public static void main(String[] args){
 		Model model = null;
 		try(ObjectInput input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(
-				new File("C:/etcsitebase/etcsite/data/matrixGeneration/347/TaxonMatrix.ser"))))) {
+				new File("C:/Users/hongcui/Documents/etc-development/matrices/TaxonMatrix.ser"))))) {
 			model = (Model)input.readObject();
-			
-			
+		
 			MatrixFileUtil matrixFileUtil = new MatrixFileUtil();
-			matrixFileUtil.generateSimpleCSV("C:/micropie/output/simple.csv", model.getTaxonMatrix());
-			matrixFileUtil.generateMatrixConverterCSV("C:/micropie/output/matrixconverter.csv", model.getTaxonMatrix());
+			matrixFileUtil.generateSimpleCSV("C:/Users/hongcui/Documents/etc-development/matrices/simple.csv", model.getTaxonMatrix());
+			matrixFileUtil.generateMatrixConverterCSV("C:/Users/hongcui/Documents/etc-development/matrices/matrixconverter.csv", model.getTaxonMatrix());
+			matrixFileUtil.generateSimpleCSVwithSentences("C:/Users/hongcui/Documents/etc-development/matrices/matrixsentences.csv", model.getTaxonMatrix());
+
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

@@ -114,6 +114,16 @@ public class MenuView extends MenuBar {
 			}
 		});
 		
+		//Hong todo
+		MenuItem downloadSourceItem = new MenuItem("Download Matrix (with all existing taxa and characters, plus source sentences)");
+		downloadSourceItem.setTitle("please set your browser to allow popup windows to use this function");
+		downloadSourceItem.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				fullModelBus.fireEvent(new DownloadEvent(model,MatrixFormat.CSVS));
+			}
+		});
+		
 		/*no significant difference from simple csv
 		MenuItem downloadMCCSVItem = new MenuItem("Download MatrixConverter Matrix (with all existing taxa and characters)");
 		downloadMCCSVItem.setTitle("please set your browser to allow popup windows to use this function");
@@ -133,6 +143,18 @@ public class MenuView extends MenuBar {
 				Model subModel = modelMerger.getSubModel(manageMatrixView.getSelectedCharacters(), manageMatrixView.getSelectedTaxa());
 				//subModel.getTaxonMatrix().
 				fullModelBus.fireEvent(new DownloadEvent(subModel));
+			}
+		});
+		
+		//Hong: todo
+		MenuItem downloadSelectionSourceItem = new MenuItem("Download Selected Part of Matrix, plus source sentences");
+		downloadSelectionSourceItem.setTitle("please set your browser to allow popup windows to use this function");
+		downloadSelectionSourceItem.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				Model subModel = modelMerger.getSubModel(manageMatrixView.getSelectedCharacters(), manageMatrixView.getSelectedTaxa());
+				//subModel.getTaxonMatrix().
+				fullModelBus.fireEvent(new DownloadEvent(subModel,MatrixFormat.CSVS));
 			}
 		});
 		
