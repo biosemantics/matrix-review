@@ -114,7 +114,7 @@ public class MenuView extends MenuBar {
 			}
 		});
 		
-		//Hong todo
+		//Hong added
 		MenuItem downloadSourceItem = new MenuItem("Download Matrix (with all existing taxa and characters, plus source sentences)");
 		downloadSourceItem.setTitle("please set your browser to allow popup windows to use this function");
 		downloadSourceItem.addSelectionHandler(new SelectionHandler<Item>() {
@@ -146,7 +146,7 @@ public class MenuView extends MenuBar {
 			}
 		});
 		
-		//Hong: todo
+		//Hong added
 		MenuItem downloadSelectionSourceItem = new MenuItem("Download Selected Part of Matrix, plus source sentences");
 		downloadSelectionSourceItem.setTitle("please set your browser to allow popup windows to use this function");
 		downloadSelectionSourceItem.addSelectionHandler(new SelectionHandler<Item>() {
@@ -175,8 +175,10 @@ public class MenuView extends MenuBar {
 		sub.add(modifyMatrixItem);
 		sub.add(saveItem);
 		sub.add(downloadItem);
+		sub.add(downloadSourceItem);
 		//sub.add(downloadMCCSVItem);
 		sub.add(downloadSelectionItem);
+		sub.add(downloadSelectionSourceItem);
 		//sub.add(downloadSelectionItemAsMC);
 		return matrixItem;
 	}
