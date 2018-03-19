@@ -187,7 +187,8 @@ public class MatrixFileUtil {
 	public static void main(String[] args){
 		Model model = null;
 		try(ObjectInput input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(
-				new File("C:/Users/hongcui/Documents/etc-development/matrices/TaxonMatrix.ser"))))) {
+				new File("C:/Users/hongcui/Documents/etcsite/data/matrixGeneration/21/matrix.ser"))))
+				/*new File("C:/Users/hongcui/Documents/etc-development/matrices/TaxonMatrix.ser"))))*/) {
 			model = (Model)input.readObject();
 		
 			MatrixFileUtil matrixFileUtil = new MatrixFileUtil();

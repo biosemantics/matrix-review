@@ -44,6 +44,8 @@ import edu.arizona.biosemantics.common.taxonomy.TaxonIdentification;
 
 @SuppressWarnings("serial")
 public class MatrixService extends RemoteServiceServlet implements IMatrixService {
+	
+
 
 	@Override
 	public Model getMatrix() {
@@ -53,16 +55,23 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 
 				//new File("C:/Users/hongcui/Downloads/TaxonMatrix.ser"))))) {
 
-				new File("C:/etcsitebase/etcsite/data/matrixGeneration/443/TaxonMatrix.ser"))))) {
+				new File("C:/Users/hongcui/Documents/etcsite/data/matrixGeneration/21/matrix.ser"))))) {
 			model = (Model)input.readObject();
+			if(model==null) System.out.println("model ="+model);
 			return model;
 		} catch(Exception e) {
+			System.out.println("model ="+model);
 			e.printStackTrace();
 		}
 		
 		return null;
 		//return createSampleModel();
 	}
+	
+	public void main(String[] args){
+	     getMatrix();	
+	}
+
 	
 	private Model createSampleModel() {
 		List<Organ> hierarhicalCharacters = new LinkedList<Organ>();
