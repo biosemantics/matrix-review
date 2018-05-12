@@ -15,10 +15,8 @@ import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
-import edu.arizona.biosemantics.matrixreview.client.common.Alerter;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueCommentEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.ShowDescriptionEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ShowSentenceEvent;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;

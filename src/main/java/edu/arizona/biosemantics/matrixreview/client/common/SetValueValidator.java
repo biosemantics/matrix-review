@@ -5,7 +5,6 @@ import java.util.Set;
 
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
 public class SetValueValidator {
 	

@@ -8,7 +8,6 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 import edu.arizona.biosemantics.matrixreview.client.event.HideTaxaEvent.HideTaxaEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
 public class HideTaxaEvent extends GwtEvent<HideTaxaEventHandler> {

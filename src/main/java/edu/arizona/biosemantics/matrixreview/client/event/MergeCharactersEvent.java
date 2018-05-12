@@ -2,7 +2,6 @@ package edu.arizona.biosemantics.matrixreview.client.event;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.event.shared.EventHandler;

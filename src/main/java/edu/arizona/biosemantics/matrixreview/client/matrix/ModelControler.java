@@ -9,13 +9,7 @@ import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent.Loc
 import edu.arizona.biosemantics.matrixreview.client.event.LockMatrixEvent.LockMatrixEventHandler;
 import edu.arizona.biosemantics.matrixreview.client.event.LockTaxonEvent.LockTaxonEventHandler;
 import edu.arizona.biosemantics.matrixreview.client.event.MatrixModeEvent.MatrixModeEventHandler;
-import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterColorEvent.SetCharacterColorEventHandler;
-import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent.SetCharacterCommentEventHandler;
 import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent.SetControlModeEventHandler;
-import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonColorEvent.SetTaxonColorEventHandler;
-import edu.arizona.biosemantics.matrixreview.client.event.SetTaxonCommentEvent.SetTaxonCommentEventHandler;
-import edu.arizona.biosemantics.matrixreview.client.event.SetValueColorEvent.SetValueColorEventHandler;
-import edu.arizona.biosemantics.matrixreview.client.event.SetValueCommentEvent.SetValueCommentEventHandler;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 

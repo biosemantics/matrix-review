@@ -5,7 +5,6 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.sencha.gxt.data.shared.SortDir;
 
 import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByNameEvent.SortTaxaByNameEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 
 public class SortTaxaByNameEvent extends GwtEvent<SortTaxaByNameEventHandler> {
 

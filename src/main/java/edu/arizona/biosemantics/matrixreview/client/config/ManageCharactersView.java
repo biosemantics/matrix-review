@@ -65,7 +65,6 @@ import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent.SelectionChangedHandler;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 
-import edu.arizona.biosemantics.matrixreview.client.common.Alerter;
 import edu.arizona.biosemantics.matrixreview.client.common.CharacterAddDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.CharacterModifyDialog;
 import edu.arizona.biosemantics.matrixreview.client.common.InputElementVisibleTextField;

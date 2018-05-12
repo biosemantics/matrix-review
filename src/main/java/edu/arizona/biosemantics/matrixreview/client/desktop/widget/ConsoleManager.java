@@ -12,8 +12,6 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import edu.arizona.biosemantics.matrixreview.client.desktop.Window;
 import edu.arizona.biosemantics.matrixreview.client.event.*;
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent.AddCharacterEventHandler;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
 public class ConsoleManager extends AbstractWindowManager {
 

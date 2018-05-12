@@ -8,8 +8,6 @@ import com.google.gwt.resources.client.ImageResource.ImageOptions;
 import com.google.gwt.resources.client.ImageResource.RepeatStyle;
 import com.sencha.gxt.core.client.resources.StyleInjectorHelper;
 import com.sencha.gxt.widget.core.client.button.IconButton.IconConfig;
-import com.sencha.gxt.widget.core.client.form.DualListField.DualListFieldAppearance;
-
 import edu.arizona.biosemantics.matrixreview.client.matrix.field.DualTreeField.DualTreeFieldAppearance;
 
 public class DualTreeFieldDefaultAppearance implements DualTreeFieldAppearance {

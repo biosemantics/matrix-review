@@ -7,19 +7,14 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jdom2.Document;
-import org.jdom2.Element;
-import org.jdom2.input.SAXBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
@@ -54,7 +49,7 @@ public class MatrixService extends RemoteServiceServlet implements IMatrixServic
 		try(ObjectInput input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(
 
 				//new File("C:/Users/hongcui/Downloads/TaxonMatrix.ser"))))) {
-
+				         //"C:/Users/hongcui/Documents/etcsite/data/matrixGeneration/71/matrix.ser",
 				new File("C:/Users/hongcui/Documents/etcsite/data/matrixGeneration/21/matrix.ser"))))) {
 			model = (Model)input.readObject();
 			if(model==null) System.out.println("model ="+model);

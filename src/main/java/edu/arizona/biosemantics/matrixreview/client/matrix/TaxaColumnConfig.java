@@ -5,9 +5,6 @@ import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.filters.Filter;
 
-import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.ModifyTaxonEvent;
-import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
 public class TaxaColumnConfig extends ColumnConfig<Taxon, Taxon> {

@@ -3,7 +3,6 @@ package edu.arizona.biosemantics.matrixreview.shared.model.core;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 

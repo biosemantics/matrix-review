@@ -1,8 +1,6 @@
 package edu.arizona.biosemantics.matrixreview.client.common;
 
 import java.util.List;
-import java.util.Set;
-
 import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
 import com.sencha.gxt.data.shared.Converter;
@@ -20,7 +18,6 @@ import edu.arizona.biosemantics.matrixreview.client.matrix.shared.AllAccessListS
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Organ;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.OrganProperties;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 
 public class CharacterInformationContainer extends SimpleContainer {
 	

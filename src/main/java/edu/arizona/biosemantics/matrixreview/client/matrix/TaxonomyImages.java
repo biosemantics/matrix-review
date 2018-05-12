@@ -1,7 +1,6 @@
 package edu.arizona.biosemantics.matrixreview.client.matrix;
 
 import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.ClientBundle.Source;
 import com.google.gwt.resources.client.ImageResource;
 
 public interface TaxonomyImages extends ClientBundle {

@@ -4,9 +4,7 @@ import java.util.Comparator;
 
 import com.sencha.gxt.data.shared.SortDir;
 
-import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 
 public class TaxaByNameComparator implements Comparator<Taxon> {
 

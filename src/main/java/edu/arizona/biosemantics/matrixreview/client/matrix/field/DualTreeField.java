@@ -2,14 +2,9 @@ package edu.arizona.biosemantics.matrixreview.client.matrix.field;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -20,20 +15,15 @@ import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.data.shared.TreeStore.TreeNode;
-import com.sencha.gxt.data.shared.TreeStore.TreeModel;
-import com.sencha.gxt.data.shared.event.StoreDataChangeEvent;
 import com.sencha.gxt.dnd.core.client.DND.Feedback;
-import com.sencha.gxt.dnd.core.client.DND.Operation;
 import com.sencha.gxt.dnd.core.client.DndDropEvent;
 import com.sencha.gxt.dnd.core.client.TreeDragSource;
 import com.sencha.gxt.dnd.core.client.TreeDropTarget;
-import com.sencha.gxt.messages.client.DefaultMessages;
 import com.sencha.gxt.widget.core.client.button.IconButton;
 import com.sencha.gxt.widget.core.client.button.IconButton.IconConfig;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.AdapterField;
-import com.sencha.gxt.widget.core.client.form.DualListField.DualListFieldAppearance;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 
 public class DualTreeField<M, T> extends AdapterField<List<M>> {

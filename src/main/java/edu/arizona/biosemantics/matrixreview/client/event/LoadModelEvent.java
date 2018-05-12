@@ -5,7 +5,6 @@ import com.google.gwt.event.shared.GwtEvent;
 
 import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent.LoadModelEventHandler;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 
 public class LoadModelEvent extends GwtEvent<LoadModelEventHandler> implements PrintableEvent {
 

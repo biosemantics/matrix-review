@@ -5,7 +5,6 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Event;
@@ -17,7 +16,6 @@ import com.sencha.gxt.core.client.Style.AnchorAlignment;
 import com.sencha.gxt.core.client.dom.XDOM;
 import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.core.client.util.ImageHelper;
-import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.dnd.core.client.StatusProxy;
 import com.sencha.gxt.fx.client.DragCancelEvent;
 import com.sencha.gxt.fx.client.DragEndEvent;
@@ -27,8 +25,6 @@ import com.sencha.gxt.fx.client.DragStartEvent;
 import com.sencha.gxt.widget.core.client.ComponentHelper;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnHeader;
-import com.sencha.gxt.widget.core.client.grid.ColumnModel;
-import com.sencha.gxt.widget.core.client.grid.ColumnHeader.Head;
 import com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance;
 import com.sencha.gxt.widget.core.client.grid.HeaderGroupConfig;
 
@@ -40,19 +36,15 @@ import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxaEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterColorEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterStatesEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetColorsEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByCoverageEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.SortTaxaByNameEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.FrozenFirstColumTaxonTreeGrid.CharactersGrid;
 import edu.arizona.biosemantics.matrixreview.client.matrix.dom.HorizontalAutoScrollSupport;
 import edu.arizona.biosemantics.matrixreview.shared.model.Color;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 
 public class CharacterColumnHeader extends ColumnHeader<Taxon> {
 

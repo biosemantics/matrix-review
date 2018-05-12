@@ -57,7 +57,9 @@ public class Value implements Serializable, Comparable<Value> {
 	}
 	
 	public boolean isNegation() {
-		return Boolean.getBoolean(negation);
+		if(negation.equals("true") || negation.equals("True")) return true;
+		else return false;
+		//return Boolean.getBoolean(negation);
 	}
 
 	public void setNegation(String negation) {

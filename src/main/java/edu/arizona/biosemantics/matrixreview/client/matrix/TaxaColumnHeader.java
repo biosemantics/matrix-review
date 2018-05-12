@@ -17,20 +17,13 @@ import com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance;
 import edu.arizona.biosemantics.matrixreview.client.event.AddCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.AddTaxonEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.LockCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.MergeCharactersEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.ModifyCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveCharacterEvent;
 import edu.arizona.biosemantics.matrixreview.client.event.RemoveTaxaEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterColorEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.SetCharacterCommentEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.SetControlModeEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.SetValueEvent;
 import edu.arizona.biosemantics.matrixreview.client.matrix.FrozenFirstColumTaxonTreeGrid.TaxaTreeGrid;
 import edu.arizona.biosemantics.matrixreview.shared.model.Model;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
 
 public class TaxaColumnHeader extends ColumnHeader<Taxon> {
 

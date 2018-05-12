@@ -2,24 +2,12 @@ package edu.arizona.biosemantics.matrixreview.shared.model.core;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sencha.gxt.data.shared.TreeStore;
-import com.sencha.gxt.data.shared.TreeStore.TreeNode;
-
 import edu.arizona.biosemantics.common.taxonomy.Rank;
 import edu.arizona.biosemantics.common.taxonomy.RankData;
 import edu.arizona.biosemantics.common.taxonomy.TaxonIdentification;
-import edu.arizona.biosemantics.matrixreview.shared.model.Color;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.TaxonMatrix;
-import edu.arizona.biosemantics.matrixreview.shared.model.core.Value;
 
 public class Taxon implements Serializable, Comparable<Taxon> {
 

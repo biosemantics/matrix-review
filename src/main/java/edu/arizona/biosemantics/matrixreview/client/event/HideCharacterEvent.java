@@ -1,7 +1,6 @@
 package edu.arizona.biosemantics.matrixreview.client.event;
 
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 

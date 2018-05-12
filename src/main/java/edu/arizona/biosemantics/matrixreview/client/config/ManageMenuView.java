@@ -16,8 +16,6 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import edu.arizona.biosemantics.matrixreview.client.MenuView;
 import edu.arizona.biosemantics.matrixreview.client.ModelMerger;
 import edu.arizona.biosemantics.matrixreview.client.event.AnalyzeCharacterEvent;
-import edu.arizona.biosemantics.matrixreview.client.event.LoadModelEvent;
-import edu.arizona.biosemantics.matrixreview.shared.model.Model;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Character;
 import edu.arizona.biosemantics.matrixreview.shared.model.core.Taxon;
 
