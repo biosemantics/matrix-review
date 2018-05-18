@@ -4,7 +4,7 @@
 	<groupId>edu.arizona.biosemantics.etcsite</groupId>
 	<artifactId>matrix-review</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.61-SNAPSHOT</version>
+	<version>0.0.63-SNAPSHOT</version>
 
    <!-- disable java doc generation, because source code are not annotated to java 8 doc standards -->
 	<profiles>
@@ -50,7 +50,13 @@
 	<dependency>
 		  <groupId>edu.arizona.biosemantics.matrixgeneration</groupId>
 		  <artifactId>matrix-generation</artifactId>
-		  <version>0.1.70-SNAPSHOT</version>
+		  <version>0.1.72-SNAPSHOT</version>
+		  <classifier>sources</classifier>
+    </dependency>
+	<dependency>
+		  <groupId>edu.arizona.biosemantics.matrixgeneration</groupId>
+		  <artifactId>matrix-generation</artifactId>
+		  <version>0.1.72-SNAPSHOT</version>
 		  <exclusions>
 		  	<exclusion>
 		  		<artifactId>owlapi-tools</artifactId>
@@ -187,7 +193,7 @@
 				<!-- Plugin configuration. There are many available options, see gwt-maven-plugin 
 					documentation at codehaus.org -->
 				<configuration>
-					<logLevel>ERROR</logLevel>
+					<logLevel>INFO</logLevel>
 					<runTarget>index.html</runTarget>
 			              <extraJvmArgs>-Xmx4096M</extraJvmArgs>
 					<hostedWebapp>${webappDirectory}</hostedWebapp>

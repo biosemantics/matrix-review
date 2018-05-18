@@ -128,7 +128,7 @@ public class MatrixFileUtil {
 	
 	
 	/**
-	 * This is no longer called or used Jan 2018
+	 * 
 	 * generate a format of csv that could be used by MatrixConverter
 	 * MatrixConverter has a conversion UI.
 	 * 
@@ -186,14 +186,15 @@ public class MatrixFileUtil {
 	public static void main(String[] args){
 		Model model = null;
 		try(ObjectInput input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(
-				new File("C:/Users/hongcui/Documents/etcsite/data/matrixGeneration/21/matrix.ser"))))
+				new File("C:/Users/hongcui/Documents/etcsite/data/matrixGeneration/112/TaxonMatrix.ser"))))
 				/*new File("C:/Users/hongcui/Documents/etc-development/matrices/TaxonMatrix.ser"))))*/) {
-			model = (Model)input.readObject();
+			Object o = input.readObject();
+			model = (Model) o;
 		
 			MatrixFileUtil matrixFileUtil = new MatrixFileUtil();
-			matrixFileUtil.generateSimpleCSV("C:/Users/hongcui/Documents/etc-development/matrices/simple.csv", model.getTaxonMatrix());
+			//matrixFileUtil.generateSimpleCSV("C:/Users/hongcui/Documents/etc-development/matrices/simple.csv", model.getTaxonMatrix());
 			matrixFileUtil.generateMatrixConverterCSV("C:/Users/hongcui/Documents/etc-development/matrices/matrixconverter.csv", model.getTaxonMatrix());
-			matrixFileUtil.generateSimpleCSVwithSentences("C:/Users/hongcui/Documents/etc-development/matrices/matrixsentences.csv", model.getTaxonMatrix());
+			//matrixFileUtil.generateSimpleCSVwithSentences("C:/Users/hongcui/Documents/etc-development/matrices/matrixsentences.csv", model.getTaxonMatrix());
 
 		} catch(Exception e) {
 			e.printStackTrace();
