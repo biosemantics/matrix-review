@@ -37,6 +37,11 @@ import edu.arizona.biosemantics.common.taxonomy.Rank;
 import edu.arizona.biosemantics.common.taxonomy.RankData;
 import edu.arizona.biosemantics.common.taxonomy.TaxonIdentification;
 
+/**
+ * test class. 
+ * @author hongcui
+ *
+ */
 @SuppressWarnings("serial")
 public class MatrixService extends RemoteServiceServlet implements IMatrixService {
 	
